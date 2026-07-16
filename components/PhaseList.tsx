@@ -6,7 +6,7 @@ import { useState } from "react";
 export type Phase = {
   id: string; order: number; title: string; subtitle: string; status: string;
   weeks: string; level: string; whyText: string; milestone: string;
-  toolsCsv: string; skills: [string, number][]; firstLesson?: string;
+  toolsCsv: string; skills: [name: string, done: boolean][]; firstLesson?: string;
 };
 
 function BoxIcon() {

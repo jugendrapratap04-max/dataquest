@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const titles: Record<string, [string, string]> = {
-  "/": ["Welcome back, {name}", "Aaj ka target — 1 topic padho, phir 5 problems solve karo."],
+  "/": ["{greeting}, {name}", "Aaj ka target — 1 topic padho, phir 5 problems solve karo."],
   "/roadmap": ["Data Science Skill Sheet", "Zero to job-ready — 9 phases, do career checkpoints."],
   "/learn": ["Lessons", "Pehle samjho, phir aage badho — ek time pe ek topic."],
   "/practice": ["Practice Arena", "Jo padha, usi pe abhi likh ke dekho — tabhi pakka hota hai."],
@@ -27,7 +27,7 @@ const MoonPath = () => (<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" /
 
 type Item = { title: string; slug: string; sub: string; kind: "lesson" | "problem" };
 
-export function Topbar({ user }: { user: { name: string; streak: number } }) {
+export function Topbar({ user }: { user: { name: string; streak: number; isNew?: boolean } }) {
   const pathname = usePathname();
   const router = useRouter();
   const [title, sub] = pick(pathname);
@@ -85,7 +85,7 @@ export function Topbar({ user }: { user: { name: string; streak: number } }) {
   return (
     <header className="topbar">
       <div className="greet">
-        <h1>{title.replace("{name}", firstName)}</h1>
+        <h1>{title.replace("{greeting}", user.isNew ? "Welcome" : "Welcome back").replace("{name}", firstName)}</h1>
         <p>{sub}</p>
       </div>
       <div className="top-actions">

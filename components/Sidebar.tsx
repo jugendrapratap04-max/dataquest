@@ -16,10 +16,10 @@ const ResumeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
 
 type Item = { href: string; label: string; icon: React.ReactNode; count?: string };
 
-const groups: { label: string; items: Item[] }[] = [
+const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Learn", items: [
     { href: "/", label: "Dashboard", icon: <HomeIcon /> },
-    { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: "36%" },
+    { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: `${roadmapPct}%` },
     { href: "/learn", label: "Lessons", icon: <BookIcon /> },
     { href: "/notes", label: "Notes", icon: <NoteIcon /> },
   ]},
@@ -35,11 +35,12 @@ const groups: { label: string; items: Item[] }[] = [
   ]},
 ];
 
-export function Sidebar({ user }: { user: { name: string; role: string } }) {
+export function Sidebar({ user, roadmapPct }: { user: { name: string; role: string }; roadmapPct: number }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   const initials = user.name.split(" ").map((n) => n[0]).slice(0, 1).join("");
+  const nav = groups(roadmapPct);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -52,7 +53,7 @@ export function Sidebar({ user }: { user: { name: string; role: string } }) {
         <div className="mark">D</div>
         <div><span className="wm">DataQuest</span><span className="beta">BETA</span></div>
       </div>
-      {groups.map((g) => (
+      {nav.map((g) => (
         <div key={g.label}>
           <div className="nav-lbl">{g.label}</div>
           {g.items.map((it) => (

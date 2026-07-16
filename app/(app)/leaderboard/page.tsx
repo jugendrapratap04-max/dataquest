@@ -14,10 +14,12 @@ export default async function LeaderboardPage() {
 
   return (
     <>
-      <p className="page-intro">
-        Apne batchmates ke saath ranking dekho — healthy competition motivate karti hai.
-        {myRank > 0 && <> Tumhari rank abhi <b>#{myRank}</b> hai — XP kamaao, upar chadho! 🔥</>}
-      </p>
+      {/* Topbar already explains the leaderboard — only add what it can't. */}
+      {myRank > 0 && (
+        <p className="page-intro">
+          Tumhari rank abhi <b>#{myRank}</b> hai — {users.length} logon me. 🔥
+        </p>
+      )}
       <div className="card pad">
         <div className="sec-head"><h2>Weekly Leaderboard<span className="sub">apni batch</span></h2></div>
         <ul className="lb">

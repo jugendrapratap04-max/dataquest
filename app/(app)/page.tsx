@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getProgress } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 
 const iconClass = (slug: string) =>
@@ -10,31 +11,18 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) return null;
 
-  const tracks = await prisma.track.findMany({ orderBy: { order: "asc" } });
+  const p = await getProgress(user.id);
   const lessons = await prisma.lesson.findMany({
-    include: { track: true },
+    include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
   });
-  const done = await prisma.lessonProgress.findMany({
-    where: { userId: user.id, status: "done" },
-  });
-  const doneIds = new Set(done.map((d) => d.lessonId));
-  const solved = await prisma.submission.findMany({
-    where: { userId: user.id, passed: true },
-    distinct: ["problemId"],
-  });
 
-  let masteredSkills = 0, totalSkills = 0;
-  for (const t of tracks) {
-    const arr: [string, number][] = JSON.parse(t.skillsJson || "[]");
-    totalSkills += arr.length;
-    masteredSkills += arr.filter(([, d]) => d === 1).length;
-  }
-  const jobReady = totalSkills ? Math.round((masteredSkills / totalSkills) * 100) : 0;
-  const inProgress = tracks.filter((t) => t.status === "now").length;
-  const locked = Math.max(0, totalSkills - masteredSkills - inProgress);
-
-  const nextLesson = lessons.find((l) => !doneIds.has(l.id)) ?? lessons[0];
+  const nextLesson = lessons.find((l) => !p.doneLessonIds.has(l.id)) ?? lessons[0];
+  const theoryDone = nextLesson ? p.doneLessonIds.has(nextLesson.id) : false;
+  const practiceDone =
+    !!nextLesson &&
+    nextLesson.problems.length > 0 &&
+    nextLesson.problems.every((q) => p.solvedProblemIds.has(q.id));
 
   return (
     <div className="grid">
@@ -48,9 +36,13 @@ export default async function DashboardPage() {
               {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Python se shuru karo"}
             </div>
             <div className="flow">
-              <span className="fstep done">✓ Read theory</span><span className="farrow">→</span>
-              <span className="fstep now">Practice</span><span className="farrow">→</span>
-              <span className="fstep">Mini quiz</span>
+              <span className={`fstep ${theoryDone ? "done" : "now"}`}>
+                {theoryDone ? "✓ " : ""}Read theory
+              </span>
+              <span className="farrow">→</span>
+              <span className={`fstep ${practiceDone ? "done" : theoryDone ? "now" : ""}`}>
+                {practiceDone ? "✓ " : ""}Practice
+              </span>
             </div>
             <div className="rfoot">
               {nextLesson && (
@@ -61,25 +53,27 @@ export default async function DashboardPage() {
           </div>
         </section>
 
+        {/* No sparklines: we don't store XP/streak history, so the old ones were fixed
+            decorative polylines that sloped upward even on a brand-new account. */}
         <section className="stats">
-          <div className="card stat"><div className="k">Day Streak</div><div className="v num">{user.streak} <small>best {user.bestStreak}</small></div>
-            <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="var(--accent)" strokeWidth="2.5" points="0,23 14,19 28,21 42,13 56,15 70,8 84,10 100,4"/></svg></div>
-          <div className="card stat"><div className="k">Problems Solved</div><div className="v num">{solved.length}</div>
-            <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="var(--teal)" strokeWidth="2.5" points="0,25 14,21 28,22 42,17 56,11 70,12 84,7 100,5"/></svg></div>
-          <div className="card stat"><div className="k">Skills Mastered</div><div className="v num">{masteredSkills}<small style={{color:"var(--ink-faint)"}}>/{totalSkills}</small></div>
-            <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="var(--good)" strokeWidth="2.5" points="0,26 14,24 28,23 42,19 56,18 70,13 84,11 100,8"/></svg></div>
-          <div className="card stat"><div className="k">Total XP</div><div className="v num">{user.xp.toLocaleString()}</div>
-            <svg className="spark" viewBox="0 0 100 28" preserveAspectRatio="none"><polyline fill="none" stroke="var(--accent)" strokeWidth="2.5" points="0,19 14,13 28,17 42,9 56,21 70,6 84,14 100,5"/></svg></div>
+          <div className="card stat"><div className="k">Day Streak</div>
+            <div className="v num">{user.streak} <small>best {user.bestStreak}</small></div></div>
+          <div className="card stat"><div className="k">Problems Solved</div>
+            <div className="v num">{p.problemsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalProblems}</small></div></div>
+          <div className="card stat"><div className="k">Lessons Done</div>
+            <div className="v num">{p.lessonsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalLessons}</small></div></div>
+          <div className="card stat"><div className="k">Total XP</div>
+            <div className="v num">{user.xp.toLocaleString()}</div></div>
         </section>
 
         <section className="card pad">
           <div className="sec-head"><h2>Your Roadmap<span className="sub">zero to job-ready</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
           <div className="trackrow">
-            {tracks.map((t) => (
+            {p.tracks.map((t) => (
               <Link key={t.id} href="/roadmap" className={`node ${t.status}`}>
                 <div className={`ic ${iconClass(t.slug)}`}>{t.icon}</div>
-                <div className="t">{t.title.split(" — ")[0].split(" (")[0].replace("Programming Foundations", "Python")}</div>
-                <div className="m">{t.status === "done" ? "✓ done" : t.status === "now" ? "now" : "locked"}</div>
+                <div className="t">{t.shortTitle}</div>
+                <div className="m">{t.status === "done" ? "✓ done" : `${t.pct}%`}</div>
                 <span className="badge">{t.status === "done" ? "✓" : t.status === "locked" ? "🔒" : ""}</span>
               </Link>
             ))}
@@ -101,13 +95,15 @@ export default async function DashboardPage() {
 
         <section className="card pad"><div className="sec-head"><h2>Overall Progress</h2></div>
           <div className="ring-wrap">
-            <div className="ring" style={{ background: `conic-gradient(var(--accent) 0turn ${jobReady/100}turn, var(--panel-2) ${jobReady/100}turn 1turn)` }}>
-              <div className="inner"><div><b className="num">{jobReady}%</b><span>Job-ready</span></div></div>
+            <div className="ring" style={{ background: `conic-gradient(var(--accent) 0turn ${p.jobReady/100}turn, var(--panel-2) ${p.jobReady/100}turn 1turn)` }}>
+              <div className="inner"><div><b className="num">{p.jobReady}%</b><span>Job-ready</span></div></div>
             </div>
+            {/* All three count skills, so they add up to totalSkills. The old legend
+                mixed skill counts with track counts and the numbers meant nothing. */}
             <div className="ring-legend">
-              <div className="row"><span className="dot" style={{background:"var(--good)"}}></span>Mastered <b>{masteredSkills}</b></div>
-              <div className="row"><span className="dot" style={{background:"var(--accent)"}}></span>In progress <b>{inProgress}</b></div>
-              <div className="row"><span className="dot" style={{background:"var(--panel-2)",border:"1px solid var(--line)"}}></span>Locked <b>{locked}</b></div>
+              <div className="row"><span className="dot" style={{background:"var(--good)"}}></span>Mastered <b>{p.masteredSkills}</b></div>
+              <div className="row"><span className="dot" style={{background:"var(--accent)"}}></span>In progress <b>{p.inProgressSkills}</b></div>
+              <div className="row"><span className="dot" style={{background:"var(--panel-2)",border:"1px solid var(--line)"}}></span>Locked <b>{p.lockedSkills}</b></div>
             </div>
           </div>
         </section>

@@ -1,17 +1,18 @@
-import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/session";
+import { getProgress } from "@/lib/progress";
 import { PhaseList, type Phase } from "@/components/PhaseList";
 
 export default async function RoadmapPage() {
-  const tracks = await prisma.track.findMany({
-    orderBy: { order: "asc" },
-    include: { lessons: { orderBy: { order: "asc" }, take: 1, select: { slug: true } } },
-  });
+  const user = await getCurrentUser();
+  if (!user) return null;
+
+  const { tracks } = await getProgress(user.id);
 
   const phases: Phase[] = tracks.map((t) => ({
     id: t.id, order: t.order, title: t.title, subtitle: t.subtitle, status: t.status,
     weeks: t.weeks, level: t.level, whyText: t.whyText, milestone: t.milestone,
-    toolsCsv: t.toolsCsv, skills: JSON.parse(t.skillsJson || "[]"),
-    firstLesson: t.lessons[0]?.slug,
+    toolsCsv: t.toolsCsv, skills: t.skills,
+    firstLesson: t.firstLesson,
   }));
 
   const projects = tracks.filter((t) => t.milestone).length;

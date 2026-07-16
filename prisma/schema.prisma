@@ -34,13 +34,16 @@ model Track {
   title      String
   subtitle   String
   icon       String   @default("Py")
-  status     String   @default("locked") // done | now | locked
   whyText    String   @default("")
   weeks      String   @default("")
   level      String   @default("Beginner")
   milestone  String   @default("")
   toolsCsv   String   @default("")
-  skillsJson String   @default("[]") // [{name, done}]
+  // Just the syllabus skill names: ["Variables", "Loops", ...]. Whether a skill is
+  // done, and whether a track is done/now/locked, are per-user and derived in
+  // lib/progress.ts. They used to be stored here, which meant every user saw the
+  // same seeded "Python done, 33% job-ready" regardless of what they'd actually done.
+  skillsJson String   @default("[]")
   checkpoint String?                  // e.g. "Data Analyst · ₹4-8 LPA"
 
   lessons Lesson[]

@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 
 type Item = { id: number; text: string; kind: "learn" | "prac"; done: boolean };
 
+// Starter suggestions — nothing is pre-ticked, since a fresh visitor hasn't done any
+// of it. These are the user's own todos from here on (localStorage).
 const initial: Item[] = [
-  { id: 1, text: "Read: Variables & Data Types", kind: "learn", done: true },
+  { id: 1, text: "Read: Variables & Data Types", kind: "learn", done: false },
   { id: 2, text: "Solve 3 Python drills", kind: "prac", done: false },
-  { id: 3, text: "Watch: type casting demo", kind: "learn", done: false },
-  { id: 4, text: "Revise: int vs str", kind: "learn", done: false },
+  { id: 3, text: "Revise: int vs str", kind: "learn", done: false },
 ];
 
 const KEY = "dq-todos";

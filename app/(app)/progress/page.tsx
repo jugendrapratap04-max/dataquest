@@ -1,58 +1,56 @@
-import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { getProgress, getActivity } from "@/lib/progress";
 
 const barColor = (i: number) => ["var(--good)", "var(--teal)", "var(--accent)", "var(--indigo)", "var(--ink-faint)"][i % 5];
+
+// Submission count -> heatmap intensity class.
+const level = (n: number) => (n === 0 ? "" : n === 1 ? "l1" : n <= 3 ? "l2" : "l3");
 
 export default async function ProgressPage() {
   const user = await getCurrentUser();
   if (!user) return null;
-  const tracks = await prisma.track.findMany({ orderBy: { order: "asc" } });
 
-  const skillRows = tracks.map((t) => {
-    const arr: [string, number][] = JSON.parse(t.skillsJson || "[]");
-    const pct = arr.length ? Math.round((arr.filter(([, d]) => d === 1).length / arr.length) * 100) : 0;
-    return { name: t.title.split(" — ")[0].replace("Programming Foundations", "Python"), pct };
-  });
-
-  let mastered = 0, total = 0;
-  for (const t of tracks) {
-    const arr: [string, number][] = JSON.parse(t.skillsJson || "[]");
-    total += arr.length; mastered += arr.filter(([, d]) => d === 1).length;
-  }
-  const jobReady = total ? Math.round((mastered / total) * 100) : 0;
-
-  // deterministic activity heatmap (28 days)
-  const cells = Array.from({ length: 28 }, (_, i) => ["", "l1", "l2", "l3"][(i * 7 + 3) % 4]);
+  const p = await getProgress(user.id);
+  const activity = await getActivity(user.id, 28);
+  const activeDays = activity.filter((n) => n > 0).length;
+  const totalSubs = activity.reduce((a, b) => a + b, 0);
 
   return (
     <>
-      <p className="page-intro">Apni growth track karo — kahan mazboot ho, kahan mehnat chahiye.</p>
-
       <div className="ov" style={{ marginBottom: 20 }}>
         <div className="card ovc"><div className="k">Total XP</div><div className="v">{user.xp.toLocaleString()}</div></div>
         <div className="card ovc"><div className="k">Day Streak</div><div className="v">{user.streak} 🔥</div></div>
         <div className="card ovc"><div className="k">Best Streak</div><div className="v">{user.bestStreak}</div></div>
-        <div className="card ovc"><div className="k">Job-Ready</div><div className="v">{jobReady}%</div></div>
+        <div className="card ovc"><div className="k">Job-Ready</div><div className="v">{p.jobReady}%</div></div>
       </div>
 
       <div className="card pad" style={{ marginBottom: 20 }}>
         <div className="sec-head"><h2>Skill Mastery</h2></div>
         <div className="prog-bars">
-          {skillRows.map((s, i) => (
-            <div className="pb-row" key={s.name}>
-              <span className="nm">{s.name}</span>
-              <div className="pbar"><i style={{ width: `${s.pct}%`, background: barColor(i) }} /></div>
-              <span className="v">{s.pct}%</span>
+          {p.tracks.map((t, i) => (
+            <div className="pb-row" key={t.id}>
+              <span className="nm">{t.shortTitle}</span>
+              <div className="pbar"><i style={{ width: `${t.pct}%`, background: barColor(i) }} /></div>
+              <span className="v">{t.pct}%</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="card pad">
-        <div className="sec-head"><h2>Activity — Last 4 Weeks</h2></div>
-        <div className="bigcal">
-          {cells.map((c, i) => <div key={i} className={`d ${c}`} />)}
+        <div className="sec-head">
+          <h2>Activity — Last 4 Weeks<span className="sub">{totalSubs} submissions · {activeDays} active din</span></h2>
         </div>
+        <div className="bigcal">
+          {activity.map((n, i) => (
+            <div key={i} className={`d ${level(n)}`} title={`${n} submission${n === 1 ? "" : "s"}`} />
+          ))}
+        </div>
+        {totalSubs === 0 && (
+          <p style={{ fontSize: 12.5, color: "var(--ink-faint)", margin: "12px 0 0" }}>
+            Abhi tak koi submission nahi — ek problem solve karo, ye grid bharna shuru ho jayega.
+          </p>
+        )}
       </div>
     </>
   );

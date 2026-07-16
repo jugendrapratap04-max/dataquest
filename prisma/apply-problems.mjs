@@ -44,7 +44,23 @@ async function apply(label, problems) {
   }
 }
 
+// skillsJson used to be [name, doneFlag] pairs whose flags were seeded per-track and
+// shown to every user. Progress is derived per-user now, so strip the dead flags and
+// leave just the syllabus names.
+async function normaliseSkills() {
+  let fixed = 0;
+  for (const t of await prisma.track.findMany({ select: { id: true, skillsJson: true } })) {
+    const arr = JSON.parse(t.skillsJson || "[]");
+    if (!arr.some(Array.isArray)) continue;
+    const names = arr.map((s) => (Array.isArray(s) ? s[0] : s));
+    await prisma.track.update({ where: { id: t.id }, data: { skillsJson: JSON.stringify(names) } });
+    fixed++;
+  }
+  if (fixed) console.log(`✅ skillsJson — ${fixed} track(s) ke dead done-flags hata diye`);
+}
+
 async function main() {
+  await normaliseSkills();
   for (const [label, problems] of SETS) await apply(label, problems);
 
   const total = await prisma.problem.count();
