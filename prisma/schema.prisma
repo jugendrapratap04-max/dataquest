@@ -1,0 +1,116 @@
+// DataQuest — data model
+// A data-science learning platform: tracks (phases) -> lessons -> problems,
+// with real per-user progress, submissions, XP and streaks.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @default("")
+  role         String   @default("Aspiring Data Analyst")
+  xp        Int      @default(0)
+  streak    Int      @default(0)
+  bestStreak Int     @default(0)
+  createdAt DateTime @default(now())
+
+  lessonProgress LessonProgress[]
+  submissions    Submission[]
+  notes          Note[]
+}
+
+model Track {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  order      Int
+  title      String
+  subtitle   String
+  icon       String   @default("Py")
+  status     String   @default("locked") // done | now | locked
+  whyText    String   @default("")
+  weeks      String   @default("")
+  level      String   @default("Beginner")
+  milestone  String   @default("")
+  toolsCsv   String   @default("")
+  skillsJson String   @default("[]") // [{name, done}]
+  checkpoint String?                  // e.g. "Data Analyst · ₹4-8 LPA"
+
+  lessons Lesson[]
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  order       Int
+  title       String
+  minutes     Int      @default(10)
+  level       String   @default("Beginner")
+  contentJson String   @default("[]") // ordered content blocks
+  trackId     String
+  track       Track    @relation(fields: [trackId], references: [id])
+
+  problems Problem[]
+  progress LessonProgress[]
+}
+
+model Problem {
+  id            String  @id @default(cuid())
+  slug          String  @unique
+  order         Int     @default(0)
+  title         String
+  difficulty    String  @default("Easy")
+  tagsCsv       String  @default("")
+  descriptionMd String  @default("")
+  examplesJson  String  @default("[]") // [{input, output}]
+  starterCode   String  @default("")
+  solutionCode  String  @default("")
+  functionName  String  @default("")
+  testsJson     String  @default("[]") // [{args:[...], expected:...}]
+  hintsJson     String  @default("[]")
+  xp            Int     @default(20)
+  lessonId      String?
+  lesson        Lesson? @relation(fields: [lessonId], references: [id])
+
+  submissions Submission[]
+}
+
+model LessonProgress {
+  id       String @id @default(cuid())
+  userId   String
+  lessonId String
+  status   String @default("in_progress") // in_progress | done
+  user     User   @relation(fields: [userId], references: [id])
+  lesson   Lesson @relation(fields: [lessonId], references: [id])
+
+  @@unique([userId, lessonId])
+}
+
+model Submission {
+  id        String   @id @default(cuid())
+  userId    String
+  problemId String
+  code      String
+  passed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  problem   Problem  @relation(fields: [problemId], references: [id])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  topic     String   @default("General")
+  title     String
+  body      String   @default("")
+  code      String   @default("")
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}

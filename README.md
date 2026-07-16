@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DataQuest 📊🔥
 
-## Getting Started
+Ek full-stack **data science learning platform** — LeetCode jaisa, but data science ke liye.
+Philosophy: **pehle padho → phir usi topic pe practice karo → phir project banao.**
 
-First, run the development server:
+Zero se ₹6–12 LPA tak ka poora roadmap, real in-browser Python compiler, aur progress tracking.
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 16 (App Router) + React 19 + TypeScript |
+| Styling | Tailwind v4 + custom design system (`app/globals.css`) |
+| Database | Prisma + SQLite (`prisma/schema.prisma`, `dev.db`) |
+| Python execution | **Pyodide** (Python → WebAssembly, browser me chalta hai, `/public/pyodide`) |
+| Code editor | Monaco (VS Code wala editor) |
+
+Sab kuch local chalta hai — koi paid API ya code-execution server nahi.
+
+---
+
+## Chalane ka tarika
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install          # dependencies (ek baar)
+npm run db:reset     # database banao + seed data daalo (tracks, lessons, problems)
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Extra commands:
+```bash
+npm run db:seed      # sirf seed data dobara daalo
+npm run db:studio    # Prisma Studio — database GUI me dekho
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Structure
 
-## Learn More
+```
+app/
+  page.tsx                 Dashboard (streak, XP, roadmap, progress)
+  roadmap/                 9-phase skill sheet
+  learn/[slug]/            Lesson view (notes + code + "ab practice karo")
+  practice/[slug]/         Compiler — Monaco + Pyodide + test cases
+  projects/  notes/  progress/
+  api/submit/              Submission record + XP award
+  api/progress/            Lesson complete tracking
+components/                Sidebar, Topbar, PracticeWorkbench, PhaseList, ...
+lib/
+  prisma.ts                DB client
+  session.ts               Current user (cookie -> demo user; NextAuth baad me)
+  pyodide-runner.ts        Browser me Python run + test checking
+  highlight.ts             Lesson code highlighting
+prisma/
+  schema.prisma            Data model
+  seed.mjs                 Sample content (Python track fully seeded)
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Abhi kya real hai (working)
+- Real login / signup / logout — email + password, har student ka apna account & progress
+- Real database — user, tracks, lessons, problems, submissions, notes
+- Real Python compiler — Pyodide se browser me actual code chalta hai
+- Real test-case checking — pass/fail with expected vs got
+- Interactive visualizations — Memory Playground, Casting Lab, Operator Lab, Loop Visualizer, List Indexer
+- No copy-paste practice editor + celebration on solve
+- Progress persist — XP milta hai, submissions save hote hain, dashboard update hota hai
+- **Python Basics module COMPLETE** — 7 lessons + 21 practice problems
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Demo login
+`jugendra@dataquest.dev` / `dataquest` — ya khud ka account bana lo (Signup).
+Prod me `AUTH_SECRET` env set karo.
 
-## Deploy on Vercel
+## Aage karne wala (TODO)
+- [ ] Baaki tracks ka content (Statistics, Pandas, SQL, ML…)
+- [ ] SQL playground (sql.js se)
+- [ ] Pandas/NumPy practice (Pyodide me micropip se install)
+- [ ] Leaderboard, certificates, daily challenge logic
+- [ ] Streak auto-update (daily activity pe)
+- [ ] Session hardening (session table / rotation)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Made with Claude Code. Pehle padho, phir practice karo, phir project banao._
