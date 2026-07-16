@@ -18,7 +18,13 @@ Zero se ₹6–12 LPA tak ka poora roadmap, real in-browser Python + SQL, aur pr
 | SQL execution | **sql.js** (SQLite → WebAssembly, `/public/sqljs`) |
 | Code editor | Monaco (VS Code wala editor) |
 
-Sab kuch browser me chalta hai — koi paid API, koi code-execution server, koi CDN nahi.
+Code browser me hi chalta hai — koi paid API, koi code-execution server nahi. Pyodide aur
+sql.js dono `public/` me vendored hain, isliye Python/SQL chalane ke liye kisi CDN pe
+depend nahi karte.
+
+> Ek exception: **Monaco editor `cdn.jsdelivr.net` se load hota hai** (`@monaco-editor/react`
+> ka default). Yaani editor ko internet chahiye — jsdelivr block/down ho to code likhne ka
+> box nahi aayega. Poori tarah offline chahiye to Monaco ko bhi self-host karna padega.
 
 ---
 
