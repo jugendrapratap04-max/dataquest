@@ -269,11 +269,13 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .mistakes h3 { font-size:14px; margin:0 0 12px; }
 .mk { border-top:1px solid var(--line); padding:12px 0; }
 .mk:first-of-type { border-top:0; padding-top:0; }
-.mk-bad, .mk-fix { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:4px 0; }
-.mk-bad span, .mk-fix span { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:5px; flex:none; }
+/* align-items:start so the label stays at the top of a multi-line snippet */
+.mk-bad, .mk-fix { display:flex; align-items:flex-start; gap:9px; margin:5px 0; }
+.mk-bad span, .mk-fix span { font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:3px 7px; border-radius:5px; flex:none; margin-top:2px; }
 .mk-bad span { color:var(--bad); background:var(--bad-soft); }
 .mk-fix span { color:var(--good); background:var(--good-soft); }
-.mk code { font-family:var(--mono); font-size:12.5px; background:var(--panel-3); padding:3px 8px; border-radius:6px; color:var(--ink); }
+/* These snippets are multi-line — <pre> so the newlines survive. */
+.mk pre { font-family:var(--mono); font-size:12.5px; line-height:1.6; background:var(--panel-3); padding:8px 11px; border-radius:7px; color:var(--ink); margin:0; overflow-x:auto; white-space:pre; flex:1; min-width:0; }
 .mk-why { font-size:13px; color:var(--ink-soft); margin:7px 0; line-height:1.6; }
 
 .iv { padding:16px 18px; margin:20px 0; }

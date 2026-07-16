@@ -38,7 +38,10 @@ function Block({ b }: { b: any }) {
     case "think":
       return (
         <details className="think">
-          <summary>🤔 {b.q} <span className="think-hint">— pehle khud socho, phir kholo</span></summary>
+          <summary>
+            🤔 <span dangerouslySetInnerHTML={{ __html: b.q }} />
+            <span className="think-hint"> — pehle khud socho, phir kholo</span>
+          </summary>
           <div className="think-a" dangerouslySetInnerHTML={{ __html: b.a }} />
         </details>
       );
@@ -72,9 +75,9 @@ function Block({ b }: { b: any }) {
           <h3>🚩 Yahan beginners phaste hain</h3>
           {b.items.map((m: any, i: number) => (
             <div className="mk" key={i}>
-              <div className="mk-bad"><span>Galat</span><code>{m.bad}</code></div>
+              <div className="mk-bad"><span>Galat</span><pre>{m.bad}</pre></div>
               <div className="mk-why" dangerouslySetInnerHTML={{ __html: m.why }} />
-              <div className="mk-fix"><span>Sahi</span><code>{m.fix}</code></div>
+              <div className="mk-fix"><span>Sahi</span><pre>{m.fix}</pre></div>
             </div>
           ))}
         </div>
@@ -86,7 +89,12 @@ function Block({ b }: { b: any }) {
           <h3>🎤 Interview me aisa poochha jaata hai</h3>
           {b.items.map((q: any, i: number) => (
             <details className="iv-q" key={i}>
-              <summary><span className={`iv-lvl ${q.level}`}>{q.level}</span>{q.q}</summary>
+              {/* q.q carries inline <code> markup like the answer does — render it,
+                  don't print the tags. */}
+              <summary>
+                <span className={`iv-lvl ${q.level}`}>{q.level}</span>
+                <span dangerouslySetInnerHTML={{ __html: q.q }} />
+              </summary>
               <div className="iv-a" dangerouslySetInnerHTML={{ __html: q.a }} />
             </details>
           ))}

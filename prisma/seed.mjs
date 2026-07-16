@@ -163,7 +163,10 @@ const L3 = [
 
 const L4 = [
   { t: "objectives", items: ["for loop se list / range pe chalna","while loop condition tak chalana","break aur continue use karna"] },
+  { t: "hook", q: "10 lakh users ki salary ka total nikalna hai. Kya tum 10 lakh baar <code>+</code> likhoge?", why: "Obviously nahi. Par phir computer kaise karta hai? Wo bhi ek-ek karke hi jodta hai — bas <b>likhne</b> ka kaam ek baar hota hai, <b>chalne</b> ka 10 lakh baar. Wahi loop hai." },
+  { t: "think", q: "<code>range(5)</code> kya deta hai? Dhyan se socho — kitne numbers, aur kaunse se kaunse tak?", a: "<b>5 numbers: 0, 1, 2, 3, 4</b> — <code>5</code> khud shaamil <b>nahi</b> hai.<br/><br/>Ye \"start included, stop excluded\" rule Python me har jagah hai — <code>range()</code>, slicing <code>[1:3]</code>, sab me. Ek baar dimaag me baith gaya to aadhi off-by-one galtiyan khatam." },
   { t: "h2", n: "1", text: "for loop" },
+  { t: "def", term: "Loop", en: "A loop repeatedly executes a block of code while a condition holds or for each item in a sequence.", hi: "Ek chakkar ko <b>iteration</b> kehte hain. <code>for</code> ek collection ke <b>har item</b> pe chalta hai; <code>while</code> tab tak chalta hai jab tak condition sach hai." },
   { t: "p", html: "Ek hi kaam har item pe dohrane ke liye <code>for</code> loop. <code>range(5)</code> deta hai 0,1,2,3,4." },
   { t: "code", file: "forloop.py", code: "total = 0\nfor n in [2, 4, 6, 8, 10]:\n    total += n\nprint(total)   # 30", output: "30" },
   { t: "viz", name: "loop-visualizer" },
@@ -173,12 +176,27 @@ const L4 = [
   { t: "h2", n: "3", text: "break aur continue" },
   { t: "p", html: "<code>break</code> loop turant rok deta hai. <code>continue</code> current chakkar chhod ke agle pe chala jaata hai." },
   { t: "note", variant: "warn", html: "<b>Infinite loop se bacho:</b> while me kuch aisa zaroor badlo jisse condition ek din False ho." },
+  { t: "analogy", concept: "for vs while", real: "Guest list vs Darwaza", html: "<b>for</b> = guest list haath me hai — tumhe pata hai kitne log aane hain, ek-ek ka naam pukaro, list khatam, kaam khatam. <b>while</b> = darwaaze pe khade ho — nahi pata kitne aayenge, bas \"jab tak koi aata rahe\" tab tak khade raho. Isiliye <code>while</code> me infinite loop ho sakta hai, <code>for</code> me nahi." },
+  { t: "mistakes", items: [
+    { bad: "for i in range(1, 5):\n    print(i)  # 5 chahiye tha", why: "<code>range(1, 5)</code> deta hai 1,2,3,4 — <b>5 nahi</b>. Stop hamesha <b>excluded</b> hota hai. Ye \"off-by-one\" galti programming ki sabse purani aur sabse aam galti hai.", fix: "for i in range(1, 6):\n    print(i)" },
+    { bad: "while count > 0:\n    print(count)", why: "<code>count</code> kabhi badla hi nahi — condition hamesha True rahegi. <b>Infinite loop.</b> Program hang ho jayega. <code>while</code> likhte hi khud se poochho: \"ye False kab hoga?\"", fix: "while count > 0:\n    print(count)\n    count -= 1" },
+    { bad: "for f in fruits:\n    fruits.remove(f)", why: "Jis list pe loop chal raha hai usi ko badal rahe ho. Har remove pe baaki items khisak jaate hain, aur loop <b>items skip kar deta hai</b>. Error nahi milega — bas chup-chaap galat jawab. Ye sabse khatarnaak kism ka bug hai.", fix: "for f in fruits[:]:\n    fruits.remove(f)" },
+  ]},
   { t: "recap", items: ["for → known items / range pe chalo","while → condition tak chalo","break → loop rok do","continue → agla chakkar"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>for</code> aur <code>while</code> kab use karoge?", a: "<code>for</code> jab pata ho <b>kis-kis pe</b> chalna hai — list, string, range. <code>while</code> jab pata na ho kitni baar chalega, sirf <b>rukne ki condition</b> pata ho — jaise \"jab tak user quit na likhe\"." },
+    { level: "beginner", q: "<code>break</code> aur <code>continue</code> me kya farak hai?", a: "<code>break</code> loop <b>poora</b> tod deta hai — bahar nikal jaata hai. <code>continue</code> sirf <b>current chakkar</b> chhodta hai aur agle pe chala jaata hai. <code>break</code> = \"bas, khatam\"; <code>continue</code> = \"isko chhodo, agla dikhao\"." },
+    { level: "intermediate", q: "Loop pe <code>else</code> laga sakte ho? Wo kab chalega?", a: "Haan — Python ki khaas cheez hai. <code>for...else</code> me <code>else</code> tab chalta hai jab loop <b>bina break ke</b> poora ho jaye. Search me kaam aata hai: item mila to <code>break</code>, nahi mila to <code>else</code> me \"not found\". Naam confusing hai — ise <code>nobreak</code> samajhna behtar hai." },
+    { level: "intermediate", q: "Jis list pe loop chal raha ho usko modify karne me kya problem hai?", a: "Loop internally <b>index</b> se chalta hai. Item hataoge to baaki peeche khisak jaayenge, par index aage badh chuka hoga — matlab kuch items <b>skip</b> ho jayenge. Error nahi aayega, jawaab galat aayega. Hal: copy pe loop karo (<code>for x in items[:]</code>) ya nayi list banao (list comprehension)." },
+  ]},
 ];
 
 const L5 = [
   { t: "objectives", items: ["List banana aur index se item nikaalna","append, len, slicing use karna","Tuple (fix list) samajhna"] },
+  { t: "hook", q: "Ek class ke 60 students ke naam rakhne hain. 60 variables banaoge — <code>name1</code>, <code>name2</code>… <code>name60</code>?", why: "Aur agar 61st student aa gaya? Ya poori list sort karni ho? 60 alag naam ek saath handle karne ka koi tarika hi nahi. Isiliye ek aisa dabba chahiye jisme <b>kai cheezein, ek order me</b> rakhi ja sakein." },
+  { t: "think", q: "<code>fruits = [\"apple\", \"mango\", \"kiwi\"]</code> — <code>fruits[1]</code> kya dega? Aur <code>fruits[-1]</code>?", a: "<code>fruits[1]</code> → <b>\"mango\"</b>. Index <b>0 se</b> shuru hota hai, isliye 1 matlab doosra item.<br/><code>fruits[-1]</code> → <b>\"kiwi\"</b>. Negative index peeche se ginta hai, aur -1 hamesha <b>aakhri</b> item hai.<br/><br/><code>len(fruits) - 1</code> likhne ki zaroorat nahi — <code>[-1]</code> hi kaafi hai." },
   { t: "h2", n: "1", text: "List aur index" },
+  { t: "def", term: "List", en: "A list is an ordered, mutable collection of values, accessed by index.", hi: "<b>Ordered</b> = jis order me daala usi order me rahega. <b>Mutable</b> = banane ke baad badal sakte ho. <b>Index</b> = har item ki position, <code>0</code> se shuru." },
   { t: "p", html: "List me kai values ek jagah, square brackets me. Har item ka index aage se <code>0</code> se, peeche se <code>-1</code> se." },
   { t: "code", file: "list.py", code: "fruits = [\"apple\", \"mango\", \"kiwi\"]\nprint(fruits[0])   # apple\nprint(fruits[-1])  # kiwi\nprint(len(fruits)) # 3", output: "apple\nkiwi\n3" },
   { t: "viz", name: "list-indexer" },
@@ -188,24 +206,54 @@ const L5 = [
   { t: "h2", n: "3", text: "Tuple — fix list" },
   { t: "p", html: "Tuple list jaisi hai par <b>badalti nahi</b> — round brackets me. Jab data fix rakhna ho to use karo." },
   { t: "note", variant: "tip", html: "<b>List vs Tuple:</b> List <code>[]</code> badal sakti hai, Tuple <code>()</code> nahi." },
+  { t: "analogy", concept: "List vs Tuple", real: "Shopping list vs Aadhaar card", html: "<b>Shopping list</b> — kuch bhi jodo, hatao, badlo. Wahi list hai. <b>Aadhaar card</b> — chhap gaya, ab badal nahi sakte; badalna hai to naya banwao. Wahi tuple hai. Isiliye coordinates <code>(x, y)</code> ya RGB <code>(255, 0, 0)</code> tuple hote hain — wo cheezein badalni nahi chahiye." },
+  { t: "mistakes", items: [
+    { bad: "fruits[3]  # list me 3 items hain", why: "3 items ke index hain <b>0, 1, 2</b> — index 3 hai hi nahi. <code>IndexError</code> milega. Aakhri item hamesha <code>len-1</code> pe hota hai, ya seedha <code>[-1]</code> likh do.", fix: "fruits[2]   # ya fruits[-1]" },
+    { bad: "b = a\nb.append(4)  # a bhi badal gaya!", why: "<code>b = a</code> nayi list nahi banata — dono naam <b>ek hi list</b> ko point karte hain. Ek ko badlo, dono me dikhega. Ye har beginner ko kaatta hai.", fix: "b = a[:]   # ya list(a)" },
+    { bad: "nums = (1, 2, 3)\nnums.append(4)", why: "Tuple <b>immutable</b> hai — usme <code>append</code> hota hi nahi. <code>AttributeError</code> milega. Badalna hai to list use karo, ya naya tuple banao.", fix: "nums = [1, 2, 3]\nnums.append(4)" },
+  ]},
   { t: "recap", items: ["List [] — kai values, index 0 se","fruits[-1] = last item","append() jodta hai, [a:b] slice deta hai","Tuple () = badalti nahi"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "List aur tuple me kya farak hai?", a: "List <b>mutable</b> hai (<code>[]</code>, badal sakti hai), tuple <b>immutable</b> (<code>()</code>, nahi badal sakta). Tuple thoda tez aur kam memory leta hai, aur — sabse zaroori — <b>dict ki key</b> ban sakta hai; list nahi ban sakti, kyunki uske badalne se hash tootega." },
+    { level: "beginner", q: "<code>nums[1:3]</code> kya dega?", a: "Index <b>1 aur 2</b> ke items — <b>3 nahi</b>. Slicing me start included, stop excluded. Aur slice hamesha <b>nayi list</b> deta hai, original ko chhedta nahi." },
+    { level: "intermediate", q: "<code>b = a</code> aur <code>b = a[:]</code> me kya farak hai?", a: "<code>b = a</code> sirf <b>naya naam</b> hai usi list ka — ek badlo, dono badle. <code>b = a[:]</code> <b>shallow copy</b> banata hai — top level alag ho jaata hai. Par nested list ho to andar wali abhi bhi shared hai; wahan <code>copy.deepcopy()</code> chahiye." },
+    { level: "intermediate", q: "<code>append()</code> aur <code>extend()</code> me kya farak hai?", a: "<code>a.append([1,2])</code> poori list ko <b>ek item</b> ki tarah andar daal deta hai → <code>[..., [1,2]]</code>. <code>a.extend([1,2])</code> uske <b>har item</b> ko alag-alag jodta hai → <code>[..., 1, 2]</code>. Nested list ban jaana isi galti ki nishani hai." },
+  ]},
 ];
 
 const L6 = [
   { t: "objectives", items: ["Dictionary (key-value) banana aur use karna","Value access aur add karna","Set (unique items) samajhna"] },
+  { t: "hook", q: "10 lakh users me se ek ka email dhoondhna hai. List me dhoondhoge — kitna time lagega?", why: "List me computer ko <b>ek-ek karke</b> 10 lakh tak check karna pad sakta hai. Dict me? Wo seedha wahan jaata hai — chahe 10 users ho ya 10 crore, time <b>utna hi</b> rehta hai. Ye jaadu nahi, ek trick hai jo aaj samajhoge." },
+  { t: "think", q: "Dict itna tez kaise hai? Wo bina poori list dekhe seedha sahi jagah kaise pahunch jaata hai?", a: "Key ko ek function se guzaarke ek <b>number</b> banaya jaata hai — usse <b>hash</b> kehte hain. Wo number batata hai ki memory me <b>kis khaane me</b> dekhna hai. Matlab dhoondhna nahi padta, <b>seedha calculate</b> ho jaata hai.<br/><br/>Isiliye dict ki key <b>immutable</b> honi chahiye — key badal gayi to hash badal jayega, aur value hamesha ke liye kho jayegi. Yahi wajah hai ki list key nahi ban sakti, tuple ban sakta hai." },
   { t: "h2", n: "1", text: "Dictionary — key : value" },
+  { t: "def", term: "Dictionary", en: "A dictionary is a mutable collection of key-value pairs, where each key maps to exactly one value.", hi: "Key se value <b>seedha</b> milti hai — dhoondhna nahi padta. Key <b>unique</b> aur <b>immutable</b> honi chahiye (string, number, tuple — list nahi)." },
   { t: "p", html: "Dict me har value ka ek <b>naam (key)</b> hota hai. Curly braces <code>{}</code> me <code>key: value</code>." },
   { t: "code", file: "dict.py", code: "student = {\"name\": \"Freya\", \"age\": 21}\nprint(student[\"name\"])       # Freya\nstudent[\"city\"] = \"Delhi\"   # naya add\nprint(student)", output: "Freya\n{'name': 'Freya', 'age': 21, 'city': 'Delhi'}" },
   { t: "note", variant: "tip", html: "<b>List vs Dict:</b> List me number index (0,1,2), Dict me apna naam wala key. Naam se dhoondhna ho to dict." },
   { t: "h2", n: "2", text: "Set — unique items" },
   { t: "p", html: "Set me har item sirf ek baar — duplicate apne aap hat jaate hain. Unique count ke liye best." },
   { t: "code", file: "set.py", code: "marks = [90, 85, 90, 70, 85]\nunique = set(marks)   # {90, 85, 70}\nprint(len(unique))    # 3", output: "3" },
+  { t: "analogy", concept: "Dictionary", real: "Phone ki contact list", html: "Tum number yaad nahi rakhte — <b>naam</b> yaad rakhte ho. \"Amma\" type kiya, number aa gaya. Naam = <b>key</b>, number = <b>value</b>. Aur dhyan do: do \"Amma\" nahi ho sakte — key hamesha unique hoti hai. Naya number save karo to purana <b>replace</b> ho jaata hai. Dict bilkul yahi karta hai." },
+  { t: "mistakes", items: [
+    { bad: 'student["email"]  # key hai hi nahi', why: "Missing key pe <code>KeyError</code> aata hai aur program <b>ruk</b> jaata hai. Agar key ka pakka na ho to <code>.get()</code> use karo — wo error ki jagah <code>None</code> (ya tumhara default) deta hai.", fix: 'student.get("email", "N/A")' },
+    { bad: 'd = {["a"]: 1}', why: "List <b>key nahi ban sakti</b> — wo mutable hai, aur badalne pe uska hash badal jayega, matlab value hamesha ke liye kho jayegi. <code>TypeError: unhashable type</code>. Tuple chalega, kyunki wo badalta nahi.", fix: 'd = {("a",): 1}' },
+    { bad: "s = {}   # khaali set banana tha", why: "<code>{}</code> khaali <b>dict</b> banata hai, set nahi — Python me <code>{}</code> pehle dict ke liye tha. Khaali set ke liye <code>set()</code> hi likhna padta hai.", fix: "s = set()" },
+  ]},
   { t: "recap", items: ["Dict {} = key:value pairs","d[key] se access, d[new]=val se add","Set {} = sirf unique items","set(list) se duplicates hatao"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "List ki jagah dict kab use karoge?", a: "Jab cheez <b>naam se</b> dhoondhni ho, position se nahi. List me item dhoondhna matlab poori list scan karna (O(n)); dict me key se seedha milta hai (O(1)) — chahe 10 items ho ya 10 lakh." },
+    { level: "beginner", q: "<code>d[\"key\"]</code> aur <code>d.get(\"key\")</code> me kya farak hai?", a: "Key na ho to <code>d[\"key\"]</code> <code>KeyError</code> phenkta hai aur program rukta hai; <code>d.get(\"key\")</code> chup-chaap <code>None</code> deta hai (ya <code>d.get(\"key\", default)</code>). Key ka pakka ho to bracket theek — kyunki tab error <b>chahiye</b>, taaki bug chhupe nahi." },
+    { level: "intermediate", q: "Dict ki key kya-kya ban sakti hai, aur kyun?", a: "Sirf <b>hashable</b> cheezein — string, number, tuple. List/dict/set nahi, kyunki wo <b>mutable</b> hain. Dict key ka hash nikaal ke uski jagah tay karta hai; key badal gayi to hash badal jayega aur value dhoondhi nahi ja sakegi. Isiliye immutable ka rule hai." },
+    { level: "intermediate", q: "Dict me lookup O(1) kaise hota hai?", a: "<b>Hash table.</b> Key ko hash function se ek number me badalte hain, wo number batata hai ki kis slot me dekhna hai — scan nahi, seedha calculation. Do keys ka hash same ho jaye (<b>collision</b>) to Python usse internally handle kar leta hai. Isiliye O(1) <b>average</b> hai, worst case nahi." },
+  ]},
 ];
 
 const L7 = [
   { t: "objectives", items: ["def se function banana","Parameters lena aur return karna","Default arguments use karna"] },
+  { t: "hook", q: "Ek hi hisaab tumhare code me 40 jagah likha hai. Ab formula badal gaya. Kitni jagah theek karoge?", why: "Chalis. Aur ek jagah bhool gaye to bug wahin baith jayega — mahino tak. Function ka asli faayda \"kam likhna\" nahi hai. Asli faayda ye hai ki <b>badalne ki jagah sirf ek</b> ho." },
+  { t: "think", q: "<code>print(x)</code> aur <code>return x</code> — dono value dikhate lagte hain. Farak kya hai?", a: "<code>print</code> value <b>screen pe dikhata</b> hai — aur baat khatam. <code>return</code> value <b>wapas deta</b> hai, taaki tum usse aage kaam kar sako.<br/><br/><code>total = add(3, 4)</code> tabhi chalega jab <code>add</code> <b>return</b> kare. Agar usme sirf <code>print</code> hota, to <code>total</code> me <code>None</code> aa jaata. Beginners ki sabse aam galti yahi hai — dikhta sahi hai, chalta nahi." },
   { t: "h2", n: "1", text: "Function banana" },
+  { t: "def", term: "Function", en: "A function is a named, reusable block of code that takes inputs, performs a task, and optionally returns a value.", hi: "Jo values function <b>leta</b> hai wo <b>parameters</b>, aur jo tum bulate waqt <b>dete</b> ho wo <b>arguments</b>. <code>return</code> jawaab wapas bhejta hai — aur function wahin khatam ho jaata hai." },
   { t: "p", html: "Function = reusable code block. <code>def</code> se banate hain, <code>return</code> se jawaab wapas dete hain. Ek baar likho, baar-baar bulao." },
   { t: "code", file: "func.py", code: "def square(n):\n    return n * n\n\nprint(square(5))   # 25\nprint(square(9))   # 81", output: "25\n81" },
   { t: "h2", n: "2", text: "Parameters aur return" },
@@ -215,7 +263,19 @@ const L7 = [
   { t: "p", html: "Parameter ko default value do — agar nahi diya to wahi use hoga." },
   { t: "code", file: "default.py", code: "def greet(name=\"Guest\"):\n    return \"Hello, \" + name\n\nprint(greet())         # Hello, Guest\nprint(greet(\"Freya\"))   # Hello, Freya", output: "Hello, Guest\nHello, Freya" },
   { t: "note", variant: "tip", html: "<b>DRY principle:</b> Don't Repeat Yourself — same code baar-baar likhne ki jagah function bana lo." },
+  { t: "analogy", concept: "Function", real: "Mixer grinder", html: "Masala <b>daalte</b> ho (arguments), button dabate ho (function call), paste <b>bahar aata</b> hai (return). Tumhe blade kaise ghoomte hain jaanne ki zaroorat nahi — bas kya daalna hai aur kya milega. Isko <b>abstraction</b> kehte hain, aur poori programming isi pe khadi hai." },
+  { t: "mistakes", items: [
+    { bad: "def add(a, b):\n    print(a + b)\n\ntotal = add(3, 4)   # total = None", why: "<code>print</code> sirf dikhata hai, <b>wapas nahi deta</b>. Bina <code>return</code> ke function chup-chaap <code>None</code> lautata hai. Screen pe 7 dikhega, par <code>total</code> me <code>None</code> hoga — aur error tab aayega jab <code>total</code> ko aage use karoge.", fix: "def add(a, b):\n    return a + b" },
+    { bad: "def add_item(item, items=[]):\n    items.append(item)\n    return items", why: "<b>Python ka sabse mashhoor trap.</b> Default value function <b>ek hi baar</b> banti hai — har call me <b>wahi</b> list dobara istemaal hoti hai. Doosri call pe pichhle items abhi bhi andar milenge. Interview me ye poochha jaata hai.", fix: "def add_item(item, items=None):\n    if items is None:\n        items = []" },
+    { bad: "def f():\n    return\n    print(\"hi\")", why: "<code>return</code> ke baad wala code <b>kabhi nahi</b> chalta — function wahin khatam ho jaata hai. Ise <b>dead code</b> kehte hain; Python warning bhi nahi deta.", fix: "def f():\n    print(\"hi\")\n    return" },
+  ]},
   { t: "recap", items: ["def se function banao","return se result wapas do","print ≠ return","Default args: def f(x=value)"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>print</code> aur <code>return</code> me kya farak hai?", a: "<code>print</code> screen pe <b>dikhata</b> hai — insaan ke liye. <code>return</code> value <b>caller ko wapas</b> deta hai — code ke liye. Bina return ke function <code>None</code> lautata hai, isliye <code>total = add(3,4)</code> me <code>None</code> aa jayega." },
+    { level: "beginner", q: "Parameter aur argument me kya farak hai?", a: "<b>Parameter</b> = definition me likha naam (<code>def add(a, b)</code> me <code>a</code>, <code>b</code>). <b>Argument</b> = call karte waqt di gayi asli value (<code>add(3, 4)</code> me <code>3</code>, <code>4</code>). Parameter dabba hai, argument usme rakhi cheez." },
+    { level: "intermediate", q: "<code>def f(items=[])</code> me kya problem hai?", a: "Default value <b>function define hote waqt ek hi baar</b> banti hai, har call pe nahi. Matlab saari calls <b>ek hi list</b> share karengi — pichhli call ka data agli me dikhega. Mutable default (list/dict/set) ke liye hamesha <code>None</code> use karo aur andar bana lo." },
+    { level: "intermediate", q: "<code>*args</code> aur <code>**kwargs</code> kya hain?", a: "<code>*args</code> extra <b>positional</b> arguments ko <b>tuple</b> me bhar leta hai; <code>**kwargs</code> extra <b>keyword</b> arguments ko <b>dict</b> me. Jab pata na ho kitne arguments aayenge tab kaam aate hain — decorators aur wrapper functions inhi pe chalte hain." },
+  ]},
 ];
 
 const L8 = [
