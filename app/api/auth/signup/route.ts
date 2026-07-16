@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, signSession, SESSION_COOKIE } from "@/lib/auth";
+import { hashPassword, signSession, SESSION_COOKIE, SESSION_COOKIE_OPTIONS } from "@/lib/auth";
 
 export async function POST(req: Request) {
   const { name, email, password } = await req.json();
@@ -20,6 +20,6 @@ export async function POST(req: Request) {
     data: { name: name.trim(), email: mail, passwordHash: hashPassword(password), role: "Aspiring Data Analyst" },
   });
   const store = await cookies();
-  store.set(SESSION_COOKIE, signSession(user.id), { httpOnly: true, path: "/", sameSite: "lax", maxAge: 60 * 60 * 24 * 30 });
+  store.set(SESSION_COOKIE, signSession(user.id), SESSION_COOKIE_OPTIONS);
   return NextResponse.json({ ok: true });
 }
