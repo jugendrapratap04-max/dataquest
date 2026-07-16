@@ -3,7 +3,7 @@
 Ek full-stack **data science learning platform** — LeetCode jaisa, but data science ke liye.
 Philosophy: **pehle padho → phir usi topic pe practice karo → phir project banao.**
 
-Zero se ₹6–12 LPA tak ka poora roadmap, real in-browser Python compiler, aur progress tracking.
+Zero se ₹6–12 LPA tak ka poora roadmap, real in-browser Python + SQL, aur progress tracking.
 
 ---
 
@@ -14,26 +14,44 @@ Zero se ₹6–12 LPA tak ka poora roadmap, real in-browser Python compiler, aur
 | Framework | Next.js 16 (App Router) + React 19 + TypeScript |
 | Styling | Tailwind v4 + custom design system (`app/globals.css`) |
 | Database | Prisma + SQLite (`prisma/schema.prisma`, `dev.db`) |
-| Python execution | **Pyodide** (Python → WebAssembly, browser me chalta hai, `/public/pyodide`) |
+| Python execution | **Pyodide** (Python → WebAssembly, `/public/pyodide`) |
+| SQL execution | **sql.js** (SQLite → WebAssembly, `/public/sqljs`) |
 | Code editor | Monaco (VS Code wala editor) |
 
-Sab kuch local chalta hai — koi paid API ya code-execution server nahi.
+Sab kuch browser me chalta hai — koi paid API, koi code-execution server, koi CDN nahi.
 
 ---
 
 ## Chalane ka tarika
 
 ```bash
-npm install          # dependencies (ek baar)
-npm run db:reset     # database banao + seed data daalo (tracks, lessons, problems)
-npm run dev          # http://localhost:3000
+npm install
+cp .env.example .env   # phir AUTH_SECRET bharo (neeche dekho)
+npm run db:reset       # database banao + seed data daalo
+npm run dev            # http://localhost:3000
 ```
 
 Extra commands:
 ```bash
-npm run db:seed      # sirf seed data dobara daalo
+npm run db:seed      # seed data dobara daalo (reset ke bina)
+npm run db:sql       # sirf SQL problems add/refresh karo (existing progress safe)
 npm run db:studio    # Prisma Studio — database GUI me dekho
 ```
+
+> ⚠️ `db:reset` **saara user data mita deta hai** (progress, XP, submissions).
+> Sirf content add karna ho to `db:sql` jaisa additive script use karo.
+
+### AUTH_SECRET
+Session cookie isse sign hoti hai. Dev me ek fallback chal jaata hai, par **production me
+ye zaroori hai** — warna app boot hone se mana kar dega. Wajah: fallback is repo me committed
+hai, aur jo bhi use padh le wo kisi bhi user ka cookie bana ke uske account me ghus sakta hai.
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+### Demo login
+`jugendra@dataquest.dev` / `dataquest` — ya khud ka account bana lo (Signup).
 
 ---
 
@@ -41,47 +59,72 @@ npm run db:studio    # Prisma Studio — database GUI me dekho
 
 ```
 app/
-  page.tsx                 Dashboard (streak, XP, roadmap, progress)
-  roadmap/                 9-phase skill sheet
-  learn/[slug]/            Lesson view (notes + code + "ab practice karo")
-  practice/[slug]/         Compiler — Monaco + Pyodide + test cases
-  projects/  notes/  progress/
+  (app)/page.tsx           Dashboard (streak, XP, roadmap, progress)
+  (app)/roadmap/           9-phase skill sheet
+  (app)/learn/[slug]/      Lesson view (notes + code + "ab practice karo")
+  (app)/practice/[slug]/   Compiler — Python (Pyodide) ya SQL (sql.js)
+  (app)/projects/  notes/  progress/  leaderboard/  certificates/  resume/
+  api/auth/                login / signup / logout
   api/submit/              Submission record + XP award
-  api/progress/            Lesson complete tracking
-components/                Sidebar, Topbar, PracticeWorkbench, PhaseList, ...
+components/
+  PracticeWorkbench.tsx    Python: Monaco + test cases
+  SqlWorkbench.tsx         SQL: Monaco + schema browser + result grid
+  viz/                     Interactive visualizations
 lib/
-  prisma.ts                DB client
-  session.ts               Current user (cookie -> demo user; NextAuth baad me)
+  auth.ts                  Password hashing + signed session cookie
   pyodide-runner.ts        Browser me Python run + test checking
-  highlight.ts             Lesson code highlighting
+  sql-runner.ts            Browser me SQL run + result-set diffing
 prisma/
   schema.prisma            Data model
-  seed.mjs                 Sample content (Python track fully seeded)
+  seed.mjs                 Poora seed
+  sql-problems.mjs         SQL problems (seed + db:sql dono isi se)
+  apply-sql-problems.mjs   Additive SQL applier
 ```
 
 ---
 
 ## Abhi kya real hai (working)
-- Real login / signup / logout — email + password, har student ka apna account & progress
-- Real database — user, tracks, lessons, problems, submissions, notes
-- Real Python compiler — Pyodide se browser me actual code chalta hai
-- Real test-case checking — pass/fail with expected vs got
-- Interactive visualizations — Memory Playground, Casting Lab, Operator Lab, Loop Visualizer, List Indexer
-- No copy-paste practice editor + celebration on solve
-- Progress persist — XP milta hai, submissions save hote hain, dashboard update hota hai
-- **Python Basics module COMPLETE** — 7 lessons + 21 practice problems
 
-### Demo login
-`jugendra@dataquest.dev` / `dataquest` — ya khud ka account bana lo (Signup).
-Prod me `AUTH_SECRET` env set karo.
+- **Real login/signup** — scrypt password hashing, HMAC-signed session cookie
+- **Real database** — user, tracks, lessons, problems, submissions, notes
+- **Real Python compiler** — Pyodide se browser me actual code, test-case checking
+- **Real SQL playground** — sql.js pe asli SQLite; grading result-set diff se hoti hai,
+  isliye koi bhi sahi query pass hoti hai (sirf ek "expected" spelling nahi)
+- **Interactive visualizations** — Memory Playground, Casting Lab, Operator Lab, Loop
+  Visualizer, List Indexer, Bell Curve, Scatter/Correlation, DataFrame Anatomy
+- No-paste practice editor + celebration on solve
+- Progress persist — XP, submissions, dashboard update
+- Leaderboard, certificates, resume + ATS checker, search, notes
+
+### Content abhi kahan tak hai
+
+| Track | Lessons | Problems |
+|---|---:|---:|
+| Python | 38 | 89 |
+| Statistics | 11 | 19 |
+| SQL | 6 | 18 |
+| Pandas | 6 | 10 |
+| ML | 6 | 3 |
+| Visualization | 5 | **0** |
+| BI | 3 | **0** |
+| Deep Learning | 3 | **0** |
+| Deployment | 4 | **0** |
+| **Total** | **82** | **139** |
+
+Saaf baat: Python aur SQL solid hain. **Viz, BI, DL aur Deployment me padhne ko content
+hai par practice ka ek bhi problem nahi** — un tracks pe "zero se job-ready" abhi pura
+nahi hota.
+
+---
 
 ## Aage karne wala (TODO)
-- [ ] Baaki tracks ka content (Statistics, Pandas, SQL, ML…)
-- [ ] SQL playground (sql.js se)
-- [ ] Pandas/NumPy practice (Pyodide me micropip se install)
-- [ ] Leaderboard, certificates, daily challenge logic
+
+- [ ] **Permanent deploy** — SQLite → Postgres + Vercel (SQLite serverless pe persist nahi hota)
+- [ ] Viz / BI / DL / Deployment tracks ke practice problems (abhi 0)
+- [ ] Pandas problems badhao (abhi 10) — target 20–30 per topic
+- [ ] matplotlib / sklearn practice (pandas jaise wheel-download pattern se)
 - [ ] Streak auto-update (daily activity pe)
-- [ ] Session hardening (session table / rotation)
+- [ ] Session hardening — expiry, rotation, revoke (abhi cookie 30 din, revoke nahi hoti)
 
 ---
 
