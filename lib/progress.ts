@@ -124,6 +124,52 @@ export async function getProgress(userId: string): Promise<Progress> {
   };
 }
 
+export type Streak = { streak: number; bestStreak: number };
+
+/**
+ * How many days in a row the user has actually practised.
+ *
+ * This used to be a seeded column on User: the demo account showed a 12-day
+ * streak against three submissions ever, and every real signup showed 0 forever
+ * because nothing ever wrote to it — the dashboard cheerfully told new students
+ * to "keep your 0-day streak alive". Same shape as the seeded Track.status this
+ * file was written to kill, so it's derived here for the same reason.
+ *
+ * Today only breaks the streak once it's over: if you studied yesterday but not
+ * yet today, the streak still stands — you have until midnight.
+ */
+export async function getStreak(userId: string): Promise<Streak> {
+  const subs = await prisma.submission.findMany({
+    where: { userId, passed: true },
+    select: { createdAt: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (subs.length === 0) return { streak: 0, bestStreak: 0 };
+
+  const DAY = 86_400_000;
+  const dayOf = (d: Date) => {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x.getTime();
+  };
+
+  const days = [...new Set(subs.map((s) => dayOf(s.createdAt)))].sort((a, b) => a - b);
+
+  let best = 1;
+  let run = 1;
+  for (let i = 1; i < days.length; i++) {
+    run = days[i] - days[i - 1] === DAY ? run + 1 : 1;
+    if (run > best) best = run;
+  }
+
+  // The current run only counts if it reaches today or yesterday.
+  const today = dayOf(new Date());
+  const last = days[days.length - 1];
+  const current = last === today || last === today - DAY ? run : 0;
+
+  return { streak: current, bestStreak: best };
+}
+
 /** Submissions per day for the last `days` days, oldest first. */
 export async function getActivity(userId: string, days = 28): Promise<number[]> {
   const start = new Date();

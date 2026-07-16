@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { ActivityPing } from "@/components/ActivityPing";
 import { getCurrentUser } from "@/lib/session";
-import { getProgress } from "@/lib/progress";
+import { getProgress, getStreak } from "@/lib/progress";
 import { prisma } from "@/lib/prisma";
 
 // The authed app shell. Anyone without a valid session is sent to /login.
@@ -20,6 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { lessonsDone, totalLessons, problemsDone, totalProblems } = await getProgress(user.id);
   const totalUnits = totalLessons + totalProblems;
   const roadmapPct = totalUnits ? Math.round(((lessonsDone + problemsDone) / totalUnits) * 100) : 0;
+  const { streak } = await getStreak(user.id);
 
   return (
     <div className="app">
@@ -29,7 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar user={{ name: user.name, role: user.role }} roadmapPct={roadmapPct} />
       <main className="main">
         <div className="wrap">
-          <Topbar user={{ name: user.name, streak: user.streak, isNew }} />
+          <Topbar user={{ name: user.name, streak, isNew }} />
           {children}
         </div>
       </main>

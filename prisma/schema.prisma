@@ -18,8 +18,10 @@ model User {
   passwordHash String   @default("")
   role         String   @default("Aspiring Data Analyst")
   xp        Int      @default(0)
-  streak    Int      @default(0)
-  bestStreak Int     @default(0)
+  // No streak column. It was a seeded constant nothing ever wrote to: the demo
+  // account showed 12 days against three submissions, and every real signup was
+  // told to keep its "0-day streak" alive forever. Derived from submissions in
+  // lib/progress.ts now, exactly like Track.status was.
   createdAt DateTime @default(now())
 
   lessonProgress LessonProgress[]

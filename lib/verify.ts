@@ -1,0 +1,181 @@
+// Server-side re-run of a submitted solution.
+//
+// Grading in the browser is what makes the practice editor feel instant, and
+// that shouldn't change. But a browser's verdict can't be *trusted* — it's the
+// student's own machine, and the old submit route simply believed it. So the
+// browser still decides what to show you as you iterate, and this decides
+// whether any XP moves.
+//
+// Both runtimes are already vendored for the client (public/pyodide,
+// public/sqljs) and both run in Node, so this costs nothing but time — no
+// service, no API key, no bill. It runs once per problem per student, on a
+// claimed first solve.
+
+import path from "node:path";
+import { readFile } from "node:fs/promises";
+
+type ProblemLike = {
+  kind: string;
+  functionName: string;
+  testsJson: string;
+  solutionCode: string;
+  sqlSetup: string;
+};
+
+export type VerifyResult = { passed: boolean; reason?: string };
+
+/** Last meaningful line of an error. A Python traceback ends with a newline, so
+ *  a plain .pop() on the split hands back an empty string — which is how this
+ *  verifier spent its first run reporting "Server pe error: " and nothing else. */
+function lastLine(e: unknown): string {
+  const msg = (e as { message?: string })?.message ?? String(e);
+  const lines = String(msg).split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  return lines[lines.length - 1] || String(e);
+}
+
+const PYODIDE_DIR = path.join(process.cwd(), "public", "pyodide");
+const SQLJS_DIR = path.join(process.cwd(), "public", "sqljs");
+
+// Loading Pyodide costs ~2s, and pandas another ~11s on top. Hold both for the
+// life of the process so only the first verifier on a cold server pays it.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+let pyPromise: Promise<any> | null = null;
+
+async function getPy(): Promise<any> {
+  if (!pyPromise) {
+    pyPromise = (async () => {
+      const { loadPyodide } = await import("pyodide");
+      // Point at our own wheel copy, the same one the browser uses — otherwise
+      // loadPackage reaches for a CDN, and a verifier that needs the network to
+      // agree you solved a loop problem is a verifier that fails offline.
+      return loadPyodide({ indexURL: PYODIDE_DIR + path.sep });
+    })();
+  }
+  return pyPromise;
+}
+
+/** Mirror the browser runner's comparison exactly, or the two disagree and the
+ *  student gets no XP for a solution their screen just called correct. */
+function eq(a: unknown, b: unknown): boolean {
+  try { return JSON.stringify(a) === JSON.stringify(b); } catch { return a === b; }
+}
+
+function toJs(v: any): unknown {
+  if (v && typeof v.toJs === "function") {
+    const j = v.toJs();
+    try { v.destroy?.(); } catch {}
+    return j;
+  }
+  return v;
+}
+
+async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyResult> {
+  let tests: { args: unknown[]; expected: unknown }[];
+  try {
+    tests = JSON.parse(problem.testsJson || "[]");
+  } catch {
+    return { passed: false, reason: "Is problem ke tests padhe nahi ja rahe." };
+  }
+  if (tests.length === 0 || !problem.functionName) {
+    // Nothing to check against — don't hand out XP for a problem that can't be
+    // graded, and don't pretend it was verified either.
+    return { passed: false, reason: "Is problem ke liye koi test case nahi hai." };
+  }
+
+  const py = await getPy();
+  py.setStdout({ batched: () => {} });
+  py.setStderr({ batched: () => {} });
+
+  try {
+    try { await py.loadPackagesFromImports(code); } catch {}
+    await py.runPythonAsync(code);
+  } catch (e: any) {
+    return { passed: false, reason: `Server pe code chala nahi: ${lastLine(e)}` };
+  }
+
+  for (const t of tests) {
+    try {
+      py.globals.set("__dq_args_json", JSON.stringify(t.args));
+      const raw = await py.runPythonAsync(
+        `import json as __json\n${problem.functionName}(*__json.loads(__dq_args_json))`
+      );
+      if (!eq(toJs(raw), t.expected)) {
+        return { passed: false, reason: "Server pe dobara chalane pe saare test pass nahi hue." };
+      }
+    } catch (e: any) {
+      // Say what actually went wrong. A bare "error aaya" is unfalsifiable: the
+      // student can't tell a bug in their code from a bug in this verifier, and
+      // neither can we.
+      return { passed: false, reason: `Server pe error: ${lastLine(e)}` };
+    }
+  }
+  return { passed: true };
+}
+
+async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResult> {
+  if (!problem.solutionCode?.trim()) {
+    return { passed: false, reason: "Is problem ka reference query missing hai." };
+  }
+
+  const initSqlJs = (await import("sql.js")).default;
+  const wasmBinary = await readFile(path.join(SQLJS_DIR, "sql-wasm.wasm"));
+  const SQL = await initSqlJs({ wasmBinary });
+
+  // Same rule as the browser: grade by diffing result sets against the reference
+  // query on an identical fresh database, so any correct query passes rather
+  // than one blessed spelling.
+  const run = (sql: string) => {
+    const db = new SQL.Database();
+    try {
+      if (problem.sqlSetup?.trim()) db.run(problem.sqlSetup);
+      const res = db.exec(sql);
+      return res.length ? { columns: res[0].columns, values: res[0].values } : { columns: [], values: [] };
+    } finally {
+      db.close();
+    }
+  };
+
+  let mine: { columns: string[]; values: unknown[][] };
+  let ref: { columns: string[]; values: unknown[][] };
+  try {
+    mine = run(code);
+  } catch (e: any) {
+    return { passed: false, reason: `Server pe query chali nahi: ${String(e?.message || e)}` };
+  }
+  try {
+    ref = run(problem.solutionCode);
+  } catch {
+    return { passed: false, reason: "Is problem ka reference query hi toota hua hai." };
+  }
+
+  const norm = (rows: unknown[][], ordered: boolean) => {
+    const fixed = rows.map((r) =>
+      r.map((c) => (typeof c === "number" ? Math.round(c * 1e6) / 1e6 : c))
+    );
+    const asText = fixed.map((r) => JSON.stringify(r));
+    // Row order only matters when the reference asked for it.
+    return ordered ? asText : [...asText].sort();
+  };
+
+  const ordered = /order\s+by/i.test(problem.solutionCode);
+  if (mine.values.length !== ref.values.length) {
+    return { passed: false, reason: "Server pe result rows match nahi hue." };
+  }
+  const a = norm(mine.values, ordered);
+  const b = norm(ref.values, ordered);
+  if (a.join("|") !== b.join("|")) {
+    return { passed: false, reason: "Server pe result match nahi hua." };
+  }
+  return { passed: true };
+}
+
+export async function verifySolution(problem: ProblemLike, code: string): Promise<VerifyResult> {
+  if (!code.trim()) return { passed: false, reason: "Koi code submit hi nahi hua." };
+  try {
+    return problem.kind === "sql" ? await verifySql(problem, code) : await verifyPython(problem, code);
+  } catch (e: any) {
+    // A broken verifier must not hand out XP — but it also shouldn't look like
+    // the student's fault.
+    return { passed: false, reason: `Server verify nahi kar paya: ${lastLine(e)}` };
+  }
+}

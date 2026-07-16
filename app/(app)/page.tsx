@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { getProgress } from "@/lib/progress";
+import { getProgress, getStreak } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 
 const iconClass = (slug: string) =>
@@ -12,6 +12,7 @@ export default async function DashboardPage() {
   if (!user) return null;
 
   const p = await getProgress(user.id);
+  const { streak, bestStreak } = await getStreak(user.id);
   const lessons = await prisma.lesson.findMany({
     include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
@@ -54,10 +55,11 @@ export default async function DashboardPage() {
         </section>
 
         {/* No sparklines: we don't store XP/streak history, so the old ones were fixed
-            decorative polylines that sloped upward even on a brand-new account. */}
+            decorative polylines that sloped upward even on a brand-new account.
+            The streak next to them was the same lie until it was derived. */}
         <section className="stats">
           <div className="card stat"><div className="k">Day Streak</div>
-            <div className="v num">{user.streak} <small>best {user.bestStreak}</small></div></div>
+            <div className="v num">{streak} <small>best {bestStreak}</small></div></div>
           <div className="card stat"><div className="k">Problems Solved</div>
             <div className="v num">{p.problemsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalProblems}</small></div></div>
           <div className="card stat"><div className="k">Lessons Done</div>
@@ -111,7 +113,10 @@ export default async function DashboardPage() {
         <section className="card pad" style={{borderColor:"color-mix(in srgb,var(--accent) 40%,transparent)"}}>
           <div className="eyebrow" style={{color:"var(--accent-2)"}}>Daily Challenge</div>
           <h3 style={{fontSize:"15px",margin:"8px 0 6px"}}>Solve today&apos;s problem</h3>
-          <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>+20 XP · keep your 🔥 {user.streak}-day streak alive</p>
+          {/* "Keep your 0-day streak alive" is not a thing you can say to someone. */}
+          <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
+            {streak > 0 ? <>+20 XP · keep your 🔥 {streak}-day streak alive</> : <>+20 XP · aaj solve karo, streak yahin se shuru</>}
+          </p>
           <Link className="btn btn-primary" style={{width:"100%",justifyContent:"center"}} href="/practice">Solve now</Link>
         </section>
       </div>

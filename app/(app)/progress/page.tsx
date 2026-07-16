@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/session";
-import { getProgress, getActivity } from "@/lib/progress";
+import { getProgress, getActivity, getStreak } from "@/lib/progress";
 
 const barColor = (i: number) => ["var(--good)", "var(--teal)", "var(--accent)", "var(--indigo)", "var(--ink-faint)"][i % 5];
 
@@ -12,6 +12,7 @@ export default async function ProgressPage() {
 
   const p = await getProgress(user.id);
   const activity = await getActivity(user.id, 28);
+  const { streak, bestStreak } = await getStreak(user.id);
   const activeDays = activity.filter((n) => n > 0).length;
   const totalSubs = activity.reduce((a, b) => a + b, 0);
 
@@ -19,8 +20,8 @@ export default async function ProgressPage() {
     <>
       <div className="ov" style={{ marginBottom: 20 }}>
         <div className="card ovc"><div className="k">Total XP</div><div className="v">{user.xp.toLocaleString()}</div></div>
-        <div className="card ovc"><div className="k">Day Streak</div><div className="v">{user.streak} 🔥</div></div>
-        <div className="card ovc"><div className="k">Best Streak</div><div className="v">{user.bestStreak}</div></div>
+        <div className="card ovc"><div className="k">Day Streak</div><div className="v">{streak} 🔥</div></div>
+        <div className="card ovc"><div className="k">Best Streak</div><div className="v">{bestStreak}</div></div>
         <div className="card ovc"><div className="k">Job-Ready</div><div className="v">{p.jobReady}%</div></div>
       </div>
 
