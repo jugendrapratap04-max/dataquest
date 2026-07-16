@@ -71,11 +71,16 @@ model Problem {
   descriptionMd String  @default("")
   examplesJson  String  @default("[]") // [{input, output}]
   starterCode   String  @default("")
-  solutionCode  String  @default("")
-  functionName  String  @default("")
-  testsJson     String  @default("[]") // [{args:[...], expected:...}]
+  solutionCode  String  @default("") // python: reference fn | sql: reference query
+  functionName  String  @default("") // python only
+  testsJson     String  @default("[]") // python only: [{args:[...], expected:...}]
   hintsJson     String  @default("[]")
   xp            Int     @default(20)
+
+  // "python" runs in Pyodide against testsJson; "sql" runs in sql.js against
+  // sqlSetup, and is graded by diffing the result set with solutionCode's.
+  kind     String @default("python")
+  sqlSetup String @default("") // CREATE TABLE + INSERT, run on a fresh in-memory db
   lessonId      String?
   lesson        Lesson? @relation(fields: [lessonId], references: [id])
 

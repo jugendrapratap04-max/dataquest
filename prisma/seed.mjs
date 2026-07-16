@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { sqlProblems } from "./sql-problems.mjs";
 import { scryptSync, randomBytes } from "crypto";
 const prisma = new PrismaClient();
 
@@ -1363,7 +1364,7 @@ const vizLessons = [
 ];
 
 /* ===================== SQL ===================== */
-const sqlNote = { t: "note", variant: "tip", html: "<b>Interactive SQL playground jaldi aa raha hai!</b> Abhi syntax aur concept solid karo — queries samajhna sabse zaroori hai." };
+const sqlNote = { t: "note", variant: "tip", html: "<b>SQL playground ab live hai!</b> Is lesson ke problems me asli SQLite database chalta hai — query likho, rows turant dikhengi. Padhne se zyada likhne se aata hai." };
 const sqlLessons = [
   { slug: "sql-intro", order: 1, title: "SQL & SELECT", minutes: 11, problems: [], content: [
     { t: "objectives", items: ["SQL kya hai","SELECT statement","Columns choose karna"] },
@@ -1611,6 +1612,7 @@ const deployLessons = [
 const EX = (lessonSlug, diff, slug, title, fn, desc, examples, starter, solution, tests, hints, tags) =>
   ({ lessonSlug, ...P(50, slug, title, fn, desc, examples, starter, solution, tests, hints, tags, diff) });
 
+
 const extraProblems = [
   /* ---------- LOOPS ---------- */
   EX("loops", "Easy", "count-positives", "Count Positives", "count_positives",
@@ -1815,6 +1817,7 @@ const extraProblems = [
     ["4 se divide AND (100 se nahi OR 400 se).", "2000 leap hai, 1900 nahi."], ["conditionals"]),
 ];
 
+
 /* ------------------------------------------------------------------ */
 async function main() {
   console.log("🌱 Seeding DataQuest…");
@@ -1865,7 +1868,7 @@ async function main() {
   }
 
   // attach the extra graded practice problems by lesson slug
-  for (const ep of extraProblems) {
+  for (const ep of [...extraProblems, ...sqlProblems]) {
     const lid = lessonBySlug[ep.lessonSlug];
     if (!lid) continue;
     const { lessonSlug, ...data } = ep;
