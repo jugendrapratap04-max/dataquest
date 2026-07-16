@@ -23,6 +23,76 @@ function Block({ b }: { b: any }) {
           </ul>
         </div>
       );
+    // Opens the lesson with a question instead of a definition — the student
+    // should want the answer before being handed one.
+    case "hook":
+      return (
+        <div className="hook">
+          <div className="hook-q" dangerouslySetInnerHTML={{ __html: b.q }} />
+          {b.why && <p className="hook-why" dangerouslySetInnerHTML={{ __html: b.why }} />}
+        </div>
+      );
+
+    // "What do you think?" only teaches if the answer is hidden. <details> makes
+    // the student commit to a guess before revealing — active recall, no JS.
+    case "think":
+      return (
+        <details className="think">
+          <summary>🤔 {b.q} <span className="think-hint">— pehle khud socho, phir kholo</span></summary>
+          <div className="think-a" dangerouslySetInnerHTML={{ __html: b.a }} />
+        </details>
+      );
+
+    // The gap this whole pass exists to fix: every concept now gets a crisp
+    // professional definition BEFORE the Hinglish explanation, not instead of it.
+    case "def":
+      return (
+        <div className="def">
+          <div className="def-term">{b.term}</div>
+          <div className="def-en">{b.en}</div>
+          {b.hi && <div className="def-hi" dangerouslySetInnerHTML={{ __html: b.hi }} />}
+        </div>
+      );
+
+    case "analogy":
+      return (
+        <div className="analogy">
+          <div className="an-row">
+            <span className="an-a">{b.concept}</span>
+            <span className="an-arrow">→</span>
+            <span className="an-b">{b.real}</span>
+          </div>
+          <p dangerouslySetInnerHTML={{ __html: b.html }} />
+        </div>
+      );
+
+    case "mistakes":
+      return (
+        <div className="card mistakes">
+          <h3>🚩 Yahan beginners phaste hain</h3>
+          {b.items.map((m: any, i: number) => (
+            <div className="mk" key={i}>
+              <div className="mk-bad"><span>Galat</span><code>{m.bad}</code></div>
+              <div className="mk-why" dangerouslySetInnerHTML={{ __html: m.why }} />
+              <div className="mk-fix"><span>Sahi</span><code>{m.fix}</code></div>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "interview":
+      return (
+        <div className="card iv">
+          <h3>🎤 Interview me aisa poochha jaata hai</h3>
+          {b.items.map((q: any, i: number) => (
+            <details className="iv-q" key={i}>
+              <summary><span className={`iv-lvl ${q.level}`}>{q.level}</span>{q.q}</summary>
+              <div className="iv-a" dangerouslySetInnerHTML={{ __html: q.a }} />
+            </details>
+          ))}
+        </div>
+      );
+
     case "h2":
       return <h2><span className="n">{b.n}</span>{b.text}</h2>;
     case "p":

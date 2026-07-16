@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { pathToFileURL } from "url";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { scryptSync, randomBytes } from "crypto";
@@ -66,8 +67,12 @@ const P = (order, slug, title, functionName, descriptionMd, examples, starter, s
 /* ------------------------------------------------------------------ */
 const L1 = [
   { t: "objectives", items: ["Variable banana aur usme value store karna","4 basic data types pehchanna — int, float, str, bool","type() se kisi bhi value ka type check karna","Ek type se doosre me convert karna (type casting)"] },
+  { t: "hook", q: "Instagram tumhara naam yaad kaise rakhta hai?", why: "Tum ek baar naam likhte ho, aur wo har baar wapas dikh jaata hai — app band karke kholo tab bhi. Computer ne wo naam <b>kahin</b> rakha hai. Aaj hum wahi jagah banana seekhenge." },
+  { t: "think", q: "Computer ko tumhara naam yaad rakhna hai. Uske paas sirf memory hai — koi copy, koi diary nahi. Wo kaise dhoondega ki naam kahan rakha tha?", a: "Memory ek badi almari jaisi hai jisme lakhon khaane hain. Value rakh dena kaafi nahi — <b>us khaane pe naam ka sticker</b> bhi lagana padega, warna wapas kaise milega? Bas yahi variable hai: ek naam, jo memory ki ek jagah ko point karta hai." },
   { t: "h2", n: "1", text: "Variable kya hota hai?" },
+  { t: "def", term: "Variable", en: "A variable is a named reference to a value stored in memory.", hi: "Seedhe shabdon me — ek <b>naam</b> jiske through tum ek value ko store karte ho aur baad me wapas nikaalte ho." },
   { t: "p", html: "Socho ek <strong>dabba (box)</strong> hai jispe naam ka sticker laga hai. Us dabbe me tum koi cheez rakh sakte ho aur naam se nikaal sakte ho. Programming me isi dabbe ko <strong>variable</strong> kehte hain." },
+  { t: "analogy", concept: "Variable", real: "Sticker laga dabba", html: "Dabba = memory ki jagah. Sticker = variable ka naam. Andar ki cheez = value. Cheez badal sakti hai, sticker wahi rehta hai — isiliye <code>age = 21</code> ke baad <code>age = 22</code> likhna bilkul chalta hai." },
   { t: "code", file: "variables.py", code: "# variable banana — naam = value\nname = \"Jugendra\"\nage  = 21\nprint(name)\nprint(age)", output: "Jugendra\n21" },
   { t: "psoft", html: "Yahan <code>=</code> ka matlab \"barabar\" nahi — iska matlab hai <strong>\"right side ki value left side ke naam me daal do\"</strong>." },
   { t: "note", variant: "tip", html: "<b>Tip:</b> Variable ka naam meaningful rakho. <code>x = 21</code> se behtar <code>age = 21</code> hai." },
@@ -85,12 +90,26 @@ const L1 = [
   { t: "code", file: "casting.py", code: "marks = \"85\"        # string hai\nmarks = int(marks)   # ab int\nprint(marks + 5)", output: "90" },
   { t: "note", variant: "warn", html: "<b>Common galti:</b> <code>\"85\" + 5</code> likhoge to error aayega. Pehle <code>int()</code> se convert karo." },
   { t: "viz", name: "casting-lab" },
+  { t: "mistakes", items: [
+    { bad: '"85" + 5', why: "Python <code>+</code> ka matlab type ke hisaab se badal deta hai — do strings ho to <b>jodta</b> hai, do numbers ho to <b>plus</b> karta hai. Ek string aur ek int? Wo guess nahi karta, error de deta hai.", fix: 'int("85") + 5' },
+    { bad: 'age = "21"', why: "Quotes laga diye to wo number nahi, <b>text</b> hai. Dikhne me 21 lagta hai par <code>age + 1</code> pe error milega. <code>input()</code> hamesha string deta hai — yahi sabse common jagah hai jahan ye galti hoti hai.", fix: "age = 21" },
+    { bad: "2age = 21", why: "Variable ka naam digit se shuru nahi ho sakta, aur usme space nahi aa sakta. Python file padhte waqt hi ruk jayega — <code>SyntaxError</code>.", fix: "age2 = 21" },
+  ]},
   { t: "recap", items: ["Variable = ek naam jisme value store hoti hai","4 basic types: int, float, str, bool","type() se type pata karo · casting se badlo","String + number seedhe jodne se error — pehle convert karo"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "Variable kya hota hai?", a: "A variable is a named reference to a value stored in memory. Python me variable declare karne ki zaroorat nahi — <code>x = 5</code> likhte hi ban jaata hai, aur uska type value se khud tay ho jaata hai." },
+    { level: "beginner", q: "int aur float me kya farak hai?", a: "<code>int</code> poore numbers rakhta hai (<code>21</code>), <code>float</code> decimal wale (<code>99.5</code>). Do int ko divide karo to Python <b>float</b> hi deta hai — <code>10 / 2</code> ka jawab <code>5.0</code> hai, <code>5</code> nahi. Yahi chhoti baat interview me pakdi jaati hai." },
+    { level: "intermediate", q: "Python dynamically typed hai — iska matlab kya hai?", a: "Type <b>value</b> ke saath judta hai, variable ke saath nahi. Isliye <code>x = 5</code> ke baad <code>x = \"hello\"</code> bilkul chalta hai — C/Java me nahi chalta. Faayda: likhna tez. Nuksan: type ki galti run karne par pakdi jaati hai, likhte waqt nahi." },
+    { level: "intermediate", q: '<code>input()</code> se number lena ho to kya dhyan rakhoge?', a: "<code>input()</code> <b>hamesha string</b> deta hai, chahe user 21 hi likhe. Number chahiye to khud convert karo: <code>age = int(input())</code>. Bina convert kiye <code>age + 1</code> karoge to <code>TypeError</code> milega — ye production bugs ki sabse aam wajah hai." },
+  ]},
 ];
 
 const L2 = [
   { t: "objectives", items: ["Arithmetic operators (+ - * / // % **) use karna","Comparison operators se True/False nikaalna","Logical and / or / not samajhna"] },
+  { t: "hook", q: "17 chocolates, 5 bachche. Har bachche ko barabar do — kitni bachengi?", why: "Jawaab hai 3 har ek ko, aur 2 bachi. Ye do alag sawaal hain, aur Python ke paas dono ke liye <b>alag operator</b> hai. Zyadatar log sirf ek jaante hain — aur wahi interview me phans jaate hain." },
+  { t: "think", q: "Python me <code>17 / 5</code> ka jawaab <code>3.4</code> aata hai. Par tumhe sirf <b>3</b> chahiye (poora bhaag), ya sirf <b>2</b> chahiye (jo bacha). Kya karoge?", a: "<code>17 // 5</code> → <b>3</b> (floor division — decimal phenk deta hai)<br/><code>17 % 5</code> → <b>2</b> (modulo — remainder deta hai)<br/><br/>Ye do operators har jagah aate hain: even/odd check (<code>n % 2</code>), pages banana, cheezein groups me baantna." },
   { t: "h2", n: "1", text: "Arithmetic operators" },
+  { t: "def", term: "Operator", en: "An operator is a symbol that performs an operation on one or more values.", hi: "Jis value pe operator kaam karta hai use <b>operand</b> kehte hain. <code>17 + 5</code> me <code>+</code> operator hai, aur <code>17</code> aur <code>5</code> operands." },
   { t: "p", html: "Numbers pe hisaab ke liye: <code>+</code> jodna, <code>-</code> ghatana, <code>*</code> guna, <code>/</code> bhaag, <code>//</code> poora bhaag, <code>%</code> remainder, <code>**</code> power." },
   { t: "code", file: "arithmetic.py", code: "print(17 + 5)   # 22\nprint(17 // 5)  # 3  (poora bhaag)\nprint(17 % 5)   # 2  (bacha hua)\nprint(2 ** 3)   # 8  (2 ki power 3)", output: "22\n3\n2\n8" },
   { t: "viz", name: "operator-lab" },
@@ -101,19 +120,45 @@ const L2 = [
   { t: "h2", n: "3", text: "Logical operators" },
   { t: "p", html: "Conditions jodne ke liye: <code>and</code> (dono sach), <code>or</code> (koi ek sach), <code>not</code> (ulta)." },
   { t: "code", file: "logical.py", code: "age = 20\nprint(age > 18 and age < 60)  # True\nprint(age < 13 or age > 60)   # False", output: "True\nFalse" },
+  { t: "mistakes", items: [
+    { bad: "if age = 18:", why: "<code>=</code> value <b>deta</b> hai, <code>==</code> <b>compare</b> karta hai. Ye sabse aam galti hai — aur Python isme meherbaan hai, seedha <code>SyntaxError</code> de deta hai. C me ye chup-chaap chal jaata aur ghanton bug dhoondhte.", fix: "if age == 18:" },
+    { bad: "10 / 2  # soch rahe ho 5 milega", why: "<code>/</code> Python me <b>hamesha float</b> deta hai — jawaab <code>5.0</code> hai, <code>5</code> nahi. Poora number chahiye to <code>//</code> use karo. Interview me ye chhota sa sawaal aksar aata hai.", fix: "10 // 2  # 5" },
+    { bad: "if 13 < age < 60 and name:", why: "Ye galat nahi hai — par samajhna zaroori hai. Python me <code>and</code>/<code>or</code> True/False nahi, <b>value</b> lautate hain, aur khaali string <code>\"\"</code> falsy hoti hai. Isliye <code>name</code> khaali hone par poori condition False ho jayegi.", fix: "if 13 < age < 60 and name != \"\":" },
+  ]},
   { t: "recap", items: ["Arithmetic: + - * / // % **","Comparison hamesha True/False deta hai","= assign karta hai, == compare karta hai","and / or / not se conditions jodo"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>/</code> aur <code>//</code> me kya farak hai?", a: "<code>/</code> <b>true division</b> hai — hamesha float deta hai (<code>10/2</code> → <code>5.0</code>). <code>//</code> <b>floor division</b> hai — neeche wale poore number pe le jaata hai (<code>10//3</code> → <code>3</code>). Dhyan do: negative me <code>-7//2</code> ka jawaab <code>-4</code> hai, <code>-3</code> nahi — floor hamesha <b>neeche</b> jaata hai." },
+    { level: "beginner", q: "<code>%</code> operator kis kaam aata hai?", a: "Remainder deta hai. Sabse common use: <code>n % 2 == 0</code> se even check karna, kisi cheez ko groups me baantna, ya circular index banana (<code>i % len(arr)</code>)." },
+    { level: "intermediate", q: "Python me <code>and</code> kya return karta hai — True/False ya kuch aur?", a: "<b>Value</b> return karta hai, boolean nahi. <code>a and b</code> me agar <code>a</code> falsy hai to <code>a</code> lautata hai, warna <code>b</code>. Isliye <code>0 and 5</code> → <code>0</code>, aur <code>2 and 5</code> → <code>5</code>. Isse <b>short-circuit</b> kehte hain — <code>b</code> evaluate hi nahi hota agar zaroorat na ho." },
+    { level: "intermediate", q: "<code>13 < age < 60</code> Python me chalta hai. Ye kaise?", a: "Ise <b>chained comparison</b> kehte hain — Python ise <code>13 < age and age < 60</code> me todta hai, aur <code>age</code> ko <b>sirf ek baar</b> evaluate karta hai. Zyadatar dusri languages me ye nahi chalta (wahan <code>13 &lt; age</code> pehle True/False banta, phir usse 60 se compare hota)." },
+  ]},
 ];
 
 const L3 = [
   { t: "objectives", items: ["if / else se decisions lena","elif se multiple cases handle karna","Indentation ka role samajhna"] },
+  { t: "hook", q: "ATM ko kaise pata chalta hai ki paise dene hain ya \"insufficient balance\" bolna hai?", why: "Har app har second yahi kar rahi hai — <b>check karo, phir tay karo</b>. Login sahi hai ya nahi, cart khaali hai ya nahi, user adult hai ya nahi. Ye poora kaam ek hi cheez pe tika hai jo aaj seekhoge." },
+  { t: "think", q: "Marks ke hisaab se grade dena hai: 90+ → A, 75+ → B, 40+ → C, warna Fail. Ek student ke 82 marks hain. Agar tum <b>chaar alag</b> <code>if</code> likh do (elif nahi), to kya hoga?", a: "Chaaron <code>if</code> alag-alag check honge. 82 <code>>= 75</code> bhi hai aur <code>>= 40</code> bhi — matlab <b>B aur C dono</b> print ho jayenge. <br/><br/><code>elif</code> ka poora point yahi hai: jaise hi koi ek match kare, <b>baaki chhod do</b>. Ye sirf sundarta nahi — ye correctness hai." },
   { t: "h2", n: "1", text: "if aur else" },
+  { t: "def", term: "Conditional statement", en: "A conditional statement executes a block of code only when a given condition evaluates to true.", hi: "Condition ka jawaab hamesha <code>True</code> ya <code>False</code> hota hai — usi pe tay hota hai ki andar wala block chalega ya nahi." },
   { t: "p", html: "Program ko decision lena sikhate hain: <b>agar</b> condition True hai to ye karo, <b>warna</b> wo. Andar ka code <b>indent</b> (4 space) hota hai." },
   { t: "code", file: "ifelse.py", code: "age = 20\nif age >= 18:\n    print(\"Adult\")\nelse:\n    print(\"Minor\")", output: "Adult" },
   { t: "note", variant: "tip", html: "<b>Indentation zaroori hai:</b> Python me curly braces nahi — code block sirf spaces se banta hai. 4 space standard." },
   { t: "h2", n: "2", text: "elif — beech ke cases" },
   { t: "p", html: "Ek se zyada conditions ke liye <code>elif</code> (else-if). Upar se neeche check hoti hain — jo pehli True mile wahi chalti hai." },
   { t: "code", file: "grade.py", code: "marks = 82\nif marks >= 90:\n    print(\"A\")\nelif marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")\nelse:\n    print(\"Fail\")", output: "B" },
+  { t: "analogy", concept: "if / elif / else", real: "Security guard ki checklist", html: "Guard upar se neeche padhta hai: \"VIP pass hai? → andar bhejo.\" \"Nahi? Normal ticket hai? → line me lagao.\" \"Wo bhi nahi? → wapas bhejo.\" Jaise hi ek match ho, wo <b>ruk jaata hai</b> — baaki nahi padhta. <code>elif</code> bilkul yahi karta hai." },
+  { t: "mistakes", items: [
+    { bad: "if marks >= 40:\nprint(\"Pass\")", why: "Indent nahi kiya. Python me curly braces nahi hote — block <b>sirf spaces</b> se banta hai. Bina indent ke <code>IndentationError</code> milega.", fix: "if marks >= 40:\n    print(\"Pass\")" },
+    { bad: "if marks >= 40:\n  print(\"Pass\")\n      print(\"Done\")", why: "Ek hi block me alag-alag indent. Python ko fixed 4 space nahi chahiye, par ek block ke andar <b>consistent</b> chahiye. Tabs aur spaces mix karna sabse bura — dikhta same hai, error milta hai.", fix: "if marks >= 40:\n    print(\"Pass\")\n    print(\"Done\")" },
+    { bad: "if marks >= 40:\n    print(\"C\")\nif marks >= 75:\n    print(\"B\")", why: "Alag <code>if</code> matlab dono independently check honge — 82 marks pe <b>C aur B dono</b> print ho jayenge. Ek hi cheez me se ek chunni ho to <code>elif</code> chahiye.", fix: "if marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")" },
+  ]},
   { t: "recap", items: ["if → condition True to chalega","elif → aur cases (upar se neeche check)","else → koi match na ho to","Indentation (4 space) block banata hai"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>elif</code> aur alag-alag <code>if</code> me kya farak hai?", a: "Alag <code>if</code> <b>sabhi</b> check hote hain — kai sach ho sakte hain. <code>elif</code> me pehla match milte hi baaki <b>skip</b> ho jaate hain. Grade jaise mutually exclusive cases me <code>elif</code> hi sahi hai, warna ek se zyada branch chal jayenge." },
+    { level: "beginner", q: "Python me indentation itna zaroori kyun hai?", a: "Kyunki Python me block banane ke liye <b>koi braces nahi</b> — indentation hi syntax hai. Dusri languages me indent sirf padhne ke liye hota hai; Python me wo hi batata hai ki code kis block ka hissa hai." },
+    { level: "intermediate", q: "Python me kaunsi cheezein <code>False</code> maani jaati hain?", a: "<code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, khaali <code>\"\"</code>, khaali <code>[]</code>, <code>{}</code>, <code>()</code>, <code>set()</code>. Baaki sab <b>truthy</b>. Isliye <code>if items:</code> likhna <code>if len(items) > 0:</code> se zyada Pythonic hai — par dhyan raho, <code>0</code> valid value ho to ye bug ban jaata hai." },
+    { level: "intermediate", q: "Python me ternary (one-line if) kaise likhte hain?", a: "<code>status = \"Adult\" if age >= 18 else \"Minor\"</code> — condition <b>beech</b> me aati hai, dusri languages ke <code>? :</code> se ulta. Chhoti assignment ke liye theek hai; nested ternary padhne layak nahi rehta — wahan normal <code>if</code> hi use karo." },
+  ]},
 ];
 
 const L4 = [
@@ -1890,4 +1935,17 @@ async function main() {
   console.log("✅ Done:", counts);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); }).finally(async () => { await prisma.$disconnect(); });
+/** Lesson content, keyed by track slug. Exported so apply-lessons.mjs can refresh
+ *  lesson bodies on a live database without a destructive re-seed. */
+export const trackLessons = {
+  python: pythonLessons, statistics: statsLessons, pandas: pandasLessons,
+  viz: vizLessons, sql: sqlLessons, bi: biLessons,
+  ml: mlLessons, dl: dlLessons, deploy: deployLessons,
+};
+
+// Only seed when run directly (`node prisma/seed.mjs`) — importing this file to
+// read trackLessons must not wipe and rebuild the database.
+const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isDirectRun) {
+  main().catch((e) => { console.error(e); process.exit(1); }).finally(async () => { await prisma.$disconnect(); });
+}
