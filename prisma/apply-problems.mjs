@@ -1,20 +1,28 @@
-// Adds (or refreshes) just the SQL practice problems on an existing database.
+// Adds (or refreshes) practice problems on an existing database.
 //
 // `db:reset` wipes every user's progress, which is too blunt for adding content
 // to a database people are already using. This upserts by slug instead, so it is
 // safe to re-run and touches nothing else.
+//
+// Add a new content module here and it flows into both this and the full seed.
 
 import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
+import { pandasProblems } from "./pandas-problems.mjs";
 
 const prisma = new PrismaClient();
 
-async function main() {
+const SETS = [
+  ["SQL", sqlProblems],
+  ["pandas/numpy", pandasProblems],
+];
+
+async function apply(label, problems) {
   let added = 0;
   let updated = 0;
   const missing = [];
 
-  for (const { lessonSlug, ...data } of sqlProblems) {
+  for (const { lessonSlug, ...data } of problems) {
     const lesson = await prisma.lesson.findUnique({ where: { slug: lessonSlug } });
     if (!lesson) {
       missing.push(`${data.slug} -> lesson "${lessonSlug}" nahi mila`);
@@ -29,14 +37,19 @@ async function main() {
     existing ? updated++ : added++;
   }
 
-  const sqlCount = await prisma.problem.count({ where: { kind: "sql" } });
-  const total = await prisma.problem.count();
-  console.log(`✅ SQL problems — added: ${added}, updated: ${updated}`);
-  console.log(`   kind=sql in db: ${sqlCount} | total problems: ${total}`);
+  console.log(`✅ ${label} — added: ${added}, updated: ${updated}`);
   if (missing.length) {
     console.log("⚠  skipped:");
     for (const m of missing) console.log("   -", m);
   }
+}
+
+async function main() {
+  for (const [label, problems] of SETS) await apply(label, problems);
+
+  const total = await prisma.problem.count();
+  const sql = await prisma.problem.count({ where: { kind: "sql" } });
+  console.log(`\n   total problems: ${total} (sql: ${sql}, python: ${total - sql})`);
 }
 
 main()

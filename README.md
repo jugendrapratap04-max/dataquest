@@ -34,12 +34,12 @@ npm run dev            # http://localhost:3000
 Extra commands:
 ```bash
 npm run db:seed      # seed data dobara daalo (reset ke bina)
-npm run db:sql       # sirf SQL problems add/refresh karo (existing progress safe)
+npm run db:content   # SQL + pandas problems add/refresh karo (existing progress safe)
 npm run db:studio    # Prisma Studio — database GUI me dekho
 ```
 
 > ⚠️ `db:reset` **saara user data mita deta hai** (progress, XP, submissions).
-> Sirf content add karna ho to `db:sql` jaisa additive script use karo.
+> Sirf content add karna ho to `db:content` use karo — wo upsert karta hai, mitaata nahi.
 
 ### AUTH_SECRET
 Session cookie isse sign hoti hai. Dev me ek fallback chal jaata hai, par **production me
@@ -77,8 +77,9 @@ lib/
 prisma/
   schema.prisma            Data model
   seed.mjs                 Poora seed
-  sql-problems.mjs         SQL problems (seed + db:sql dono isi se)
-  apply-sql-problems.mjs   Additive SQL applier
+  sql-problems.mjs         SQL problems (seed + db:content dono isi se)
+  pandas-problems.mjs      NumPy/pandas problems
+  apply-problems.mjs       Additive applier (upsert by slug)
 ```
 
 ---
@@ -101,19 +102,19 @@ prisma/
 | Track | Lessons | Problems |
 |---|---:|---:|
 | Python | 38 | 89 |
+| Pandas / NumPy | 6 | 27 |
 | Statistics | 11 | 19 |
 | SQL | 6 | 18 |
-| Pandas | 6 | 10 |
 | ML | 6 | 3 |
 | Visualization | 5 | **0** |
 | BI | 3 | **0** |
 | Deep Learning | 3 | **0** |
 | Deployment | 4 | **0** |
-| **Total** | **82** | **139** |
+| **Total** | **82** | **156** |
 
-Saaf baat: Python aur SQL solid hain. **Viz, BI, DL aur Deployment me padhne ko content
-hai par practice ka ek bhi problem nahi** — un tracks pe "zero se job-ready" abhi pura
-nahi hota.
+Saaf baat: Python, Pandas, Statistics aur SQL solid hain — yahi chaar interview me sabse
+zyada poochhe jaate hain. **Viz, BI, DL aur Deployment me padhne ko content hai par
+practice ka ek bhi problem nahi** — un tracks pe "zero se job-ready" abhi pura nahi hota.
 
 ---
 
@@ -121,7 +122,6 @@ nahi hota.
 
 - [ ] **Permanent deploy** — SQLite → Postgres + Vercel (SQLite serverless pe persist nahi hota)
 - [ ] Viz / BI / DL / Deployment tracks ke practice problems (abhi 0)
-- [ ] Pandas problems badhao (abhi 10) — target 20–30 per topic
 - [ ] matplotlib / sklearn practice (pandas jaise wheel-download pattern se)
 - [ ] Streak auto-update (daily activity pe)
 - [ ] Session hardening — expiry, rotation, revoke (abhi cookie 30 din, revoke nahi hoti)

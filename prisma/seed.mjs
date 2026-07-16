@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
+import { pandasProblems } from "./pandas-problems.mjs";
 import { scryptSync, randomBytes } from "crypto";
 const prisma = new PrismaClient();
 
@@ -1868,7 +1869,7 @@ async function main() {
   }
 
   // attach the extra graded practice problems by lesson slug
-  for (const ep of [...extraProblems, ...sqlProblems]) {
+  for (const ep of [...extraProblems, ...sqlProblems, ...pandasProblems]) {
     const lid = lessonBySlug[ep.lessonSlug];
     if (!lid) continue;
     const { lessonSlug, ...data } = ep;
