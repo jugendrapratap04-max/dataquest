@@ -25,6 +25,11 @@ model User {
   lessonProgress LessonProgress[]
   submissions    Submission[]
   notes          Note[]
+  sessions       StudySession[]
+  notebook       NotebookEntry[]
+  roomMembers    RoomMember[]
+  roomMessages   RoomMessage[]
+  hostedRooms    Room[]          @relation("RoomHost")
 }
 
 model Track {
@@ -121,4 +126,139 @@ model Note {
   code      String   @default("")
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+}
+
+// ---------------------------------------------------------------------------
+// Study Together — focus sessions, rooms, notebook.
+//
+// The timer is never "ticked" by a server. A room stores which phase it's in
+// and when that phase started; every client derives the remaining time from the
+// wall clock (lib/focus.ts). The poll endpoint advances the phase lazily when it
+// notices the current one has run out. So there's no cron job, no socket server,
+// and a tab that was asleep for ten minutes comes back to the correct time
+// instead of a drifted one.
+// ---------------------------------------------------------------------------
+
+// One sitting of focused study — solo, or attached to a room.
+model StudySession {
+  id       String  @id @default(cuid())
+  userId   String
+  roomId   String?
+  topic    String  @default("General")
+  goal     String  @default("")
+  // Minutes per phase, copied at start so changing a room's settings later
+  // doesn't rewrite history.
+  focusMinutes Int @default(30)
+  breakMinutes Int @default(5)
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+  // Set on each heartbeat. Active time accrues from the gap between beats, so
+  // the client reports only "I'm still here" and never how long it was here —
+  // otherwise a focus score would be worth exactly as much as the honesty of
+  // whoever opened devtools.
+  lastBeatAt DateTime @default(now())
+  // Wall-clock seconds the session was open, vs seconds this user was actually
+  // present and interacting. focusPct is derived from these two, never stored.
+  elapsedSeconds Int  @default(0)
+  activeSeconds  Int  @default(0)
+  cyclesDone     Int  @default(0)
+  problemsSolved Int  @default(0)
+  messagesUsed   Int  @default(0)
+
+  user     User            @relation(fields: [userId], references: [id])
+  room     Room?           @relation(fields: [roomId], references: [id])
+  notebook NotebookEntry[]
+
+  @@index([userId, startedAt])
+}
+
+// A private doubt. Written during focus so it doesn't interrupt anyone; the
+// student can push it to the room's discussion queue when the break starts.
+// The queue is just the rows where queued = true — it needs no model of its own.
+model NotebookEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String?
+  roomId    String?
+  text      String
+  resolved  Boolean  @default(false)
+  queued    Boolean  @default(false) // in the room's discussion queue
+  queuedAt  DateTime?               // queue order; null when not queued
+  createdAt DateTime @default(now())
+
+  user    User          @relation(fields: [userId], references: [id])
+  session StudySession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  room    Room?         @relation(fields: [roomId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([roomId, queued])
+}
+
+model Room {
+  id              String  @id @default(cuid())
+  code            String  @unique // invite code, e.g. "PY-4K2M"
+  name            String
+  subject         String  @default("Python")
+  topic           String  @default("")
+  maxParticipants Int     @default(4) // spec: 2-6
+  isPublic        Boolean @default(false)
+  hostId          String
+
+  focusMinutes Int @default(30)
+  breakMinutes Int @default(5)
+
+  // The whole timer, in three fields. See the note above.
+  phase          String   @default("focus") // focus | discussion | ended
+  phaseStartedAt DateTime @default(now())
+  cycle          Int      @default(1)
+
+  createdAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  host     User            @relation("RoomHost", fields: [hostId], references: [id])
+  members  RoomMember[]
+  messages RoomMessage[]
+  sessions StudySession[]
+  notebook NotebookEntry[]
+
+  @@index([isPublic, endedAt])
+}
+
+model RoomMember {
+  id     String @id @default(cuid())
+  roomId String
+  userId String
+
+  joinedAt   DateTime @default(now())
+  // Presence is derived from this: no heartbeat for a while = "away".
+  // Nothing needs to push a leave event; a closed tab simply stops beating.
+  lastSeenAt DateTime @default(now())
+  activeSeconds Int   @default(0)
+  status     String   @default("studying") // studying | away | left
+  handRaised Boolean  @default(false)
+  needsHelp  Boolean  @default(false)
+  messagesUsed Int    @default(0)
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([roomId, userId])
+}
+
+// Deliberately not a chat log. Quick preset replies and emoji only, and the
+// per-cycle budget is enforced server-side in the room's action route.
+model RoomMessage {
+  id        String   @id @default(cuid())
+  roomId    String
+  userId    String
+  kind      String   @default("quick") // quick | emoji
+  text      String
+  cycle     Int      @default(1)
+  createdAt DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([roomId, createdAt])
 }

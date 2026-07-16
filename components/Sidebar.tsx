@@ -13,6 +13,8 @@ const ChartIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 const TrophyIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3"/></svg>);
 const CertIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="5"/><path d="M8.5 12 7 22l5-3 5 3-1.5-10"/></svg>);
 const ResumeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>);
+const TimerIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>);
+const RoomIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><path d="M16 6a3 3 0 0 1 0 6M18 20v-1a5 5 0 0 0-2-4"/></svg>);
 
 type Item = { href: string; label: string; icon: React.ReactNode; count?: string };
 
@@ -26,6 +28,10 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Practice", items: [
     { href: "/practice", label: "Compiler", icon: <CodeIcon /> },
     { href: "/projects", label: "Projects", icon: <BoxIcon /> },
+  ]},
+  { label: "Study", items: [
+    { href: "/focus", label: "Focus Mode", icon: <TimerIcon /> },
+    { href: "/rooms", label: "Study Rooms", icon: <RoomIcon /> },
   ]},
   { label: "Progress", items: [
     { href: "/leaderboard", label: "Leaderboard", icon: <TrophyIcon /> },
