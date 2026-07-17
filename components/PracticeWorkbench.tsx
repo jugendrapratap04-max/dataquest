@@ -23,7 +23,11 @@ function mdLite(md: string) {
     .split(/\n\n+/).map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`).join("");
 }
 
-const fmt = (v: unknown) => JSON.stringify(v);
+// Pyodide hands Python's None back as `undefined`, and JSON.stringify(undefined)
+// is undefined — which React renders as nothing at all. So the single most common
+// beginner mistake, forgetting to `return`, showed up as "add_marks("85", "5") → "
+// with a blank where the answer goes. Say None, the way Python would.
+const fmt = (v: unknown) => (v === undefined || v === null ? "None" : JSON.stringify(v));
 
 export function PracticeWorkbench({ p }: { p: ProblemData }) {
   const router = useRouter();

@@ -54,6 +54,27 @@ function toJs(v: any): unknown {
   return v;
 }
 
+/** A Python traceback ends in a newline, so splitting on newlines leaves an
+ *  empty last element. These two both drop it — without that, the line a
+ *  beginner most needs ("ZeroDivisionError: division by zero") came back as an
+ *  empty string, and the UI, seeing a falsy error, reported the crash as if the
+ *  function had simply returned the wrong value. */
+function errLines(e: any): string[] {
+  const msg = e?.message ?? String(e);
+  return String(msg).split(/\r?\n/).map((l) => l.trimEnd()).filter((l) => l.trim() !== "");
+}
+
+/** Last meaningful line — the actual exception, without the traceback plumbing. */
+function errLast(e: any): string {
+  const lines = errLines(e);
+  return lines[lines.length - 1] || String(e?.message ?? e) || "Python error";
+}
+
+/** Last few lines — enough context for a syntax/compile failure. */
+function errTail(e: any, n = 4): string {
+  const lines = errLines(e);
+  return lines.slice(-n).join("\n") || String(e?.message ?? e) || "Python error";
+}
 
 /** Run raw Python and return captured stdout (used by the free-play console). */
 export async function runPython(code: string): Promise<{ stdout: string; error?: string }> {
@@ -66,7 +87,7 @@ export async function runPython(code: string): Promise<{ stdout: string; error?:
     await py.runPythonAsync(code);
     return { stdout };
   } catch (e: any) {
-    return { stdout, error: String(e?.message || e).split("\n").slice(-4).join("\n") };
+    return { stdout, error: errTail(e) };
   }
 }
 
@@ -87,7 +108,7 @@ export async function runTests(
   } catch (e: any) {
     return {
       compiled: false,
-      error: String(e?.message || e).split("\n").slice(-4).join("\n"),
+      error: errTail(e),
       stdout, cases: [], passed: 0, total: tests.length,
     };
   }
@@ -106,7 +127,7 @@ export async function runTests(
       );
       got = toJs(raw);
     } catch (e: any) {
-      error = String(e?.message || e).split("\n").pop();
+      error = errLast(e);
     }
     const pass = !error && eq(got, t.expected);
     if (pass) passed++;
