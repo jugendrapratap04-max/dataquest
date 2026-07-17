@@ -10,7 +10,7 @@ const projects = [
 export default function ProjectsPage() {
   return (
     <>
-      <p className="page-intro">Har skill ke baad ek project banao — yahi cheez resume me sabse zyada matter karti hai. Beginner se capstone tak, sab portfolio-ready.</p>
+      <p className="page-intro">Har skill ke baad ek project banao — yahi cheez resume me sabse zyada matter karti hai. Beginner se capstone tak, sab portfolio-ready. <b>Detailed briefs jald aa rahe hain</b> — abhi ye roadmap ka preview hai.</p>
       <div className="projs">
         {projects.map((p) => (
           <div className="proj" key={p.title}>
@@ -21,7 +21,7 @@ export default function ProjectsPage() {
               <h3>{p.title}</h3>
               <p>{p.desc}</p>
               <div className="skills">{p.skills.map((s) => <span key={s} className="tag">{s}</span>)}</div>
-              <div className="pf"><span className="est">{p.est}</span><span className="go">Start →</span></div>
+              <div className="pf"><span className="est">{p.est}</span><span className="soon">Coming soon</span></div>
             </div>
           </div>
         ))}
