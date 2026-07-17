@@ -38,6 +38,9 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
   const [busy, setBusy] = useState<null | "run" | "submit">(null);
   const [celebrate, setCelebrate] = useState<number | null>(null);
   const [noPaste, setNoPaste] = useState(false);
+  // Shown when the server's re-check disagrees with the browser, or the submit
+  // didn't save. Without it, a rejected solve looked like a silent 0 XP.
+  const [submitNote, setSubmitNote] = useState<string | null>(null);
 
   function flashNoPaste() {
     setNoPaste(true);
@@ -59,6 +62,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     setBusy(submit ? "submit" : "run");
     setResult(null);
     setResTab("tests");
+    setSubmitNote(null);
     try {
       const r = await runTests(code, p.functionName, p.tests);
       setResult(r);
@@ -68,7 +72,17 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ problemId: p.id, code, passed }),
         }).then((x) => x.json()).catch(() => null);
-        if (passed) setCelebrate(res?.awardedXp ?? p.xp);
+        // Celebrate only when the server confirms. It re-runs the solution before
+        // paying XP, so the browser's verdict alone isn't enough.
+        if (!passed) {
+          // the test panel already shows which cases failed
+        } else if (!res?.ok) {
+          setSubmitNote("Submit save nahi hua — internet check karke dobara Submit karo.");
+        } else if (res.verifyNote) {
+          setSubmitNote(`Server pe verify nahi hua: ${res.verifyNote}`);
+        } else {
+          setCelebrate(res.awardedXp ?? 0);
+        }
       }
     } catch (e) {
       setResult({ compiled: false, error: String(e), stdout: "", cases: [], passed: 0, total: p.tests.length });
@@ -153,6 +167,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               <button className={`res-tab${resTab === "console" ? " active" : ""}`} onClick={() => setResTab("console")}>Console</button>
             </div>
             <div className="res-body">
+              {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "tests" && (
                 !result ? (
                   <div className="res-empty">▶ &quot;Run&quot; dabao — pehli baar Python load hone me thoda time (pandas/data problems me ~30 sec), phir turant chalega.</div>

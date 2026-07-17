@@ -76,6 +76,9 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   const [busy, setBusy] = useState<null | "run" | "submit">(null);
   const [celebrate, setCelebrate] = useState<number | null>(null);
   const [noPaste, setNoPaste] = useState(false);
+  // Shown when the server's re-check disagrees with the browser, or the submit
+  // didn't save — so a rejected solve never reads as a silent 0 XP.
+  const [submitNote, setSubmitNote] = useState<string | null>(null);
 
   const schema = readSchema(p.sqlSetup);
 
@@ -99,6 +102,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
     setBusy(submit ? "submit" : "run");
     setResult(null);
     setResTab("out");
+    setSubmitNote(null);
     try {
       const r = await runSql(sql, p.sqlSetup, p.solutionCode);
       setResult(r);
@@ -107,7 +111,16 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ problemId: p.id, code: sql, passed: r.pass }),
         }).then((x) => x.json()).catch(() => null);
-        if (r.pass) setCelebrate(res?.awardedXp ?? p.xp);
+        // Celebrate only when the server confirms — it re-runs the query itself.
+        if (!r.pass) {
+          // the output/expected panels already show the mismatch
+        } else if (!res?.ok) {
+          setSubmitNote("Submit save nahi hua — internet check karke dobara Submit karo.");
+        } else if (res.verifyNote) {
+          setSubmitNote(`Server pe verify nahi hua: ${res.verifyNote}`);
+        } else {
+          setCelebrate(res.awardedXp ?? 0);
+        }
       }
     } catch (e) {
       setResult({ ok: false, pass: false, ordered: false, error: String(e) });
@@ -203,6 +216,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               <button className={`res-tab${resTab === "expected" ? " active" : ""}`} onClick={() => setResTab("expected")}>Expected</button>
             </div>
             <div className="res-body">
+              {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "out" && (
                 !result ? (
                   <div className="res-empty">▶ &quot;Run&quot; dabao — pehli baar SQL engine load hone me 1-2 second lagega, phir turant chalega.</div>
