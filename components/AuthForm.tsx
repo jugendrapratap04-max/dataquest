@@ -13,8 +13,23 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Catch the obvious mistakes here so an empty field or a typo'd email shows an
+  // answer immediately, instead of a round-trip to the server and back. The
+  // server still validates — this is only about not making the user wait for a
+  // bounce it can already see.
+  function validate(): string | null {
+    if (isSignup && !name.trim()) return "Apna naam likho.";
+    if (!email.trim()) return "Email likho.";
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return "Email theek nahi lag raha — dobara dekho.";
+    if (!password) return "Password likho.";
+    if (isSignup && password.length < 6) return "Password kam se kam 6 characters ka rakho.";
+    return null;
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const problem = validate();
+    if (problem) { setErr(problem); return; }
     setErr(null);
     setBusy(true);
     try {
@@ -35,7 +50,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   return (
     <div className="auth-wrap">
-      <form className="auth-card" onSubmit={submit}>
+      {/* noValidate: our own validate() owns the messaging (Hinglish, specific),
+          so the browser's native English bubbles don't fire first. */}
+      <form className="auth-card" onSubmit={submit} noValidate>
         <div className="auth-logo">
           <div className="mark">D</div>
           <div><span className="wm">DataQuest</span></div>
