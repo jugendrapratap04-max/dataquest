@@ -86,30 +86,44 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
   py.setStdout({ batched: () => {} });
   py.setStderr({ batched: () => {} });
 
+  // Every submission runs in its own empty namespace.
+  //
+  // The interpreter is cached for the life of the process, so without this a
+  // submission inherits whatever the last one defined — and the last one was
+  // some other student. Confirmed against the running server: A solved
+  // make-greeting honestly, B submitted the single line `# lol`, and B was paid
+  // 20 XP because A's `greet` was still sitting in globals. Reusing the runtime
+  // is fine; reusing its globals is the whole hole this file exists to close.
+  const ns = py.globals.get("dict")();
   try {
-    try { await py.loadPackagesFromImports(code); } catch {}
-    await py.runPythonAsync(code);
-  } catch (e: any) {
-    return { passed: false, reason: `Server pe code chala nahi: ${lastLine(e)}` };
-  }
-
-  for (const t of tests) {
     try {
-      py.globals.set("__dq_args_json", JSON.stringify(t.args));
-      const raw = await py.runPythonAsync(
-        `import json as __json\n${problem.functionName}(*__json.loads(__dq_args_json))`
-      );
-      if (!eq(toJs(raw), t.expected)) {
-        return { passed: false, reason: "Server pe dobara chalane pe saare test pass nahi hue." };
-      }
+      try { await py.loadPackagesFromImports(code); } catch {}
+      await py.runPythonAsync(code, { globals: ns });
     } catch (e: any) {
-      // Say what actually went wrong. A bare "error aaya" is unfalsifiable: the
-      // student can't tell a bug in their code from a bug in this verifier, and
-      // neither can we.
-      return { passed: false, reason: `Server pe error: ${lastLine(e)}` };
+      return { passed: false, reason: `Server pe code chala nahi: ${lastLine(e)}` };
     }
+
+    for (const t of tests) {
+      try {
+        ns.set("__dq_args_json", JSON.stringify(t.args));
+        const raw = await py.runPythonAsync(
+          `import json as __json\n${problem.functionName}(*__json.loads(__dq_args_json))`,
+          { globals: ns }
+        );
+        if (!eq(toJs(raw), t.expected)) {
+          return { passed: false, reason: "Server pe dobara chalane pe saare test pass nahi hue." };
+        }
+      } catch (e: any) {
+        // Say what actually went wrong. A bare "error aaya" is unfalsifiable: the
+        // student can't tell a bug in their code from a bug in this verifier, and
+        // neither can we.
+        return { passed: false, reason: `Server pe error: ${lastLine(e)}` };
+      }
+    }
+    return { passed: true };
+  } finally {
+    try { ns.destroy(); } catch {}
   }
-  return { passed: true };
 }
 
 async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResult> {

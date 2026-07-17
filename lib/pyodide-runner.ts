@@ -102,37 +102,47 @@ export async function runTests(
   py.setStdout({ batched: (s: string) => { stdout += s + "\n"; } });
   py.setStderr({ batched: (s: string) => { stdout += s + "\n"; } });
 
+  // Each run gets an empty namespace. The interpreter is cached for the whole
+  // tab, so otherwise a run inherits every function defined by the runs before
+  // it: clear the editor after solving, press Run, and the leftover function
+  // answers the tests — "All test cases passed" on an empty file.
+  const ns = py.globals.get("dict")();
   try {
-    try { await py.loadPackagesFromImports(userCode); } catch {}
-    await py.runPythonAsync(userCode);
-  } catch (e: any) {
-    return {
-      compiled: false,
-      error: errTail(e),
-      stdout, cases: [], passed: 0, total: tests.length,
-    };
-  }
-
-  const cases: CaseResult[] = [];
-  let passed = 0;
-
-  for (const t of tests) {
-    let got: unknown;
-    let error: string | undefined;
     try {
-      // Pass args as JSON and rebuild them in Python — reliable for dicts/lists/numbers.
-      py.globals.set("__dq_args_json", JSON.stringify(t.args));
-      const raw = await py.runPythonAsync(
-        `import json as __json\n${functionName}(*__json.loads(__dq_args_json))`
-      );
-      got = toJs(raw);
+      try { await py.loadPackagesFromImports(userCode); } catch {}
+      await py.runPythonAsync(userCode, { globals: ns });
     } catch (e: any) {
-      error = errLast(e);
+      return {
+        compiled: false,
+        error: errTail(e),
+        stdout, cases: [], passed: 0, total: tests.length,
+      };
     }
-    const pass = !error && eq(got, t.expected);
-    if (pass) passed++;
-    cases.push({ pass, got, expected: t.expected, args: t.args, error });
-  }
 
-  return { compiled: true, stdout, cases, passed, total: tests.length };
+    const cases: CaseResult[] = [];
+    let passed = 0;
+
+    for (const t of tests) {
+      let got: unknown;
+      let error: string | undefined;
+      try {
+        // Pass args as JSON and rebuild them in Python — reliable for dicts/lists/numbers.
+        ns.set("__dq_args_json", JSON.stringify(t.args));
+        const raw = await py.runPythonAsync(
+          `import json as __json\n${functionName}(*__json.loads(__dq_args_json))`,
+          { globals: ns }
+        );
+        got = toJs(raw);
+      } catch (e: any) {
+        error = errLast(e);
+      }
+      const pass = !error && eq(got, t.expected);
+      if (pass) passed++;
+      cases.push({ pass, got, expected: t.expected, args: t.args, error });
+    }
+
+    return { compiled: true, stdout, cases, passed, total: tests.length };
+  } finally {
+    try { ns.destroy(); } catch {}
+  }
 }
