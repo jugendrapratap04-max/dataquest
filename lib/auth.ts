@@ -15,7 +15,14 @@ export function verifyPassword(pw: string, stored: string): boolean {
   return h.length === hb.length && timingSafeEqual(h, hb);
 }
 
-// Signed session cookie: "<userId>.<hmac>" — prevents forging arbitrary ids.
+// Signed session cookie: "<userId>.<issuedAt>.<hmac>" — prevents forging
+// arbitrary ids, and bounds how long a leaked cookie stays usable.
+
+// A session is good for 30 days from issue, matching the cookie's maxAge. The
+// old token signed only the uid, so a stolen cookie was valid forever (the
+// browser maxAge is client-side and trivially ignored); now the signed payload
+// carries the issue time and verifySession refuses anything past this age.
+const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 const DEV_SECRET = "dq-dev-secret-change-in-prod";
 let cachedSecret: string | null = null;
@@ -40,21 +47,36 @@ function sessionSecret(): string {
 }
 
 export function signSession(uid: string): string {
-  const sig = createHmac("sha256", sessionSecret()).update(uid).digest("hex");
-  return `${uid}.${sig}`;
+  // The uid is a cuid (no dots) and iat is an integer, so "<uid>.<iat>" splits
+  // back apart unambiguously in verifySession.
+  const payload = `${uid}.${Date.now()}`;
+  const sig = createHmac("sha256", sessionSecret()).update(payload).digest("hex");
+  return `${payload}.${sig}`;
 }
 
 export function verifySession(token?: string): string | null {
   if (!token) return null;
   const i = token.lastIndexOf(".");
   if (i < 0) return null;
-  const uid = token.slice(0, i);
+  const payload = token.slice(0, i); // "<uid>.<iat>"
   const sig = token.slice(i + 1);
-  const expected = createHmac("sha256", sessionSecret()).update(uid).digest("hex");
+
+  const expected = createHmac("sha256", sessionSecret()).update(payload).digest("hex");
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
-  if (a.length === b.length && timingSafeEqual(a, b)) return uid;
-  return null;
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+
+  // Split the verified payload into uid + issued-at. Tokens from the old
+  // uid-only format have no "." here and are rejected — those users just log in
+  // again once, which is the correct outcome for tightening session security.
+  const j = payload.lastIndexOf(".");
+  if (j < 0) return null;
+  const uid = payload.slice(0, j);
+  const iat = Number(payload.slice(j + 1));
+  if (!uid || !Number.isFinite(iat)) return null;
+  if (Date.now() - iat > SESSION_MAX_AGE_MS) return null; // expired
+
+  return uid;
 }
 
 export const SESSION_COOKIE = "dq_session";
