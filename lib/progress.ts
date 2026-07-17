@@ -6,6 +6,7 @@
 // so the two pages openly contradicted each other. Everything here is derived from
 // the user's own LessonProgress + Submissions instead, and every page reads it.
 
+import { cache } from "react";
 import { prisma } from "./prisma";
 
 export type SkillState = [name: string, done: boolean];
@@ -39,7 +40,11 @@ export type Progress = {
 export const shortTitle = (t: string) =>
   t.split(" — ")[0].split(" (")[0].replace("Programming Foundations", "Python");
 
-export async function getProgress(userId: string): Promise<Progress> {
+// Deduped per request: the app layout and the page both call these, so without
+// cache() every dashboard/progress load ran the same queries twice. cache()
+// memoizes on the arguments for the life of one server render.
+export const getProgress = cache(getProgressImpl);
+async function getProgressImpl(userId: string): Promise<Progress> {
   const tracks = await prisma.track.findMany({
     orderBy: { order: "asc" },
     include: {
@@ -138,7 +143,8 @@ export type Streak = { streak: number; bestStreak: number };
  * Today only breaks the streak once it's over: if you studied yesterday but not
  * yet today, the streak still stands — you have until midnight.
  */
-export async function getStreak(userId: string): Promise<Streak> {
+export const getStreak = cache(getStreakImpl);
+async function getStreakImpl(userId: string): Promise<Streak> {
   const subs = await prisma.submission.findMany({
     where: { userId, passed: true },
     select: { createdAt: true },
@@ -171,7 +177,8 @@ export async function getStreak(userId: string): Promise<Streak> {
 }
 
 /** Submissions per day for the last `days` days, oldest first. */
-export async function getActivity(userId: string, days = 28): Promise<number[]> {
+export const getActivity = cache(getActivityImpl);
+async function getActivityImpl(userId: string, days = 28): Promise<number[]> {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - (days - 1));
