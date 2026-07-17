@@ -11,7 +11,8 @@
     "db:content": "node prisma/apply-problems.mjs",
     "db:lessons": "node prisma/apply-lessons.mjs",
     "db:reset": "prisma migrate reset --force && node prisma/seed.mjs",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:check": "node prisma/check-content.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
