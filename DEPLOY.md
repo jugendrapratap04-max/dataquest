@@ -37,6 +37,11 @@ hoga**. Isliye Postgres — ek alag server jo requests ke beech zinda rehta hai.
 1. [neon.tech](https://neon.tech) pe free account banao
 2. New project banao (region: Singapore/Mumbai — India ke users ke liye tez)
 3. **Connection string** copy karo — `postgresql://...?sslmode=require` jaisa dikhega
+   > ⚠️ Neon do tarah ke string deta hai: **pooled** (host me `-pooler` likha hota hai) aur
+   > **direct**. Yahan **direct wala** lo — dashboard me "Connection pooling" toggle OFF karke
+   > copy karo. Wajah: `vercel-build` har deploy pe `prisma migrate deploy` chalata hai, jo
+   > pooler (PgBouncer) ke through fail ho jaata hai. Beta ke traffic ke liye direct kaafi hai;
+   > pooler ki zaroorat tab padegi jab users sach me badh jayenge.
 4. Neon me do branches rakho:
    - `main` → production (Vercel isko use karega)
    - `dev` → local development (tumhare laptop ke liye)
