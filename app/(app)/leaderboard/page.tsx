@@ -15,6 +15,10 @@ function publicName(name: string): string {
 
 export default async function LeaderboardPage() {
   const me = await getCurrentUser();
+  // Same guard as every other authed page. The layout already redirects, so this
+  // is belt-and-braces — but leaving one page out is how the next page copied
+  // from it ends up without one.
+  if (!me) return null;
   const users = await prisma.user.findMany({
     orderBy: [{ xp: "desc" }, { createdAt: "asc" }],
     take: 25,

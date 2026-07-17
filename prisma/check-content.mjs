@@ -22,6 +22,7 @@ import { loadPyodide } from "pyodide";
 import initSqlJs from "sql.js";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
+import { readSchema } from "../lib/sql-schema.ts";
 
 const prisma = new PrismaClient();
 
@@ -58,6 +59,28 @@ for (const p of sqlProblems) {
     if (p.sqlSetup?.trim()) db.run(p.sqlSetup);
     const res = db.exec(p.solutionCode);
     if (!(res.length && res[0].values.length)) fails.push(`[sql] ${p.slug}: reference query returns ZERO rows`);
+
+    // The workbench shows students a table/column panel parsed out of the setup
+    // SQL with a regex (lib/sql-schema.ts). Check it against what SQLite itself
+    // reports, so a setup that outgrows the parser fails here instead of quietly
+    // showing the wrong columns.
+    if (p.sqlSetup?.trim()) {
+      const tRes = db.exec("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name");
+      const realTables = tRes.length ? tRes[0].values.map((r) => String(r[0])) : [];
+      const parsed = Object.fromEntries(readSchema(p.sqlSetup).map((t) => [t.name, t.cols.map((c) => c.split(" ")[0])]));
+      const parsedTables = Object.keys(parsed).sort();
+      if (JSON.stringify(realTables) !== JSON.stringify(parsedTables)) {
+        fails.push(`[sql] ${p.slug}: schema panel lists tables ${JSON.stringify(parsedTables)}, SQLite has ${JSON.stringify(realTables)}`);
+      } else {
+        for (const t of realTables) {
+          const cRes = db.exec(`PRAGMA table_info(${t})`);
+          const realCols = cRes.length ? cRes[0].values.map((r) => String(r[1])) : [];
+          if (JSON.stringify(realCols) !== JSON.stringify(parsed[t])) {
+            fails.push(`[sql] ${p.slug}: schema panel shows ${t}(${parsed[t]}), SQLite has ${t}(${realCols})`);
+          }
+        }
+      }
+    }
   } catch (e) {
     fails.push(`[sql] ${p.slug}: ${lastLine(e)}`);
   } finally {

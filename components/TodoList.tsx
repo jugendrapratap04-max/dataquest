@@ -4,18 +4,24 @@ import { useEffect, useState } from "react";
 
 type Item = { id: number; text: string; kind: "learn" | "prac"; done: boolean };
 
-// Starter suggestions — nothing is pre-ticked, since a fresh visitor hasn't done any
-// of it. These are the user's own todos from here on (localStorage).
-const initial: Item[] = [
-  { id: 1, text: "Read: Variables & Data Types", kind: "learn", done: false },
-  { id: 2, text: "Solve 3 Python drills", kind: "prac", done: false },
-  { id: 3, text: "Revise: int vs str", kind: "learn", done: false },
-];
-
 const KEY = "dq-todos";
 
-export function TodoList() {
-  const [items, setItems] = useState<Item[]>(initial);
+// Starter suggestions for a fresh visitor, built from the lesson they're actually
+// up next on rather than a hardcoded Python one — a Statistics learner shouldn't
+// open the dashboard to "Revise: int vs str". Nothing is pre-ticked, since they
+// haven't done any of it. After the first edit these are the user's own todos
+// (localStorage), and the starters never come back.
+function starterItems(next?: { title: string; track: string } | null): Item[] {
+  if (!next) return [{ id: 1, text: "Apna pehla lesson padho", kind: "learn", done: false }];
+  return [
+    { id: 1, text: `Read: ${next.title}`, kind: "learn", done: false },
+    { id: 2, text: `Solve 3 ${next.track} drills`, kind: "prac", done: false },
+    { id: 3, text: `Revise: ${next.title}`, kind: "learn", done: false },
+  ];
+}
+
+export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: string } | null }) {
+  const [items, setItems] = useState<Item[]>(() => starterItems(nextLesson));
   const [text, setText] = useState("");
   const [ready, setReady] = useState(false);
 
@@ -46,10 +52,14 @@ export function TodoList() {
       <ul className="todo">
         {items.map((it) => (
           <li key={it.id} className={it.done ? "done" : ""}>
-            <span className="box" onClick={() => toggle(it.id)}>{it.done ? "✓" : ""}</span>
-            <span className="txt" onClick={() => toggle(it.id)}>{it.text}</span>
+            {/* A real button: the tick used to be a <span onClick>, so a keyboard
+                user couldn't check anything off. aria-pressed carries the state. */}
+            <button type="button" className="todo-toggle" aria-pressed={it.done} onClick={() => toggle(it.id)}>
+              <span className="box" aria-hidden="true">{it.done ? "✓" : ""}</span>
+              <span className="txt">{it.text}</span>
+            </button>
             <span className={`kind ${it.kind === "learn" ? "learn" : "prac"}`}>{it.kind === "learn" ? "learn" : "practice"}</span>
-            <button className="todo-del" onClick={() => remove(it.id)} aria-label="Delete">×</button>
+            <button className="todo-del" onClick={() => remove(it.id)} aria-label={`"${it.text}" hatao`}>×</button>
           </li>
         ))}
       </ul>

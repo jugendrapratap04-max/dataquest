@@ -6,6 +6,7 @@ import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { runSql, type ResultSet, type SqlRunResult } from "@/lib/sql-runner";
+import { readSchema } from "@/lib/sql-schema";
 import { Celebrate } from "@/components/Celebrate";
 
 export type SqlProblemData = {
@@ -21,21 +22,6 @@ function mdLite(md: string) {
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/`([^`]+)`/g, '<code class="kbd">$1</code>')
     .split(/\n\n+/).map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`).join("");
-}
-
-/** Pull table names + columns out of the setup SQL so students can see what exists. */
-function readSchema(setup: string): { name: string; cols: string[] }[] {
-  const out: { name: string; cols: string[] }[] = [];
-  const re = /create\s+table\s+(?:if\s+not\s+exists\s+)?["`]?(\w+)["`]?\s*\(([\s\S]*?)\)\s*;/gi;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(setup))) {
-    const cols = m[2]
-      .split(/,(?![^(]*\))/)
-      .map((c) => c.trim().split(/\s+/).slice(0, 2).join(" "))
-      .filter((c) => c && !/^(primary|foreign|unique|check|constraint)\b/i.test(c));
-    out.push({ name: m[1], cols });
-  }
-  return out;
 }
 
 const cell = (v: unknown) =>

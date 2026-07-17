@@ -21,7 +21,19 @@ function PhaseCard({ p }: { p: Phase }) {
 
   return (
     <section className={`card phase ${p.status}${open ? " open" : ""}`}>
-      <div className="phead" onClick={() => setOpen((o) => !o)}>
+      {/* Keyboard-operable disclosure. This was a plain <div onClick>, and since
+          .pbody is display:none until .phase.open, a keyboard user couldn't open a
+          phase at all — the skills and the "Start lessons →" link were unreachable. */}
+      <div
+        className="phead"
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen((o) => !o); }
+        }}
+      >
         <div className="pnum">{p.order}</div>
         <div className="ptitle">
           <h3>{p.title} <span className={`stchip ${st}`}>{stTxt}</span></h3>

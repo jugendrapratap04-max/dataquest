@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { getProgress, getStreak } from "@/lib/progress";
+import { getProgress, getStreak, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 
 const iconClass = (slug: string) =>
@@ -93,7 +93,9 @@ export default async function DashboardPage() {
 
       {/* right */}
       <div className="col">
-        <section className="card pad"><div className="sec-head"><h2>Today&apos;s Plan</h2></div><TodoList /></section>
+        <section className="card pad"><div className="sec-head"><h2>Today&apos;s Plan</h2></div>
+          <TodoList nextLesson={nextLesson ? { title: nextLesson.title, track: shortTitle(nextLesson.track.title) } : null} />
+        </section>
 
         <section className="card pad"><div className="sec-head"><h2>Overall Progress</h2></div>
           <div className="ring-wrap">

@@ -10,7 +10,7 @@ export default async function ResumePage() {
         Apna resume banao aur turant dekho ki <b>ATS</b> (jo software companies resumes filter karne ko use karti hain) me kitna score karega.
         Har tip follow karke score badhao — job-ready resume ready! 🎯
       </p>
-      <ResumeBuilder name={user.name} />
+      <ResumeBuilder name={user.name} role={user.role} />
     </>
   );
 }

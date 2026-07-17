@@ -45,10 +45,15 @@ function scoreResume(d: Data) {
   return { score, checks, matched };
 }
 
-export function ResumeBuilder({ name }: { name: string }) {
+export function ResumeBuilder({ name, role }: { name: string; role: string }) {
+  // Your saved title, so the resume starts from what your profile actually says
+  // rather than a hardcoded one. Changing it here can be saved back (it's the
+  // only place the role was ever editable).
+  const [savedRole, setSavedRole] = useState(role);
+  const [savingRole, setSavingRole] = useState(false);
   const [d, setD] = useState<Data>({
     fullName: name || "Jugendra Pratap",
-    role: "Aspiring Data Analyst",
+    role: role || "Aspiring Data Analyst",
     email: "you@email.com",
     phone: "+91 98765 43210",
     linkedin: "linkedin.com/in/you",
@@ -64,6 +69,16 @@ export function ResumeBuilder({ name }: { name: string }) {
 
   const { score, checks, matched } = useMemo(() => scoreResume(d), [d]);
   const set = (k: keyof Data, v: string) => setD((p) => ({ ...p, [k]: v }));
+
+  async function saveRole() {
+    setSavingRole(true);
+    const r = await fetch("/api/profile", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: d.role }),
+    }).then((x) => x.json()).catch(() => null);
+    setSavingRole(false);
+    if (r?.ok) setSavedRole(r.role);
+  }
   const setProj = (i: number, k: keyof Project, v: string) =>
     setD((p) => ({ ...p, projects: p.projects.map((pr, idx) => (idx === i ? { ...pr, [k]: v } : pr)) }));
 
@@ -80,7 +95,15 @@ export function ResumeBuilder({ name }: { name: string }) {
       <div className="card pad rb-form">
         <div className="sec-head"><h2>Apni details bharo</h2></div>
         <div className="rb-field"><label>Full name</label><input className="auth-input" value={d.fullName} onChange={(e) => set("fullName", e.target.value)} /></div>
-        <div className="rb-field"><label>Title / Role</label><input className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} /></div>
+        <div className="rb-field">
+          <label>Title / Role</label>
+          <input className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} />
+          {d.role.trim() && d.role.trim() !== savedRole && (
+            <button type="button" className="rb-saverole" onClick={saveRole} disabled={savingRole}>
+              {savingRole ? "Save ho raha…" : "↑ Ye title profile me bhi save karo"}
+            </button>
+          )}
+        </div>
         <div className="rb-row">
           <div className="rb-field"><label>Email</label><input className="auth-input" value={d.email} onChange={(e) => set("email", e.target.value)} /></div>
           <div className="rb-field"><label>Phone</label><input className="auth-input" value={d.phone} onChange={(e) => set("phone", e.target.value)} /></div>
