@@ -4,6 +4,15 @@ import { getCurrentUser } from "@/lib/session";
 const medals = ["🥇", "🥈", "🥉"];
 const colors = ["#5B4CD6", "#0C9384", "#DB3B3B", "#E8920C", "#2C5FC0", "#1FA85A"];
 
+// First name + last initial, so a public board doesn't expose everyone's full
+// name alongside their activity. "Ananya Sharma" -> "Ananya S."
+function publicName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "Learner";
+  if (parts.length === 1) return parts[0];
+  return `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.`;
+}
+
 export default async function LeaderboardPage() {
   const me = await getCurrentUser();
   const users = await prisma.user.findMany({
@@ -21,7 +30,7 @@ export default async function LeaderboardPage() {
         </p>
       )}
       <div className="card pad">
-        <div className="sec-head"><h2>Weekly Leaderboard<span className="sub">apni batch</span></h2></div>
+        <div className="sec-head"><h2>Top Learners<span className="sub">XP ke hisaab se · all-time</span></h2></div>
         <ul className="lb">
           {users.map((u, i) => {
             const isMe = me && u.id === me.id;
@@ -32,7 +41,7 @@ export default async function LeaderboardPage() {
                 <span className="av" style={{ background: isMe ? "linear-gradient(150deg,var(--teal),#0A6B60)" : colors[i % colors.length] }}>
                   {u.name.charAt(0).toUpperCase()}
                 </span>
-                <span className="nm">{isMe ? "You" : u.name}</span>
+                <span className="nm">{isMe ? "You" : publicName(u.name)}</span>
                 <span className="xp">{u.xp.toLocaleString()} XP</span>
               </li>
             );

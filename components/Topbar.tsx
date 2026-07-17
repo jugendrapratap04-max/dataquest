@@ -11,7 +11,7 @@ const titles: Record<string, [string, string]> = {
   "/projects": ["Projects", "Skills ko real projects me lagao — portfolio yahin banta hai."],
   "/notes": ["My Notes", "Tumhari personal cheat-sheet — revision ka best dost."],
   "/progress": ["Your Analytics", "Growth track karo — mazbooti aur gaps dono dikhengi."],
-  "/leaderboard": ["Leaderboard", "Batchmates ke saath ranking — XP kamaao, upar chadho."],
+  "/leaderboard": ["Leaderboard", "XP ke hisaab se ranking — solve karo, upar chadho."],
   "/certificates": ["Certificates", "Har track complete karke certificate kamaao."],
   "/resume": ["Resume + ATS", "Job-ready resume banao aur ATS score check karo."],
 };
