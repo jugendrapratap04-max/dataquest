@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress } from "@/lib/progress";
 
@@ -36,7 +37,12 @@ export default async function CertificatesPage() {
             <div className="eyebrow">Certificate</div>
             <h3>{t.shortTitle}</h3>
             <div className="sub2">Data Science Track · DataQuest</div>
-            {state === "earned" && <span className="cert-status on">✓ Earned</span>}
+            {state === "earned" && (
+              <div className="cert-earned">
+                <span className="cert-status on">✓ Earned</span>
+                <Link className="btn btn-primary cert-get" href={`/certificates/${t.slug}`}>Certificate dekho →</Link>
+              </div>
+            )}
             {(state === "prog" || state === "new") && (
               <div className="cert-prog">
                 <span className={`cert-status ${state === "new" ? "lock" : "prog"}`}>
