@@ -83,8 +83,17 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
   .side-backdrop.show { opacity:1; pointer-events:auto; }
   .wrap { padding-top:62px; }
 }
+/* Reduced motion: neutralise every decorative transition and animation across
+   the app — the drawer slide, card pop-ins, the focus-ring easing, hovers, the
+   toast. Movement that could trigger nausea/vestibular issues goes away while
+   everything stays fully usable. The confetti canvas is skipped in Celebrate.tsx. */
 @media (prefers-reduced-motion:reduce){
-  .side, .side-backdrop { transition:none; }
+  *, *::before, *::after {
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
 }
 
 .main { min-width:0; }

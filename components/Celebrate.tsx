@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const LINES = [
   "Ek aur skill pakki! Isi tarah roz — job door nahi. 🚀",
@@ -13,6 +13,10 @@ const LINES = [
 function Confetti() {
   const ref = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
+    // A burst of flying particles is exactly what "reduce motion" exists to stop,
+    // so leave the canvas blank for anyone who's asked for it. Checked in the
+    // effect (not during render) so it stays a pure render and there's no flash.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const cv = ref.current!;
     const ctx = cv.getContext("2d")!;
     cv.width = window.innerWidth; cv.height = window.innerHeight;
@@ -44,7 +48,9 @@ export function Celebrate({
 }: {
   title?: string; xp?: number; sub?: string; onClose: () => void; onNext?: () => void; nextLabel?: string;
 }) {
-  const line = sub ?? LINES[(Math.random() * LINES.length) | 0];
+  // Pick the motivational line once on mount (lazy init keeps Math.random out of
+  // the render body and stable across re-renders).
+  const [line] = useState(() => sub ?? LINES[Math.floor(Math.random() * LINES.length)]);
   return (
     <>
       <Confetti />
