@@ -12,7 +12,7 @@ export type ProblemData = {
   id: string; title: string; difficulty: string; tags: string[];
   descriptionMd: string; examples: { input: string; output: string }[];
   starterCode: string; functionName: string; tests: TestCase[]; hints: string[];
-  xp: number; recap: string; lessonSlug?: string;
+  xp: number; recap: string; lessonSlug?: string; nextSlug?: string | null;
 };
 
 function mdLite(md: string) {
@@ -205,8 +205,8 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
         <Celebrate
           xp={celebrate}
           onClose={() => setCelebrate(null)}
-          onNext={() => router.push("/practice")}
-          nextLabel="Agla problem →"
+          onNext={() => router.push(p.nextSlug ? `/practice/${p.nextSlug}` : "/practice")}
+          nextLabel={p.nextSlug ? "Agla problem →" : "Sab problems →"}
         />
       )}
     </>
