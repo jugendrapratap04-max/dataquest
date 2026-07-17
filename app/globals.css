@@ -48,7 +48,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 
 /* shell */
 .app { display:grid; grid-template-columns:232px 1fr; min-height:100vh; }
-@media (max-width:900px){ .app{ grid-template-columns:1fr;} .side{ display:none;} }
+.nav-toggle, .side-backdrop { display:none; }
 .side { position:sticky; top:0; height:100vh; overflow-y:auto; background:var(--panel); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:18px 14px; gap:3px; }
 .logo { display:flex; align-items:center; gap:11px; padding:4px 8px 16px; }
 .logo .mark { width:38px; height:38px; border-radius:11px; flex:none; background:linear-gradient(150deg,var(--accent),var(--accent-2)); color:#fff; display:grid; place-items:center; font-family:var(--mono); font-weight:800; font-size:19px; box-shadow:var(--shadow); }
@@ -64,6 +64,28 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .userbox { display:flex; align-items:center; gap:10px; padding:9px; border-radius:11px; border:1px solid var(--line); background:var(--panel-2); }
 .userbox .av { width:34px; height:34px; border-radius:9px; flex:none; background:linear-gradient(150deg,var(--teal),#0A6B60); color:#fff; display:grid; place-items:center; font-family:var(--mono); font-weight:700; }
 .userbox .nm { font-size:12.5px; font-weight:650; line-height:1.2; } .userbox .rl { font-size:11px; color:var(--ink-faint); }
+
+/* Mobile: the sidebar becomes a slide-in drawer behind a hamburger, so nav is
+   reachable without a 100vh sidebar burying the whole first screen. The old rule
+   just hid .side, but a later ".side{display:flex}" overrode it in source order,
+   so on a phone the sidebar never hid and there was no way to navigate. */
+@media (max-width:900px){
+  .app { grid-template-columns:1fr; }
+  .nav-toggle { display:inline-flex; position:fixed; top:13px; left:13px; z-index:80;
+    width:42px; height:42px; align-items:center; justify-content:center; cursor:pointer;
+    background:var(--panel); border:1px solid var(--line); border-radius:11px; box-shadow:var(--shadow); color:var(--ink); }
+  .nav-toggle svg { width:20px; height:20px; }
+  .side { position:fixed; top:0; left:0; z-index:90; width:266px; max-width:84vw;
+    transform:translateX(-100%); transition:transform .22s ease; }
+  .side.open { transform:translateX(0); box-shadow:0 0 44px rgba(0,0,0,.34); }
+  .side-backdrop { display:block; position:fixed; inset:0; z-index:85;
+    background:rgba(8,10,16,.5); opacity:0; pointer-events:none; transition:opacity .22s ease; }
+  .side-backdrop.show { opacity:1; pointer-events:auto; }
+  .wrap { padding-top:62px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .side, .side-backdrop { transition:none; }
+}
 
 .main { min-width:0; }
 .wrap { max-width:1200px; margin:0 auto; padding:20px 30px 64px; }

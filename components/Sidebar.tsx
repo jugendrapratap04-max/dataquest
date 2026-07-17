@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const HomeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/></svg>);
 const MapIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5h12a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4z"/><path d="M4 5v14"/></svg>);
@@ -48,13 +49,28 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
   const initials = user.name.split(" ").map((n) => n[0]).slice(0, 1).join("");
   const nav = groups(roadmapPct);
 
+  // On desktop the sidebar is always shown (CSS ignores this state). On mobile it's
+  // a drawer — closed by default. It closes on Escape, on a backdrop tap, and on
+  // any nav link tap (each Link's onClick), so it never traps the reader.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   }
 
   return (
-    <aside className="side">
+    <>
+      <button className="nav-toggle" aria-label="Menu kholo" aria-expanded={open} onClick={() => setOpen(true)}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div className={`side-backdrop${open ? " show" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
+      <aside className={`side${open ? " open" : ""}`}>
       <div className="logo">
         <div className="mark">D</div>
         <div><span className="wm">DataQuest</span><span className="beta">BETA</span></div>
@@ -63,7 +79,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
         <div key={g.label}>
           <div className="nav-lbl">{g.label}</div>
           {g.items.map((it) => (
-            <Link key={it.href} href={it.href} className={`nav-item${isActive(it.href) ? " active" : ""}`}>
+            <Link key={it.href} href={it.href} className={`nav-item${isActive(it.href) ? " active" : ""}`} onClick={() => setOpen(false)}>
               {it.icon}
               {it.label}
               {it.count && <span className="count">{it.count}</span>}
@@ -84,6 +100,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
           Logout
         </button>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }
