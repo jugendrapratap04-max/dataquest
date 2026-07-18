@@ -2133,6 +2133,42 @@ export const QUIZZES = {
     { q: "<code>def f(): x = 5</code>, phir bahar <code>print(x)</code> — kya hoga?", options: ["5", "NameError", "None", "0"], correct: 1, why: "<code>x</code> function ke <b>andar local</b> hai — bahar exist hi nahi karta. <b>NameError</b>." },
     { q: "<code>return</code> ke baad wala code chalta hai?", options: ["haan", "nahi", "kabhi-kabhi", "sirf loop me"], correct: 1, why: "<code>return</code> function ko <b>turant khatam</b> kar deta hai — uske baad ka code us call me kabhi nahi chalta." },
   ],
+  "strings": [
+    { q: "<code>s = \"DATA\"; print(s[1:3])</code> — kya aayega?", options: ["AT", "ATA", "DAT", "TA"], correct: 0, why: "Index 1, 2 = A, T — <b>stop (3) excluded</b>. Result <code>AT</code>." },
+    { q: "<code>s = \"hi\"; s.upper(); print(s)</code> — kya chhapega?", options: ["HI", "hi", "TypeError", "\"\""], correct: 1, why: "Strings <b>immutable</b> — <code>.upper()</code> naya string return karta hai, <code>s</code> nahi badalta. Return pakadna padta: <code>s = s.upper()</code>." },
+    { q: "<code>print(\"abc\"[::-1])</code> ka output?", options: ["abc", "cba", "cab", "TypeError"], correct: 1, why: "Step <code>-1</code> = <b>reverse</b>. <code>abc</code> → <code>cba</code>." },
+    { q: "<code>\"a,b,c\".split(\",\")</code> kya deta hai?", options: ["abc", "['a', 'b', 'c']", "a b c", "TypeError"], correct: 1, why: "<code>.split(\",\")</code> string ko <b>list</b> me todta hai — <code>['a', 'b', 'c']</code>." },
+  ],
+  "comprehensions": [
+    { q: "<code>[x*x for x in [1, 2, 3]]</code> — result?", options: ["[1, 4, 9]", "[1, 2, 3]", "[2, 4, 6]", "[1, 8, 27]"], correct: 0, why: "Har item ka square: 1, 4, 9." },
+    { q: "<code>[x for x in range(5) if x % 2 == 0]</code> — kya aayega?", options: ["[0, 2, 4]", "[1, 3]", "[2, 4]", "[0, 1, 2, 3, 4]"], correct: 0, why: "range(5) = 0..4, sirf even rakhe: <b>0, 2, 4</b>." },
+    { q: "Comprehension me filter (<code>if</code>) kahan aata hai?", options: ["for se pehle", "for ke baad", "bracket ke bahar", "kahin bhi"], correct: 1, why: "<code>[x for x in xs <b>if cond</b>]</code> — filter <code>for</code> ke baad." },
+    { q: "<code>{x for x in [1, 1, 2, 2]}</code> kya dega?", options: ["[1, 1, 2, 2]", "{1, 2}", "{1, 1, 2, 2}", "TypeError"], correct: 1, why: "<code>{}</code> = set comprehension — <b>duplicates hata deta</b>: {1, 2}." },
+  ],
+  "oop": [
+    { q: "Class ke method ka <b>pehla</b> parameter kya hona chahiye?", options: ["this", "self", "obj", "kuch bhi"], correct: 1, why: "<code>self</code> — \"yehi object\". Python use automatically bhejta hai, isiliye pehla parameter." },
+    { q: "Ek class se kitne objects bana sakte ho?", options: ["sirf 1", "jitne chaaho", "max 10", "0"], correct: 1, why: "Class ek <b>blueprint</b> hai — usse jitne chaaho objects (instances) banao." },
+    { q: "<code>__init__</code> kab chalta hai?", options: ["jab tum call karo", "object banate waqt (apne aap)", "kabhi nahi", "program end pe"], correct: 1, why: "Object banate waqt <b>automatically</b> — data (attributes) set karne ke liye. Tum seedha call nahi karte." },
+    { q: "<code>Dog</code> class me <code>self.name</code> hai. Bruno aur Rex ka naam?", options: ["same", "alag — har object apna", "error", "None"], correct: 1, why: "Har <b>object apna</b> data rakhta hai — <code>self.name</code> us object ka. Bruno ka \"Bruno\", Rex ka \"Rex\"." },
+  ],
+  "error-handling": [
+    { q: "<code>int(\"x\")</code> ko <code>try</code> me daala, aur <code>except ValueError:</code> me <code>print(\"caught\")</code>. Kya chhapega?", options: ["program crash", "caught", "x", "ValueError"], correct: 1, why: "<code>int(\"x\")</code> ValueError deta, jise <code>except</code> pakad leta hai — <b>caught</b>, crash nahi." },
+    { q: "<code>finally</code> block kab chalta hai?", options: ["sirf error pe", "sirf success pe", "hamesha", "kabhi nahi"], correct: 2, why: "<b>Hamesha</b> — error ho ya na ho. Cleanup ke liye." },
+    { q: "<b>Bare</b> <code>except:</code> kyun bura hai?", options: ["tez hai", "asli bugs bhi chup-chaap chhup jaati hain", "kaam nahi karta", "kuch bura nahi"], correct: 1, why: "Woh <b>har</b> error nigal jaata hai — tumhari apni bug bhi. Hamesha specific exception pakdo." },
+    { q: "Key miss ho sakti ho — crash NA ho, kaunsa?", options: ["d[key]", "d.get(key)", "d.key(key)", "get d[key]"], correct: 1, why: "<code>d.get(key)</code> miss pe <b>None</b> deta (no crash). <code>d[key]</code> KeyError deta." },
+  ],
+  "booleans": [
+    { q: "<code>print(bool([]))</code> — kya aayega?", options: ["True", "False", "TypeError", "None"], correct: 1, why: "Khaali list <b>falsy</b> hai — <code>False</code>." },
+    { q: "<code>print(bool([0]))</code> — kya aayega?", options: ["True", "False", "TypeError", "0"], correct: 0, why: "List <b>khaali nahi</b> (usme 0 hai) — to <b>truthy</b>, <code>True</code>. \"Khaali\" matter karta hai, andar kya hai wo nahi." },
+    { q: "<code>print(0 or \"hi\")</code> — kya chhapega?", options: ["True", "hi", "0", "False"], correct: 1, why: "<code>or</code> <b>pehli truthy value</b> return karta hai — <code>0</code> falsy, to <code>\"hi\"</code>." },
+    { q: "<code>None</code> check karne ka <b>sahi</b> tareeka?", options: ["x == None", "x is None", "x = None", "None(x)"], correct: 1, why: "<code>is None</code> — identity check, sahi aur tez. <code>== None</code> style-wise galat." },
+  ],
+  "numbers-math": [
+    { q: "<code>print(10 // 3)</code> ka output?", options: ["3.33", "3", "4", "1"], correct: 1, why: "<code>//</code> = floor division — neeche wala <b>poora</b> number, 3." },
+    { q: "<code>print(10 % 3)</code> — kya aayega?", options: ["3", "1", "0", "3.33"], correct: 1, why: "<code>%</code> = remainder. 10 ÷ 3 = 3, bacha <b>1</b>." },
+    { q: "<code>print(0.1 + 0.2 == 0.3)</code> — result?", options: ["True", "False", "error", "0.3"], correct: 1, why: "Float precision — <code>0.1 + 0.2</code> = <code>0.3000…04</code>, to <code>== 0.3</code> <b>False</b>. Floats ko <code>==</code> se mat compare karo." },
+    { q: "<code>7 / 2</code> ka type aur value?", options: ["int, 3", "float, 3.5", "int, 4", "str"], correct: 1, why: "<code>/</code> <b>hamesha float</b> — <code>3.5</code>. Poora chahiye to <code>//</code>." },
+  ],
 };
 
 // A lesson's content plus its quiz block (if any), so a quiz lives in one map
