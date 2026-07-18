@@ -5,7 +5,7 @@
 // contentJson (and title/minutes) by slug and leaves everything else alone.
 
 import { PrismaClient } from "@prisma/client";
-import { trackLessons } from "./seed.mjs";
+import { trackLessons, lessonContent } from "./seed.mjs";
 
 const prisma = new PrismaClient();
 
@@ -32,7 +32,7 @@ async function main() {
           title: l.title,
           minutes: l.minutes,
           level: l.level || "Beginner",
-          contentJson: JSON.stringify(l.content),
+          contentJson: JSON.stringify(lessonContent(l)),
         },
       });
       updated++;

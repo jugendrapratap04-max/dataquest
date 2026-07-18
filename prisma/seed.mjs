@@ -102,12 +102,6 @@ const L1 = [
     { level: "intermediate", q: "Python dynamically typed hai — iska matlab kya hai?", a: "Type <b>value</b> ke saath judta hai, variable ke saath nahi. Isliye <code>x = 5</code> ke baad <code>x = \"hello\"</code> bilkul chalta hai — C/Java me nahi chalta. Faayda: likhna tez. Nuksan: type ki galti run karne par pakdi jaati hai, likhte waqt nahi." },
     { level: "intermediate", q: '<code>input()</code> se number lena ho to kya dhyan rakhoge?', a: "<code>input()</code> <b>hamesha string</b> deta hai, chahe user 21 hi likhe. Number chahiye to khud convert karo: <code>age = int(input())</code>. Bina convert kiye <code>age + 1</code> karoge to <code>TypeError</code> milega — ye production bugs ki sabse aam wajah hai." },
   ]},
-  { t: "quiz", items: [
-    { q: "<code>x = 10; x = \"ten\"; print(type(x))</code> — kya chhapega?", options: ["<class 'int'>", "<class 'str'>", "TypeError", "10"], correct: 1, why: "Python <b>dynamically typed</b> hai — type value se judta hai, variable se nahi. <code>x</code> ab string hai, to <code>str</code>." },
-    { q: "<code>age = input()</code>, user ne <code>5</code> type kiya. <code>age + 1</code> kya hoga?", options: ["6", "51", "TypeError", "'6'"], correct: 2, why: "<code>input()</code> hamesha <b>string</b> deta hai — <code>age</code> = <code>\"5\"</code>. String + int = <code>TypeError</code>. Pehle <code>int(age)</code> karo." },
-    { q: "<code>print(10 / 2)</code> ka output kya hai?", options: ["5", "5.0", "\"5\"", "2.5"], correct: 1, why: "<code>/</code> <b>hamesha float</b> deta hai — <code>5.0</code>, na ki <code>5</code>. Poora number chahiye to <code>//</code> use karo." },
-    { q: "In me se <b>valid</b> variable name kaunsa hai?", options: ["2nd_place", "my-score", "_total", "for"], correct: 2, why: "Digit se shuru nahi (<code>2nd_place</code> ✗), hyphen nahi (<code>my-score</code> ✗), keyword nahi (<code>for</code> ✗). <code>_total</code> sahi hai." },
-  ] },
 ];
 
 const L2 = [
@@ -2059,7 +2053,7 @@ async function main() {
     if (lessons) {
       for (const l of lessons) {
         const lesson = await prisma.lesson.create({
-          data: { slug: l.slug, order: l.order, title: l.title, minutes: l.minutes, level: l.level || "Beginner", contentJson: JSON.stringify(l.content), trackId: track.id },
+          data: { slug: l.slug, order: l.order, title: l.title, minutes: l.minutes, level: l.level || "Beginner", contentJson: JSON.stringify(lessonContent(l)), trackId: track.id },
         });
         lessonBySlug[l.slug] = lesson.id;
         for (const p of (l.problems || [])) {
@@ -2089,6 +2083,66 @@ async function main() {
 
   const counts = { users: await prisma.user.count(), tracks: await prisma.track.count(), lessons: await prisma.lesson.count(), problems: await prisma.problem.count() };
   console.log("✅ Done:", counts);
+}
+
+/** End-of-lesson quizzes, keyed by lesson slug. Application-level MCQs (predict
+ *  the output, spot the bug, apply to a new case) — so the answer can't be found
+ *  by re-reading the lesson; it only clears if the concept actually clicked.
+ *  Appended to a lesson's content by lessonContent(), so quizzes live in one
+ *  place instead of scattered through every lesson array. */
+export const QUIZZES = {
+  "variables-data-types": [
+    { q: "<code>x = 10; x = \"ten\"; print(type(x))</code> — kya chhapega?", options: ["<class 'int'>", "<class 'str'>", "TypeError", "10"], correct: 1, why: "Python <b>dynamically typed</b> hai — type value se judta hai, variable se nahi. <code>x</code> ab string hai, to <code>str</code>." },
+    { q: "<code>age = input()</code>, user ne <code>5</code> type kiya. <code>age + 1</code> kya hoga?", options: ["6", "51", "TypeError", "'6'"], correct: 2, why: "<code>input()</code> hamesha <b>string</b> deta hai — <code>age = \"5\"</code>. String + int = <code>TypeError</code>. Pehle <code>int(age)</code>." },
+    { q: "<code>print(10 / 2)</code> ka output?", options: ["5", "5.0", "\"5\"", "2.5"], correct: 1, why: "<code>/</code> <b>hamesha float</b> deta hai — <code>5.0</code>, na ki <code>5</code>. Poora chahiye to <code>//</code>." },
+    { q: "In me se <b>valid</b> variable name kaunsa hai?", options: ["2nd_place", "my-score", "_total", "for"], correct: 2, why: "Digit se shuru nahi, hyphen nahi, keyword (<code>for</code>) nahi. <code>_total</code> sahi hai." },
+  ],
+  "operators": [
+    { q: "<code>print(7 % 3)</code> ka output?", options: ["2", "1", "2.33", "0"], correct: 1, why: "<code>%</code> = <b>remainder</b>. 7 ÷ 3 = 2, bacha <b>1</b>." },
+    { q: "<code>print(2 + 3 * 2)</code> — kya aayega?", options: ["10", "8", "12", "7"], correct: 1, why: "<code>*</code> pehle chalta hai (precedence): 3*2 = 6, phir 2 + 6 = <b>8</b>." },
+    { q: "<code>print(5 > 3 and 2 > 4)</code> ka result?", options: ["True", "False", "error", "None"], correct: 1, why: "<code>and</code> me dono sach hone chahiye. <code>2 > 4</code> False hai, to poora <b>False</b>." },
+    { q: "<code>print(\"ha\" * 3)</code> kya dega?", options: ["9", "hahaha", "ha ha ha", "TypeError"], correct: 1, why: "<code>*</code> string aur int pe <b>repeat</b> karta hai — <code>\"ha\"</code> teen baar = <code>hahaha</code>." },
+  ],
+  "conditionals": [
+    { q: "<code>x = 5</code>. <code>if x > 3:</code> print A, <code>elif x > 4:</code> print B — kya chhapega?", options: ["A", "B", "A aur B", "kuch nahi"], correct: 0, why: "<code>if</code> match ho gaya (5>3), to <code>elif</code> check hi nahi hota — chahe wo bhi True ho. Sirf <b>A</b>." },
+    { q: "<code>if 0:</code> ka block chalega?", options: ["Haan", "Nahi", "SyntaxError", "kabhi-kabhi"], correct: 1, why: "<code>0</code> falsy hai, to condition False — block <b>skip</b> ho jaata hai." },
+    { q: "<code>if x = 5:</code> likha to?", options: ["x 5 ho jaata", "SyntaxError", "True", "kuch nahi"], correct: 1, why: "<code>=</code> assignment hai; condition me <b>==</b> chahiye. Ye <code>SyntaxError</code> deta hai — sabse aam beginner galti." },
+    { q: "<code>\"pass\" if marks >= 40 else \"fail\"</code>, <code>marks = 35</code> — result?", options: ["pass", "fail", "35", "error"], correct: 1, why: "Ternary: condition (<code>35 >= 40</code>) False, to <code>else</code> waala — <b>fail</b>." },
+  ],
+  "loops": [
+    { q: "<code>for i in range(1, 4): print(i)</code> — kya chhapega?", options: ["1 2 3 4", "1 2 3", "0 1 2 3", "1 2"], correct: 1, why: "<code>range(1, 4)</code> = 1, 2, 3 — <b>stop (4) excluded</b>." },
+    { q: "<code>continue</code> loop me kya karta hai?", options: ["poora loop rok deta", "current chakkar chhod ke agle pe", "program band", "kuch nahi"], correct: 1, why: "<code>continue</code> = current iteration <b>skip</b>, agla chalu. <code>break</code> poora loop rokta hai." },
+    { q: "<code>while count > 0:</code> me <code>count</code> kabhi na badle to?", options: ["ek baar chalega", "infinite loop", "error", "kabhi nahi chalega"], correct: 1, why: "Condition kabhi False nahi hogi → <b>infinite loop</b>. <code>while</code> me kuch aisa badlo jisse condition ek din False ho." },
+    { q: "<code>range(5)</code> kitne aur kaunse numbers deta hai?", options: ["5 numbers: 1-5", "5 numbers: 0-4", "6 numbers: 0-5", "4 numbers: 0-3"], correct: 1, why: "<code>range(5)</code> = 0, 1, 2, 3, 4 — <b>0 se shuru, 5 excluded</b>." },
+  ],
+  "lists-tuples": [
+    { q: "<code>nums = [1, 2, 3]; print(nums[3])</code> — kya hoga?", options: ["3", "IndexError", "None", "0"], correct: 1, why: "Index 0, 1, 2 hi valid hain (3 items). <code>nums[3]</code> range ke bahar — <b>IndexError</b>." },
+    { q: "<code>t = (1, 2); t[0] = 9</code> — kya hoga?", options: ["t = (9, 2)", "TypeError", "kuch nahi", "IndexError"], correct: 1, why: "Tuple <b>immutable</b> hai — badal nahi sakte. <code>TypeError</code>. Badalna ho to list use karo." },
+    { q: "<code>nums = [10, 20, 30]; print(nums[-1])</code> ka output?", options: ["10", "30", "IndexError", "-1"], correct: 1, why: "Negative index peeche se — <code>-1</code> = <b>aakhri</b> item = 30." },
+    { q: "List aur tuple me — kaunsa <b>badla</b> ja sakta hai?", options: ["tuple", "list", "dono", "koi nahi"], correct: 1, why: "<b>list</b> mutable (badalti hai), <b>tuple</b> immutable (fix). Data fix rakhna ho to tuple." },
+  ],
+  "dicts-sets": [
+    { q: "<code>d = {\"a\": 1}; print(d[\"b\"])</code> — kya hoga?", options: ["None", "KeyError", "0", "\"b\""], correct: 1, why: "Key <code>\"b\"</code> hai hi nahi → <b>KeyError</b>. Safe access ke liye <code>d.get(\"b\")</code> — wo None deta hai." },
+    { q: "<code>set([1, 2, 2, 3, 3, 3])</code> me kitne items honge?", options: ["6", "3", "2", "1"], correct: 1, why: "Set <b>duplicates hata deta</b> hai — sirf unique: {1, 2, 3} = <b>3</b> items." },
+    { q: "Key miss hone par crash NA ho — kaunsa sahi?", options: ["d[\"x\"]", "d.get(\"x\")", "d.key(\"x\")", "get(d, \"x\")"], correct: 1, why: "<code>d.get(\"x\")</code> key na mile to <b>None</b> deta hai (crash nahi). <code>d[\"x\"]</code> KeyError deta." },
+    { q: "Ek dict me do baar same key daalo to?", options: ["dono rehti", "aakhri value jeetegi", "error", "pehli value rehti"], correct: 1, why: "Dict me key <b>unique</b> hoti hai — same key dubara daalo to <b>aakhri value</b> purani ko replace kar deti hai." },
+  ],
+  "functions": [
+    { q: "<code>def f(): print(\"hi\")</code>, phir <code>x = f()</code>. <code>x</code> me kya?", options: ["\"hi\"", "None", "error", "\"\""], correct: 1, why: "Function me koi <code>return</code> nahi, to wo <b>None</b> return karta hai — <code>x = None</code> (\"hi\" sirf print hua)." },
+    { q: "<code>def f(a, b=2): return a + b</code>, phir <code>f(3)</code> — result?", options: ["error", "5", "3", "32"], correct: 1, why: "<code>b</code> ka default 2 hai, to <code>f(3)</code> = 3 + 2 = <b>5</b>." },
+    { q: "<code>def f(): x = 5</code>, phir bahar <code>print(x)</code> — kya hoga?", options: ["5", "NameError", "None", "0"], correct: 1, why: "<code>x</code> function ke <b>andar local</b> hai — bahar exist hi nahi karta. <b>NameError</b>." },
+    { q: "<code>return</code> ke baad wala code chalta hai?", options: ["haan", "nahi", "kabhi-kabhi", "sirf loop me"], correct: 1, why: "<code>return</code> function ko <b>turant khatam</b> kar deta hai — uske baad ka code us call me kabhi nahi chalta." },
+  ],
+};
+
+// A lesson's content plus its quiz block (if any), so a quiz lives in one map
+// entry instead of being pasted into each lesson array. Skips adding when the
+// lesson already carries an inline quiz.
+export function lessonContent(l) {
+  const q = QUIZZES[l.slug];
+  return q && !l.content.some((b) => b.t === "quiz")
+    ? [...l.content, { t: "quiz", items: q }]
+    : l.content;
 }
 
 /** Lesson content, keyed by track slug. Exported so apply-lessons.mjs can refresh
