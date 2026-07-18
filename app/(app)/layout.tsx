@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { ActivityPing } from "@/components/ActivityPing";
+import { FeedbackButton } from "@/components/FeedbackButton";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak } from "@/lib/progress";
 import { prisma } from "@/lib/prisma";
@@ -27,6 +28,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* Every authed page reports activity, so a focus session still counts
           you as studying while you're in the Practice tab it told you to open. */}
       <ActivityPing />
+      {/* Beta feedback capture, floating on every authed page. */}
+      <FeedbackButton />
       <Sidebar user={{ name: user.name, role: user.role }} roadmapPct={roadmapPct} />
       <main className="main">
         <div className="wrap">

@@ -32,6 +32,7 @@ model User {
   roomMembers    RoomMember[]
   roomMessages   RoomMessage[]
   hostedRooms    Room[]          @relation("RoomHost")
+  feedback       Feedback[]
 }
 
 model Track {
@@ -128,6 +129,22 @@ model Note {
   code      String   @default("")
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+}
+
+// Beta feedback captured in-app, so testers' reports land in one place instead
+// of scattering across WhatsApp. Written by /api/feedback; read on /feedback by
+// the admin account (ADMIN_EMAIL). No email service involved.
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String   @default("other") // "bug" | "idea" | "other"
+  message   String
+  path      String   @default("")      // the page they were on when reporting
+  status    String   @default("new")   // "new" | "seen" — for triage
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([status, createdAt])
 }
 
 // ---------------------------------------------------------------------------

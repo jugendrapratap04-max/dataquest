@@ -803,3 +803,56 @@ select.inp { cursor:pointer; }
 .room-bar { display:flex; align-items:center; gap:8px; padding:10px 14px; flex-wrap:wrap; }
 .room-bar .btn { padding:8px 13px; font-size:12.5px; }
 .rb-mid { margin-left:auto; font-size:11.5px; color:var(--ink-faint); }
+
+/* ---- Beta feedback: floating button + panel ---- */
+.fb-fab { position:fixed; right:20px; bottom:20px; z-index:70; display:inline-flex; align-items:center; gap:8px;
+  padding:11px 16px; border-radius:30px; border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent); color:#201607; font-weight:650; font-size:13px; box-shadow:var(--shadow); }
+.fb-fab svg { width:17px; height:17px; }
+.fb-fab:hover { filter:brightness(1.05); }
+@media (max-width:560px){ .fb-fab span { display:none; } .fb-fab { padding:13px; border-radius:50%; } }
+.fb-backdrop { position:fixed; inset:0; z-index:71; background:rgba(8,10,16,.32); }
+.fb-panel { position:fixed; right:20px; bottom:74px; z-index:72; width:340px; max-width:calc(100vw - 40px);
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:0 20px 50px -18px rgba(20,25,40,.4);
+  padding:18px; }
+.fb-head { display:flex; align-items:center; justify-content:space-between; }
+.fb-head b { font-size:15px; }
+.fb-x { border:0; background:none; color:var(--ink-faint); font-size:15px; cursor:pointer; padding:2px 4px; }
+.fb-x:hover { color:var(--ink); }
+.fb-sub { font-size:12px; color:var(--ink-soft); margin:4px 0 12px; }
+.fb-cats { display:flex; gap:7px; margin-bottom:11px; }
+.fb-cat { flex:1; font-size:12px; font-weight:600; padding:8px 6px; border-radius:9px; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--ink-soft); cursor:pointer; }
+.fb-cat.on { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-2); }
+.fb-area { width:100%; min-height:92px; resize:vertical; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:10px; padding:10px 12px; font:inherit; font-size:13px; color:var(--ink); outline:none; }
+.fb-area:focus { border-color:var(--accent); }
+.fb-area::placeholder { color:var(--ink-faint); }
+.fb-err { font-size:12px; color:var(--bad); margin-top:8px; }
+.fb-send { width:100%; justify-content:center; margin-top:11px; }
+.fb-thanks { text-align:center; padding:10px 4px; }
+.fb-tick { width:44px; height:44px; margin:2px auto 10px; border-radius:50%; background:var(--good-soft); color:var(--good);
+  display:grid; place-items:center; font-size:22px; font-weight:700; }
+.fb-thanks b { font-size:16px; } .fb-thanks p { font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; }
+
+/* ---- Feedback admin inbox ---- */
+.fa-tabs { display:flex; gap:8px; margin-bottom:16px; }
+.fa-tab { display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; padding:8px 14px;
+  border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--ink-soft); cursor:pointer; }
+.fa-tab.on { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-2); }
+.fa-n { font-family:var(--mono); font-size:11px; background:var(--panel-2); border-radius:20px; padding:1px 7px; }
+.fa-tab.on .fa-n { background:color-mix(in srgb,var(--accent) 22%,transparent); }
+.fa-list { display:flex; flex-direction:column; gap:12px; }
+.fa-item { padding:15px 16px; }
+.fa-item.is-new { border-color:color-mix(in srgb,var(--accent) 38%,transparent); }
+.fa-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:9px; }
+.fa-cat { font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; }
+.fa-bug { background:var(--bad-soft); color:var(--bad); }
+.fa-idea { background:var(--accent-soft); color:var(--accent-2); }
+.fa-other { background:var(--teal-soft); color:var(--teal); }
+.fa-meta { font-size:12px; color:var(--ink-faint); }
+.fa-mark { margin-left:auto; font-size:11.5px; font-weight:600; padding:5px 11px; border-radius:8px; cursor:pointer;
+  border:1px solid color-mix(in srgb,var(--good) 40%,transparent); background:var(--good-soft); color:var(--good); }
+.fa-mark.seen { border-color:var(--line); background:var(--panel-2); color:var(--ink-faint); }
+.fa-msg { font-size:13.5px; line-height:1.55; margin:0; white-space:pre-wrap; }
+.fa-path { font-size:11px; color:var(--ink-faint); margin-top:9px; }
