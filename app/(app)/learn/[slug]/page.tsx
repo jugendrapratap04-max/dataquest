@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
+import { LessonQuiz } from "@/components/LessonQuiz";
 import { VizBlock } from "@/components/viz/VizBlock";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -142,6 +143,8 @@ function Block({ b }: { b: any }) {
       );
     case "viz":
       return <VizBlock name={b.name} />;
+    case "quiz":
+      return <LessonQuiz items={b.items} />;
     case "recap":
       return (
         <div className="card recap">

@@ -130,13 +130,21 @@ const PLAIN = {
   h2: ["text"], def: ["term", "en"], analogy: ["concept", "real"], code: ["file", "output"],
   mistakes: ["items[].bad", "items[].fix"], interview: ["items[].level"],
   dtypes: ["items[].tag", "items[].name", "items[].desc", "items[].ex"],
+  quiz: ["items[].options[]"],
 };
 const HTML = {
   objectives: ["items[]"], hook: ["q", "why"], think: ["q", "a"], def: ["hi"], analogy: ["html"],
   mistakes: ["items[].why"], interview: ["items[].q", "items[].a"],
   p: ["html"], psoft: ["html"], note: ["html"], recap: ["items[]"],
+  quiz: ["items[].q", "items[].why"],
 };
 const pick = (obj, spec) => {
+  // Quiz options are an array inside each item — one extra level of nesting.
+  if (spec === "items[].options[]") {
+    const out = [];
+    (obj.items ?? []).forEach((it, i) => (it?.options ?? []).forEach((o, j) => out.push([`items[${i}].options[${j}]`, o])));
+    return out;
+  }
   if (spec.startsWith("items[]")) {
     const rest = spec.slice("items[]".length).replace(/^\./, "");
     return (obj.items ?? []).map((it, i) => [`items[${i}]${rest ? "." + rest : ""}`, rest ? it?.[rest] : it]);

@@ -102,6 +102,12 @@ const L1 = [
     { level: "intermediate", q: "Python dynamically typed hai — iska matlab kya hai?", a: "Type <b>value</b> ke saath judta hai, variable ke saath nahi. Isliye <code>x = 5</code> ke baad <code>x = \"hello\"</code> bilkul chalta hai — C/Java me nahi chalta. Faayda: likhna tez. Nuksan: type ki galti run karne par pakdi jaati hai, likhte waqt nahi." },
     { level: "intermediate", q: '<code>input()</code> se number lena ho to kya dhyan rakhoge?', a: "<code>input()</code> <b>hamesha string</b> deta hai, chahe user 21 hi likhe. Number chahiye to khud convert karo: <code>age = int(input())</code>. Bina convert kiye <code>age + 1</code> karoge to <code>TypeError</code> milega — ye production bugs ki sabse aam wajah hai." },
   ]},
+  { t: "quiz", items: [
+    { q: "<code>x = 10; x = \"ten\"; print(type(x))</code> — kya chhapega?", options: ["<class 'int'>", "<class 'str'>", "TypeError", "10"], correct: 1, why: "Python <b>dynamically typed</b> hai — type value se judta hai, variable se nahi. <code>x</code> ab string hai, to <code>str</code>." },
+    { q: "<code>age = input()</code>, user ne <code>5</code> type kiya. <code>age + 1</code> kya hoga?", options: ["6", "51", "TypeError", "'6'"], correct: 2, why: "<code>input()</code> hamesha <b>string</b> deta hai — <code>age</code> = <code>\"5\"</code>. String + int = <code>TypeError</code>. Pehle <code>int(age)</code> karo." },
+    { q: "<code>print(10 / 2)</code> ka output kya hai?", options: ["5", "5.0", "\"5\"", "2.5"], correct: 1, why: "<code>/</code> <b>hamesha float</b> deta hai — <code>5.0</code>, na ki <code>5</code>. Poora number chahiye to <code>//</code> use karo." },
+    { q: "In me se <b>valid</b> variable name kaunsa hai?", options: ["2nd_place", "my-score", "_total", "for"], correct: 2, why: "Digit se shuru nahi (<code>2nd_place</code> ✗), hyphen nahi (<code>my-score</code> ✗), keyword nahi (<code>for</code> ✗). <code>_total</code> sahi hai." },
+  ] },
 ];
 
 const L2 = [
