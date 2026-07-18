@@ -363,14 +363,28 @@ const L10 = [
 ];
 
 const L11 = [
-  { t: "objectives", items: ["try / except se errors handle karna","Program crash hone se bachana","Common errors pehchanna"] },
-  { t: "h2", n: "1", text: "try aur except" },
-  { t: "p", html: "Jo code fail ho sakta hai use <code>try</code> me daalo, aur error aane pe kya karna hai wo <code>except</code> me." },
-  { t: "code", file: "try.py", code: "try:\n    x = int(\"abc\")\nexcept ValueError:\n    x = 0\nprint(x)   # 0 (crash nahi hua)", output: "0" },
-  { t: "h2", n: "2", text: "Kyun zaroori hai" },
-  { t: "p", html: "User galat input de, ya file na mile — bina handle kiye program crash ho jaata hai. try/except usse rokta hai." },
-  { t: "note", variant: "warn", html: "<b>Common errors:</b> ValueError (galat convert), ZeroDivisionError (0 se bhaag), KeyError (dict me key nahi)." },
-  { t: "recap", items: ["try me risky code","except me error handle","Crash rukta hai","ValueError, ZeroDivisionError, KeyError common"] },
+  { t: "objectives", items: ["<code>try / except</code> se crash rokna","Specific errors pakadna (<code>ValueError</code> waghairah)","<code>else</code> aur <code>finally</code> ka kaam","<b>Bare except</b> kyun khatarnaak hai"] },
+  { t: "hook", q: "Tumhare 50,000 rows ke data me ek row me age likhi hai <code>\"pachees\"</code> (number ki jagah shabd). <code>int(\"pachees\")</code> crash karega — kya poora analysis ek gande row ki wajah se ruk jaaye?", why: "Bilkul nahi. <b>try / except</b> se tum us ek row ko sambhal ke aage badh jaate ho — program zinda rehta hai. Real data <b>hamesha</b> ganda hota hai, isiliye ye skill roz kaam aati hai." },
+  { t: "def", term: "Exception handling", en: "A mechanism to catch runtime errors so the program can respond gracefully instead of crashing.", hi: "Jo code fail ho sakta hai use <code>try</code> me rakho; agar error (exception) aaye to <code>except</code> use <b>pakad</b> leta hai aur program crash hone ke bajaye sambhal jaata hai." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> raw data me gande values, missing files, galat types — normal hai. <code>try/except</code> se ek kharab row/file poori pipeline nahi giraati; tum use skip/log karke aage badhte ho. Robust data code ki reedh ki haddi." },
+  { t: "h2", n: "1", text: "try / except" },
+  { t: "p", html: "Risky code <code>try</code> me, aur error aane pe kya karna hai <code>except</code> me. <b>Specific</b> error pakdo (jaise <code>ValueError</code>) — taaki sirf wahi galti sambhle jiski umeed hai." },
+  { t: "code", file: "try.py", code: "try:\n    age = int(\"pachees\")\nexcept ValueError:\n    age = 0            # default, crash nahi\nprint(age)   # 0", output: "0" },
+  { t: "h2", n: "2", text: "else aur finally" },
+  { t: "p", html: "<code>else</code> tab chalta hai jab <b>koi error nahi</b> aaya. <code>finally</code> <b>hamesha</b> chalta hai — chahe error ho ya na ho (cleanup ke liye: file band karna waghairah). Neeche scenario badal ke dekho 👇" },
+  { t: "viz", name: "exception-flow" },
+  { t: "think", q: "<code>finally</code> block kab chalta hai?", a: "<b>Hamesha</b> — error aaye ya na aaye, <code>except</code> chale ya <code>else</code>, <code>finally</code> zaroor chalta hai. Isiliye usme cleanup rakhte hain (file close, connection band) — jo har haal me hona chahiye." },
+  { t: "analogy", concept: "try / except", real: "Trapeze ke neeche jaal", html: "<code>try</code> = trapeze artist ka daring jump (risky code). <b>Jaal (except)</b> neeche laga hai — agar girre (error), jaal pakad leta hai, artist zinda. <code>finally</code> = show ke baad safai, jo hamesha hoti hai. Bina jaal ke ek galti = poora show (program) khatam." },
+  { t: "mistakes", items: [
+    { bad: "try:\n    risky()\nexcept:            # sab kuch pakad liya\n    pass", why: "<b>Bare except</b> (ya <code>except Exception</code> + <code>pass</code>) <b>har</b> error nigal jaata hai — tumhari asli bug (typo, galat naam) bhi chup-chaap chhup jaati hai. Debugging naamumkin ho jaati hai.", fix: "try:\n    risky()\nexcept ValueError as e:\n    print(\"skip:\", e)" },
+    { bad: "# normal flow control ke liye exception\ntry:\n    return d[key]\nexcept KeyError:\n    return None", why: "Kaam to karta hai, par jab har baar key miss ho sakti ho to exception mehnga aur galat tareeka hai. Iske liye seedha tareeka hai.", fix: "return d.get(key)   # miss pe None, no exception" },
+  ] },
+  { t: "recap", items: ["<code>try</code> risky code, <code>except</code> error handle","<b>specific</b> error pakdo (<code>except ValueError</code>)","<code>else</code> = koi error nahi to chala","<code>finally</code> = <b>hamesha</b> (cleanup)","<b>bare except</b> mat karo — bugs chhup jaati hain"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>try/except</code> ka kaam?", a: "Risky code ko crash hone se bachana — error aaye to <code>except</code> use pakad ke sambhal leta hai, program aage chalta rehta hai." },
+    { level: "beginner", q: "<code>else</code> aur <code>finally</code> me farak?", a: "<code>else</code> sirf tab jab koi error <b>na</b> aaye. <code>finally</code> <b>hamesha</b> — error ho ya na ho — cleanup ke liye." },
+    { level: "intermediate", q: "<b>Bare <code>except:</code></b> kyun bura hai?", a: "Woh <b>har</b> exception pakad leta hai — <code>KeyboardInterrupt</code>, tumhari apni bug, sab. Asli galti chhup jaati hai aur debugging behad mushkil. Hamesha <b>specific</b> exception pakdo." },
+  ] },
 ];
 
 const L12 = [

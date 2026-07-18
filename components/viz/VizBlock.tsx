@@ -8,6 +8,7 @@ import { ListIndexer } from "./ListIndexer";
 import { StringSlicer } from "./StringSlicer";
 import { ComprehensionBuilder } from "./ComprehensionBuilder";
 import { ObjectInspector } from "./ObjectInspector";
+import { ExceptionFlow } from "./ExceptionFlow";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
 import { ScatterCorrelation } from "./ScatterCorrelation";
@@ -22,6 +23,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "string-slicer": StringSlicer,
   "comprehension-builder": ComprehensionBuilder,
   "object-inspector": ObjectInspector,
+  "exception-flow": ExceptionFlow,
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
   "scatter-correlation": ScatterCorrelation,
