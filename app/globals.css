@@ -518,6 +518,14 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .ef-always { border-color:color-mix(in srgb,var(--indigo) 45%,transparent); } .ef-always .ef-badge { background:var(--indigo-soft); color:var(--indigo); }
 .ef-partial .ef-badge { background:var(--bad-soft); color:var(--bad); }
 .ef-skip { opacity:.5; } .ef-skip .ef-badge { background:var(--panel-3); color:var(--ink-faint); }
+/* Truthiness Tester viz */
+.tt-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+.tt-chip { display:flex; flex-direction:column; align-items:flex-start; gap:3px; padding:9px 11px; border-radius:10px; border:1.5px solid var(--line); background:var(--panel-2); cursor:pointer; text-align:left; }
+.tt-chip .tt-code { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); }
+.tt-chip .tt-tag { font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; }
+.tt-chip.t { border-color:color-mix(in srgb,var(--good) 40%,transparent); } .tt-chip.t .tt-tag { color:var(--good); }
+.tt-chip.f { border-color:color-mix(in srgb,var(--bad) 38%,transparent); } .tt-chip.f .tt-tag { color:var(--bad); }
+.tt-chip.sel { box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent); border-color:var(--accent); }
 .cast-flow { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .cast-src, .cast-res { border:2px solid var(--line); border-radius:12px; padding:12px 16px; text-align:center; min-width:90px; background:var(--panel); }
 .cast-src .lbl, .cast-res .lbl { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:4px; }

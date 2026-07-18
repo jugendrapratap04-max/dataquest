@@ -409,15 +409,28 @@ const L13 = [
 ];
 
 const L14 = [
-  { t: "objectives", items: ["int, float, complex samajhna","abs, round, pow use karna","math module ke functions"] },
-  { t: "h2", n: "1", text: "Number types" },
-  { t: "p", html: "Python me 3 number types: <b>int</b> (poore), <b>float</b> (decimal), <b>complex</b> (a+bj — DS me kam). Bade numbers me underscore bhi chalega: <code>1_000_000</code>." },
-  { t: "code", file: "numbers.py", code: "print(abs(-7))          # 7\nprint(round(3.567, 1))  # 3.6\nprint(pow(2, 5))        # 32", output: "7\n3.6\n32" },
-  { t: "h2", n: "2", text: "math module" },
-  { t: "p", html: "<code>import math</code> se aur functions: <code>sqrt</code>, <code>ceil</code> (upar round), <code>floor</code> (neeche round), <code>pi</code>." },
-  { t: "code", file: "math.py", code: "import math\nprint(math.sqrt(16))    # 4.0\nprint(math.ceil(4.1))   # 5\nprint(math.floor(4.9))  # 4", output: "4.0\n5\n4" },
-  { t: "note", variant: "tip", html: "<b>random</b> module se random numbers: <code>random.randint(1, 6)</code> — dice roll jaisa." },
-  { t: "recap", items: ["int, float, complex","abs / round / pow built-in","math: sqrt, ceil, floor, pi","random for random numbers"] },
+  { t: "objectives", items: ["<b>int</b> vs <b>float</b>, aur <code>/</code> vs <code>//</code> vs <code>%</code>","<code>**</code>, <code>round</code>, <code>abs</code>","<code>math</code> module","Float ki <b>precision</b> gotcha (money ka khatra)"] },
+  { t: "hook", q: "Python se poochho: <code>0.1 + 0.2</code> kitna hai? Tumhe lagega <code>0.3</code>. Par Python bolta hai <code>0.30000000000000004</code> — kyun??", why: "Ye bug nahi — computer decimals ko <b>binary</b> me store karta hai, aur kuch decimals (jaise 0.1) binary me poore fit hi nahi hote. Isiliye <b>paison ka hisaab float se karna khatarnaak</b> hai." },
+  { t: "def", term: "int vs float", en: "int is a whole number with unlimited size; float is a decimal number stored in limited binary precision.", hi: "<b>int</b> = poora number (<code>7</code>, <code>-100</code>), Python me kitna bhi bada. <b>float</b> = decimal (<code>3.14</code>), par <b>seemit precision</b> ke saath — isiliye kabhi-kabhi thoda-sa off hota hai." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> saara analysis numbers pe — averages, totals, percentages, growth. Do cheezein rozana: (1) <code>/</code> hamesha <b>float</b> deta hai, <code>//</code> <b>poora</b> (floor); (2) float precision — money/exact hisaab me <code>round()</code> lagao ya <code>Decimal</code> use karo, warna paise idhar-udhar." },
+  { t: "h2", n: "1", text: "Division ki teen shaklein" },
+  { t: "p", html: "<code>/</code> normal bhaag (<b>float</b> deta hai, hamesha). <code>//</code> <b>floor</b> division (neeche wala poora). <code>%</code> <b>remainder</b> (bacha hua). <code>**</code> power." },
+  { t: "code", file: "div.py", code: "print(7 / 2)     # 3.5   (float)\nprint(7 // 2)    # 3     (poora, neeche)\nprint(7 % 2)     # 1     (remainder)\nprint(2 ** 5)    # 32    (power)", output: "3.5\n3\n1\n32" },
+  { t: "h2", n: "2", text: "round, abs aur math" },
+  { t: "p", html: "<code>round(x, n)</code> n decimal tak, <code>abs(x)</code> minus hataao. <code>import math</code> se <code>sqrt</code>, <code>ceil</code> (upar), <code>floor</code> (neeche), <code>pi</code>." },
+  { t: "code", file: "math.py", code: "import math\nprint(round(3.567, 1))  # 3.6\nprint(abs(-7))          # 7\nprint(math.sqrt(16))    # 4.0\nprint(math.ceil(4.1))   # 5", output: "3.6\n7\n4.0\n5" },
+  { t: "think", q: "<code>10 / 3</code> aur <code>10 // 3</code> — dono ka result kya hoga?", a: "<code>10 / 3</code> → <b>3.3333…</b> (float, poora bhaag). <code>10 // 3</code> → <b>3</b> (floor, neeche wala poora — decimal phenk deta hai). Yaad rakho: <code>/</code> hamesha float, <code>//</code> poora." },
+  { t: "analogy", concept: "Float precision", real: "Decimal me 1/3", html: "Tum decimal me <code>1/3</code> likho to <code>0.3333…</code> — kabhi khatam nahi hota, isliye tum kahin round kar dete ho, thoda error aa jaata hai. Computer ke saath yahi hai par <b>binary</b> me — <code>0.1</code> jaise numbers binary me theek fit nahi hote, isliye halka-sa off. Bug nahi, ganit ki majboori." },
+  { t: "mistakes", items: [
+    { bad: "total = 0.1 + 0.2\nif total == 0.3:      # kabhi True nahi!\n    print(\"exact\")", why: "<code>0.1 + 0.2</code> == <code>0.30000000000000004</code>, to <code>== 0.3</code> <b>False</b> hai. Floats ko seedha <code>==</code> se compare mat karo.", fix: "if round(total, 2) == 0.3:\n    print(\"close enough\")" },
+    { bad: "half = 7 / 2\nprint(items[half])    # TypeError", why: "<code>/</code> hamesha <b>float</b> deta hai (<code>3.5</code>), aur index int hona chahiye. Poora chahiye to <code>//</code>.", fix: "half = 7 // 2   # 3 (int)\nprint(items[half])" },
+  ] },
+  { t: "recap", items: ["<code>/</code> float, <code>//</code> poora (floor), <code>%</code> remainder, <code>**</code> power","<code>round</code>, <code>abs</code>, aur <code>math</code>: <code>sqrt/ceil/floor/pi</code>","float ki precision seemit — <code>==</code> se compare mat karo","paise/exact hisaab me <code>round()</code> ya <code>Decimal</code>"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "<code>/</code> aur <code>//</code> me farak?", a: "<code>/</code> normal bhaag, hamesha <b>float</b> (<code>7/2 = 3.5</code>). <code>//</code> <b>floor</b> division — neeche wala poora number (<code>7//2 = 3</code>). Index/count ke liye <code>//</code>." },
+    { level: "intermediate", q: "<code>0.1 + 0.2 == 0.3</code> False kyun?", a: "Floats binary me store hote hain aur <code>0.1</code>/<code>0.2</code> binary me poore represent nahi hote — halki si error rehti hai (<code>0.3000…04</code>). Isiliye floats ko <code>==</code> se nahi, <code>round()</code> ya <code>math.isclose()</code> se compare karo." },
+    { level: "intermediate", q: "Paison ke liye float kyun nahi?", a: "Precision errors jud ke paise idhar-udhar kar dete hain. Money ke liye Python ka <code>decimal.Decimal</code> (exact decimal) ya integer paise (100 = ₹1) use karo." },
+  ] },
 ];
 const L15 = [
   { t: "objectives", items: ["f-strings se dynamic strings","Numbers format karna (decimals, comma)","Escape characters"] },
@@ -431,14 +444,28 @@ const L15 = [
   { t: "recap", items: ["f\"{var}\" — dynamic strings","{x:.2f} — 2 decimals","{x:,} — comma separator","\\n newline, \\t tab"] },
 ];
 const L16 = [
-  { t: "objectives", items: ["True/False samajhna","Comparisons se bool banana","Truthy/falsy values"] },
-  { t: "h2", n: "1", text: "Boolean values" },
-  { t: "p", html: "Sirf do value: <code>True</code> aur <code>False</code>. Har comparison ek bool deta hai." },
-  { t: "code", file: "bool.py", code: "print(10 > 5)        # True\nprint(bool(0))       # False\nprint(bool(\"hi\"))    # True", output: "True\nFalse\nTrue" },
+  { t: "objectives", items: ["<code>True</code>/<code>False</code> aur comparisons","<code>and</code> / <code>or</code> / <code>not</code>","<b>Truthy</b> aur <b>Falsy</b> values","<code>== None</code> ki jagah <code>is None</code>"] },
+  { t: "hook", q: "Code me likha hai <code>if my_list:</code> — bina <code>== something</code> ke. Iska kya matlab? Aur ek khaali list <code>[]</code> — woh <code>True</code> hai ya <code>False</code>?", why: "<code>if my_list:</code> ka matlab hai \"agar list <b>khaali nahi</b>\". Aur haan — khaali <code>[]</code> ko Python <b>False</b> maanta hai! Ye \"truthiness\" har condition ke peeche hai." },
+  { t: "def", term: "Boolean", en: "A boolean is one of exactly two values, True or False, used to represent logic and drive conditions.", hi: "Sirf do value: <code>True</code> aur <code>False</code>. Har comparison (<code>&gt;</code>, <code>==</code>, <code>in</code>) ek boolean deta hai, aur <code>if</code>/<code>while</code> isi pe faisla lete hain." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> data filter karna = boolean soch. Pandas me <code>df[df.age &gt; 18]</code> — ye <code>df.age &gt; 18</code> ek poora <b>True/False</b> ka column banata hai (boolean mask), aur wahi rows chunta hai jahan True hai. Boolean pakka to filtering pakki." },
+  { t: "h2", n: "1", text: "Comparison aur logic" },
+  { t: "p", html: "Comparisons (<code>&gt; &lt; == != &gt;= &lt;=</code>) bool dete hain. Jodne ke liye <code>and</code> (dono sach), <code>or</code> (koi ek), <code>not</code> (ulta)." },
+  { t: "code", file: "bool.py", code: "age = 20\nprint(age > 18 and age < 60)   # True\nprint(age < 13 or age > 60)    # False\nprint(not True)                # False", output: "True\nFalse\nFalse" },
   { t: "h2", n: "2", text: "Truthy aur Falsy" },
-  { t: "p", html: "Kuch values automatically <b>False</b> maani jaati hain: <code>0</code>, <code>\"\"</code> (empty), <code>[]</code>, <code>None</code>. Baaki sab <b>True</b>." },
-  { t: "note", variant: "tip", html: "<b>if me direct:</b> <code>if my_list:</code> ka matlab 'agar list khaali nahi hai'." },
-  { t: "recap", items: ["True / False only","Comparison bool deta hai","0, \"\", [], None = falsy","Baaki sab truthy"] },
+  { t: "p", html: "Sirf <code>True</code>/<code>False</code> hi nahi — <b>har</b> value ki ek \"truthiness\" hoti hai. <b>Falsy</b> (False jaisi): <code>0</code>, <code>0.0</code>, <code>\"\"</code>, <code>[]</code>, <code>{}</code>, <code>None</code>. Baaki <b>sab truthy</b>. Neeche khud check karo 👇" },
+  { t: "viz", name: "truthiness-tester" },
+  { t: "think", q: "<code>bool([])</code> kya dega — aur <code>bool([0])</code>?", a: "<code>bool([])</code> → <b>False</b> (khaali list falsy). Par <code>bool([0])</code> → <b>True</b>! List <b>khaali nahi</b> hai — usme ek item (0) hai. \"Khaali\" matter karta hai, andar kya hai wo nahi." },
+  { t: "analogy", concept: "Boolean", real: "On/Off switch", html: "Boolean = ek switch 🔘 — sirf <b>ON (True)</b> ya <b>OFF (False)</b>, beech me kuch nahi. Truthiness ka matlab: Python har cheez ko dekh ke keh deta hai \"ye switch on maanein ya off\" — khaali/zero/None ko OFF, baaki sab ko ON." },
+  { t: "mistakes", items: [
+    { bad: "if is_ready == True:   # fizool\n    go()", why: "<code>is_ready</code> pehle se bool hai — <code>== True</code> lagana bekaar hai. Seedha <code>if is_ready:</code> saaf aur sahi hai.", fix: "if is_ready:\n    go()" },
+    { bad: "if x == None:          # kaam karta, par galat style", why: "<code>None</code> ke liye <code>==</code> nahi, <code>is</code> use karo — <code>None</code> poore program me ek hi cheez hai (identity check), aur <code>is None</code> tez + sahi maana jaata hai.", fix: "if x is None:\n    ..." },
+  ] },
+  { t: "recap", items: ["<code>True</code>/<code>False</code> — comparisons se milte hain","<code>and</code> (dono), <code>or</code> (koi ek), <code>not</code> (ulta)","Falsy: <code>0, 0.0, \"\", [], {}, None</code> — baaki truthy","<code>if my_list:</code> = \"khaali nahi\"","<code>None</code> ke liye <code>is None</code>, <code>== None</code> nahi"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "Truthy aur Falsy kya hai?", a: "Har value ko Python <code>if</code> me True ya False jaisa maanta hai. <b>Falsy</b>: <code>0, 0.0, \"\", [], {}, (), None, False</code>. Baaki <b>sab truthy</b> — jaise non-empty list/string, non-zero number." },
+    { level: "beginner", q: "<code>and</code> aur <code>or</code> ka result kya hota hai?", a: "<code>and</code>: dono True to True. <code>or</code>: koi ek True to True. Dono <b>short-circuit</b> karte hain — <code>and</code> pehli False pe ruk jaata hai, <code>or</code> pehli True pe." },
+    { level: "intermediate", q: "<code>== None</code> aur <code>is None</code> me farak?", a: "<code>is None</code> <b>identity</b> check karta hai (None poore program me ek hi object) — sahi aur tez tareeka. <code>==</code> value compare karta hai aur custom objects me galat bhi ho sakta hai. None ke liye hamesha <code>is</code>." },
+  ] },
 ];
 const L17 = [
   { t: "objectives", items: ["Lambda (one-line function) banana","map/sorted ke saath use","Kab use karein"] },

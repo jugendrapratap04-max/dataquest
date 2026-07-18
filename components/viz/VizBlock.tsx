@@ -9,6 +9,7 @@ import { StringSlicer } from "./StringSlicer";
 import { ComprehensionBuilder } from "./ComprehensionBuilder";
 import { ObjectInspector } from "./ObjectInspector";
 import { ExceptionFlow } from "./ExceptionFlow";
+import { TruthinessTester } from "./TruthinessTester";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
 import { ScatterCorrelation } from "./ScatterCorrelation";
@@ -24,6 +25,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "comprehension-builder": ComprehensionBuilder,
   "object-inspector": ObjectInspector,
   "exception-flow": ExceptionFlow,
+  "truthiness-tester": TruthinessTester,
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
   "scatter-correlation": ScatterCorrelation,
