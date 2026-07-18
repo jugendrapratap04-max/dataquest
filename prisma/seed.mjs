@@ -311,26 +311,55 @@ const L8 = [
 ];
 
 const L9 = [
-  { t: "objectives", items: ["List comprehension se short loop likhna","Condition (if) se filter karna","Clean code banana"] },
-  { t: "h2", n: "1", text: "List comprehension" },
-  { t: "p", html: "Ek line me list banana — loop ka short form: <code>[expression for item in list]</code>." },
+  { t: "objectives", items: ["Loop ko ek line ki <b>comprehension</b> me badalna","<code>if</code> se filter karna","set/dict comprehension ka idea","Kab comprehension, kab normal loop"] },
+  { t: "hook", q: "Tumhare paas 10,000 prices hain, sabpe 18% GST lagana hai — ek nayi list chahiye. Poora <code>for</code> + <code>append</code> likhoge, ya ek line me?", why: "Python me ye ek line ka kaam hai — <b>list comprehension</b>. Loop + append ka chhota, tez aur saaf roop — aur data transform karne ka sabse aam tareeka." },
+  { t: "def", term: "List comprehension", en: "A concise expression that builds a new list by transforming and/or filtering the items of an iterable in a single line.", hi: "Ek line me nayi list banane ka tareeka — kisi list ke har item ko <b>transform</b> karo (expr), aur chaaho to <b>filter</b> karo (if). Formula: <code>[expr for x in list if cond]</code>." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> data transform rozana ka kaam hai — prices pe tax, naam clean karna, ek column se doosra banana, gande rows hatana. Comprehension yehi kaam chhote, padhne-layak code me karta hai. (Pandas me yehi soch <code>df</code> pe kaam aayegi.)" },
+  { t: "h2", n: "1", text: "Basic — transform" },
+  { t: "p", html: "<code>[expr for x in list]</code> — har item pe <code>expr</code> lagao, nayi list milegi." },
   { t: "code", file: "comp.py", code: "nums = [1, 2, 3, 4]\nsquares = [n * n for n in nums]\nprint(squares)   # [1, 4, 9, 16]", output: "[1, 4, 9, 16]" },
-  { t: "h2", n: "2", text: "Condition ke saath" },
-  { t: "p", html: "<code>if</code> laga ke filter karo: <code>[x for x in list if condition]</code>." },
-  { t: "code", file: "compif.py", code: "nums = [1, 2, 3, 4, 5, 6]\nevens = [x for x in nums if x % 2 == 0]\nprint(evens)   # [2, 4, 6]", output: "[2, 4, 6]" },
-  { t: "note", variant: "tip", html: "<b>Kyun:</b> 3 line ka loop ek clean line me. Par bahut complex ho to normal loop hi behtar." },
-  { t: "recap", items: ["[expr for x in list] — short loop","[x for x in list if cond] — filter","Clean & fast","Complex ho to normal loop use karo"] },
+  { t: "h2", n: "2", text: "Filter — if ke saath" },
+  { t: "p", html: "Aakhir me <code>if</code> laga ke sirf kuch items rakho: <code>[x for x in list if cond]</code>. Pehle filter, phir transform." },
+  { t: "code", file: "compif.py", code: "nums = [1, 2, 3, 4, 5, 6]\nevens_sq = [x*x for x in nums if x % 2 == 0]\nprint(evens_sq)   # [4, 16, 36]", output: "[4, 16, 36]" },
+  { t: "viz", name: "comprehension-builder" },
+  { t: "think", q: "Har word ko UPPERCASE karke nayi list <code>out</code> banani hai (loop + append). Ek line ki comprehension me kaise?", a: "<code>out = [w.upper() for w in words]</code><br/><br/><code>append</code> waala expr aage, <code>for</code> waisa hi. Teen line ka kaam ek saaf line me." },
+  { t: "note", variant: "tip", html: "<b>Bonus:</b> yehi soch set aur dict pe bhi — <code>{x for x in nums}</code> (set), <code>{k: v for k, v in pairs}</code> (dict). Bracket badla, idea wahi." },
+  { t: "analogy", concept: "Comprehension", real: "Factory conveyor belt", html: "Socho ek conveyor belt 🏭: items ek taraf se aate hain. Pehle ek <b>gate (if)</b> — kuch nikal jaate hain. Jo bache, unpe ek <b>machine (expr)</b> kaam karti hai. Doosri taraf nayi list nikalti hai. <code>for</code> loop bhi yahi karta hai — comprehension bas usko ek line me likh deta hai." },
+  { t: "mistakes", items: [
+    { bad: "# 2 nested loop + 2 filter, sab ek line me\nres = [f(x) for x in a for y in b if p(x) if q(y)]", why: "Comprehension ka faayda <b>readability</b> hai. Itna thoos doge to woh khatam — koi (tum bhi) 2 mahine baad nahi samjhega. Complex ho to normal loop saaf hai.", fix: "res = []\nfor x in a:\n    for y in b:\n        if p(x) and q(y):\n            res.append(f(x))" },
+    { bad: "# sirf print ke liye comprehension\n[print(x) for x in nums]", why: "Comprehension ka kaam <b>nayi list banana</b> hai. Sirf side-effect (print) ke liye chalाओge to ek bekaar <code>[None, None, …]</code> list bhi banegi. Iske liye seedha <code>for</code> loop.", fix: "for x in nums:\n    print(x)" },
+  ] },
+  { t: "recap", items: ["<code>[expr for x in list]</code> — transform","<code>[x for x in list if cond]</code> — filter + transform","<code>{}</code> se set/dict comprehension","nayi list <b>return</b> hoti hai, purani nahi badalti","complex ya side-effect ho to normal loop"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "List comprehension kya hai, faayda kya?", a: "Ek line me list banane ka tareeka — <code>[expr for x in it if cond]</code>. Faayda: chhota, thoda tez (loop+append se), aur padhne me saaf — jab tak simple rahe." },
+    { level: "beginner", q: "<code>if</code> comprehension me kahan lagta hai?", a: "<code>for</code> ke <b>baad</b>, filter ke liye: <code>[x for x in xs if x > 0]</code>. (Ek alag roop me <code>if/else</code> <code>for</code> se <b>pehle</b> bhi aa sakta hai — wo transform ke liye, filter ke liye nahi.)" },
+    { level: "intermediate", q: "Comprehension kab NA use karein?", a: "Jab logic complex/nested ho (readability marr jaaye), ya sirf side-effect chahiye (print, DB write) — tab normal <code>for</code>. Rule: ek nazar me samajh na aaye to loop." },
+  ] },
 ];
 
 const L10 = [
-  { t: "objectives", items: ["Class aur object samajhna","__init__ se data set karna","Method banana"] },
-  { t: "h2", n: "1", text: "Class kya hai?" },
-  { t: "p", html: "Class ek <b>blueprint</b> hai (jaise 'Car' ka design), object us blueprint se bani asli cheez (ek car). <code>class</code> se banate hain." },
-  { t: "code", file: "class.py", code: "class Dog:\n    def __init__(self, name):\n        self.name = name\n    def bark(self):\n        return self.name + \" says woof!\"\n\nd = Dog(\"Bruno\")\nprint(d.bark())   # Bruno says woof!", output: "Bruno says woof!" },
-  { t: "h2", n: "2", text: "__init__ aur self" },
-  { t: "p", html: "<code>__init__</code> object banate waqt chalta hai (data set karta hai). <code>self</code> = wahi object, khud ko refer karta hai." },
-  { t: "note", variant: "tip", html: "<b>Real use:</b> ML models, data structures — sab classes hote hain. OOP data science ka bada part hai." },
-  { t: "recap", items: ["class = blueprint, object = usse bani cheez","__init__ data set karta hai","self = object khud","method = class ke andar function"] },
+  { t: "objectives", items: ["<b>class</b> (blueprint) aur <b>object</b> (instance) ka farak","<code>__init__</code> aur <code>self</code> kya karte hain","<b>method</b> — object ka apna function","OOP ki zaroorat kyun"] },
+  { t: "hook", q: "Ek app me 100 dogs hain — har ek ka naam, breed, age. Kya tum <code>dog1_name</code>, <code>dog1_age</code>, <code>dog2_name</code>… 300 variables banaoge?", why: "Namumkin. Chahiye ek <b>saancha (blueprint)</b> jisme likha ho \"har dog me naam-breed-age hota hai aur bark karta hai\" — phir usse jitne chaaho dog bana lo. Yehi <b>class</b> hai." },
+  { t: "def", term: "Class / Object", en: "A class is a blueprint that bundles data (attributes) and behaviour (methods); an object is a specific instance built from that blueprint.", hi: "<b>Class</b> = design/blueprint (jaise 'Dog' ka saancha). <b>Object</b> = us design se bani ek asli cheez (Bruno naam ka ek dog). Ek class se kai objects — har object ka apna data, par methods sab me common." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> tum jo bhi library use karoge — <code>DataFrame</code>, ek sklearn <code>model</code>, <code>model.fit()</code> / <code>model.predict()</code> — sab <b>objects</b> aur <b>methods</b> hain. OOP samajh gaye to har library apne aap samajh aane lagti hai." },
+  { t: "h2", n: "1", text: "Class banao, object banao" },
+  { t: "p", html: "<code>class</code> se blueprint likho. Phir <code>Dog(\"Bruno\")</code> jaise call se ek object bana lo — jitne chaaho." },
+  { t: "code", file: "class.py", code: "class Dog:\n    def __init__(self, name, breed):\n        self.name = name      # is object ka data\n        self.breed = breed\n    def bark(self):\n        return self.name + \" says woof!\"\n\nd = Dog(\"Bruno\", \"Labrador\")\nprint(d.bark())   # Bruno says woof!", output: "Bruno says woof!" },
+  { t: "viz", name: "object-inspector" },
+  { t: "h2", n: "2", text: "__init__ aur self — dil ki baat" },
+  { t: "p", html: "<code>__init__</code> tab <b>apne aap</b> chalta hai jab tum object banate ho — data set karne ke liye. <code>self</code> = <b>\"yehi object\"</b>. Python <code>self</code> khud bhejta hai; tum likhte ho par call karte waqt paste nahi karte: <code>d.bark()</code>, na ki <code>d.bark(d)</code>." },
+  { t: "think", q: "<code>self.name</code> aur sirf <code>name</code> me kya farak hai?", a: "<code>name</code> = sirf ek local variable (function khatam, gaayab). <code>self.name</code> = <b>is object pe chipka</b> data — object jab tak zinda, ye data zinda. Isiliye <code>bark()</code> baad me bhi <code>self.name</code> padh paata hai." },
+  { t: "analogy", concept: "Class vs Object", real: "Cookie-cutter vs cookie 🍪", html: "<b>Class</b> = cookie-cutter (saancha) — ek hi hai, khud khaane layak nahi. <b>Object</b> = usse kati asli cookies — jitni chaaho, har ek alag (koi chocolate, koi vanilla = alag data), par shape (methods) same. <code>self</code> = \"yeh waali cookie\", taaki har cookie apna flavour jaane." },
+  { t: "mistakes", items: [
+    { bad: "class Dog:\n    def bark():          # self bhool gaye\n        return \"woof\"\nDog().bark()             # TypeError", why: "Har method ka <b>pehla</b> parameter <code>self</code> hona chahiye — Python object ko wahin bhejta hai. Bina <code>self</code> ke woh confuse ho jaata hai.", fix: "class Dog:\n    def bark(self):\n        return \"woof\"" },
+    { bad: "class Dog:\n    def __init__(self, name):\n        name = name        # self. bhool gaye", why: "<code>self.</code> ke bina <code>name</code> sirf ek local variable hai jo <code>__init__</code> khatam hote hi gaayab. Object me kuch save nahi hua.", fix: "def __init__(self, name):\n    self.name = name" },
+  ] },
+  { t: "recap", items: ["<b>class</b> = blueprint, <b>object</b> = usse bani cheez","<code>__init__</code> object banate waqt data set karta hai","<code>self</code> = \"yehi object\" — Python khud bhejta hai","<code>self.x</code> object pe data chipkata hai; <b>method</b> = class ke andar function"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "class aur object me farak?", a: "<b>class</b> blueprint/design hai (ek), <b>object</b> us blueprint se bani asli cheez (kai ho sakti hain). Jaise 'Car' class, aur meri asli car ek object." },
+    { level: "beginner", q: "<code>self</code> kya hai?", a: "Method ke andar \"yehi object\" ko refer karta hai — jis object pe method call hua. Python use <b>automatically</b> bhejta hai, isiliye pehla parameter <code>self</code> likhte hain par call me nahi dete." },
+    { level: "intermediate", q: "<code>__init__</code> kab aur kyun chalta hai?", a: "Jab tum object banate ho (<code>Dog(\"Bruno\")</code>) tab <b>apne aap</b>. Iska kaam object ka shuruaati data (attributes) set karna — constructor. Tum ise seedha call nahi karte." },
+  ] },
 ];
 
 const L11 = [

@@ -6,6 +6,8 @@ import { OperatorLab } from "./OperatorLab";
 import { LoopVisualizer } from "./LoopVisualizer";
 import { ListIndexer } from "./ListIndexer";
 import { StringSlicer } from "./StringSlicer";
+import { ComprehensionBuilder } from "./ComprehensionBuilder";
+import { ObjectInspector } from "./ObjectInspector";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
 import { ScatterCorrelation } from "./ScatterCorrelation";
@@ -18,6 +20,8 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "loop-visualizer": LoopVisualizer,
   "list-indexer": ListIndexer,
   "string-slicer": StringSlicer,
+  "comprehension-builder": ComprehensionBuilder,
+  "object-inspector": ObjectInspector,
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
   "scatter-correlation": ScatterCorrelation,
