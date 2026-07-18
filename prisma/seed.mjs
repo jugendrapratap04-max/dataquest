@@ -279,15 +279,35 @@ const L7 = [
 ];
 
 const L8 = [
-  { t: "objectives", items: ["String methods use karna (upper, lower, strip, replace)","Slicing se tukde nikaalna","split se list banana"] },
-  { t: "h2", n: "1", text: "String methods" },
-  { t: "p", html: "Strings pe kaam ke methods: <code>.upper()</code>, <code>.lower()</code>, <code>.strip()</code> (extra space hatao), <code>.replace(a, b)</code>." },
-  { t: "code", file: "strings.py", code: "name = \"  Freya  \"\nprint(name.strip())              # Freya\nprint(\"hello\".upper())           # HELLO\nprint(\"a-b-c\".replace(\"-\", \" \"))  # a b c", output: "Freya\nHELLO\na b c" },
-  { t: "h2", n: "2", text: "Slicing aur split" },
-  { t: "p", html: "<code>s[a:b]</code> se tukda lo (index a se b-1 tak). <code>.split()</code> string ko list me todta hai." },
-  { t: "code", file: "slice.py", code: "s = \"datascience\"\nprint(s[0:4])            # data\nprint(s[-7:])            # science\nprint(\"a,b,c\".split(\",\"))  # ['a', 'b', 'c']", output: "data\nscience\n['a', 'b', 'c']" },
-  { t: "note", variant: "tip", html: "<b>Yaad rakho:</b> Strings <b>immutable</b> hain — badalti nahi. Method hamesha naya string return karta hai." },
-  { t: "recap", items: ["upper / lower / strip / replace common methods","s[a:b] se slicing","split() se list banao","strings immutable hoti hain"] },
+  { t: "objectives", items: ["Index aur slicing se string ke tukde nikaalna","<code>upper / lower / strip / replace</code> jaise methods","<code>split</code> aur <code>join</code>","Strings <b>immutable</b> kyun hain"] },
+  { t: "hook", q: "Ek file me 5000 logon ke naam aaye — kisi me aage-peeche extra space, koi <code>ALL CAPS</code>, koi <code>small</code>. Kya tum 5000 naam haath se theek karoge?", why: "Kabhi nahi. Ye kaam computer <b>strings</b> pe ek line me karta hai — aur data science me raw data hamesha aisa hi <b>ganda</b> aata hai. String cleaning analyst ka rozana kaam #1 hai." },
+  { t: "def", term: "String", en: "A string is an immutable, ordered sequence of characters.", hi: "Matlab: letters ki ek <b>line</b>, jiske har character ki ek fixed <b>jagah (index)</b> hai — aur jo ban-ne ke baad <b>badalti nahi</b> (immutable). Koi bhi change hamesha ek <b>naya</b> string banata hai." },
+  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> raw data — naam, dates, categories, address, CSV ke fields — sab text hota hai, aur ganda aata hai. <code>strip()</code>, <code>lower()</code>, <code>replace()</code>, <code>split()</code> — yehi analyst har din use karta hai. Ye lesson seedha job ka daily skill hai." },
+  { t: "h2", n: "1", text: "Index — har letter ki position" },
+  { t: "p", html: "String ek <b>sequence</b> hai. Har letter ka ek <b>index</b> — aage se <code>0, 1, 2…</code>, peeche se <code>-1, -2…</code>. <code>s[0]</code> pehla letter, <code>s[-1]</code> aakhri." },
+  { t: "code", file: "index.py", code: "s = \"DATA\"\nprint(s[0])    # D  (pehla)\nprint(s[-1])   # A  (aakhri)", output: "D\nA" },
+  { t: "h2", n: "2", text: "Slicing — tukda nikaalo" },
+  { t: "p", html: "<code>s[start:stop:step]</code> se tukda milta hai. Rule (yaad rakho): <b>start included, stop excluded</b>. <code>step</code> optional — <code>2</code> matlab ek chhod ke, <code>-1</code> matlab ulta. Neeche khud khel ke dekho 👇" },
+  { t: "viz", name: "string-slicer" },
+  { t: "think", q: "<code>s[::-1]</code> kya karega?", a: "<b>Poori string ulti (reverse)</b> kar dega — step <code>-1</code> peeche se chalta hai. Yehi Python ka sabse chhota reverse trick hai, aur <b>palindrome check</b> me kaam aata hai: <code>s == s[::-1]</code>." },
+  { t: "h2", n: "3", text: "Kaam ke string methods" },
+  { t: "p", html: "<code>.strip()</code> aage-peeche ke space hatao, <code>.upper()</code> / <code>.lower()</code> case badlo, <code>.replace(a, b)</code> a ko b se badlo. Method chain bhi kar sakte ho." },
+  { t: "code", file: "clean.py", code: "raw = \"  Freya THOMPSAN  \"\nclean = raw.strip().lower()\nprint(clean)                          # freya thompsan\nprint(\"09-08-2026\".replace(\"-\", \"/\"))  # 09/08/2026", output: "freya thompsan\n09/08/2026" },
+  { t: "h2", n: "4", text: "split aur join" },
+  { t: "p", html: "<code>.split(sep)</code> string ko ek <b>list</b> me todta hai; <code>sep.join(list)</code> ulta kaam — list ko wapas string banata hai. CSV-jaise data me rozana." },
+  { t: "code", file: "split.py", code: "row = \"Freya,Chef,India\"\nparts = row.split(\",\")\nprint(parts)              # ['Freya', 'Chef', 'India']\nprint(\" | \".join(parts))  # Freya | Chef | India", output: "['Freya', 'Chef', 'India']\nFreya | Chef | India" },
+  { t: "analogy", concept: "String", real: "Letter-dabbon ki train", html: "String = ek train 🚂 jiske har <b>dabbe</b> me ek letter, aur har dabbe ka ek <b>seat number</b> (index). <b>Slice</b> = kuch dabbe kaat ke alag train bana lena. <b>Immutable</b> = dabbe fix hain — tum badal nahi sakte, sirf ek <b>nayi</b> train bana sakte ho. Isiliye har string method <b>naya</b> string deta hai." },
+  { t: "mistakes", items: [
+    { bad: "name = \"  Freya  \"\nname.strip()\nprint(name)   # abhi bhi space!", why: "Strings <b>immutable</b> hain — <code>.strip()</code> string badalta nahi, <b>naya</b> string <b>return</b> karta hai. Return value pakadni padegi.", fix: "name = name.strip()\nprint(name)   # Freya" },
+    { bad: "s = \"DATA\"\nprint(s[1:4])   # 3 chahiye the?", why: "<code>[1:4]</code> deta hai index 1,2,3 — <b>4 nahi</b> (stop hamesha excluded). Ye off-by-one Python ki sabse aam galti hai.", fix: "print(s[1:4])   # ATA  (3 letters, sahi)" },
+    { bad: "s = \"Hi\"\nprint(s[5])   # IndexError!", why: "Index range ke bahar gaye — <code>s[5]</code> exist nahi karta, crash. Par <b>slicing</b> range bahar jaane pe crash nahi karti.", fix: "print(s[5:])   # ''  (khaali, no error)" },
+  ] },
+  { t: "recap", items: ["<code>s[i]</code> index, <code>s[a:b:c]</code> slice — <b>start in, stop out</b>","<code>s[::-1]</code> = reverse","<code>strip / lower / upper / replace</code> — cleaning","<code>split</code> → list, <code>join</code> → string","strings <b>immutable</b> — method <b>naya</b> string deta hai"] },
+  { t: "interview", items: [
+    { level: "beginner", q: "Strings <b>immutable</b> hain — iska matlab?", a: "Ban-ne ke baad string badalti nahi. <code>.upper()</code>, <code>.replace()</code> — koi bhi change asli string ko nahi chhedta, hamesha ek <b>naya</b> string return karta hai. Isiliye <code>s = s.strip()</code> likhna padta hai." },
+    { level: "beginner", q: "<code>s[::-1]</code> kya karta hai?", a: "String ko <b>ulta</b> (reverse) kar deta hai — step <code>-1</code> peeche se. Palindrome check ka classic tareeka: <code>s == s[::-1]</code>." },
+    { level: "intermediate", q: "<code>replace()</code> aur <code>split()</code> kab use karoge?", a: "<code>replace(a,b)</code> jab kisi character/substring ko badalna ho (jaise <code>-</code> ko <code>/</code>). <code>split(sep)</code> jab ek string ko tukdon ki <b>list</b> me todna ho (CSV row → columns). split ke baad aksar <code>strip()</code> lagta hai kyunki tukdon me space reh jaata hai." },
+  ] },
 ];
 
 const L9 = [

@@ -5,6 +5,7 @@ import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
 import { LoopVisualizer } from "./LoopVisualizer";
 import { ListIndexer } from "./ListIndexer";
+import { StringSlicer } from "./StringSlicer";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
 import { ScatterCorrelation } from "./ScatterCorrelation";
@@ -16,6 +17,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "operator-lab": OperatorLab,
   "loop-visualizer": LoopVisualizer,
   "list-indexer": ListIndexer,
+  "string-slicer": StringSlicer,
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
   "scatter-correlation": ScatterCorrelation,
