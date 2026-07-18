@@ -26,11 +26,14 @@ function pick(pathname: string): [string, string] {
 // milestone). Swatch is ground on the left, accent on the right so each reads
 // distinct at a glance (Focus shows its teal so it doesn't look like Dark).
 type Theme = { id: string; name: string; sub: string; xp: number; sw: string };
+// BETA DEMO: all themes unlocked (xp:0) so every tester can try them while we
+// collect feedback. To re-lock behind coins later, restore Focus xp:500 and
+// Sunset xp:1500.
 const THEMES: Theme[] = [
   { id: "light", name: "Light", sub: "Warm paper", xp: 0, sw: "linear-gradient(135deg,#F1EDE4 52%,#E8920C 52%)" },
   { id: "dark", name: "Dark", sub: "Classic night", xp: 0, sw: "linear-gradient(135deg,#0E1119 52%,#F5A524 52%)" },
-  { id: "focus", name: "Focus", sub: "Deep blue, calm", xp: 500, sw: "linear-gradient(135deg,#0F1A2E 52%,#2DD4BF 52%)" },
-  { id: "sunset", name: "Sunset", sub: "Warm & cozy", xp: 1500, sw: "linear-gradient(135deg,#1B1012 52%,#FF9E5A 52%)" },
+  { id: "focus", name: "Focus", sub: "Deep blue, calm", xp: 0, sw: "linear-gradient(135deg,#0F1A2E 52%,#2DD4BF 52%)" }, // re-lock: 500
+  { id: "sunset", name: "Sunset", sub: "Warm & cozy", xp: 0, sw: "linear-gradient(135deg,#1B1012 52%,#FF9E5A 52%)" }, // re-lock: 1500
 ];
 
 type Item = { title: string; slug: string; sub: string; kind: "lesson" | "problem" };
