@@ -33,7 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar user={{ name: user.name, role: user.role }} roadmapPct={roadmapPct} />
       <main className="main">
         <div className="wrap">
-          <Topbar user={{ name: user.name, streak, isNew }} />
+          <Topbar user={{ name: user.name, streak, isNew, xp: user.xp }} />
           {children}
         </div>
       </main>

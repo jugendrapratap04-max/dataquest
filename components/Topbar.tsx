@@ -22,16 +22,28 @@ function pick(pathname: string): [string, string] {
   return key ? titles[key] : ["DataMarg", "Learn. Practice. Get job-ready."];
 }
 
-const SunPath = () => (<><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19" /></>);
-const MoonPath = () => (<path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z" />);
+// Two free themes, two earned with coins (= XP; never spent, unlocks at a
+// milestone). Swatch is ground on the left, accent on the right so each reads
+// distinct at a glance (Focus shows its teal so it doesn't look like Dark).
+type Theme = { id: string; name: string; sub: string; xp: number; sw: string };
+const THEMES: Theme[] = [
+  { id: "light", name: "Light", sub: "Warm paper", xp: 0, sw: "linear-gradient(135deg,#F1EDE4 52%,#E8920C 52%)" },
+  { id: "dark", name: "Dark", sub: "Classic night", xp: 0, sw: "linear-gradient(135deg,#0E1119 52%,#F5A524 52%)" },
+  { id: "focus", name: "Focus", sub: "Deep blue, calm", xp: 500, sw: "linear-gradient(135deg,#0F1A2E 52%,#2DD4BF 52%)" },
+  { id: "sunset", name: "Sunset", sub: "Warm & cozy", xp: 1500, sw: "linear-gradient(135deg,#1B1012 52%,#FF9E5A 52%)" },
+];
 
 type Item = { title: string; slug: string; sub: string; kind: "lesson" | "problem" };
 
-export function Topbar({ user }: { user: { name: string; streak: number; isNew?: boolean } }) {
+export function Topbar({ user }: { user: { name: string; streak: number; xp: number; isNew?: boolean } }) {
   const pathname = usePathname();
   const router = useRouter();
   const [title, sub] = pick(pathname);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  const [theme, setTheme] = useState<string>("light");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [toast, setToast] = useState<{ name: string; need: number } | null>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -41,14 +53,21 @@ export function Topbar({ user }: { user: { name: string; streak: number; isNew?:
   useEffect(() => {
     let saved: string | null = null;
     try { saved = localStorage.getItem("dq-theme"); } catch {}
-    const cur = (saved as "light" | "dark") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    // Only honour a saved theme this account has actually unlocked. Otherwise a
+    // locked theme left in localStorage by a higher-XP account on the same
+    // browser would apply — and show as both active and 🔒 in the menu.
+    const savedT = THEMES.find((t) => t.id === saved);
+    const cur = (savedT && user.xp >= savedT.xp) ? savedT.id
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.setAttribute("data-theme", cur);
+    if (cur !== saved) { try { localStorage.setItem("dq-theme", cur); } catch {} }
     setTheme(cur);
-  }, []);
+  }, [user.xp]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
       if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+      if (themeRef.current && !themeRef.current.contains(e.target as Node)) setMenuOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     // preload the search index once
@@ -64,11 +83,16 @@ export function Topbar({ user }: { user: { name: string; streak: number; isNew?:
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  const toggle = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    try { localStorage.setItem("dq-theme", next); } catch {}
-    setTheme(next);
+  const applyTheme = (id: string) => {
+    document.documentElement.setAttribute("data-theme", id);
+    try { localStorage.setItem("dq-theme", id); } catch {}
+    setTheme(id);
+    setMenuOpen(false);
+  };
+
+  const nudge = (t: Theme) => {
+    setToast({ name: t.name, need: t.xp });
+    setTimeout(() => setToast(null), 2600);
   };
 
   const results = q.trim() && index
@@ -81,6 +105,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; isNew?:
   };
 
   const firstName = user.name.split(" ")[0];
+  const current = THEMES.find((t) => t.id === theme) ?? THEMES[0];
 
   return (
     <header className="topbar">
@@ -115,12 +140,47 @@ export function Topbar({ user }: { user: { name: string; streak: number; isNew?:
           )}
         </div>
         <div className="streak-chip"><span>🔥</span><b>{user.streak}</b><span className="lbl">streak</span></div>
-        <button className="icon-btn" onClick={toggle} aria-label="Toggle theme">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {theme === "dark" ? <MoonPath /> : <SunPath />}
-          </svg>
-        </button>
+        <div className="theme-wrap" ref={themeRef}>
+          <button className="icon-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Theme chuno" aria-expanded={menuOpen}>
+            <span className="theme-sw" style={{ width: 18, height: 18, background: current.sw }} />
+          </button>
+          {menuOpen && (
+            <div className="theme-menu" role="menu">
+              <div className="tm-h"><span>Theme</span><span className="coins">🪙 {user.xp.toLocaleString()}</span></div>
+              {THEMES.map((t) => {
+                const locked = user.xp < t.xp;
+                const active = theme === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    className={`theme-opt${active ? " active" : ""}${locked ? " locked" : ""}`}
+                    onClick={() => (locked ? nudge(t) : applyTheme(t.id))}
+                    aria-disabled={locked}
+                    role="menuitemradio"
+                    aria-checked={active}
+                  >
+                    <span className="theme-sw" style={{ background: t.sw }} />
+                    <span className="theme-txt">
+                      <span className="theme-nm">{t.name}</span>
+                      <span className="theme-sub">{t.sub}</span>
+                    </span>
+                    <span className="theme-meta">
+                      {active ? <span className="theme-check">✓</span>
+                        : locked ? <span className="theme-lock">🔒 {t.xp}</span>
+                          : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+      {toast && (
+        <div className="theme-toast" role="status">
+          🔒 <span><b>{toast.name}</b> theme {toast.need.toLocaleString()} coins pe unlock — abhi {user.xp.toLocaleString()} 🪙</span>
+        </div>
+      )}
     </header>
   );
 }
