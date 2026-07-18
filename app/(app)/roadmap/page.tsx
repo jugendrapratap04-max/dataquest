@@ -47,7 +47,7 @@ export default async function RoadmapPage() {
 
       <PhaseList phases={phases} />
 
-      <div className="footer"><span className="mono">DataQuest</span> — pehle padho, phir practice karo, phir project banao. 💪</div>
+      <div className="footer"><span className="mono">DataMarg</span> — pehle padho, phir practice karo, phir project banao. 💪</div>
     </>
   );
 }

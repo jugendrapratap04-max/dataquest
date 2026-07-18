@@ -19,7 +19,7 @@ const titles: Record<string, [string, string]> = {
 function pick(pathname: string): [string, string] {
   if (pathname === "/") return titles["/"];
   const key = Object.keys(titles).find((k) => k !== "/" && pathname.startsWith(k));
-  return key ? titles[key] : ["DataQuest", "Learn. Practice. Get job-ready."];
+  return key ? titles[key] : ["DataMarg", "Learn. Practice. Get job-ready."];
 }
 
 const SunPath = () => (<><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19" /></>);

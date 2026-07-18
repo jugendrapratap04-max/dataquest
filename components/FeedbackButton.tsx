@@ -73,7 +73,7 @@ export function FeedbackButton() {
               <div className="fb-thanks">
                 <div className="fb-tick">✓</div>
                 <b>Shukriya!</b>
-                <p>Tumhara feedback mil gaya — isi se DataQuest behtar hoga.</p>
+                <p>Tumhara feedback mil gaya — isi se DataMarg behtar hoga.</p>
               </div>
             ) : (
               <>

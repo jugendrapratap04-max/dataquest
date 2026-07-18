@@ -55,7 +55,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <form className="auth-card" onSubmit={submit} noValidate>
         <div className="auth-logo">
           <div className="mark">D</div>
-          <div><span className="wm">DataQuest</span></div>
+          <div><span className="wm">DataMarg</span></div>
         </div>
         <h1>{isSignup ? "Naya account banao" : "Wapas aa gaye? 👋"}</h1>
         <p className="sub">{isSignup ? "Ek account, aur poora data science safar tumhara." : "Login karo aur wahin se shuru karo jahan chhoda tha."}</p>

@@ -73,7 +73,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
       <aside className={`side${open ? " open" : ""}`}>
       <div className="logo">
         <div className="mark">D</div>
-        <div><span className="wm">DataQuest</span><span className="beta">BETA</span></div>
+        <div><span className="wm">DataMarg</span><span className="beta">BETA</span></div>
       </div>
       {nav.map((g) => (
         <div key={g.label}>

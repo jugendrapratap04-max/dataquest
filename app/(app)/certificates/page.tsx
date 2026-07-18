@@ -36,7 +36,7 @@ export default async function CertificatesPage() {
             <div className="cert-seal"><SealIcon /></div>
             <div className="eyebrow">Certificate</div>
             <h3>{t.shortTitle}</h3>
-            <div className="sub2">Data Science Track · DataQuest</div>
+            <div className="sub2">Data Science Track · DataMarg</div>
             {state === "earned" && (
               <div className="cert-earned">
                 <span className="cert-status on">✓ Earned</span>
