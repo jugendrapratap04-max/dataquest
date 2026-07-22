@@ -7,6 +7,7 @@ import { FunctionMachine } from "./FunctionMachine";
 import { FloatLab } from "./FloatLab";
 import { FileLab } from "./FileLab";
 import { ImportLab } from "./ImportLab";
+import { FormatLab } from "./FormatLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -30,6 +31,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "float-lab": FloatLab,
   "file-lab": FileLab,
   "import-lab": ImportLab,
+  "format-lab": FormatLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,

@@ -951,15 +951,85 @@ const L14 = [
   ]},
 ];
 const L15 = [
-  { t: "objectives", items: ["f-strings se dynamic strings","Numbers format karna (decimals, comma)","Escape characters"] },
-  { t: "h2", n: "1", text: "f-strings — sabse aasaan tarika" },
-  { t: "p", html: "String ke aage <code>f</code> lagao aur <code>{}</code> me variable daalo. Ye modern Python ka standard hai." },
-  { t: "code", file: "fstring.py", code: "name = \"Freya\"\nage = 21\nprint(f\"{name} is {age} years old\")\nprint(f\"Next year: {age + 1}\")", output: "Freya is 21 years old\nNext year: 22" },
-  { t: "h2", n: "2", text: "Numbers ko format karna" },
-  { t: "p", html: "<code>{value:.2f}</code> se 2 decimal tak, <code>{value:,}</code> se comma (1,000)." },
-  { t: "code", file: "fmt.py", code: "pi = 3.14159\nprint(f\"{pi:.2f}\")      # 3.14\nprint(f\"{1000000:,}\")  # 1,000,000", output: "3.14\n1,000,000" },
-  { t: "note", variant: "tip", html: "<b>Escape:</b> <code>\\n</code> nayi line, <code>\\t</code> tab. Reports/output me kaam aate hain." },
-  { t: "recap", items: ["f\"{var}\" — dynamic strings","{x:.2f} — 2 decimals","{x:,} — comma separator","\\n newline, \\t tab"] },
+  { t: "objectives", items: [
+    "Build strings with <b>f-strings</b>, and know why they beat <code>+</code> and <code>%</code>",
+    "Round, pad, align and add thousands separators with format specs",
+    "Read the grammar <code>{value:align width .precision type}</code> instead of memorising recipes",
+    "Spot the missing <code>f</code> — the bug that prints your placeholder instead of your data",
+    "Use <code>{x=}</code> to debug without writing a label twice",
+  ]},
+  { t: "hook", q: "This line runs perfectly and prints <code>Hello, {name}! You scored {marks}%</code> on screen. Not the values — the <b>braces</b>. What is missing?", why: "The letter <code>f</code>. Without it Python sees an ordinary string and has no reason to look inside the braces, so it prints them literally. There is no error, no warning, and the line looks completely correct — which is why this one costs beginners so much time." },
+  { t: "think", q: "<code>f\"{price:.2f}\"</code> shows <code>19.99</code>. Has the value of <code>price</code> changed?", a: "No. A format spec only decides how the value is <b>drawn</b> — it builds a new string and leaves the original number exactly as it was.<br/><br/>That matters more than it sounds. A total can print as a tidy <code>99.95</code> while the number still stored is <code>99.94999999999999</code>, so the screen and a later comparison disagree. Formatting is for humans; it is not rounding your data." },
+
+  { t: "h2", n: "1", text: "f-strings, and the two older ways" },
+  { t: "def", term: "f-string", en: "An f-string is a string literal prefixed with f, in which any expression written inside braces is evaluated and inserted at that position.", hi: "In plain words: the <code>f</code> is what gives the braces meaning. Inside them you can put a variable, a calculation, a function call — anything that produces a value." },
+  { t: "p", html: "You will meet all three styles in real code. Write f-strings; recognise the others when you read them." },
+  { t: "code", file: "three_ways.py", code: "name = \"Aarav\"\nmarks = 91\n\nprint(f\"{name} scored {marks}%\")           # f-string  - use this\nprint(\"{} scored {}%\".format(name, marks))  # .format() - older\nprint(\"%s scored %d%%\" % (name, marks))     # %         - oldest\n\n# an f-string holds any expression, not just a name\nprint(f\"{name.upper()} needs {100 - marks} more\")", output: "Aarav scored 91%\nAarav scored 91%\nAarav scored 91%\nAARAV needs 9 more" },
+  { t: "note", variant: "warn", html: "<b>The missing <code>f</code>.</b> <code>print(\"{name} scored\")</code> prints <code>{name} scored</code> — literally. Python raises nothing, because a plain string with braces in it is perfectly valid. If your output contains braces, that is the first thing to check." },
+
+  { t: "h2", n: "2", text: "The bit after the colon" },
+  { t: "p", html: "Everything after the <code>:</code> is the <b>format spec</b>, and it has a grammar: <code>{value:[fill][align][sign][width][,][.precision][type]}</code>. You never need all of it at once." },
+  { t: "viz", name: "format-lab" },
+  { t: "p", html: "Click through those specs. <code>.2f</code> rounds for display, <code>,</code> groups thousands, <code>&gt;12</code> pads to twelve characters — and the column above shows exactly where the padding goes." },
+  { t: "code", file: "specs.py", code: "price = 1234.5678\nrate = 0.8756\n\nprint(f\"{price:.2f}\")\nprint(f\"{price:,.2f}\")\nprint(f\"{price:>12.2f}|\")\nprint(f\"{price:<12.2f}|\")\nprint(f\"{price:012.2f}\")\nprint(f\"{rate:.1%}\")", output: "1234.57\n1,234.57\n     1234.57|\n1234.57     |\n000001234.57\n87.6%" },
+  { t: "note", variant: "tip", html: "<b><code>%</code> multiplies by 100 for you.</b> <code>rate</code> is <code>0.8756</code> and prints as <code>87.6%</code> — so never write <code>f\"{rate * 100:.1f}%\"</code> and <code>:.1%</code> together, or you will ship 8756%." },
+  { t: "analogy", concept: "A format spec", real: "A printed form with fixed boxes", html: "Think of a printed invoice where the amount box is exactly twelve characters wide. <code>:.2f</code> decides <b>how the number is written</b>, <code>:,</code> adds the separators a reader expects, and <code>&gt;12</code> decides <b>where in the box it sits</b> — pushed right, so every row's decimal point lines up in a column. The number in your program never changes; only the printing on the form does." },
+
+  { t: "h2", n: "3", text: "Lining data up in columns" },
+  { t: "p", html: "Alignment is what turns a pile of prints into a readable table. Text defaults to left, numbers to right — and that default is usually what you want." },
+  { t: "code", file: "table.py", code: "rows = [(\"Aarav\", 91), (\"Diya\", 8), (\"Kabir\", 100)]\n\nfor name, marks in rows:\n    print(f\"{name:<10}{marks:>5}\")", output: "Aarav        91\nDiya          8\nKabir       100" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> a data script that prints a summary is read by a human every morning, and misaligned numbers make it unreadable — <code>8</code> and <code>100</code> in the same ragged column force the reader to check every row. One <code>:&gt;5</code> makes the units line up under each other. The same specs feed straight into Pandas' <code>to_string</code> and report formatting later." },
+
+  { t: "h2", n: "4", text: "The = spec, for debugging" },
+  { t: "p", html: "Putting <code>=</code> at the end of an expression prints the expression itself along with its value. It is the fastest way to check a variable without typing its name twice." },
+  { t: "code", file: "debugging.py", code: "marks = 91\nbonus = 4\n\nprint(f\"{marks=}\")\nprint(f\"{marks + bonus=}\")\nprint(f\"{marks / 3=:.2f}\")", output: "marks=91\nmarks + bonus=95\nmarks / 3=30.33" },
+
+  { t: "trace", intro: "Formatting only changes the drawing, never the value. Work each one out.", code: "price = 19.995\n\nshown = f\"{price:.2f}\"\nsame = price == 19.995\nlength = len(shown)\n\nname = \"Diya\"\npadded = f\"{name:>8}\"\nwidth = len(padded)\n\nrate = 0.5\npercent = f\"{rate:.0%}\"", steps: [
+    { q: "After line 3, <code>shown</code> is", answer: "20.00", why: "<code>.2f</code> rounds to two decimals for display — 19.995 draws as 20.00. It is a new string, not a change to <code>price</code>." },
+    { q: "After line 4, <code>same</code> is", answer: "True", why: "This is the point. <code>price</code> is untouched and still equals 19.995 — the formatting produced a separate string and left the number alone." },
+    { q: "After line 9, <code>width</code> is", answer: "8", why: "<code>&gt;8</code> pads the 4-letter name with 4 spaces to reach a width of exactly 8." },
+    { q: "After line 12, <code>percent</code> is", answer: "50%", why: "<code>%</code> multiplies by 100 and adds the sign, and <code>.0%</code> asks for no decimals — so 0.5 becomes 50%." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Print <code>Aarav scored 91</code> using an f-string.", code: "name = \"Aarav\"\nmarks = 91\n\nprint(f\"{name} scored {marks}\")", out: "Aarav scored 91" },
+    { task: "Put a calculation directly inside the braces.", code: "marks = 91\n\nprint(f\"{marks} out of 100, missing {100 - marks}\")", out: "91 out of 100, missing 9" },
+    { task: "Show a price with exactly two decimals.", code: "price = 1234.5678\n\nprint(f\"{price:.2f}\")", out: "1234.57" },
+    { task: "Add thousands separators to a big number.", code: "salary = 1250000\n\nprint(f\"{salary:,}\")", out: "1,250,000" },
+    { task: "Format money: separators <b>and</b> two decimals.", code: "price = 1234.5678\n\nprint(f\"{price:,.2f}\")", out: "1,234.57" },
+    { task: "Right-align a number in a column 8 wide, with a <code>|</code> to show the edge.", code: "n = 42\n\nprint(f\"{n:>8}|\")", out: "      42|" },
+    { task: "Left-align a name in a column 8 wide.", code: "name = \"Diya\"\n\nprint(f\"{name:<8}|\")", out: "Diya    |" },
+    { task: "Pad an id to 5 digits with leading zeros.", code: "student_id = 42\n\nprint(f\"{student_id:05}\")", out: "00042" },
+    { task: "Show 0.8756 as a percentage with one decimal.", code: "rate = 0.8756\n\nprint(f\"{rate:.1%}\")", out: "87.6%" },
+    { task: "Use the <code>=</code> spec to print a name and its value at once.", code: "total = 250\n\nprint(f\"{total=}\")", out: "total=250" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "name = \"Aarav\"\nprint(\"Hello, {name}\")", why: "No <code>f</code>, so the braces are just characters. This prints <code>Hello, {name}</code> and raises nothing at all — the most common formatting bug there is.", fix: "name = \"Aarav\"\nprint(f\"Hello, {name}\")" },
+    { bad: "total = 99.94999999999999\nprint(f\"Total: {total:.2f}\")\nif total == 99.95:\n    print(\"balanced\")", why: "The screen shows <code>99.95</code>, so the <code>if</code> looks like it must be True — but formatting made a <b>separate string</b> and the stored number is unchanged, so the comparison fails. The display and the logic are looking at different things.", fix: "import math\n\ntotal = 99.94999999999999\nprint(f\"Total: {total:.2f}\")\nif math.isclose(total, 99.95):\n    print(\"balanced\")" },
+    { bad: "rate = 0.8756\nprint(f\"{rate * 100:.1%}\")", why: "<code>%</code> already multiplies by 100, so multiplying first gives <b>8756.0%</b>. Pick one or the other.", fix: "rate = 0.8756\nprint(f\"{rate:.1%}\")" },
+    { bad: "name = \"Aarav\"\nprint(\"Hi \" + name + \", you scored \" + 91 + \" marks\")", why: "<code>+</code> cannot join a string and an int — this is a <code>TypeError</code>. Concatenation also gets unreadable fast and forces you to manage every space by hand.", fix: "name = \"Aarav\"\nprint(f\"Hi {name}, you scored {91} marks\")" },
+  ]},
+
+  { t: "debug", intro: "A receipt printer. It runs, prints something that looks like a receipt, and the numbers are wrong in a way nobody notices until a customer complains.", code: "items = [(\"Chai\", 0.2), (\"Samosa\", 0.35)]\n\nprint(\"Discount applied:\")\nfor name, discount in items:\n    print(f\"{name:<10}{discount * 100:.1%}\")", symptom: "prints Chai 20.0% as 2000.0%", q: "The discount really is 20 percent, and the code says .1% which is a percentage. So why 2000?", fix: "items = [(\"Chai\", 0.2), (\"Samosa\", 0.35)]\n\nprint(\"Discount applied:\")\nfor name, discount in items:\n    print(f\"{name:<10}{discount:.1%}\")", why: "The value is multiplied <b>twice</b>. <code>discount * 100</code> turns 0.2 into 20, and then the <code>%</code> spec multiplies by 100 again on its way to the screen, giving 2000.0%.<br/><br/>The <code>%</code> type does the conversion for you — that is its entire job. It expects the raw fraction, so <code>0.2</code> goes in and <code>20.0%</code> comes out. This is a bug that survives review because both halves look individually reasonable: multiplying by 100 is what you do for a percentage, and <code>.1%</code> is obviously a percentage spec. Only together are they wrong." },
+
+  { t: "recap", items: [
+    "<code>f\"...\"</code> — the <code>f</code> is what makes braces mean anything; without it they print literally",
+    "Anything that produces a value can go inside the braces, including calls and arithmetic",
+    "<code>{v:.2f}</code> decimals · <code>{v:,}</code> thousands · <code>{v:,.2f}</code> money",
+    "<code>{v:&gt;10}</code> right · <code>{v:&lt;10}</code> left · <code>{v:^10}</code> centre · <code>{v:05}</code> zero-pad",
+    "<code>{v:.1%}</code> multiplies by 100 itself — do not multiply as well",
+    "Formatting builds a <b>new string</b>; the original value is never changed",
+    "<code>f\"{x=}\"</code> prints the expression and its value — the quickest debug print there is",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Why are f-strings preferred over <code>+</code> concatenation?", a: "They read in the order the output appears, they interpolate any expression without extra calls, and they convert types for you — <code>+</code> raises <code>TypeError</code> the moment an int meets a string. They are also the fastest of the three styles, because the interpolation is compiled into the bytecode rather than dispatched at runtime like <code>.format()</code>." },
+    { level: "beginner", q: "What does <code>{value:.2f}</code> actually do to the value?", a: "Nothing. It produces a new string in which the number is drawn with two decimal places; the original object is unchanged. That distinction matters because a total can display as 99.95 while the stored float is 99.94999999999999, so a later <code>==</code> against 99.95 fails even though the screen looks right." },
+    { level: "intermediate", q: "How would you print a table of names and marks so the columns line up?", a: "Give each field a fixed width and an alignment: <code>f\"{name:&lt;12}{marks:&gt;5}\"</code> — text left, numbers right, so the units digits sit under each other. Right-aligning numbers is what makes different magnitudes comparable at a glance; 8 and 100 in a left-aligned column force the reader to inspect every row." },
+    { level: "intermediate", q: "What is the difference between <code>{x:.1f}</code> and <code>{x:.1%}</code>?", a: "<code>f</code> is fixed-point: it prints the number as-is to one decimal. <code>%</code> multiplies the value by 100, prints it to one decimal and appends a percent sign. So 0.8756 gives 0.9 with <code>.1f</code> and 87.6% with <code>.1%</code>. Multiplying by 100 yourself and then using <code>%</code> is a classic double-conversion bug." },
+    { level: "intermediate", q: "What does <code>f\"{total=}\"</code> print, and when is it useful?", a: "It prints <code>total=250</code> — the literal expression text, an equals sign, then the value. It is a debugging shortcut added in Python 3.8 that stops you writing the name twice and getting the label out of step with the variable after a rename. It also works on whole expressions, so <code>f\"{a + b=}\"</code> shows both the expression and its result." },
+  ]},
 ];
 const L16 = [
   { t: "objectives", items: ["<code>True</code>/<code>False</code> aur comparisons","<code>and</code> / <code>or</code> / <code>not</code>","<b>Truthy</b> aur <b>Falsy</b> values","<code>== None</code> ki jagah <code>is None</code>"] },
@@ -2747,6 +2817,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "string-formatting": [
+    // Easy
+    { level: "easy", q: "<code>name = \"Aarav\"</code>, then <code>print(\"Hello {name}\")</code>. What appears?", options: ["Hello Aarav", "A SyntaxError", "Hello {name}", "Hello"], correct: 2, why: "Without the <code>f</code> prefix the braces are ordinary characters, so they print literally. Nothing errors, which is exactly what makes this bug slow to find." },
+    { level: "easy", q: "Which prints a price with exactly two decimal places?", options: ["f\"{price:2f}\"", "f\"{price:.2f}\"", "f\"{price:2}\"", "f\"{price:0.2}\""], correct: 1, why: "The dot is what marks precision, and <code>f</code> means fixed-point. Without the dot, 2 is read as a width instead." },
+    { level: "easy", q: "What can you put inside the braces of an f-string?", options: ["Only a variable name", "Only strings and numbers", "Nothing that calls a function", "Any expression that produces a value"], correct: 3, why: "Arithmetic, method calls, indexing, comparisons — anything evaluating to a value works, so <code>f\"{100 - marks}\"</code> is fine." },
+    // Medium
+    { level: "medium", q: "<code>rate = 0.8756</code>. What does <code>f\"{rate:.1%}\"</code> give?", options: ["0.9%", "87.6%", "8756.0%", "0.8756%"], correct: 1, why: "The <code>%</code> type multiplies by 100 itself and appends the sign, then <code>.1</code> rounds to one decimal." },
+    { level: "medium", q: "What does the <code>&gt;</code> in <code>f\"{n:&gt;8}\"</code> do?", options: ["Compares n with 8", "Truncates n to 8 characters", "Pads to width 8, value pushed right", "Prints 8 spaces after n"], correct: 2, why: "It is an alignment, not a comparison: pad the value to 8 characters wide and sit it against the right edge, which is how number columns line up." },
+    { level: "medium", q: "Does <code>f\"{price:.2f}\"</code> change the value stored in <code>price</code>?", options: ["No — it only builds a new string", "Yes, it rounds price in place", "Only if price is a float", "Only inside a loop"], correct: 0, why: "Formatting produces a separate string for display. The original number is untouched, which is why a total can print as 99.95 while <code>total == 99.95</code> is still False." },
+    { level: "medium", q: "Which format spec is the usual one for money?", options: ["{v:.2}", "{v:money}", "{v:0.2d}", "{v:,.2f}"], correct: 3, why: "The comma groups thousands and <code>.2f</code> fixes two decimals — together they give 1,234.57." },
+    // Hard
+    { level: "hard", q: "<code>discount = 0.2</code>. What does <code>f\"{discount * 100:.1%}\"</code> print?", options: ["20.0%", "0.2%", "2000.0%", "2.0%"], correct: 2, why: "Double conversion: your <code>* 100</code> makes it 20, and the <code>%</code> spec multiplies by 100 again. Drop one of the two — <code>f\"{discount:.1%}\"</code> is correct." },
+    { level: "hard", q: "What does <code>f\"{marks=}\"</code> print when <code>marks</code> is 91?", options: ["91", "marks", "True", "marks=91"], correct: 3, why: "The <code>=</code> spec prints the expression text, an equals sign, then the value — a debugging shortcut that stops the label drifting out of step with the variable after a rename." },
+    { level: "hard", q: "Why does <code>\"Hi \" + name + \" scored \" + 91</code> fail?", options: ["+ cannot join a string and an int", "name must be lowercase", "It needs an f prefix", "Too many + operators"], correct: 0, why: "Concatenation will not convert types for you, so joining a str and an int raises <code>TypeError</code>. An f-string converts each value as it inserts it, which is one of the reasons it is preferred." },
   ],
 
   "modules": [

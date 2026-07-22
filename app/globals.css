@@ -360,6 +360,21 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .imp-out { font-family:var(--mono); font-size:11.5px; word-break:break-word; animation:viz-land .22s ease-out; }
 .imp-row.ok .imp-out { color:var(--good); }
 .imp-row.bad .imp-out { color:var(--bad); }
+
+/* Format Lab — the output drawn inside a ruled 12-character column, because
+   ">12" is meaningless until you can see the column and the padding. */
+.fmt-src { font-family:var(--mono); font-size:13px; color:var(--accent-2); margin-bottom:10px; }
+.fmt-col { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px 13px; overflow-x:auto; }
+.fmt-ruler, .fmt-cells { display:flex; gap:2px; min-width:max-content; }
+.fmt-tick { width:20px; text-align:center; font-family:var(--mono); font-size:9.5px; color:var(--ink-faint); }
+.fmt-cells { margin-top:4px; animation:viz-land .24s ease-out; }
+.fmt-cell { width:20px; height:28px; display:flex; align-items:center; justify-content:center;
+            font-family:var(--mono); font-size:13px; border-radius:4px; border:1px solid transparent; }
+.fmt-cell.val { background:var(--teal-soft); border-color:color-mix(in srgb,var(--teal) 30%,transparent); color:var(--teal); font-weight:700; }
+.fmt-cell.pad { background:var(--panel); border-color:var(--line); color:var(--ink-faint); }
+.fmt-cell.empty { border-style:dashed; border-color:color-mix(in srgb,var(--line) 70%,transparent); }
+.fmt-len { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px; }
+.fmt-dot { font-family:var(--mono); color:var(--ink-faint); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
