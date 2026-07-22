@@ -81,6 +81,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           {busy ? "Please wait…" : isSignup ? "Create account →" : "Sign in →"}
         </button>
 
+        {/* Shown at the moment the account is created, which is when consent
+            actually has to be given — not buried in a footer somewhere. */}
+        {isSignup && (
+          <p className="auth-legal">
+            By creating an account you agree to our <Link href="/terms">Terms of Service</Link> and{" "}
+            <Link href="/guidelines">Community Guidelines</Link>, and to the{" "}
+            <Link href="/privacy">Privacy Policy</Link>. If you are under 18, please use DataMarg
+            with a parent or guardian&apos;s permission.
+          </p>
+        )}
+
         <div className="auth-alt">
           {isSignup ? <>Already have an account? <Link href="/login">Sign in</Link></> : <>New here? <Link href="/signup">Create an account</Link></>}
         </div>

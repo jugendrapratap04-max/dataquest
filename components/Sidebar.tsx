@@ -102,6 +102,13 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
         </div>
       ))}
       <div className="side-foot">
+        {/* Reachable from inside the app too — a signed-in student should not
+            have to log out to find the rules they agreed to. */}
+        <div className="side-legal">
+          <Link href="/guidelines" onClick={() => setOpen(false)}>Guidelines</Link>
+          <Link href="/terms" onClick={() => setOpen(false)}>Terms</Link>
+          <Link href="/privacy" onClick={() => setOpen(false)}>Privacy</Link>
+        </div>
         {user ? (
           <>
             <div className="userbox">

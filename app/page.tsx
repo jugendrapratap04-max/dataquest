@@ -156,6 +156,8 @@ export default async function LandingPage() {
 
       <footer className="lp-foot">
         <span className="mono">DataMarg</span> — learn, practice, get job-ready.
+        <br />
+        <Link href="/guidelines">Community Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
       </footer>
     </div>
   );
