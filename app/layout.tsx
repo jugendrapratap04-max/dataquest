@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "DataMarg — Learn. Practice. Get Job-Ready.",
-  description: "Ek jagah data science padho, practice karo, aur job-ready bano.",
+  description: "Learn data science, practise it in the browser, and get job-ready — in one place.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
