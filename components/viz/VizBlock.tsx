@@ -3,6 +3,7 @@
 import { CodeRunner } from "./CodeRunner";
 import { ConditionFlow } from "./ConditionFlow";
 import { CollectionBench } from "./CollectionBench";
+import { FunctionMachine } from "./FunctionMachine";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -22,6 +23,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
   "condition-flow": ConditionFlow,
   "collection-bench": CollectionBench,
+  "function-machine": FunctionMachine,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,

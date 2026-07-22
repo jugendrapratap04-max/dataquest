@@ -11,6 +11,9 @@ import { writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+// Marks where our own probe output begins, so a traced program is free to print.
+const SENTINEL = "__TRACE_VALUE__";
+
 const [track, slug] = process.argv.slice(2);
 const lesson = (trackLessons[track] ?? []).find((l) => l.slug === slug);
 if (!lesson) { console.error(`no lesson ${track}/${slug}`); process.exit(1); }
@@ -49,9 +52,13 @@ for (const b of lesson.content) {
       const v = s.q.match(/<code>(\w+)<\/code>/);
       if (!m || !v) { cases.push({ what: `trace step ${i + 1} (unparseable question)`, code: "raise SystemExit('cannot parse')", claim: "" }); return; }
       const upto = b.code.split("\n").slice(0, Number(m[1])).join("\n");
+      // A traced program may print things of its own — a lesson about print vs
+      // return has to. So mark where our own output starts and read only what
+      // comes after it, instead of banning prints from traced code.
+      const probe = `${upto}\nprint("${SENTINEL}")\nprint(${v[1]})`;
       // `accept` lists equally-correct spellings a student might type. The
       // checker has to honour them too, or it fails a lesson for being lenient.
-      cases.push({ what: `trace: after line ${m[1]}, ${v[1]}`, code: `${upto}\nprint(${v[1]})`, claim: s.answer, accept: s.accept ?? [] });
+      cases.push({ what: `trace: after line ${m[1]}, ${v[1]}`, code: probe, claim: s.answer, accept: s.accept ?? [], sentinel: true });
     });
   }
   if (b.t === "debug") {
@@ -89,6 +96,10 @@ for (const c of cases) {
     else console.log(`  ok   ${c.what}`);
   } else {
     const norm = (x) => String(x).replace(/\r\n/g, "\n").trimEnd();
+    // Drop the traced program's own output; keep only what follows our marker.
+    if (c.sentinel && r.ok && r.out.includes(SENTINEL)) {
+      r.out = r.out.slice(r.out.lastIndexOf(SENTINEL) + SENTINEL.length).replace(/^\n/, "").trimEnd();
+    }
     const want = norm(c.claim);
     const ok = [want, ...(c.accept ?? []).map(norm)].includes(r.out);
     if (!r.ok) fail(c, `crashed: ${r.out}`);

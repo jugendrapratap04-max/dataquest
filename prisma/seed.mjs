@@ -519,32 +519,77 @@ const L6 = [
 ];
 
 const L7 = [
-  { t: "objectives", items: ["def se function banana","Parameters lena aur return karna","Default arguments use karna"] },
-  { t: "hook", q: "Ek hi hisaab tumhare code me 40 jagah likha hai. Ab formula badal gaya. Kitni jagah theek karoge?", why: "Chalis. Aur ek jagah bhool gaye to bug wahin baith jayega — mahino tak. Function ka asli faayda \"kam likhna\" nahi hai. Asli faayda ye hai ki <b>badalne ki jagah sirf ek</b> ho." },
-  { t: "think", q: "<code>print(x)</code> aur <code>return x</code> — dono value dikhate lagte hain. Farak kya hai?", a: "<code>print</code> value <b>screen pe dikhata</b> hai — aur baat khatam. <code>return</code> value <b>wapas deta</b> hai, taaki tum usse aage kaam kar sako.<br/><br/><code>total = add(3, 4)</code> tabhi chalega jab <code>add</code> <b>return</b> kare. Agar usme sirf <code>print</code> hota, to <code>total</code> me <code>None</code> aa jaata. Beginners ki sabse aam galti yahi hai — dikhta sahi hai, chalta nahi." },
-  { t: "h2", n: "1", text: "Function banana" },
-  { t: "def", term: "Function", en: "A function is a named, reusable block of code that takes inputs, performs a task, and optionally returns a value.", hi: "Jo values function <b>leta</b> hai wo <b>parameters</b>, aur jo tum bulate waqt <b>dete</b> ho wo <b>arguments</b>. <code>return</code> jawaab wapas bhejta hai — aur function wahin khatam ho jaata hai." },
-  { t: "p", html: "Function = reusable code block. <code>def</code> se banate hain, <code>return</code> se jawaab wapas dete hain. Ek baar likho, baar-baar bulao." },
-  { t: "code", file: "func.py", code: "def square(n):\n    return n * n\n\nprint(square(5))   # 25\nprint(square(9))   # 81", output: "25\n81" },
-  { t: "h2", n: "2", text: "Parameters aur return" },
-  { t: "p", html: "Function ko values do (parameters), wo kaam karke <code>return</code> se result deta hai. <code>print</code> aur <code>return</code> alag hain — return value aage use ho sakti hai." },
-  { t: "code", file: "add.py", code: "def add(a, b):\n    return a + b\n\ntotal = add(3, 4)\nprint(total)   # 7", output: "7" },
-  { t: "h2", n: "3", text: "Default arguments" },
-  { t: "p", html: "Parameter ko default value do — agar nahi diya to wahi use hoga." },
-  { t: "code", file: "default.py", code: "def greet(name=\"Guest\"):\n    return \"Hello, \" + name\n\nprint(greet())         # Hello, Guest\nprint(greet(\"Freya\"))   # Hello, Freya", output: "Hello, Guest\nHello, Freya" },
-  { t: "note", variant: "tip", html: "<b>DRY principle:</b> Don't Repeat Yourself — same code baar-baar likhne ki jagah function bana lo." },
-  { t: "analogy", concept: "Function", real: "Mixer grinder", html: "Masala <b>daalte</b> ho (arguments), button dabate ho (function call), paste <b>bahar aata</b> hai (return). Tumhe blade kaise ghoomte hain jaanne ki zaroorat nahi — bas kya daalna hai aur kya milega. Isko <b>abstraction</b> kehte hain, aur poori programming isi pe khadi hai." },
-  { t: "mistakes", items: [
-    { bad: "def add(a, b):\n    print(a + b)\n\ntotal = add(3, 4)   # total = None", why: "<code>print</code> sirf dikhata hai, <b>wapas nahi deta</b>. Bina <code>return</code> ke function chup-chaap <code>None</code> lautata hai. Screen pe 7 dikhega, par <code>total</code> me <code>None</code> hoga — aur error tab aayega jab <code>total</code> ko aage use karoge.", fix: "def add(a, b):\n    return a + b" },
-    { bad: "def add_item(item, items=[]):\n    items.append(item)\n    return items", why: "<b>Python ka sabse mashhoor trap.</b> Default value function <b>ek hi baar</b> banti hai — har call me <b>wahi</b> list dobara istemaal hoti hai. Doosri call pe pichhle items abhi bhi andar milenge. Interview me ye poochha jaata hai.", fix: "def add_item(item, items=None):\n    if items is None:\n        items = []" },
-    { bad: "def f():\n    return\n    print(\"hi\")", why: "<code>return</code> ke baad wala code <b>kabhi nahi</b> chalta — function wahin khatam ho jaata hai. Ise <b>dead code</b> kehte hain; Python warning bhi nahi deta.", fix: "def f():\n    print(\"hi\")\n    return" },
+  { t: "objectives", items: [
+    "Write a function with <code>def</code> and call it",
+    "Take inputs as parameters and hand a result back with <code>return</code>",
+    "Tell <code>print</code> and <code>return</code> apart — the difference that catches everyone",
+    "Give a parameter a default, and avoid the trap that comes with it",
   ]},
-  { t: "recap", items: ["def se function banao","return se result wapas do","print ≠ return","Default args: def f(x=value)"] },
+  { t: "hook", q: "The same calculation appears in 40 places in your code. The formula changes. How many places do you fix?", why: "Forty. And if you miss one, that bug sits there for months. The real value of a function is not writing less — it is that there is <b>only one place to change</b>." },
+  { t: "think", q: "<code>print(x)</code> and <code>return x</code> both look like they give you the value. What is actually different?", a: "<code>print</code> puts the value <b>on the screen</b> — and that is the end of it. <code>return</code> hands the value <b>back to whoever called the function</b>, so you can store it, add to it, or pass it on.<br/><br/><code>total = add(3, 4)</code> only works if <code>add</code> <b>returns</b>. If it only printed, <code>total</code> would be <code>None</code> — the screen looks perfect and the program is broken. This is the most common beginner mistake there is." },
+
+  { t: "h2", n: "1", text: "Writing one" },
+  { t: "def", term: "Function", en: "A function is a named, reusable block of code that takes inputs, performs a task, and optionally returns a value.", hi: "In plain words: the values a function <b>accepts</b> are its parameters; the values you <b>hand it</b> when calling are the arguments. <code>return</code> sends the answer back — and ends the function on the spot." },
+  { t: "p", html: "Write it once with <code>def</code>, then call it as many times as you like." },
+  { t: "code", file: "func.py", code: "def square(n):\n    return n * n\n\nprint(square(5))\nprint(square(9))", output: "25\n81" },
+
+  { t: "h2", n: "2", text: "print is not return" },
+  { t: "p", html: "This is the one to slow down on. Both of these look correct, and only one of them can be used in the next line of your program." },
+  { t: "code", file: "add.py", code: "def add(a, b):\n    return a + b\n\ntotal = add(3, 4)\nprint(total + 10)   # only possible because add RETURNED", output: "17" },
+  { t: "viz", name: "function-machine" },
+  { t: "p", html: "Call the printing one and look at the right-hand panel: the screen shows the greeting, and <code>x</code> holds <code>None</code>. That is why the mistake survives so long — in a terminal the two versions look identical, and the program only breaks later, on a line that has nothing wrong with it." },
+  { t: "note", variant: "warn", html: "A function with no <code>return</code> still returns something: <code>None</code>. So <code>total = add(3, 4)</code> on a printing function gives you <code>None</code>, and the error appears wherever <code>total</code> is next used — far from the real cause." },
+
+  { t: "h2", n: "3", text: "Default arguments" },
+  { t: "p", html: "Give a parameter a default and the caller can leave it out." },
+  { t: "code", file: "default.py", code: "def greet(name=\"Guest\"):\n    return \"Hello, \" + name\n\nprint(greet())\nprint(greet(\"Priya\"))", output: "Hello, Guest\nHello, Priya" },
+  { t: "note", variant: "tip", html: "<b>Don't Repeat Yourself.</b> If you have written the same three lines twice, that is usually a function waiting to be named." },
+  { t: "analogy", concept: "A function", real: "A mixer grinder", html: "You put the spices in (arguments), press the button (the call), and paste comes out (the return value). You never need to know how the blades are arranged — only what goes in and what comes back. That is <b>abstraction</b>, and the whole of programming is built on it." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> every cleaning step you write — parse a date, strip a currency symbol, bucket an age — becomes a function, because you will run it on next month's file too. A data pipeline is mostly small functions called in order, and the ones that <code>return</code> rather than <code>print</code> are the ones you can test." },
+
+  { t: "trace", intro: "Read it carefully. Two of these functions look almost the same and do not behave the same.", code: "def shout(word):\n    print(word.upper())\n\ndef quiet(word):\n    return word.lower()\n\na = shout(\"hello\")\nb = quiet(\"HELLO\")\nc = quiet(\"HELLO\").upper()", steps: [
+    { q: "After line 7, <code>a</code> is", answer: "None", why: "<code>shout</code> printed \"HELLO\" to the screen and returned nothing — so <code>a</code> holds <code>None</code>. The screen looked right and the variable is empty." },
+    { q: "After line 8, <code>b</code> is", answer: "hello", why: "<code>quiet</code> returned the value, so it actually landed in <code>b</code>." },
+    { q: "After line 9, <code>c</code> is", answer: "HELLO", why: "Because <code>quiet</code> hands a real string back, you can keep working on it in the same expression. Try that on <code>shout(...)</code> and you get <code>AttributeError</code>, because you would be calling <code>.upper()</code> on <code>None</code>." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each before opening the answer.", items: [
+    { task: "Write <code>double(n)</code> that returns twice its input, and print <code>double(7)</code>.", code: "def double(n):\n    return n * 2\n\nprint(double(7))", out: "14" },
+    { task: "Write a function taking two numbers and returning the larger one.", code: "def bigger(a, b):\n    if a > b:\n        return a\n    return b\n\nprint(bigger(3, 9))", out: "9" },
+    { task: "Store a function's result in a variable, then use it.", code: "def add(a, b):\n    return a + b\n\ntotal = add(3, 4)\nprint(total + 10)", out: "17" },
+    { task: "Show what a function without <code>return</code> gives back.", code: "def show(n):\n    print(n)\n\nresult = show(5)\nprint(result)", out: "5\nNone" },
+    { task: "Give a parameter a default and call the function both ways.", code: "def greet(name=\"Guest\"):\n    return \"Hello, \" + name\n\nprint(greet())\nprint(greet(\"Priya\"))", out: "Hello, Guest\nHello, Priya" },
+    { task: "Call a function using keyword arguments, in the wrong order on purpose.", code: "def rate(price, qty):\n    return price * qty\n\nprint(rate(qty=3, price=20))", out: "60" },
+    { task: "Return two values at once and unpack them.", code: "def stats(nums):\n    return min(nums), max(nums)\n\nlow, high = stats([4, 9, 1])\nprint(low, high)", out: "1 9" },
+    { task: "Use <code>return</code> to leave a function early.", code: "def check(n):\n    if n < 0:\n        return \"negative\"\n    return \"fine\"\n\nprint(check(-5))", out: "negative" },
+    { task: "Write a function that calls another function.", code: "def square(n):\n    return n * n\n\ndef sum_of_squares(a, b):\n    return square(a) + square(b)\n\nprint(sum_of_squares(3, 4))", out: "25" },
+    { task: "Show that a variable made inside a function does not exist outside it.", code: "def f():\n    inside = 10\n    return inside\n\nprint(f())\nprint(\"inside\" in dir())", out: "10\nFalse" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "def add(a, b):\n    print(a + b)\n\ntotal = add(3, 4)", why: "<code>print</code> only displays — it <b>hands nothing back</b>. Without <code>return</code> the function quietly gives <code>None</code>, so the screen shows 7 while <code>total</code> is empty, and the error surfaces later on a line that is perfectly fine.", fix: "def add(a, b):\n    return a + b" },
+    { bad: "def add_item(item, items=[]):\n    items.append(item)\n    return items", why: "<b>Python's most famous trap.</b> A default value is created <b>once</b>, when the function is defined — so every call reuses the <i>same</i> list. The second call still has the first call's items in it. This is a standard interview question.", fix: "def add_item(item, items=None):\n    if items is None:\n        items = []\n    items.append(item)\n    return items" },
+    { bad: "def f():\n    return\n    print(\"hi\")", why: "Code after <code>return</code> <b>never runs</b> — the function ends there. This is dead code, and Python will not warn you about it.", fix: "def f():\n    print(\"hi\")\n    return" },
+    { bad: "def f():\n    count = 0\n\nf()\nprint(count)", why: "A name created inside a function lives only inside it. Once the function ends it is gone, so this raises <code>NameError</code>. If you want the value outside, <b>return</b> it.", fix: "def f():\n    return 0\n\ncount = f()\nprint(count)" },
+  ]},
+
+  { t: "debug", intro: "This should add a 5-mark bonus to each student and total them up. It crashes. Read it before opening the fix.", code: "def add_bonus(marks):\n    print(marks + 5)\n\ntotal = 0\nfor m in [80, 72, 91]:\n    total = total + add_bonus(m)\n\nprint(total)", symptom: "TypeError: unsupported operand type(s) for +: 'int' and 'NoneType'", q: "The numbers print correctly on screen. So why does the addition fail?", fix: "def add_bonus(marks):\n    return marks + 5\n\ntotal = 0\nfor m in [80, 72, 91]:\n    total = total + add_bonus(m)\n\nprint(total)", why: "Look at what the screen shows: 85, 77, 96 — all correct. But <code>add_bonus</code> <b>prints</b> them instead of <b>returning</b> them, so the call itself evaluates to <code>None</code>, and <code>total + None</code> is the crash. The output being right is exactly what makes this confusing: the values were computed, they just never came back. Swapping <code>print</code> for <code>return</code> is the whole fix." },
+
+  { t: "recap", items: [
+    "<code>def</code> defines a function; calling it runs the body",
+    "<code>return</code> hands a value back — <code>print</code> only displays it",
+    "No <code>return</code> means the function returns <b>None</b>",
+    "<code>return</code> ends the function immediately",
+    "Defaults let a caller leave an argument out — but <b>never use a list or dict as one</b>",
+    "Names made inside a function do not exist outside it",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>print</code> aur <code>return</code> me kya farak hai?", a: "<code>print</code> screen pe <b>dikhata</b> hai — insaan ke liye. <code>return</code> value <b>caller ko wapas</b> deta hai — code ke liye. Bina return ke function <code>None</code> lautata hai, isliye <code>total = add(3,4)</code> me <code>None</code> aa jayega." },
-    { level: "beginner", q: "Parameter aur argument me kya farak hai?", a: "<b>Parameter</b> = definition me likha naam (<code>def add(a, b)</code> me <code>a</code>, <code>b</code>). <b>Argument</b> = call karte waqt di gayi asli value (<code>add(3, 4)</code> me <code>3</code>, <code>4</code>). Parameter dabba hai, argument usme rakhi cheez." },
-    { level: "intermediate", q: "<code>def f(items=[])</code> me kya problem hai?", a: "Default value <b>function define hote waqt ek hi baar</b> banti hai, har call pe nahi. Matlab saari calls <b>ek hi list</b> share karengi — pichhli call ka data agli me dikhega. Mutable default (list/dict/set) ke liye hamesha <code>None</code> use karo aur andar bana lo." },
-    { level: "intermediate", q: "<code>*args</code> aur <code>**kwargs</code> kya hain?", a: "<code>*args</code> extra <b>positional</b> arguments ko <b>tuple</b> me bhar leta hai; <code>**kwargs</code> extra <b>keyword</b> arguments ko <b>dict</b> me. Jab pata na ho kitne arguments aayenge tab kaam aate hain — decorators aur wrapper functions inhi pe chalte hain." },
+    { level: "beginner", q: "What is the difference between <code>print</code> and <code>return</code>?", a: "<code>print</code> writes to standard output for a human to read; <code>return</code> passes a value back to the calling code. Only a returned value can be stored, tested or passed on. A function without <code>return</code> returns <code>None</code>, which is why <code>total = add(3, 4)</code> on a printing function silently leaves <code>total</code> empty." },
+    { level: "beginner", q: "What is the difference between a parameter and an argument?", a: "A parameter is the name in the definition — <code>def greet(name)</code>. An argument is the actual value passed at the call — <code>greet(\"Priya\")</code>. Interviewers ask it to see whether you read documentation precisely, not because the distinction changes your code." },
+    { level: "intermediate", q: "Why is a mutable default argument dangerous?", a: "The default is evaluated <b>once</b>, when the function is defined, so every call shares the same object. <code>def f(items=[])</code> accumulates across calls, which looks like the function remembering things it should not. The fix is <code>items=None</code> and creating the list inside the body. It is the classic Python gotcha question." },
+    { level: "intermediate", q: "Can a Python function return more than one value?", a: "It returns one object — but <code>return min(x), max(x)</code> builds a tuple, and the caller can unpack it as <code>low, high = stats(x)</code>. That is why it feels like multiple returns. Beyond two or three values, a dictionary or a small class reads far better than positional unpacking." },
+    { level: "intermediate", q: "What happens to a variable created inside a function?", a: "It lives in that call's local scope and disappears when the call ends — referencing it outside raises <code>NameError</code>. Each call gets its own copy, which is what makes functions safe to reuse. To get a value out, return it; reaching for <code>global</code> instead is almost always a design smell." },
   ]},
 ];
 
@@ -2441,10 +2486,19 @@ export const QUIZZES = {
     { level: "hard", q: "Which is safe to rely on: the printed order of a dictionary, or of a set?", options: ["Both", "Neither", "The dictionary only", "The set only"], correct: 2, why: "Since Python 3.7 a dictionary preserves <b>insertion order</b> as a language guarantee. A set gives no order guarantee at all, so code that depends on how a set prints will work on your machine and fail somewhere else." },
   ],
   "functions": [
-    { q: "<code>def f(): print(\"hi\")</code>, phir <code>x = f()</code>. <code>x</code> me kya?", options: ["\"hi\"", "None", "error", "\"\""], correct: 1, why: "Function me koi <code>return</code> nahi, to wo <b>None</b> return karta hai — <code>x = None</code> (\"hi\" sirf print hua)." },
-    { q: "<code>def f(a, b=2): return a + b</code>, phir <code>f(3)</code> — result?", options: ["error", "5", "3", "32"], correct: 1, why: "<code>b</code> ka default 2 hai, to <code>f(3)</code> = 3 + 2 = <b>5</b>." },
-    { q: "<code>def f(): x = 5</code>, phir bahar <code>print(x)</code> — kya hoga?", options: ["5", "NameError", "None", "0"], correct: 1, why: "<code>x</code> function ke <b>andar local</b> hai — bahar exist hi nahi karta. <b>NameError</b>." },
-    { q: "<code>return</code> ke baad wala code chalta hai?", options: ["haan", "nahi", "kabhi-kabhi", "sirf loop me"], correct: 1, why: "<code>return</code> function ko <b>turant khatam</b> kar deta hai — uske baad ka code us call me kabhi nahi chalta." },
+    // Easy
+    { level: "easy", q: "Which keyword defines a function in Python?", options: ["function", "def", "fun", "define"], correct: 1, why: "<code>def name(parameters):</code> — the body is the indented block underneath." },
+    { level: "easy", q: "What does <code>return</code> do?", options: ["Prints the value", "Hands the value back to the caller", "Ends the program", "Saves it to a file"], correct: 1, why: "It passes a value back to whoever called the function — and ends the function immediately." },
+    { level: "easy", q: "<code>def f(a, b=2): return a + b</code>. What is <code>f(3)</code>?", options: ["3", "5", "error", "32"], correct: 1, why: "<code>b</code> falls back to its default of 2, so 3 + 2 = 5." },
+    // Medium
+    { level: "medium", q: "<code>def f(): print(\"hi\")</code>, then <code>x = f()</code>. What is in <code>x</code>?", options: ["\"hi\"", "None", "an error", "an empty string"], correct: 1, why: "It printed rather than returned, so the call evaluates to <code>None</code>. \"hi\" reached the screen and nothing reached <code>x</code>." },
+    { level: "medium", q: "<code>def f(): x = 5</code>, then <code>print(x)</code> outside. What happens?", options: ["Prints 5", "NameError", "Prints None", "Prints 0"], correct: 1, why: "<code>x</code> lives only inside that call and is gone once it ends. To get a value out, return it." },
+    { level: "medium", q: "Does code written after <code>return</code> run?", options: ["Yes", "No", "Only in loops", "Only if indented"], correct: 1, why: "<code>return</code> ends the function on the spot. Anything below it is dead code, and Python gives no warning." },
+    { level: "medium", q: "<code>def rate(price, qty): return price * qty</code>. What does <code>rate(qty=3, price=20)</code> give?", options: ["60", "an error — wrong order", "23", "None"], correct: 0, why: "Naming the arguments makes their order irrelevant. Keyword arguments also make a call far easier to read than three bare numbers." },
+    // Hard
+    { level: "hard", q: "<code>def add(item, items=[]): items.append(item); return items</code>. You call it twice with 1 then 2. What does the second call return?", options: ["[2]", "[1, 2]", "[]", "an error"], correct: 1, why: "Python's most famous trap. The default list is created <b>once</b>, when the function is defined, so every call shares it — the first item is still in there. Use <code>items=None</code> and build the list inside the body." },
+    { level: "hard", q: "A function prints its result. A loop does <code>total = total + f(x)</code>. What happens?", options: ["It works", "TypeError, because the call gives None", "It prints twice", "total stays 0"], correct: 1, why: "The screen shows correct numbers, which is what makes it confusing — but the call itself returns <code>None</code>, and <code>int + None</code> raises <code>TypeError</code>. The values were computed and never handed back." },
+    { level: "hard", q: "<code>return min(x), max(x)</code> — what does the caller actually receive?", options: ["Two separate values", "One tuple, which can be unpacked", "Only the min", "An error"], correct: 1, why: "A function returns one object. The comma builds a tuple, and <code>low, high = stats(x)</code> unpacks it — which is why it feels like returning two things. Past two or three values, a dictionary reads better than positional unpacking." },
   ],
   "strings": [
     { q: "<code>s = \"DATA\"; print(s[1:3])</code> — kya aayega?", options: ["AT", "ATA", "DAT", "TA"], correct: 0, why: "Index 1, 2 = A, T — <b>stop (3) excluded</b>. Result <code>AT</code>." },
