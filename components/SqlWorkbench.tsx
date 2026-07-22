@@ -118,7 +118,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   return (
     <>
       <div className="crumb" style={{ marginBottom: 16 }}>
-        Practice / <b>{p.title}</b>
+        <Link href="/practice">← Practice</Link> / <b>{p.title}</b>
         {p.lessonSlug && <> · <Link href={`/learn/${p.lessonSlug}`} style={{ color: "var(--teal)" }}>read the lesson</Link></>}
       </div>
 

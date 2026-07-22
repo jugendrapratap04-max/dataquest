@@ -224,6 +224,9 @@ export function RoomClient({ code }: { code: string }) {
       {/* ---- header ---- */}
       <div className="room-head card">
         <div className="rh-left">
+          {/* A non-destructive way out. "Leave" ends your sitting on purpose;
+              this just goes back to the list and keeps you a member. */}
+          <Link className="crumb rh-back" href="/rooms">← Rooms</Link>
           <h2 className="rh-name">{st.room.name}</h2>
           <div className="rh-meta">{st.room.subject}{st.room.topic && ` · ${st.room.topic}`} · host {st.room.hostName}</div>
         </div>

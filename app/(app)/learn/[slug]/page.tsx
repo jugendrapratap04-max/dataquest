@@ -297,7 +297,12 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
     <div className="learn-layout">
       <ReadingProgress />
       <article>
-        <div className="crumb">Roadmap / {lesson.track.title.split(" — ")[0]} / <b>{lesson.title}</b></div>
+        {/* Clickable, because this breadcrumb was plain text and a lesson had no
+            way out at all — and on mobile the sidebar is behind a hamburger, so
+            the browser's own back button was the only exit. */}
+        <div className="crumb">
+          <Link href="/roadmap">← Roadmap</Link> / <Link href="/learn">{lesson.track.title.split(" — ")[0]}</Link> / <b>{lesson.title}</b>
+        </div>
         <div className="lesson-head">
           <div className="eyebrow">Lesson {lesson.order} · {lesson.track.title.split(" — ").pop()}</div>
           <h1>{lesson.title}</h1>
