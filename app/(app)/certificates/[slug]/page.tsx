@@ -22,14 +22,14 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
     return (
       <div className="card room-empty" style={{ maxWidth: 560, margin: "40px auto" }}>
         <div className="re-mark">🔒</div>
-        <h3>Ye certificate abhi earned nahi hai</h3>
+        <h3>This certificate is not earned yet</h3>
         <p>
-          {t.shortTitle} track abhi {t.pct}% complete hai — {t.lessonsDone}/{t.totalLessons} lessons,{" "}
-          {t.problemsDone}/{t.totalProblems} problems. Poora karo, phir certificate yahin milega.
+          The {t.shortTitle} track is {t.pct}% complete — {t.lessonsDone}/{t.totalLessons} lessons,{" "}
+          {t.problemsDone}/{t.totalProblems} problems. Finish it and the certificate appears right here.
         </p>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 14 }}>
-          <Link className="btn btn-primary" href={t.firstLesson ? `/learn/${t.firstLesson}` : "/learn"}>Lessons kholo</Link>
-          <Link className="btn btn-ghost" href="/certificates">Wapas</Link>
+          <Link className="btn btn-primary" href={t.firstLesson ? `/learn/${t.firstLesson}` : "/learn"}>Open the lessons</Link>
+          <Link className="btn btn-ghost" href="/certificates">Back</Link>
         </div>
       </div>
     );

@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
   const body = await req.json().catch(() => ({}));
   const text = String(body.text ?? "").trim().slice(0, 500);
-  if (!text) return NextResponse.json({ error: "Doubt likho pehle." }, { status: 400 });
+  if (!text) return NextResponse.json({ error: "Write the doubt first." }, { status: 400 });
 
   // Only attach to a session/room the user is actually in — otherwise anyone
   // could seed doubts into a stranger's queue.
@@ -71,7 +71,7 @@ export async function PATCH(req: Request) {
   if (typeof body.resolved === "boolean") data.resolved = body.resolved;
   if (typeof body.queued === "boolean") {
     if (body.queued && !mine.roomId) {
-      return NextResponse.json({ error: "Ye doubt kisi room se juda nahi hai." }, { status: 400 });
+      return NextResponse.json({ error: "This doubt is not attached to any room." }, { status: 400 });
     }
     data.queued = body.queued;
     data.queuedAt = body.queued ? new Date() : null; // queue order

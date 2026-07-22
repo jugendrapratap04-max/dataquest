@@ -5,7 +5,7 @@
 // contentJson (and title/minutes) by slug and leaves everything else alone.
 
 import { PrismaClient } from "@prisma/client";
-import { trackLessons, lessonContent } from "./seed.mjs";
+import { trackLessons, lessonContent, tracks } from "./seed.mjs";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +14,20 @@ const prisma = new PrismaClient();
 const TAUGHT = ["hook", "think", "def", "analogy", "mistakes", "interview"];
 
 async function main() {
+  // Track blurbs are content too — they're what the roadmap page reads. Same
+  // rule as lessons: editing the copy must never mean re-seeding the database.
+  let tracksUpdated = 0;
+  for (const t of tracks) {
+    const existing = await prisma.track.findUnique({ where: { slug: t.slug } });
+    if (!existing) continue;
+    // The seed objects already use the model's own field names, so this stays
+    // correct if a column is ever added — no second list to keep in step.
+    const { slug, ...fields } = t;
+    await prisma.track.update({ where: { slug }, data: fields });
+    tracksUpdated++;
+  }
+  console.log(`✅ tracks refreshed: ${tracksUpdated}`);
+
   let updated = 0;
   const missing = [];
   const coverage = Object.fromEntries(TAUGHT.map((t) => [t, 0]));

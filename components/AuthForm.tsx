@@ -18,11 +18,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   // server still validates — this is only about not making the user wait for a
   // bounce it can already see.
   function validate(): string | null {
-    if (isSignup && !name.trim()) return "Apna naam likho.";
-    if (!email.trim()) return "Email likho.";
-    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return "Email theek nahi lag raha — dobara dekho.";
-    if (!password) return "Password likho.";
-    if (isSignup && password.length < 6) return "Password kam se kam 6 characters ka rakho.";
+    if (isSignup && !name.trim()) return "Enter your name.";
+    if (!email.trim()) return "Enter your email.";
+    if (!/^\S+@\S+\.\S+$/.test(email.trim())) return "That email does not look right — check it again.";
+    if (!password) return "Enter a password.";
+    if (isSignup && password.length < 6) return "Use a password of at least 6 characters.";
     return null;
   }
 
@@ -39,11 +39,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         body: JSON.stringify(isSignup ? { name, email, password } : { email, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setErr(data.error || "Kuch galat ho gaya."); setBusy(false); return; }
+      if (!res.ok) { setErr(data.error || "Something went wrong."); setBusy(false); return; }
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setErr("Network issue — dobara try karo.");
+      setErr("Network problem — please try again.");
       setBusy(false);
     }
   }
@@ -57,14 +57,14 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <div className="mark">D</div>
           <div><span className="wm">DataMarg</span></div>
         </div>
-        <h1>{isSignup ? "Naya account banao" : "Wapas aa gaye? 👋"}</h1>
-        <p className="sub">{isSignup ? "Ek account, aur poora data science safar tumhara." : "Login karo aur wahin se shuru karo jahan chhoda tha."}</p>
+        <h1>{isSignup ? "Create your account" : "Welcome back 👋"}</h1>
+        <p className="sub">{isSignup ? "One account, and the whole data science path is yours." : "Sign in and pick up exactly where you left off."}</p>
 
         {err && <div className="auth-err">{err}</div>}
 
         {isSignup && (
           <div className="auth-field">
-            <label>Naam</label>
+            <label>Name</label>
             <input className="auth-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jugendra Pratap" autoComplete="name" />
           </div>
         )}
@@ -78,11 +78,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         </div>
 
         <button className="btn btn-primary auth-btn" type="submit" disabled={busy}>
-          {busy ? "Ruko…" : isSignup ? "Account banao →" : "Login →"}
+          {busy ? "Please wait…" : isSignup ? "Create account →" : "Sign in →"}
         </button>
 
         <div className="auth-alt">
-          {isSignup ? <>Pehle se account hai? <Link href="/login">Login karo</Link></> : <>Naye ho? <Link href="/signup">Account banao</Link></>}
+          {isSignup ? <>Already have an account? <Link href="/login">Sign in</Link></> : <>New here? <Link href="/signup">Create an account</Link></>}
         </div>
       </form>
     </div>

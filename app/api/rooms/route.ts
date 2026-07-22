@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
   if (action === "create") {
     const name = String(body.name ?? "").trim().slice(0, 60);
-    if (!name) return NextResponse.json({ error: "Room ka naam zaroori hai." }, { status: 400 });
+    if (!name) return NextResponse.json({ error: "The room needs a name." }, { status: 400 });
 
     // Retry on the astronomically unlikely code collision rather than trusting luck.
     let code = makeRoomCode();
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       include: { members: true },
     });
     if (!room || room.endedAt) {
-      return NextResponse.json({ error: "Aisa koi room nahi mila (ya khatam ho chuka)." }, { status: 404 });
+      return NextResponse.json({ error: "No such room (or it has already ended)." }, { status: 404 });
     }
 
     const now = new Date();

@@ -12,7 +12,7 @@ const KEY = "dq-todos";
 // haven't done any of it. After the first edit these are the user's own todos
 // (localStorage), and the starters never come back.
 function starterItems(next?: { title: string; track: string } | null): Item[] {
-  if (!next) return [{ id: 1, text: "Apna pehla lesson padho", kind: "learn", done: false }];
+  if (!next) return [{ id: 1, text: "Read your first lesson", kind: "learn", done: false }];
   return [
     { id: 1, text: `Read: ${next.title}`, kind: "learn", done: false },
     { id: 2, text: `Solve 3 ${next.track} drills`, kind: "prac", done: false },
@@ -64,7 +64,7 @@ export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: 
         ))}
       </ul>
       <div className="todo-add">
-        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} placeholder="Naya task add karo…" />
+        <input value={text} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} placeholder="Add a new task…" />
         <button onClick={add} aria-label="Add">+</button>
       </div>
     </>

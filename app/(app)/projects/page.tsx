@@ -1,16 +1,16 @@
 const projects = [
-  { title: "Sales Dashboard EDA", level: "Beginner", em: "📊", grad: "linear-gradient(135deg,#E8920C,#B8690A)", desc: "Messy CSV clean karo, trends dhoondo, apni pehli insight report banao.", skills: ["pandas", "matplotlib"], est: "~6 hrs" },
+  { title: "Sales Dashboard EDA", level: "Beginner", em: "📊", grad: "linear-gradient(135deg,#E8920C,#B8690A)", desc: "Clean a messy CSV, find the trends, and write your first insight report.", skills: ["pandas", "matplotlib"], est: "~6 hrs" },
   { title: "Movie Ratings SQL Case", level: "Intermediate", em: "🎬", grad: "linear-gradient(135deg,#0E9C8C,#0A6B60)", desc: "3-table database se 12 business questions ka jawaab SQL se nikaalo.", skills: ["sql", "joins"], est: "~8 hrs" },
   { title: "Churn Prediction Model", level: "Capstone", em: "🤖", grad: "linear-gradient(135deg,#5B4CD6,#3D2FA0)", desc: "End-to-end: clean → EDA → model → evaluate. Portfolio-ready.", skills: ["sklearn", "ml"], est: "~15 hrs" },
-  { title: "House Price Predictor", level: "Intermediate", em: "🏠", grad: "linear-gradient(135deg,#2C5FC0,#1E4088)", desc: "Regression se ghar ki keemat predict karo. Feature engineering ka maza.", skills: ["regression", "pandas"], est: "~10 hrs" },
+  { title: "House Price Predictor", level: "Intermediate", em: "🏠", grad: "linear-gradient(135deg,#2C5FC0,#1E4088)", desc: "Predict house prices with regression — where feature engineering gets fun.", skills: ["regression", "pandas"], est: "~10 hrs" },
   { title: "Twitter Sentiment", level: "Beginner", em: "💬", grad: "linear-gradient(135deg,#1FA85A,#147A40)", desc: "Tweets ka mood — positive ya negative? NLP ki pehli jhalak.", skills: ["nlp", "text"], est: "~7 hrs" },
-  { title: "Deployed ML Web App", level: "Capstone", em: "🚀", grad: "linear-gradient(135deg,#D9557B,#A83459)", desc: "Apna model Streamlit pe deploy karo — live link resume me daalo.", skills: ["streamlit", "deploy"], est: "~12 hrs" },
+  { title: "Deployed ML Web App", level: "Capstone", em: "🚀", grad: "linear-gradient(135deg,#D9557B,#A83459)", desc: "Deploy your model on Streamlit — put the live link on your resume.", skills: ["streamlit", "deploy"], est: "~12 hrs" },
 ];
 
 export default function ProjectsPage() {
   return (
     <>
-      <p className="page-intro">Har skill ke baad ek project banao — yahi cheez resume me sabse zyada matter karti hai. Beginner se capstone tak, sab portfolio-ready. <b>Detailed briefs jald aa rahe hain</b> — abhi ye roadmap ka preview hai.</p>
+      <p className="page-intro">Build a project after every skill — nothing on a resume counts for more. Beginner to capstone, all portfolio-ready. <b>Detailed briefs are coming soon</b> — this is a preview of the roadmap.</p>
       <div className="projs">
         {projects.map((p) => (
           <div className="proj" key={p.title}>

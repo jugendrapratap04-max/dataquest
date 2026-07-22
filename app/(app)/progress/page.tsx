@@ -50,7 +50,7 @@ export default async function ProgressPage() {
         </div>
         {totalSubs === 0 && (
           <p style={{ fontSize: 12.5, color: "var(--ink-faint)", margin: "12px 0 0" }}>
-            Abhi tak koi submission nahi — ek problem solve karo, ye grid bharna shuru ho jayega.
+            No submissions yet — solve one problem and this grid starts filling in.
           </p>
         )}
       </div>

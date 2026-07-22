@@ -71,7 +71,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
 
   return (
     <>
-      <button className="nav-toggle" aria-label="Menu kholo" aria-expanded={open} onClick={() => setOpen(true)}>
+      <button className="nav-toggle" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
       <div className={`side-backdrop${open ? " show" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />

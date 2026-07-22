@@ -14,7 +14,7 @@ export async function PATCH(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const role = String(body.role ?? "").trim().slice(0, 60);
-  if (!role) return NextResponse.json({ error: "Title khaali nahi ho sakta." }, { status: 400 });
+  if (!role) return NextResponse.json({ error: "The title cannot be empty." }, { status: 400 });
 
   await prisma.user.update({ where: { id: user.id }, data: { role } });
   return NextResponse.json({ ok: true, role });

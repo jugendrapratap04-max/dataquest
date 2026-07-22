@@ -196,7 +196,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
       <>
         <div className="sec-head"><h2 style={{ fontSize: 19 }}>Session complete</h2></div>
         <div className="card focus-summary">
-          <div className="fs-badge">{summary.completed ? "✅ Poora focus block ho gaya" : "Chhota session — chalega, kal aur"}</div>
+          <div className="fs-badge">{summary.completed ? "✅ Full focus block done" : "Short session — that counts, more tomorrow"}</div>
           <h3 className="fs-title">{summary.goal || summary.topic}</h3>
           <div className="stats" style={{ marginTop: 18 }}>
             <div className="card stat"><div className="k">Study time</div><div className="v num">{humanDuration(summary.elapsedSeconds)}</div></div>
@@ -205,8 +205,8 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
             <div className="card stat"><div className="k">Problems solved</div><div className="v num">{summary.problemsSolved}</div></div>
           </div>
           <p className="fs-note">
-            Focus {summary.focusPct}% = session ke {humanDuration(summary.elapsedSeconds)} me se {humanDuration(summary.activeSeconds)} tum actually yahan the.
-            {summary.doubtsWritten > 0 && <> Notebook me {summary.doubtsWritten} doubt likhe — Notes me jaake unhe clear karo.</>}
+            Focus {summary.focusPct}% — of the session’s {humanDuration(summary.elapsedSeconds)} you were actually here for {humanDuration(summary.activeSeconds)}.
+            {summary.doubtsWritten > 0 && <> You wrote {summary.doubtsWritten} doubts in the notebook — clear them in Notes.</>}
           </p>
           <button className="btn btn-primary" onClick={() => setSummary(null)}>Naya session</button>
         </div>
@@ -220,8 +220,8 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
       <>
         <div className="sec-head"><h2 style={{ fontSize: 19 }}>Focus Mode</h2></div>
         <p className="page-intro">
-          Ek topic chuno, timer chalao, aur bas wahi karo. Focus ke dauraan doubt aaye to notebook me likh do —
-          break me dekhna. Padhna toot-ta nahi, aur doubt bhi nahi bhoolta.
+          Pick one topic, start the timer, and do only that. If a doubt comes up during focus, write it in the notebook —
+          you deal with it in the break. Your study never breaks, and the doubt is never lost.
         </p>
 
         <div className="card focus-setup">
@@ -233,7 +233,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
             </label>
             <label className="fset">
               <span className="k">Aaj ka goal</span>
-              <input className="inp" placeholder="5 loop problems solve karne hain" value={form.goal}
+              <input className="inp" placeholder="Solve 5 loop problems" value={form.goal}
                 onChange={(e) => setForm({ ...form, goal: e.target.value })} />
             </label>
           </div>
@@ -254,7 +254,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
             </label>
           </div>
           <button className="btn btn-primary fset-go" onClick={start} disabled={busy}>
-            {busy ? "Shuru ho raha…" : `${form.focusMinutes} min focus shuru karo →`}
+            {busy ? "Starting…" : `Start ${form.focusMinutes} min of focus →`}
           </button>
         </div>
 
@@ -287,7 +287,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
           <div className="fring-mid">
             <div className="fring-time num">{mmss(secondsLeft)}</div>
             <div className="fring-sub">
-              {phaseDone ? "Switch ho raha hai…" : isFocus ? "sirf padhai" : "doubts dekho"}
+              {phaseDone ? "Switching…" : isFocus ? "study only" : "clear your doubts"}
             </div>
           </div>
         </div>
@@ -305,8 +305,8 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
           <button className={`btn btn-ghost${notebookOpen ? " on" : ""}`} onClick={() => setNotebookOpen((o) => !o)}>
             📓 Notebook{openDoubts > 0 && <span className="fdot">{openDoubts}</span>}
           </button>
-          <Link className="btn btn-ghost" href="/practice">Practice kholo</Link>
-          <button className="btn btn-ghost fend" onClick={end} disabled={busy}>Session khatam</button>
+          <Link className="btn btn-ghost" href="/practice">Open practice</Link>
+          <button className="btn btn-ghost fend" onClick={end} disabled={busy}>End session</button>
         </div>
       </div>
 
@@ -314,27 +314,27 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
         <div className="card fnote">
           <div className="sec-head" style={{ marginBottom: 10 }}>
             <h2>Private Notebook</h2>
-            <span className="tag" style={{ marginLeft: "auto" }}>sirf tum dekh sakte ho</span>
+            <span className="tag" style={{ marginLeft: "auto" }}>only you can see this</span>
           </div>
           <p className="fnote-why">
             {isFocus
-              ? "Doubt aaya? Yahan likh do aur padhte raho. Break me wapas aayega."
-              : "Break hai — ab in doubts ko clear karo."}
+              ? "Doubt? Write it here and keep studying. It comes back in the break."
+              : "Break time — clear these doubts now."}
           </p>
           <div className="fnote-add">
-            <input className="inp" placeholder="Binary search O(log n) kyun hai?" value={draft}
+            <input className="inp" placeholder="Why is binary search O(log n)?" value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") addDoubt(); }} />
             <button className="btn btn-teal" onClick={addDoubt} disabled={!draft.trim()}>Add</button>
           </div>
           {entries.length === 0 ? (
-            <p className="fnote-empty">Abhi tak koi doubt nahi. Achhi baat hai — ya to sab clear hai, ya poochhna baaki hai.</p>
+            <p className="fnote-empty">No doubts yet. That is either a good sign, or you have not asked enough.</p>
           ) : (
             <ul className="fnote-list">
               {entries.map((e) => (
                 <li key={e.id} className={e.resolved ? "done" : ""}>
                   <button className="fnote-tick" onClick={() => toggleResolved(e)}
-                    title={e.resolved ? "Wapas open karo" : "Clear ho gaya"}>{e.resolved ? "✅" : "○"}</button>
+                    title={e.resolved ? "Reopen" : "Mark as cleared"}>{e.resolved ? "✅" : "○"}</button>
                   <span className="fnote-txt">{e.text}</span>
                   <button className="fnote-del" onClick={() => delDoubt(e.id)} title="Delete">×</button>
                 </li>

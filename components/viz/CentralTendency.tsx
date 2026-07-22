@@ -27,7 +27,7 @@ export function CentralTendency() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">📍 Central Tendency — mean vs median</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 16px" }}>
-        Data points neeche dots hain. Ek <b>bada number (jaise 22)</b> add karo aur dekho — <b>mean (average)</b> us taraf khisak jaata hai, par <b>median (beech ka)</b> tikaa rehta hai. Isliye outliers me median behtar hota hai.
+        The data points are the dots below. Add a <b>large number (say 22)</b> and watch — the <b>mean</b> slides towards it while the <b>median</b> holds its ground. That is why the median is the safer choice when there are outliers.
       </p>
 
       <div className="ct-track">

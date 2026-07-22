@@ -17,10 +17,10 @@ export default async function FeedbackInboxPage() {
     return (
       <section className="card pad" style={{ maxWidth: 560 }}>
         <div className="eyebrow" style={{ color: "var(--ink-faint)" }}>Feedback inbox</div>
-        <h2 style={{ fontSize: 18, margin: "8px 0 8px" }}>Ye page sirf admin ke liye hai</h2>
+        <h2 style={{ fontSize: 18, margin: "8px 0 8px" }}>This page is for the admin only</h2>
         <p style={{ color: "var(--ink-soft)", fontSize: 13.5, margin: 0 }}>
-          Feedback dekhne ke liye <code>ADMIN_EMAIL</code> env var ko apne account ki email pe set
-          karo (Vercel → Settings → Environment Variables), phir usi account se login karo.
+          To read feedback, set the <code>ADMIN_EMAIL</code> environment variable to your own account email
+          (Vercel → Settings → Environment Variables), then sign in with that account.
         </p>
       </section>
     );

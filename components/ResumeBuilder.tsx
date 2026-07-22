@@ -17,29 +17,29 @@ function scoreResume(d: Data) {
 
   const email = /\S+@\S+\.\S+/.test(d.email);
   const phone = d.phone.replace(/\D/g, "").length >= 10;
-  add(email && phone && d.linkedin.trim().length > 3, "Contact info complete", "Email, phone aur LinkedIn — teeno daalo.", 15);
-  add(d.role.trim().length > 2, "Professional title", "Ek clear title likho (jaise 'Data Analyst').", 5);
+  add(email && phone && d.linkedin.trim().length > 3, "Contact info complete", "Add all three — email, phone and LinkedIn.", 15);
+  add(d.role.trim().length > 2, "Professional title", "Write one clear title (for example 'Data Analyst').", 5);
 
   const sw = d.summary.trim().split(/\s+/).filter(Boolean).length;
-  add(sw >= 15 && sw <= 70, "Focused summary (15–70 words)", "2–3 line ka crisp summary likho.", 10);
+  add(sw >= 15 && sw <= 70, "Focused summary (15–70 words)", "Write a crisp 2–3 line summary.", 10);
 
   const skills = d.skills.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
   add(skills.length >= 6, "6+ skills listed", "Kam se kam 6 relevant skills.", 15);
 
   const text = (d.summary + " " + d.skills).toLowerCase();
   const matched = CORE.filter((k) => skills.some((s) => s.includes(k)) || text.includes(k));
-  add(matched.length >= 4, `Core DS keywords (${matched.length} mile)`, "Python, SQL, Pandas, ML, Statistics jaise keywords daalo.", 15);
+  add(matched.length >= 4, `Core DS keywords (${matched.length} found)`, "Add keywords like Python, SQL, Pandas, ML, Statistics.", 15);
 
   const projs = d.projects.filter((p) => p.title.trim());
   add(projs.length >= 2, "2+ projects", "Kam se kam 2 projects — portfolio ka proof.", 15);
 
   const allDesc = projs.map((p) => p.desc.toLowerCase()).join(" ");
-  add(VERBS.some((v) => allDesc.includes(v)), "Action verbs used", "Projects 'Built / Analyzed / Developed' se shuru karo.", 10);
+  add(VERBS.some((v) => allDesc.includes(v)), "Action verbs used", "Start project lines with 'Built / Analyzed / Developed'.", 10);
 
   const quantified = /\d+\s?%|\b\d{2,}\b|\baccuracy\b/i.test(allDesc + " " + d.summary);
-  add(quantified, "Quantified impact", "Numbers daalo — '95% accuracy', '10k rows'.", 10);
+  add(quantified, "Quantified impact", "Add numbers — '95% accuracy', '10k rows'.", 10);
 
-  add(d.education.trim().length > 3, "Education listed", "Apni degree / education add karo.", 5);
+  add(d.education.trim().length > 3, "Education listed", "Add your degree or education.", 5);
 
   const score = checks.reduce((s, c) => s + (c.ok ? c.weight : 0), 0);
   return { score, checks, matched };
@@ -84,7 +84,7 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
 
   const band = score >= 75 ? "good" : score >= 50 ? "warn" : "bad";
   const bandColor = band === "good" ? "var(--good)" : band === "warn" ? "var(--accent)" : "var(--bad)";
-  const verdict = score >= 75 ? "Shabaash — ATS-ready! 🎉" : score >= 50 ? "Theek hai, thoda aur polish karo." : "Abhi kaam baaki hai — tips follow karo.";
+  const verdict = score >= 75 ? "Well done — ATS-ready! 🎉" : score >= 50 ? "Decent — a little more polish and it is there." : "Not there yet — work through the tips below.";
 
   const skillList = d.skills.split(",").map((s) => s.trim()).filter(Boolean);
   const projList = d.projects.filter((p) => p.title.trim());
@@ -93,14 +93,14 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
     <div className="resume-grid">
       {/* form */}
       <div className="card pad rb-form">
-        <div className="sec-head"><h2>Apni details bharo</h2></div>
+        <div className="sec-head"><h2>Fill in your details</h2></div>
         <div className="rb-field"><label>Full name</label><input className="auth-input" value={d.fullName} onChange={(e) => set("fullName", e.target.value)} /></div>
         <div className="rb-field">
           <label>Title / Role</label>
           <input className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} />
           {d.role.trim() && d.role.trim() !== savedRole && (
             <button type="button" className="rb-saverole" onClick={saveRole} disabled={savingRole}>
-              {savingRole ? "Save ho raha…" : "↑ Ye title profile me bhi save karo"}
+              {savingRole ? "Saving…" : "↑ Save this title to your profile too"}
             </button>
           )}
         </div>
@@ -116,7 +116,7 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
         {d.projects.map((p, i) => (
           <div className="rb-proj" key={i}>
             <input className="auth-input" placeholder={`Project ${i + 1} title`} value={p.title} onChange={(e) => setProj(i, "title", e.target.value)} />
-            <textarea className="auth-input" rows={2} placeholder="Kya banaya + result (action verb + number)" value={p.desc} onChange={(e) => setProj(i, "desc", e.target.value)} />
+            <textarea className="auth-input" rows={2} placeholder="What you built + the result (action verb + number)" value={p.desc} onChange={(e) => setProj(i, "desc", e.target.value)} />
           </div>
         ))}
       </div>
@@ -124,12 +124,12 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
       {/* ATS + preview */}
       <div className="rb-right">
         <div className="card pad">
-          <div className="sec-head"><h2>ATS Score<span className="sub">machine kaise padhti hai</span></h2></div>
+          <div className="sec-head"><h2>ATS Score<span className="sub">how a machine reads it</span></h2></div>
           <div className="ats-top">
             <div className="ats-ring" style={{ background: `conic-gradient(${bandColor} ${score * 3.6}deg, var(--panel-2) 0)` }}>
               <div className="ats-inner"><b style={{ color: bandColor }}>{score}</b><span>/ 100</span></div>
             </div>
-            <div className="ats-verdict"><b>{verdict}</b><p>Ye tumhara resume ATS software (jo companies use karti hain) me kaisa perform karega uska estimate hai.</p></div>
+            <div className="ats-verdict"><b>{verdict}</b><p>An estimate of how your resume would perform in the ATS software companies use to filter applications.</p></div>
           </div>
           <ul className="ats-list">
             {checks.map((c, i) => (

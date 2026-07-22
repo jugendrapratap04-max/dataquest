@@ -48,7 +48,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
   }
 
   function handleMount(editor: any, monaco: any) {
-    // No copy-paste — student ko khud likhna padega (tabhi seekhega).
+    // No copy-paste — the student has to type it, which is the point.
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, flashNoPaste);
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyV, flashNoPaste);
     const dom = editor.getDomNode?.();
@@ -77,9 +77,9 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
         if (!passed) {
           // the test panel already shows which cases failed
         } else if (!res?.ok) {
-          setSubmitNote("Submit save nahi hua — internet check karke dobara Submit karo.");
+          setSubmitNote("Submission did not save — check your connection and press Submit again.");
         } else if (res.verifyNote) {
-          setSubmitNote(`Server pe verify nahi hua: ${res.verifyNote}`);
+          setSubmitNote(`The server could not verify this: ${res.verifyNote}`);
         } else {
           setCelebrate(res.awardedXp ?? 0);
         }
@@ -97,7 +97,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     <>
       <div className="crumb" style={{ marginBottom: 16 }}>
         Practice / <b>{p.title}</b>
-        {p.lessonSlug && <> · <Link href={`/learn/${p.lessonSlug}`} style={{ color: "var(--teal)" }}>lesson padho</Link></>}
+        {p.lessonSlug && <> · <Link href={`/learn/${p.lessonSlug}`} style={{ color: "var(--teal)" }}>read the lesson</Link></>}
       </div>
 
       <div className="psplit">
@@ -128,8 +128,8 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
           )}
           {tab === "hint" && <div>{p.hints.map((h, i) => <div className="hintb" key={i}>💡 <b>Hint {i + 1}:</b> {h}</div>)}</div>}
           {tab === "recap" && (
-            <div><p dangerouslySetInnerHTML={{ __html: mdLite(p.recap || "Is topic ka lesson kholo aur dobara padho.") }} />
-              {p.lessonSlug && <Link className="link" style={{ margin: 0, color: "var(--teal)" }} href={`/learn/${p.lessonSlug}`}>↩ Poora lesson kholo</Link>}
+            <div><p dangerouslySetInnerHTML={{ __html: mdLite(p.recap || "Open this topic’s lesson and read it again.") }} />
+              {p.lessonSlug && <Link className="link" style={{ margin: 0, color: "var(--teal)" }} href={`/learn/${p.lessonSlug}`}>↩ Open the full lesson</Link>}
             </div>
           )}
         </div>
@@ -138,7 +138,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
         <div className="editor-wrap">
           <div className="ed-bar">
             <span className="ed-lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg> Python 3</span>
-            <span className="no-paste-badge" title="Copy-paste band hai — khud likho!">🔒 no paste</span>
+            <span className="no-paste-badge" title="Copy-paste is off — type it yourself!">🔒 no paste</span>
             <div className="ed-actions">
               <button className="btn btn-run" onClick={() => doRun(false)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -156,9 +156,9 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               height="300px" defaultLanguage="python" theme="vs-dark" value={code}
               onChange={(v) => setCode(v ?? "")} onMount={handleMount}
               options={{ minimap: { enabled: false }, fontSize: 13, lineNumbers: "on", scrollBeyondLastLine: false, padding: { top: 12 }, tabSize: 4, contextmenu: false }}
-              loading={<div style={{ color: "#8890A0", padding: 20, fontFamily: "var(--mono)", fontSize: 13 }}>Editor load ho raha hai…</div>}
+              loading={<div style={{ color: "#8890A0", padding: 20, fontFamily: "var(--mono)", fontSize: 13 }}>Loading the editor…</div>}
             />
-            {noPaste && <div className="paste-toast">✋ Paste band hai — khud likho, tabhi yaad rahega!</div>}
+            {noPaste && <div className="paste-toast">✋ Paste is off — type it out, that is how it sticks!</div>}
           </div>
 
           <div className="results">
@@ -170,7 +170,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "tests" && (
                 !result ? (
-                  <div className="res-empty">▶ &quot;Run&quot; dabao — pehli baar Python load hone me thoda time (pandas/data problems me ~30 sec), phir turant chalega.</div>
+                  <div className="res-empty">▶ Press &quot;Run&quot; — Python takes a moment to load the first time (~30s for pandas problems), then it is instant.</div>
                 ) : !result.compiled ? (
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Code me error hai</div>
@@ -194,7 +194,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                 )
               )}
               {resTab === "console" && (
-                <div className="console-out">{result?.stdout ? result.stdout : "// print() ka output yahan dikhega…"}</div>
+                <div className="console-out">{result?.stdout ? result.stdout : "// output from print() appears here…"}</div>
               )}
             </div>
           </div>

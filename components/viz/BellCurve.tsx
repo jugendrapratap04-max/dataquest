@@ -39,7 +39,7 @@ export function BellCurve() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">🔔 Normal Distribution — bell curve</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Bahut saara real data is "ghanti" shape me hota hai — zyaadatar beech me, kam kinare pe. Slider se <b>z-score</b> badlo aur dekho uske left me kitna % data aata hai.
+        A great deal of real data falls into this bell shape — most of it in the middle, little at the edges. Move the <b>z-score</b> slider and see what percentage of the data sits to its left.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: 420, display: "block", margin: "0 auto" }}>

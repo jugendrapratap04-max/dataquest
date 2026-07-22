@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   if (retry > 0) {
     const mins = Math.ceil(retry / 60);
     return NextResponse.json(
-      { error: `Bahut zyada galat koshish. ${mins} minute baad dobara try karo.` },
+      { error: `Too many failed attempts. Try again in ${mins} minutes.` },
       { status: 429 }
     );
   }
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   const user = await prisma.user.findUnique({ where: { email: mail } });
   if (!user || !verifyPassword(password ?? "", user.passwordHash)) {
     recordLoginFail(key);
-    return NextResponse.json({ error: "Email ya password galat hai." }, { status: 401 });
+    return NextResponse.json({ error: "That email or password is not right." }, { status: 401 });
   }
 
   recordLoginSuccess(key);

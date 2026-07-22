@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 const LINES = [
-  "Ek aur skill pakki! Isi tarah roz — job door nahi. 🚀",
-  "Shabaash! Jo khud likh ke solve kiya, wo kabhi nahi bhoolega. 💪",
-  "Consistency hi asli talent hai — aur tum wahi dikha rahe ho. 🔥",
+  "Another skill locked in. Keep this up daily — the job is not far. 🚀",
+  "Nicely done. What you solve by typing it yourself, you never forget. 💪",
+  "Consistency is the real talent — and you are showing it. 🔥",
   "Chhote steps, bada result. Aaj ka topic clear! ✅",
   "Ye lo +XP! Ek din ye saare chhote wins ek badi job banenge. 🎯",
 ];
@@ -44,7 +44,7 @@ function Confetti() {
 }
 
 export function Celebrate({
-  title = "Shabaash! 🎉", xp, sub, onClose, onNext, nextLabel = "Next →",
+  title = "Nicely done! 🎉", xp, sub, onClose, onNext, nextLabel = "Next →",
 }: {
   title?: string; xp?: number; sub?: string; onClose: () => void; onNext?: () => void; nextLabel?: string;
 }) {

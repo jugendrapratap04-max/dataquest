@@ -5,9 +5,9 @@ import { useEffect, useRef, useState } from "react";
 
 type Cat = "bug" | "idea" | "other";
 const CATS: { id: Cat; label: string; hint: string }[] = [
-  { id: "bug", label: "🐞 Bug", hint: "kuch toota / galat hua" },
-  { id: "idea", label: "💡 Idea", hint: "aisa hona chahiye" },
-  { id: "other", label: "💬 Other", hint: "kuch aur kehna hai" },
+  { id: "bug", label: "🐞 Bug", hint: "something broke or looks wrong" },
+  { id: "idea", label: "💡 Idea", hint: "this should exist" },
+  { id: "other", label: "💬 Other", hint: "anything else" },
 ];
 
 export function FeedbackButton() {
@@ -34,7 +34,7 @@ export function FeedbackButton() {
   }
 
   async function submit() {
-    if (msg.trim().length < 3) { setError("Thoda detail likho."); return; }
+    if (msg.trim().length < 3) { setError("Add a little more detail."); return; }
     setState("sending"); setError("");
     try {
       const res = await fetch("/api/feedback", {
@@ -43,11 +43,11 @@ export function FeedbackButton() {
         body: JSON.stringify({ category: cat, message: msg, path: pathname }),
       });
       const data = await res.json();
-      if (!res.ok) { setState("error"); setError(data.error || "Kuch galat hua."); return; }
+      if (!res.ok) { setState("error"); setError(data.error || "Something went wrong."); return; }
       setState("done");
       setTimeout(() => { setOpen(false); reset(); }, 1600);
     } catch {
-      setState("error"); setError("Network issue — dobara try karo.");
+      setState("error"); setError("Network problem — please try again.");
     }
   }
 
@@ -73,15 +73,15 @@ export function FeedbackButton() {
               <div className="fb-thanks">
                 <div className="fb-tick">✓</div>
                 <b>Shukriya!</b>
-                <p>Tumhara feedback mil gaya — isi se DataMarg behtar hoga.</p>
+                <p>Feedback received — this is how DataMarg gets better.</p>
               </div>
             ) : (
               <>
                 <div className="fb-head">
                   <b>Feedback bhejo</b>
-                  <button className="fb-x" onClick={() => setOpen(false)} aria-label="Band karo">✕</button>
+                  <button className="fb-x" onClick={() => setOpen(false)} aria-label="Close">✕</button>
                 </div>
-                <p className="fb-sub">Beta hai — jo bhi khatke wo bata do. Sab padha jaata hai.</p>
+                <p className="fb-sub">This is a beta — tell us anything that feels off. Every note is read.</p>
                 <div className="fb-cats">
                   {CATS.map((c) => (
                     <button
@@ -104,7 +104,7 @@ export function FeedbackButton() {
                 />
                 {error && <div className="fb-err">{error}</div>}
                 <button className="btn btn-primary fb-send" onClick={submit} disabled={state === "sending"}>
-                  {state === "sending" ? "Bhej raha hoon…" : "Bhejo →"}
+                  {state === "sending" ? "Sending…" : "Send →"}
                 </button>
               </>
             )}

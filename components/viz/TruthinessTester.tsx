@@ -6,15 +6,15 @@ type V = { code: string; truthy: boolean; why: string };
 const VALUES: V[] = [
   { code: "0", truthy: false, why: "zero — falsy" },
   { code: "0.0", truthy: false, why: "zero float — falsy" },
-  { code: '""', truthy: false, why: "khaali string — falsy" },
-  { code: "[]", truthy: false, why: "khaali list — falsy (surprise!)" },
-  { code: "{}", truthy: false, why: "khaali dict — falsy" },
+  { code: '""', truthy: false, why: "empty string — falsy" },
+  { code: "[]", truthy: false, why: "empty list — falsy (surprise!)" },
+  { code: "{}", truthy: false, why: "empty dict — falsy" },
   { code: "None", truthy: false, why: "None — hamesha falsy" },
-  { code: "1", truthy: true, why: "koi bhi non-zero number — truthy" },
+  { code: "1", truthy: true, why: "any non-zero number — truthy" },
   { code: "-5", truthy: true, why: "non-zero (negative bhi) — truthy" },
   { code: '"hi"', truthy: true, why: "non-empty string — truthy" },
   { code: '" "', truthy: true, why: "space bhi ek character hai — truthy!" },
-  { code: "[0]", truthy: true, why: "list me kuch hai (chahe 0 ho) — truthy" },
+  { code: "[0]", truthy: true, why: "the list has something in it (even a 0) — truthy" },
   { code: '{"a": 1}', truthy: true, why: "non-empty dict — truthy" },
 ];
 
@@ -25,7 +25,7 @@ export function TruthinessTester() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">💡 Truthiness Tester</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        <code>if</code> me har value ya to <b>True jaisi (truthy)</b> hai ya <b>False jaisi (falsy)</b>. Kisi pe click karke <code>bool()</code> dekho — rule yaad ho jaayega.
+        Inside an <code>if</code>, every value is either <b>truthy</b> or <b>falsy</b>. Click any of them to see what <code>bool()</code> says — the rule sticks fast.
       </p>
 
       <div className="tt-grid">
@@ -48,7 +48,7 @@ export function TruthinessTester() {
             <div style={{ marginTop: 4 }}><span className="c-com"># {sel.why}</span></div>
           </>
         ) : (
-          <div><span className="c-com"># Falsy = khaali ya zero: 0, 0.0, &quot;&quot;, [], {}, (), None, False. Baaki SAB truthy.</span></div>
+          <div><span className="c-com"># Falsy = empty or zero: 0, 0.0, &quot;&quot;, [], {}, (), None, False. EVERYTHING else is truthy.</span></div>
         )}
       </div>
     </div>

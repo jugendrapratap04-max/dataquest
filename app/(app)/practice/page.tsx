@@ -28,8 +28,8 @@ export default async function PracticeList() {
   return (
     <>
       <p className="page-intro">
-        {problems.length} problems, difficulty ke hisaab se arrange — Easy se shuru karo, phir Super Hard tak chadho.
-        Har problem asli Python compiler pe test cases se check hoti hai. 🎯
+        {problems.length} problems, arranged by difficulty — start at Easy and climb to Super Hard.
+        Every problem is checked against test cases in a real Python compiler. 🎯
       </p>
 
       {groups.map((g) => (

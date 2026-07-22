@@ -5,16 +5,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const titles: Record<string, [string, string]> = {
-  "/dashboard": ["{greeting}, {name}", "Aaj ka target — 1 topic padho, phir 5 problems solve karo."],
+  "/dashboard": ["{greeting}, {name}", "Today's target — read one topic, then solve five problems."],
   "/roadmap": ["Data Science Skill Sheet", "Zero to job-ready — 9 phases, do career checkpoints."],
-  "/learn": ["Lessons", "Pehle samjho, phir aage badho — ek time pe ek topic."],
-  "/practice": ["Practice Arena", "Jo padha, usi pe abhi likh ke dekho — tabhi pakka hota hai."],
-  "/projects": ["Projects", "Skills ko real projects me lagao — portfolio yahin banta hai."],
-  "/notes": ["My Notes", "Tumhari personal cheat-sheet — revision ka best dost."],
-  "/progress": ["Your Analytics", "Growth track karo — mazbooti aur gaps dono dikhengi."],
-  "/leaderboard": ["Leaderboard", "XP ke hisaab se ranking — solve karo, upar chadho."],
-  "/certificates": ["Certificates", "Har track complete karke certificate kamaao."],
-  "/resume": ["Resume + ATS", "Job-ready resume banao aur ATS score check karo."],
+  "/learn": ["Lessons", "Understand it first, then move on — one topic at a time."],
+  "/practice": ["Practice Arena", "Write code for what you just read — that is what makes it stick."],
+  "/projects": ["Projects", "Put your skills into real projects — this is where a portfolio comes from."],
+  "/notes": ["My Notes", "Your personal cheat-sheet — the best friend revision has."],
+  "/progress": ["Your Analytics", "Track your growth — both your strengths and your gaps."],
+  "/leaderboard": ["Leaderboard", "Ranked by XP — solve more, climb higher."],
+  "/certificates": ["Certificates", "Finish a track and earn its certificate."],
+  "/resume": ["Resume + ATS", "Build a job-ready resume and check its ATS score."],
 };
 
 function pick(pathname: string): [string, string] {
@@ -134,7 +134,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
           {open && q.trim() && (
             <div className="search-drop">
               {results.length === 0 ? (
-                <div className="search-empty">Kuch nahi mila</div>
+                <div className="search-empty">Nothing found</div>
               ) : results.map((it, i) => (
                 <button key={i} className="search-item" onClick={() => goTo(it)}>
                   <span className={`si-tag ${it.kind}`}>{it.kind === "lesson" ? "Lesson" : "Practice"}</span>
@@ -154,7 +154,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
           </div>
         )}
         <div className="theme-wrap" ref={themeRef}>
-          <button className="icon-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Theme chuno" aria-expanded={menuOpen}>
+          <button className="icon-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Choose theme" aria-expanded={menuOpen}>
             <span className="theme-sw" style={{ width: 18, height: 18, background: current.sw }} />
           </button>
           {menuOpen && (
@@ -191,7 +191,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
       </div>
       {toast && (
         <div className="theme-toast" role="status">
-          🔒 <span><b>{toast.name}</b> theme {toast.need.toLocaleString()} coins pe unlock — abhi {xp.toLocaleString()} 🪙</span>
+          🔒 <span><b>{toast.name}</b> theme unlocks at {toast.need.toLocaleString()} coins — you have {xp.toLocaleString()} 🪙</span>
         </div>
       )}
     </header>

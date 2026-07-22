@@ -7,9 +7,9 @@ const ROWS: (string | number)[][] = [["Delhi", 100, 2023], ["Mumbai", 200, 2023]
 type Part = "columns" | "index" | "values";
 
 const INFO: Record<Part, string> = {
-  columns: "Column names — har column ka naam (city, sales, year). df.columns se milte hain.",
-  index: "Index — har row ka label (0, 1, 2...). df.index se access hota hai.",
-  values: "Values — asli data jo cells me hai. df.values ya df['col'] se.",
+  columns: "Column names — the name of each column (city, sales, year). You get them from df.columns.",
+  index: "Index — the label on each row (0, 1, 2...). Reachable through df.index.",
+  values: "Values — the actual data in the cells. Reach it with df.values or df['col'].",
 };
 
 export function DataFrameAnatomy() {
@@ -19,7 +19,7 @@ export function DataFrameAnatomy() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">🗂️ DataFrame Anatomy</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        DataFrame = rows + columns wala table (Excel jaisa). Neeche kisi hisse pe click karke uska matlab samjho.
+        A DataFrame is a table of rows and columns, much like a spreadsheet. Click any part below to see what it means.
       </p>
 
       <div style={{ overflowX: "auto" }}>

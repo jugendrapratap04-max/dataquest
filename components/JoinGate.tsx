@@ -22,15 +22,15 @@ export function JoinGate(p: {
     }).then((x) => x.json()).catch(() => null);
     setBusy(false);
     if (r?.ok) router.refresh();
-    else setErr(r?.error ?? "Join nahi hua.");
+    else setErr(r?.error ?? "Could not join.");
   }
 
   if (p.ended) {
     return (
       <div className="card room-empty">
         <div className="re-mark">🏁</div>
-        <h3>Ye room khatam ho chuka hai</h3>
-        <p><Link href="/rooms">Doosra room dekho</Link> ya apna banao.</p>
+        <h3>This room has already ended</h3>
+        <p><Link href="/rooms">Look at other rooms</Link> or open your own.</p>
       </div>
     );
   }
@@ -42,13 +42,13 @@ export function JoinGate(p: {
       <h3>{p.name}</h3>
       <p className="jg-meta">{p.subject}{p.topic && ` · ${p.topic}`} · host {p.hostName}</p>
       <div className="jg-rules">
-        <div><b>{p.focusMinutes} min focus</b> — chup-chaap padhai, sirf emoji</div>
-        <div><b>{p.breakMinutes} min discussion</b> — doubts queue se, ek-ek karke</div>
-        <div><b>{p.count}/{p.max} log</b> abhi andar</div>
+        <div><b>{p.focusMinutes} min focus</b> — heads-down study, emoji only</div>
+        <div><b>{p.breakMinutes} min discussion</b> — doubts from the queue, one at a time</div>
+        <div><b>{p.count}/{p.max} log</b> inside right now</div>
       </div>
       {err && <div className="room-err" style={{ marginTop: 12 }}>{err}</div>}
       <button className="btn btn-primary" onClick={join} disabled={busy || full} style={{ marginTop: 14 }}>
-        {full ? "Room full hai" : busy ? "Join ho raha…" : "Join karo →"}
+        {full ? "Room is full" : busy ? "Joining…" : "Join →"}
       </button>
     </div>
   );

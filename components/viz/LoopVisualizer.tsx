@@ -25,9 +25,9 @@ export function LoopVisualizer() {
 
   return (
     <div className="viz">
-      <div className="viz-head"><span className="viz-title">🔁 Loop Visualizer — har chakkar dekho</span><span className="viz-badge">interactive</span></div>
+      <div className="viz-head"><span className="viz-title">🔁 Loop Visualizer — watch every pass</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Loop list ke har item pe ek baar chalta hai. Neeche &quot;Step&quot; dabao aur dekho <b>current item</b> highlight hota hai aur <b>total</b> badhta jaata hai.
+        A loop runs once for every item in the list. Press &quot;Step&quot; below and watch the <b>current item</b> highlight while the <b>total</b> grows.
       </p>
 
       <div className="mem-grid" style={{ marginBottom: 14 }}>
@@ -42,7 +42,7 @@ export function LoopVisualizer() {
       <div className="cast-flow" style={{ marginBottom: 14 }}>
         <div className="cast-res ok" style={{ minWidth: 120 }}><div className="lbl">total</div><div className="val">{total}</div></div>
         {step >= 0 && !done && <span className="cast-arrow">+ {DATA[step + 1] ?? ""} next</span>}
-        {done && <span className="cast-arrow" style={{ color: "var(--good)" }}>✓ loop khatam!</span>}
+        {done && <span className="cast-arrow" style={{ color: "var(--good)" }}>✓ loop finished!</span>}
       </div>
 
       <div className="viz-controls">
@@ -54,7 +54,7 @@ export function LoopVisualizer() {
       <div className="viz-code" style={{ marginTop: 14 }}>
         <div>total <span className="c-kw">=</span> <span className="c-num">0</span></div>
         <div><span className="c-kw">for</span> n <span className="c-kw">in</span> [<span className="c-num">2</span>, <span className="c-num">4</span>, <span className="c-num">6</span>, <span className="c-num">8</span>, <span className="c-num">10</span>]:</div>
-        <div style={{ paddingLeft: 20, background: step >= 0 && !done ? "rgba(245,165,36,.12)" : "transparent", borderRadius: 4 }}>total <span className="c-kw">+=</span> n  <span className="c-com"># {step >= 0 ? `n=${DATA[step]}, total=${total}` : "abhi start nahi hua"}</span></div>
+        <div style={{ paddingLeft: 20, background: step >= 0 && !done ? "rgba(245,165,36,.12)" : "transparent", borderRadius: 4 }}>total <span className="c-kw">+=</span> n  <span className="c-com"># {step >= 0 ? `n=${DATA[step]}, total=${total}` : "not started yet"}</span></div>
       </div>
     </div>
   );

@@ -25,9 +25,9 @@ export default async function RoadmapPage() {
         <div className="pad">
           <div className="eyebrow">The Skill Sheet</div>
           <h1>Data Science — Zero to ₹6–12 LPA</h1>
-          <p>Ek complete industry-ready roadmap. Har skill ko <b>pehle samjho, phir practice karo, phir ek real project banao</b> — tabhi wo pakki hoti hai. Seedhe follow karo, base itna strong ban jayega ki interview me confidence khud aayega.</p>
+          <p>A complete, industry-ready roadmap. For every skill: <b>understand it, practise it, then build something real with it</b> — that is what makes it stick. Follow it straight through and your base gets strong enough that interview confidence comes on its own.</p>
           <div className="method">
-            <span className="mstep"><b>1</b> Padho</span><span className="farrow" style={{color:"#5A6478"}}>→</span>
+            <span className="mstep"><b>1</b> Learn</span><span className="farrow" style={{color:"#5A6478"}}>→</span>
             <span className="mstep"><b>2</b> Practice</span><span className="farrow" style={{color:"#5A6478"}}>→</span>
             <span className="mstep"><b>3</b> Project</span><span className="farrow" style={{color:"#5A6478"}}>→</span>
             <span className="mstep"><b>4</b> Repeat</span>
@@ -49,7 +49,7 @@ export default async function RoadmapPage() {
 
       <PhaseList phases={phases} />
 
-      <div className="footer"><span className="mono">DataMarg</span> — pehle padho, phir practice karo, phir project banao. 💪</div>
+      <div className="footer"><span className="mono">DataMarg</span> — learn it, practise it, then build with it. 💪</div>
     </>
   );
 }

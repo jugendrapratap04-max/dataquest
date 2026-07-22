@@ -27,9 +27,9 @@ export function OperatorLab() {
 
   return (
     <div className="viz">
-      <div className="viz-head"><span className="viz-title">🧮 Operator Lab — hisaab live dekho</span><span className="viz-badge">interactive</span></div>
+      <div className="viz-head"><span className="viz-title">🧮 Operator Lab — see the maths live</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Do numbers chuno, operator badlo, aur turant result dekho. <span className="kbd">//</span> = poora bhaag, <span className="kbd">%</span> = remainder, <span className="kbd">**</span> = power.
+        Pick two numbers, change the operator, and see the result instantly. <span className="kbd">//</span> = whole-number division, <span className="kbd">%</span> = remainder, <span className="kbd">**</span> = power.
       </p>
       <div className="cast-flow">
         <input className="viz-input" style={{ width: 70 }} type="number" value={a} onChange={(e) => setA(Number(e.target.value))} />

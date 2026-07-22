@@ -60,8 +60,8 @@ export function StringSlicer() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">✂️ String Slicer</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        <code>s = &quot;DATASCIENCE&quot;</code> — har letter ka index upar (<span className="kbd">0,1,2…</span>) aur peeche se neeche (<span className="kbd">-1,-2…</span>).
-        Neeche <b>start / stop / step</b> badlo ya koi preset dabao — highlight aur result live badlega.
+        <code>s = &quot;DATASCIENCE&quot;</code> — each letter's index is above (<span className="kbd">0,1,2…</span>) and the from-the-back index below (<span className="kbd">-1,-2…</span>).
+        Change <b>start / stop / step</b> below or press a preset — the highlight and the result update live.
       </p>
 
       <div className="ss-track">
@@ -86,7 +86,7 @@ export function StringSlicer() {
             <span className="ss-lbl">{name}</span>
             <button onClick={() => set(bump(val, -1))} aria-label={`${name} kam`}>−</button>
             <span className="ss-val">{val == null ? "None" : val}</span>
-            <button onClick={() => set(bump(val, +1))} aria-label={`${name} zyada`}>+</button>
+            <button onClick={() => set(bump(val, +1))} aria-label={`increase ${name}`}>+</button>
           </div>
         ))}
         <div className="ss-stepper">
@@ -99,7 +99,7 @@ export function StringSlicer() {
 
       <div className="viz-code">
         <div><span className="c-str">&quot;{S}&quot;</span>{expr.replace("s", "")}  <span className="c-kw">→</span>  <span className="c-str">&quot;{result}&quot;</span></div>
-        <div style={{ marginTop: 4, color: "var(--ink-faint)" }}><span className="c-com"># {idxs.length === 0 ? "khaali string — is range me kuch nahi" : `index ${idxs.join(", ")}`}</span></div>
+        <div style={{ marginTop: 4, color: "var(--ink-faint)" }}><span className="c-com"># {idxs.length === 0 ? "empty string — nothing in this range" : `index ${idxs.join(", ")}`}</span></div>
       </div>
     </div>
   );

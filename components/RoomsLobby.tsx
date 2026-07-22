@@ -38,7 +38,7 @@ export function RoomsLobby() {
   }, [load]);
 
   async function create() {
-    if (!f.name.trim()) { setErr("Room ka naam likho."); return; }
+    if (!f.name.trim()) { setErr("Give the room a name."); return; }
     setBusy(true); setErr("");
     const r = await fetch("/api/rooms", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -46,7 +46,7 @@ export function RoomsLobby() {
     }).then((x) => x.json()).catch(() => null);
     setBusy(false);
     if (r?.code) router.push(`/rooms/${r.code}`);
-    else setErr(r?.error ?? "Room nahi bana.");
+    else setErr(r?.error ?? "Could not create the room.");
   }
 
   async function join(c: string) {
@@ -57,7 +57,7 @@ export function RoomsLobby() {
     }).then((x) => x.json()).catch(() => null);
     setBusy(false);
     if (r?.code) router.push(`/rooms/${r.code}`);
-    else setErr(r?.error ?? "Join nahi hua.");
+    else setErr(r?.error ?? "Could not join.");
   }
 
   return (
@@ -66,12 +66,12 @@ export function RoomsLobby() {
         <h2 style={{ fontSize: 19 }}>Study Rooms</h2>
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           <button className="btn btn-ghost" onClick={() => { setMode(mode === "join" ? "none" : "join"); setErr(""); }}>Code se join</button>
-          <button className="btn btn-primary" onClick={() => { setMode(mode === "create" ? "none" : "create"); setErr(""); }}>+ Room banao</button>
+          <button className="btn btn-primary" onClick={() => { setMode(mode === "create" ? "none" : "create"); setErr(""); }}>+ Create room</button>
         </div>
       </div>
       <p className="page-intro">
-        Saath me padho, par chup-chaap. Focus block me sirf padhai — doubt notebook me likho.
-        Break me wahi doubts queue me aate hain aur ek-ek karke discuss hote hain.
+        Study together, quietly. During a focus block you only study — doubts go in the notebook.
+        In the break those doubts come into the queue and you discuss them one by one.
       </p>
 
       {err && <div className="room-err">{err}</div>}
@@ -84,7 +84,7 @@ export function RoomsLobby() {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               onKeyDown={(e) => { if (e.key === "Enter") join(code); }} />
           </label>
-          <button className="btn btn-primary fset-go" onClick={() => join(code)} disabled={busy || !code.trim()}>Join karo →</button>
+          <button className="btn btn-primary fset-go" onClick={() => join(code)} disabled={busy || !code.trim()}>Join →</button>
         </div>
       )}
 
@@ -119,10 +119,10 @@ export function RoomsLobby() {
           </div>
           <label className="fcheck">
             <input type="checkbox" checked={f.isPublic} onChange={(e) => setF({ ...f, isPublic: e.target.checked })} />
-            <span>Public — koi bhi list me dekh ke join kar sake. Warna sirf code se.</span>
+            <span>Public — anyone can find it in the list and join. Otherwise it is code-only.</span>
           </label>
           <button className="btn btn-primary fset-go" onClick={create} disabled={busy}>
-            {busy ? "Ban raha…" : "Room banao →"}
+            {busy ? "Creating…" : "Create room →"}
           </button>
         </div>
       )}
@@ -130,8 +130,8 @@ export function RoomsLobby() {
       {!loaded ? null : rooms.length === 0 ? (
         <div className="card room-empty">
           <div className="re-mark">📚</div>
-          <h3>Abhi koi room khula nahi hai</h3>
-          <p>Pehla room tum banao, phir code apne dost ko bhejo. Ya akele padhna ho to <a href="/focus">Focus Mode</a> use karo — usme kisi aur ki zaroorat nahi.</p>
+          <h3>No rooms are open right now</h3>
+          <p>Open the first one and send the code to a friend. Studying alone? <a href="/focus">Focus Mode</a> needs nobody else.</p>
         </div>
       ) : (
         <div className="room-grid">
@@ -156,7 +156,7 @@ export function RoomsLobby() {
                 </div>
                 <button className="btn btn-primary rc-join" disabled={busy || (r.full && !r.joined)}
                   onClick={() => join(r.code)}>
-                  {r.joined ? "Wapas jao" : r.full ? "Full" : "Join"}
+                  {r.joined ? "Go back" : r.full ? "Full" : "Join"}
                 </button>
               </div>
             </div>

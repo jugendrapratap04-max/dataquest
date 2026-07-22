@@ -16,9 +16,9 @@ export function ExceptionFlow() {
   // try always starts; on error -> except runs, else skipped; no error -> else
   // runs, except skipped; finally always runs.
   const rows = [
-    { key: "try", label: "try:", note: errored ? "shuru hua, par error pe ruk gaya" : "poora chala", on: true, kind: errored ? "partial" : "run" },
-    { key: "except", label: "except:", note: errored ? `${scn.err} pakda — yahi chala` : "koi error nahi — skip", on: errored, kind: errored ? "catch" : "skip" },
-    { key: "else", label: "else:", note: errored ? "error tha — skip" : "sab theek — yahi chala", on: !errored, kind: errored ? "skip" : "run" },
+    { key: "try", label: "try:", note: errored ? "started, then stopped at the error" : "ran all the way", on: true, kind: errored ? "partial" : "run" },
+    { key: "except", label: "except:", note: errored ? `caught ${scn.err} — this one ran` : "no error — skipped", on: errored, kind: errored ? "catch" : "skip" },
+    { key: "else", label: "else:", note: errored ? "there was an error — skipped" : "all clear — this one ran", on: !errored, kind: errored ? "skip" : "run" },
     { key: "finally", label: "finally:", note: "hamesha chalta hai — cleanup", on: true, kind: "always" },
   ];
 
@@ -26,7 +26,7 @@ export function ExceptionFlow() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">🛟 Exception Flow</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Ek scenario chuno — dekho <code>try / except / else / finally</code> me se kaunsa block chalta hai aur kaunsa <b>skip</b> hota hai.
+        Pick a scenario and watch which of <code>try / except / else / finally</code> runs and which is <b>skipped</b>.
       </p>
 
       <div className="viz-controls">
@@ -49,7 +49,7 @@ export function ExceptionFlow() {
         <div><span className="c-kw">result =</span> {scn.expr}</div>
         <div style={{ marginTop: 4 }}>
           {errored
-            ? <span className="c-com"># crash hota — par except ne pakad liya, program zinda</span>
+            ? <span className="c-com"># this would crash — except caught it, the program lives</span>
             : <><span className="c-kw">→</span> <span className="c-num">{scn.result}</span></>}
         </div>
       </div>

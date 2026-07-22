@@ -28,7 +28,7 @@ const cell = (v: unknown) =>
   v === null || v === undefined ? <span className="nul">NULL</span> : String(v);
 
 function Grid({ rs, cap }: { rs: ResultSet; cap?: string }) {
-  if (!rs.columns.length) return <div className="sqlt-empty">Koi column return nahi hua.</div>;
+  if (!rs.columns.length) return <div className="sqlt-empty">No columns were returned.</div>;
   return (
     <>
       {cap && <div className="sqlt-cap">{cap}</div>}
@@ -74,7 +74,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   }
 
   function handleMount(editor: any, monaco: any) {
-    // No copy-paste — student ko khud likhna padega (tabhi seekhega).
+    // No copy-paste — the student has to type it, which is the point.
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, flashNoPaste);
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyV, flashNoPaste);
     const dom = editor.getDomNode?.();
@@ -101,9 +101,9 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
         if (!r.pass) {
           // the output/expected panels already show the mismatch
         } else if (!res?.ok) {
-          setSubmitNote("Submit save nahi hua — internet check karke dobara Submit karo.");
+          setSubmitNote("Submission did not save — check your connection and press Submit again.");
         } else if (res.verifyNote) {
-          setSubmitNote(`Server pe verify nahi hua: ${res.verifyNote}`);
+          setSubmitNote(`The server could not verify this: ${res.verifyNote}`);
         } else {
           setCelebrate(res.awardedXp ?? 0);
         }
@@ -119,7 +119,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
     <>
       <div className="crumb" style={{ marginBottom: 16 }}>
         Practice / <b>{p.title}</b>
-        {p.lessonSlug && <> · <Link href={`/learn/${p.lessonSlug}`} style={{ color: "var(--teal)" }}>lesson padho</Link></>}
+        {p.lessonSlug && <> · <Link href={`/learn/${p.lessonSlug}`} style={{ color: "var(--teal)" }}>read the lesson</Link></>}
       </div>
 
       <div className="psplit">
@@ -148,7 +148,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               ))}
 
               <div className="sql-side">
-                <h4>Tables jo available hain</h4>
+                <h4>Tables you can use</h4>
                 {schema.map((t) => (
                   <div className="sql-tbl" key={t.name}>
                     <div className="nm">{t.name}</div>
@@ -163,8 +163,8 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
           )}
           {tab === "hint" && <div>{p.hints.map((h, i) => <div className="hintb" key={i}>💡 <b>Hint {i + 1}:</b> {h}</div>)}</div>}
           {tab === "recap" && (
-            <div><p dangerouslySetInnerHTML={{ __html: mdLite(p.recap || "Is topic ka lesson kholo aur dobara padho.") }} />
-              {p.lessonSlug && <Link className="link" style={{ margin: 0, color: "var(--teal)" }} href={`/learn/${p.lessonSlug}`}>↩ Poora lesson kholo</Link>}
+            <div><p dangerouslySetInnerHTML={{ __html: mdLite(p.recap || "Open this topic’s lesson and read it again.") }} />
+              {p.lessonSlug && <Link className="link" style={{ margin: 0, color: "var(--teal)" }} href={`/learn/${p.lessonSlug}`}>↩ Open the full lesson</Link>}
             </div>
           )}
         </div>
@@ -173,7 +173,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
         <div className="editor-wrap">
           <div className="ed-bar">
             <span className="ed-lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/><path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></svg> SQLite</span>
-            <span className="no-paste-badge" title="Copy-paste band hai — khud likho!">🔒 no paste</span>
+            <span className="no-paste-badge" title="Copy-paste is off — type it yourself!">🔒 no paste</span>
             <div className="ed-actions">
               <button className="btn btn-run" onClick={() => doRun(false)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -191,9 +191,9 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               height="240px" defaultLanguage="sql" theme="vs-dark" value={sql}
               onChange={(v) => setSql(v ?? "")} onMount={handleMount}
               options={{ minimap: { enabled: false }, fontSize: 13, lineNumbers: "on", scrollBeyondLastLine: false, padding: { top: 12 }, tabSize: 2, contextmenu: false }}
-              loading={<div style={{ color: "#8890A0", padding: 20, fontFamily: "var(--mono)", fontSize: 13 }}>Editor load ho raha hai…</div>}
+              loading={<div style={{ color: "#8890A0", padding: 20, fontFamily: "var(--mono)", fontSize: 13 }}>Loading the editor…</div>}
             />
-            {noPaste && <div className="paste-toast">✋ Paste band hai — khud likho, tabhi yaad rahega!</div>}
+            {noPaste && <div className="paste-toast">✋ Paste is off — type it out, that is how it sticks!</div>}
           </div>
 
           <div className="results">
@@ -205,7 +205,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "out" && (
                 !result ? (
-                  <div className="res-empty">▶ &quot;Run&quot; dabao — pehli baar SQL engine load hone me 1-2 second lagega, phir turant chalega.</div>
+                  <div className="res-empty">▶ Press &quot;Run&quot; — the SQL engine takes a second to load the first time, then it is instant.</div>
                 ) : result.error ? (
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Query me error hai</div>
@@ -215,7 +215,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
                   <>
                     <div className={`verdict ${result.pass ? "ok" : "no"}`}>
                       {result.pass
-                        ? <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5"/></svg> Sahi hai — result exactly match kar gaya</>
+                        ? <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5"/></svg> Correct — the result matches exactly</>
                         : <><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> {result.reason}</>}
                     </div>
                     {result.got && <Grid rs={result.got} cap={`${result.got.rows.length} row${result.got.rows.length === 1 ? "" : "s"}${result.ordered ? " · order check on (ORDER BY)" : ""}`} />}
@@ -224,8 +224,8 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               )}
               {resTab === "expected" && (
                 !result?.expected
-                  ? <div className="res-empty">Pehle &quot;Run&quot; dabao — phir expected result yahan dikhega.</div>
-                  : <Grid rs={result.expected} cap={`Aisa dikhna chahiye — ${result.expected.rows.length} row${result.expected.rows.length === 1 ? "" : "s"}`} />
+                  ? <div className="res-empty">Press &quot;Run&quot; first — the expected result appears here.</div>
+                  : <Grid rs={result.expected} cap={`It should look like this — ${result.expected.rows.length} row${result.expected.rows.length === 1 ? "" : "s"}`} />
               )}
             </div>
           </div>

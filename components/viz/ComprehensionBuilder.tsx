@@ -29,7 +29,7 @@ export function ComprehensionBuilder() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">⚙️ Comprehension Builder</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        <code>nums = [1, 2, 3, 4, 5, 6]</code>. Neeche <b>filter (if)</b> aur <b>transform (expr)</b> chuno — har number ka safar dekho: pehle filter, phir transform.
+        <code>nums = [1, 2, 3, 4, 5, 6]</code>. Choose a <b>filter (if)</b> and a <b>transform (expr)</b> below, and follow each number through: filter first, then transform.
       </p>
 
       <div className="viz-controls">

@@ -8,8 +8,8 @@ export default async function ResumePage() {
   return (
     <>
       <p className="page-intro">
-        Apna resume banao aur turant dekho ki <b>ATS</b> (jo software companies resumes filter karne ko use karti hain) me kitna score karega.
-        Har tip follow karke score badhao — job-ready resume ready! 🎯
+        Build your resume and see straight away how it would score in <b>ATS</b> — the software companies use to filter applications.
+        Work through each tip to raise the score, and the resume is job-ready. 🎯
       </p>
       <ResumeBuilder name={user.name} role={user.role} />
     </>

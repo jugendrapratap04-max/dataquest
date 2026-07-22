@@ -7,7 +7,7 @@ export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
   const { topic, title, body, code } = await req.json();
-  if (!title?.trim()) return NextResponse.json({ error: "Title zaroori hai." }, { status: 400 });
+  if (!title?.trim()) return NextResponse.json({ error: "A title is required." }, { status: 400 });
   const note = await prisma.note.create({
     data: {
       userId: user.id,

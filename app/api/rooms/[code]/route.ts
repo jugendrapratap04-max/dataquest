@@ -54,11 +54,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
   const { code } = await params;
 
   const room = await loadRoom(code);
-  if (!room) return NextResponse.json({ error: "Room nahi mila" }, { status: 404 });
+  if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
 
   const me = room.members.find((m) => m.userId === user.id);
   if (!me || me.status === "left") {
-    return NextResponse.json({ error: "Tum is room me nahi ho", needJoin: true }, { status: 403 });
+    return NextResponse.json({ error: "You are not in this room", needJoin: true }, { status: 403 });
   }
 
   const st = await syncPhase(room);
@@ -158,9 +158,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   const action = String(body.action ?? "");
 
   const room = await loadRoom(code);
-  if (!room) return NextResponse.json({ error: "Room nahi mila" }, { status: 404 });
+  if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
   const me = room.members.find((m) => m.userId === user.id);
-  if (!me || me.status === "left") return NextResponse.json({ error: "Tum is room me nahi ho" }, { status: 403 });
+  if (!me || me.status === "left") return NextResponse.json({ error: "You are not in this room" }, { status: 403 });
 
   const now = new Date();
   const st = await syncPhase(room);
@@ -197,19 +197,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     const kind = String(body.kind ?? "quick");
     const text = String(body.text ?? "");
     if (!isAllowedMessage(kind, text)) {
-      return NextResponse.json({ error: "Ye message allowed nahi hai." }, { status: 400 });
+      return NextResponse.json({ error: "That message is not allowed." }, { status: 400 });
     }
     // Focus means focus: during a focus block only emoji get through. This is
     // the rule that keeps the room from turning into a chat app with a timer.
     if (st.phase === "focus" && kind !== "emoji") {
-      return NextResponse.json({ error: "Focus ke dauraan sirf emoji. Doubt notebook me likho." }, { status: 403 });
+      return NextResponse.json({ error: "Emoji only during focus — write doubts in your notebook." }, { status: 403 });
     }
     if (kind === "quick") {
       const used = await prisma.roomMessage.count({
         where: { roomId: room.id, userId: user.id, cycle: st.cycle, kind: "quick" },
       });
       if (used >= MESSAGES_PER_CYCLE) {
-        return NextResponse.json({ error: "Is cycle ke messages khatam." }, { status: 429 });
+        return NextResponse.json({ error: "No messages left this cycle." }, { status: 429 });
       }
     }
     await prisma.roomMessage.create({
@@ -277,7 +277,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   // ---- host controls -------------------------------------------------------
 
   if (action === "roomVoice") {
-    if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
+    if (room.hostId !== user.id) return NextResponse.json({ error: "Host only" }, { status: 403 });
     const on = body.on === true;
     await prisma.room.update({ where: { id: room.id }, data: { voiceEnabled: on } });
     if (!on) {
@@ -289,7 +289,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   }
 
   if (action === "skip") {
-    if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
+    if (room.hostId !== user.id) return NextResponse.json({ error: "Host only" }, { status: 403 });
     const next = st.phase === "focus" ? "discussion" : "focus";
     await prisma.room.update({
       where: { id: room.id },
@@ -305,7 +305,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   if (action === "resolveQueue") {
     // The host runs the discussion, so the host can tick items off — but only
     // items in their own room.
-    if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
+    if (room.hostId !== user.id) return NextResponse.json({ error: "Host only" }, { status: 403 });
     const id = String(body.id ?? "");
     const updated = await prisma.notebookEntry.updateMany({
       where: { id, roomId: room.id, queued: true },
@@ -316,7 +316,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   }
 
   if (action === "end") {
-    if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
+    if (room.hostId !== user.id) return NextResponse.json({ error: "Host only" }, { status: 403 });
     await prisma.room.update({
       where: { id: room.id },
       data: { phase: "ended", endedAt: now },

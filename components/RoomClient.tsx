@@ -167,17 +167,17 @@ export function RoomClient({ code }: { code: string }) {
         <div className="card focus-summary">
           <div className="fs-badge">Room: {st?.room.name}</div>
           <div className="stats" style={{ marginTop: 18 }}>
-            <div className="card stat"><div className="k">Room me time</div><div className="v num">{humanDuration(summary.elapsedSeconds)}</div></div>
+            <div className="card stat"><div className="k">Time in room</div><div className="v num">{humanDuration(summary.elapsedSeconds)}</div></div>
             <div className="card stat"><div className="k">Active time</div><div className="v num">{humanDuration(summary.activeSeconds)}</div></div>
             <div className="card stat"><div className="k">Focus</div><div className="v num">{summary.focusPct}<small>%</small></div></div>
             <div className="card stat"><div className="k">Problems solved</div><div className="v num">{summary.problemsSolved}</div></div>
           </div>
           <p className="fs-note">
-            {summary.cyclesDone} focus cycle poore kiye · {summary.messagesUsed} message use kiye.
-            Ye session tumhari Study History me aa gaya.
+            {summary.cyclesDone} focus cycles finished · {summary.messagesUsed} messages used.
+            This session has been added to your Study History.
           </p>
           <div style={{ display: "flex", gap: 8 }}>
-            <Link className="btn btn-primary" href="/rooms">Rooms pe wapas</Link>
+            <Link className="btn btn-primary" href="/rooms">Back to rooms</Link>
             <Link className="btn btn-ghost" href="/focus">Focus Mode</Link>
           </div>
         </div>
@@ -190,20 +190,20 @@ export function RoomClient({ code }: { code: string }) {
       <div className="card room-empty">
         <div className="re-mark">🔒</div>
         <h3>{err}</h3>
-        <p><Link href="/rooms">Rooms list pe wapas jao</Link> aur code se join karo.</p>
+        <p><Link href="/rooms">Go back to the rooms list</Link> and join with a code.</p>
       </div>
     );
   }
-  if (!st) return <div className="card room-empty"><p>Room khul raha hai…</p></div>;
+  if (!st) return <div className="card room-empty"><p>Opening the room…</p></div>;
 
   if (st.phase === "ended" || st.room.endedAt) {
     return (
       <div className="card room-empty">
         <div className="re-mark">🏁</div>
-        <h3>Ye room khatam ho gaya</h3>
-        <p>Host ne session end kar diya. Tumhara time Study History me save hai.</p>
+        <h3>This room has ended</h3>
+        <p>The host ended the session. Your time is saved in your Study History.</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12 }}>
-          <Link className="btn btn-primary" href="/rooms">Naya room</Link>
+          <Link className="btn btn-primary" href="/rooms">New room</Link>
           <Link className="btn btn-ghost" href="/focus">Focus Mode</Link>
         </div>
       </div>
@@ -251,12 +251,12 @@ export function RoomClient({ code }: { code: string }) {
             {m.isHost && <span className="av-host">host</span>}
             {m.handRaised && <span className="av-flag hand">✋</span>}
             {m.needsHelp && <span className="av-flag help">!</span>}
-            <div className="av-name">{m.isMe ? "Tum" : m.name.split(" ")[0]}</div>
+            <div className="av-name">{m.isMe ? "You" : m.name.split(" ")[0]}</div>
             <div className="av-sub num">{m.status === "away" ? "away" : humanDuration(m.activeSeconds)}</div>
           </div>
         ))}
         {Array.from({ length: Math.max(0, st.room.maxParticipants - st.members.length) }, (_, i) => (
-          <div key={`e${i}`} className="av empty"><div className="av-circle" /><div className="av-name">khaali</div></div>
+          <div key={`e${i}`} className="av empty"><div className="av-circle" /><div className="av-name">empty</div></div>
         ))}
       </div>
 
@@ -266,39 +266,39 @@ export function RoomClient({ code }: { code: string }) {
           {isFocus ? (
             <div className="rw-focus">
               <div className="rw-eyebrow">Focus block</div>
-              <h3 className="rw-title">{st.room.topic || st.room.subject} — chup-chaap padho</h3>
+              <h3 className="rw-title">{st.room.topic || st.room.subject} — heads down</h3>
               <p className="rw-say">
-                Ab sirf padhai. Discussion band hai. Doubt aaye to <b>notebook</b> me likh do — {mmss(secondsLeft)} baad
-                break me wahi doubt queue me chala jayega aur sabke saamne discuss hoga.
+                Study only. Chat is closed. If a doubt comes up, write it in your <b>notebook</b> — in {mmss(secondsLeft)}
+                the break starts, and that doubt joins the queue for everyone to discuss.
               </p>
               <div className="rw-cta">
-                <Link className="btn btn-primary" href="/practice" target="_blank">Practice kholo ↗</Link>
+                <Link className="btn btn-primary" href="/practice" target="_blank">Open practice ↗</Link>
                 <Link className="btn btn-ghost" href="/learn" target="_blank">Lessons ↗</Link>
-                <button className="btn btn-ghost" onClick={() => setNotebookOpen(true)}>📓 Doubt likho</button>
+                <button className="btn btn-ghost" onClick={() => setNotebookOpen(true)}>📓 Write a doubt</button>
               </div>
               {(helpers.length > 0 || hands.length > 0) && (
                 <div className="rw-alert">
-                  {helpers.map((m) => <div key={m.userId}>🆘 <b>{m.name}</b> ko help chahiye</div>)}
-                  {hands.map((m) => <div key={m.userId}>✋ <b>{m.name}</b> ne haath uthaya</div>)}
-                  <span className="rw-alert-note">Break me sabse pehle inhe sunenge.</span>
+                  {helpers.map((m) => <div key={m.userId}>🆘 <b>{m.name}</b> needs help</div>)}
+                  {hands.map((m) => <div key={m.userId}>✋ <b>{m.name}</b> raised their hand</div>)}
+                  <span className="rw-alert-note">These come first when the break starts.</span>
                 </div>
               )}
             </div>
           ) : (
             <div className="rw-break">
               <div className="rw-eyebrow">Discussion break</div>
-              <h3 className="rw-title">Ab doubts clear karo</h3>
+              <h3 className="rw-title">Now clear the doubts</h3>
               {st.queue.length === 0 ? (
-                <p className="rw-say">Queue khaali hai. Jisko doubt hai, notebook se “Discuss karo” dabaye — list yahan aayegi.</p>
+                <p className="rw-say">The queue is empty. Anyone with a doubt can press “Discuss” in their notebook and it will appear here.</p>
               ) : (
                 <ol className="rw-queue">
                   {st.queue.map((q, i) => (
                     <li key={q.id}>
                       <span className="rq-n num">{i + 1}</span>
-                      <span className="rq-who">{q.mine ? "Tum" : q.name}</span>
+                      <span className="rq-who">{q.mine ? "You" : q.name}</span>
                       <span className="rq-txt">{q.text}</span>
                       {st.room.iAmHost && (
-                        <button className="btn btn-ghost rq-done" onClick={() => act({ action: "resolveQueue", id: q.id })}>Ho gaya</button>
+                        <button className="btn btn-ghost rq-done" onClick={() => act({ action: "resolveQueue", id: q.id })}>Done</button>
                       )}
                     </li>
                   ))}
@@ -306,7 +306,7 @@ export function RoomClient({ code }: { code: string }) {
               )}
               <div className="rw-cta">
                 <button className="btn btn-ghost" onClick={() => setNotebookOpen(true)}>📓 Notebook</button>
-                {st.room.iAmHost && <button className="btn btn-teal" onClick={() => act({ action: "skip" })}>Break khatam → Focus</button>}
+                {st.room.iAmHost && <button className="btn btn-teal" onClick={() => act({ action: "skip" })}>End break → Focus</button>}
               </div>
             </div>
           )}
@@ -315,23 +315,23 @@ export function RoomClient({ code }: { code: string }) {
             <div className="rw-note">
               <div className="sec-head" style={{ marginBottom: 8 }}>
                 <h2>Private Notebook</h2>
-                <span className="tag" style={{ marginLeft: "auto" }}>sirf tum dekh sakte ho</span>
+                <span className="tag" style={{ marginLeft: "auto" }}>only you can see this</span>
                 <button className="fnote-del" onClick={() => setNotebookOpen(false)}>×</button>
               </div>
               <div className="fnote-add">
-                <input className="inp" placeholder="Merge aur Join me farak kya hai?" value={draft}
+                <input className="inp" placeholder="What is the difference between merge and join?" value={draft}
                   onChange={(e) => setDraft(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addDoubt(); }} />
                 <button className="btn btn-teal" onClick={addDoubt} disabled={!draft.trim()}>Add</button>
               </div>
               {entries.length === 0 ? (
-                <p className="fnote-empty">Doubt yahan likho — koi nahi dekhega jab tak tum “Discuss karo” na dabao.</p>
+                <p className="fnote-empty">Write your doubt here — nobody sees it until you press “Discuss”.</p>
               ) : (
                 <ul className="fnote-list">
                   {entries.map((e) => (
                     <li key={e.id}>
                       <span className="fnote-txt">{e.text}</span>
                       <button className={`btn btn-ghost fnote-q${e.queued ? " on" : ""}`} onClick={() => toggleQueue(e)}>
-                        {e.queued ? "Queue me hai" : "Discuss karo"}
+                        {e.queued ? "In the queue" : "Discuss"}
                       </button>
                       <button className="fnote-del" onClick={() => delDoubt(e.id)}>×</button>
                     </li>
@@ -359,7 +359,7 @@ export function RoomClient({ code }: { code: string }) {
                   <li key={m.userId}>
                     <span className={`dot ${m.status}`} />
                     <span className="rs-nm">
-                      {m.isMe ? "Tum" : m.name}
+                      {m.isMe ? "You" : m.name}
                       {m.isHost && <span className="tag" style={{ marginLeft: 6 }}>host</span>}
                       {m.inVoice && <span title={m.micMuted ? "in voice, muted" : "in voice"} style={{ marginLeft: 6 }}>{m.micMuted ? "🔇" : "🎙️"}</span>}
                     </span>
@@ -381,10 +381,10 @@ export function RoomClient({ code }: { code: string }) {
 
           {tab === "queue" && (
             st.queue.length === 0
-              ? <p className="rs-empty">Queue khaali. Notebook se doubt add karo.</p>
+              ? <p className="rs-empty">Queue is empty. Add a doubt from your notebook.</p>
               : <ol className="rs-queue">
                   {st.queue.map((q) => (
-                    <li key={q.id}><b>{q.mine ? "Tum" : q.name.split(" ")[0]}</b> — {q.text}</li>
+                    <li key={q.id}><b>{q.mine ? "You" : q.name.split(" ")[0]}</b> — {q.text}</li>
                   ))}
                 </ol>
           )}
@@ -392,10 +392,10 @@ export function RoomClient({ code }: { code: string }) {
           {tab === "chat" && (
             <div className="rs-chat">
               <div className="rs-msgs">
-                {st.messages.length === 0 && <p className="rs-empty">Abhi koi message nahi.</p>}
+                {st.messages.length === 0 && <p className="rs-empty">No messages yet.</p>}
                 {st.messages.map((m) => (
                   <div key={m.id} className={`rs-msg${m.mine ? " mine" : ""}${m.kind === "emoji" ? " emo" : ""}`}>
-                    <b>{m.mine ? "Tum" : m.name.split(" ")[0]}</b> {m.text}
+                    <b>{m.mine ? "You" : m.name.split(" ")[0]}</b> {m.text}
                   </div>
                 ))}
               </div>
@@ -405,7 +405,7 @@ export function RoomClient({ code }: { code: string }) {
                 ))}
               </div>
               {isFocus ? (
-                <p className="rs-locked">🔒 Focus me sirf emoji. Baat break me — doubt notebook me likho.</p>
+                <p className="rs-locked">🔒 Emoji only during focus. Talk in the break — write doubts in your notebook.</p>
               ) : (
                 <>
                   <div className="rs-quick">
@@ -414,7 +414,7 @@ export function RoomClient({ code }: { code: string }) {
                         onClick={() => act({ action: "message", kind: "quick", text: q })}>{q}</button>
                     ))}
                   </div>
-                  <p className="rs-left num">{st.messagesLeft} message bache is cycle me</p>
+                  <p className="rs-left num">{st.messagesLeft} messages left this cycle</p>
                 </>
               )}
             </div>
@@ -425,10 +425,10 @@ export function RoomClient({ code }: { code: string }) {
       {/* ---- bottom bar ---- */}
       <div className="room-bar card">
         <button className={`btn btn-ghost${me?.handRaised ? " on" : ""}`} onClick={() => act({ action: "hand", on: !me?.handRaised })}>
-          ✋ {me?.handRaised ? "Haath uthaya hai" : "Raise hand"}
+          ✋ {me?.handRaised ? "Hand is up" : "Raise hand"}
         </button>
         <button className={`btn btn-ghost${me?.needsHelp ? " danger-on" : ""}`} onClick={() => act({ action: "help", on: !me?.needsHelp })}>
-          🆘 {me?.needsHelp ? "Help maangi hai" : "Need help"}
+          🆘 {me?.needsHelp ? "Help requested" : "Need help"}
         </button>
         <button className={`btn btn-ghost${notebookOpen ? " on" : ""}`} onClick={() => setNotebookOpen((o) => !o)}>
           📓 Notebook{openDoubts > 0 && <span className="fdot">{openDoubts}</span>}
@@ -437,7 +437,7 @@ export function RoomClient({ code }: { code: string }) {
         {st.room.iAmHost && (
           <>
             <button className="btn btn-ghost" onClick={() => act({ action: "skip" })}>
-              {isFocus ? "Break shuru karo" : "Focus shuru karo"}
+              {isFocus ? "Start break" : "Start focus"}
             </button>
             <button className="btn btn-ghost fend" onClick={() => act({ action: "end" })}>Room end</button>
           </>

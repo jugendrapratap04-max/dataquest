@@ -74,12 +74,12 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
   try {
     tests = JSON.parse(problem.testsJson || "[]");
   } catch {
-    return { passed: false, reason: "Is problem ke tests padhe nahi ja rahe." };
+    return { passed: false, reason: "This problem's tests could not be read." };
   }
   if (tests.length === 0 || !problem.functionName) {
     // Nothing to check against — don't hand out XP for a problem that can't be
     // graded, and don't pretend it was verified either.
-    return { passed: false, reason: "Is problem ke liye koi test case nahi hai." };
+    return { passed: false, reason: "This problem has no test cases." };
   }
 
   const py = await getPy();
@@ -100,7 +100,7 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
       try { await py.loadPackagesFromImports(code); } catch {}
       await py.runPythonAsync(code, { globals: ns });
     } catch (e: any) {
-      return { passed: false, reason: `Server pe code chala nahi: ${lastLine(e)}` };
+      return { passed: false, reason: `The code did not run on the server: ${lastLine(e)}` };
     }
 
     for (const t of tests) {
@@ -111,7 +111,7 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
           { globals: ns }
         );
         if (!eq(toJs(raw), t.expected)) {
-          return { passed: false, reason: "Server pe dobara chalane pe saare test pass nahi hue." };
+          return { passed: false, reason: "Re-run on the server: not every test passed." };
         }
       } catch (e: any) {
         // Say what actually went wrong. A bare "error aaya" is unfalsifiable: the
@@ -154,7 +154,7 @@ async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResu
   try {
     mine = run(code);
   } catch (e: any) {
-    return { passed: false, reason: `Server pe query chali nahi: ${String(e?.message || e)}` };
+    return { passed: false, reason: `The query did not run on the server: ${String(e?.message || e)}` };
   }
   try {
     ref = run(problem.solutionCode);
@@ -173,23 +173,23 @@ async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResu
 
   const ordered = /order\s+by/i.test(problem.solutionCode);
   if (mine.values.length !== ref.values.length) {
-    return { passed: false, reason: "Server pe result rows match nahi hue." };
+    return { passed: false, reason: "The result rows did not match on the server." };
   }
   const a = norm(mine.values, ordered);
   const b = norm(ref.values, ordered);
   if (a.join("|") !== b.join("|")) {
-    return { passed: false, reason: "Server pe result match nahi hua." };
+    return { passed: false, reason: "The result did not match on the server." };
   }
   return { passed: true };
 }
 
 export async function verifySolution(problem: ProblemLike, code: string): Promise<VerifyResult> {
-  if (!code.trim()) return { passed: false, reason: "Koi code submit hi nahi hua." };
+  if (!code.trim()) return { passed: false, reason: "No code was submitted." };
   try {
     return problem.kind === "sql" ? await verifySql(problem, code) : await verifyPython(problem, code);
   } catch (e: any) {
     // A broken verifier must not hand out XP — but it also shouldn't look like
     // the student's fault.
-    return { passed: false, reason: `Server verify nahi kar paya: ${lastLine(e)}` };
+    return { passed: false, reason: `The server could not verify this: ${lastLine(e)}` };
   }
 }

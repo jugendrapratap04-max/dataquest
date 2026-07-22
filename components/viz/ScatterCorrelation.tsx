@@ -6,7 +6,7 @@ type Mode = "positive" | "negative" | "none";
 const SETS: Record<Mode, { pts: [number, number][]; r: string; label: string }> = {
   positive: { pts: [[1,2],[2,3],[3,3],[4,5],[5,5],[6,7],[7,8]], r: "+0.96", label: "ek badhe to doosra bhi badhe" },
   negative: { pts: [[1,8],[2,7],[3,7],[4,5],[5,4],[6,2],[7,1]], r: "−0.97", label: "ek badhe to doosra ghate" },
-  none: { pts: [[1,4],[2,8],[3,2],[4,6],[5,3],[6,7],[7,4]], r: "~0.0", label: "koi pattern nahi" },
+  none: { pts: [[1,4],[2,8],[3,2],[4,6],[5,3],[6,7],[7,4]], r: "~0.0", label: "no pattern" },
 };
 const W = 300, H = 160;
 
@@ -19,9 +19,9 @@ export function ScatterCorrelation() {
 
   return (
     <div className="viz">
-      <div className="viz-head"><span className="viz-title">📈 Correlation — do cheezein kaise judi hain</span><span className="viz-badge">interactive</span></div>
+      <div className="viz-head"><span className="viz-title">📈 Correlation — how two things move together</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Correlation batata hai do variables ka rishta: <b>+1</b> (saath badhein), <b>−1</b> (ulta), <b>0</b> (koi rishta nahi). Neeche button dabao aur pattern dekho.
+        Correlation describes how two variables relate: <b>+1</b> (rise together), <b>−1</b> (opposite), <b>0</b> (no relationship). Press a button below and watch the pattern.
       </p>
 
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ maxWidth: 400, display: "block", margin: "0 auto" }}>
@@ -42,7 +42,7 @@ export function ScatterCorrelation() {
         <button className={`btn ${mode === "negative" ? "btn-primary" : "btn-ghost"}`} style={{ padding: "8px 14px" }} onClick={() => setMode("negative")}>Negative</button>
         <button className={`btn ${mode === "none" ? "btn-primary" : "btn-ghost"}`} style={{ padding: "8px 14px" }} onClick={() => setMode("none")}>No correlation</button>
       </div>
-      <div className="note tip" style={{ marginTop: 14 }}><span className="i">💡</span><div><b>Yaad rakho:</b> correlation ka matlab causation nahi! Ice-cream sales aur doobne ke case dono garmi me badhte hain — ek doosre ka kaaran nahi.</div></div>
+      <div className="note tip" style={{ marginTop: 14 }}><span className="i">💡</span><div><b>Remember:</b> correlation is not causation. Ice-cream sales and drowning cases both rise in summer — neither one causes the other.</div></div>
     </div>
   );
 }

@@ -20,10 +20,10 @@ export async function POST(req: Request) {
   const { category, message, path } = await req.json();
   const msg = typeof message === "string" ? message.trim() : "";
   if (msg.length < 3) {
-    return NextResponse.json({ error: "Thoda detail likho — kya hua ya kya chahiye." }, { status: 400 });
+    return NextResponse.json({ error: "Add a little detail — what happened, or what you would like." }, { status: 400 });
   }
   if (msg.length > 2000) {
-    return NextResponse.json({ error: "Bahut lamba ho gaya (2000 char tak)." }, { status: 400 });
+    return NextResponse.json({ error: "That is too long (2000 characters max)." }, { status: 400 });
   }
 
   await prisma.feedback.create({

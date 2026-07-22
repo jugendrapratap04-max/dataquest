@@ -35,22 +35,22 @@ export function NotesClient({ initial }: { initial: Note[] }) {
         <h2 style={{ fontSize: 19 }}>My Notes</h2>
         <button className="btn btn-primary" style={{ marginLeft: "auto" }} onClick={() => setShow((s) => !s)}>{show ? "Cancel" : "+ New note"}</button>
       </div>
-      <p className="page-intro">Jo bhi important lage, yahan save karo. Revision ke time ye tumhari cheat-sheet banegi.</p>
+      <p className="page-intro">Save anything worth keeping. At revision time this becomes your cheat-sheet.</p>
 
       {show && (
         <div className="card pad note-form">
           <div className="nf-row">
-            <input placeholder="Topic (jaise Python)" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} />
+            <input placeholder="Topic (for example Python)" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} />
             <input placeholder="Title *" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
           </div>
-          <textarea placeholder="Note — kya yaad rakhna hai" rows={2} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
+          <textarea placeholder="Note — what you want to remember" rows={2} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
           <input placeholder="Code snippet (optional)" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value })} />
           <button className="btn btn-primary" onClick={add} disabled={busy}>{busy ? "Saving…" : "Save note"}</button>
         </div>
       )}
 
       {notes.length === 0 ? (
-        <div className="card pad">Abhi koi note nahi. Upar &quot;+ New note&quot; se pehla note banao.</div>
+        <div className="card pad">No notes yet. Use &quot;+ New note&quot; above to write your first one.</div>
       ) : (
         <div className="notes-grid">
           {notes.map((n) => (

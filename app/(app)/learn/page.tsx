@@ -6,5 +6,5 @@ export default async function LearnIndex() {
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
   });
   if (first) redirect(`/learn/${first.slug}`);
-  return <p className="page-intro">Abhi koi lesson nahi hai. Seed chala do.</p>;
+  return <p className="page-intro">No lessons yet. Run the seed script.</p>;
 }

@@ -26,7 +26,7 @@ function loadScript(src: string): Promise<void> {
     s.src = src;
     s.setAttribute("data-pyodide", "1");
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error("Pyodide load nahi ho paya"));
+    s.onerror = () => reject(new Error("Python could not load"));
     document.head.appendChild(s);
   });
 }

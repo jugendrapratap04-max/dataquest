@@ -35,7 +35,7 @@ export default async function DashboardPage() {
             <div className="eyebrow">Continue where you left off</div>
             <h2>{nextLesson ? nextLesson.title : "Start your journey"}</h2>
             <div className="sub">
-              {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Python se shuru karo"}
+              {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Start with Python"}
             </div>
             <div className="flow">
               <span className={`fstep ${theoryDone ? "done" : "now"}`}>
@@ -86,8 +86,8 @@ export default async function DashboardPage() {
         <section className="card pad">
           <div className="sec-head"><h2>Practice Arena<span className="sub">learn, then master by doing</span></h2><Link className="link" href="/practice">All playgrounds →</Link></div>
           <div className="arena">
-            <Link href="/practice" className="pcard"><div className="top"><div className="ic py"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div><h3>Python Compiler<small>real, in-browser</small></h3></div><div className="d">Code likho, run karo, output turant dekho — asli Python.</div></Link>
-            <Link href="/practice" className="pcard"><div className="top"><div className="ic pd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></div><h3>Problem Sets<small>test-case checked</small></h3></div><div className="d">Har topic ke chhote problems, auto-checker ke saath.</div></Link>
+            <Link href="/practice" className="pcard"><div className="top"><div className="ic py"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div><h3>Python Compiler<small>real, in-browser</small></h3></div><div className="d">Write code, run it, see the output instantly — real Python.</div></Link>
+            <Link href="/practice" className="pcard"><div className="top"><div className="ic pd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></div><h3>Problem Sets<small>test-case checked</small></h3></div><div className="d">Short problems for every topic, with an auto-checker.</div></Link>
           </div>
         </section>
       </div>
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
           <h3 style={{fontSize:"15px",margin:"8px 0 6px"}}>Solve today&apos;s problem</h3>
           {/* "Keep your 0-day streak alive" is not a thing you can say to someone. */}
           <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
-            {streak > 0 ? <>+20 XP · keep your 🔥 {streak}-day streak alive</> : <>+20 XP · aaj solve karo, streak yahin se shuru</>}
+            {streak > 0 ? <>+20 XP · keep your 🔥 {streak}-day streak alive</> : <>+20 XP · solve one today and your streak starts here</>}
           </p>
           <Link className="btn btn-primary" style={{width:"100%",justifyContent:"center"}} href="/practice">Solve now</Link>
         </section>

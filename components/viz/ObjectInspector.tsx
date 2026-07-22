@@ -22,16 +22,16 @@ export function ObjectInspector() {
     <div className="viz">
       <div className="viz-head"><span className="viz-title">🔎 Object Inspector</span><span className="viz-badge">interactive</span></div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Ek <b>class</b> = blueprint. Usse jitne chaaho <b>objects</b> (instances) banao — har ek ka apna <b>data</b>, par methods <b>shared</b>. Naya dog banao aur <code>bark()</code> dabao.
+        One <b>class</b> is a blueprint. Build as many <b>objects</b> (instances) from it as you like — each with its own <b>data</b>, but sharing the methods. Add a dog and press <code>bark()</code>.
       </p>
 
       <div className="oi-wrap">
         <div className="oi-class">
           <div className="oi-tag">class · blueprint</div>
           <div className="oi-cname">Dog</div>
-          <div className="oi-line"><span className="c-com"># har object me hoga:</span></div>
+          <div className="oi-line"><span className="c-com"># every object gets its own:</span></div>
           <div className="oi-line c-kw">name, breed, age</div>
-          <div className="oi-line"><span className="c-com"># sab share karte hain:</span></div>
+          <div className="oi-line"><span className="c-com"># shared by all of them:</span></div>
           <div className="oi-line c-fn">bark()</div>
         </div>
 
@@ -53,7 +53,7 @@ export function ObjectInspector() {
       </div>
 
       <div className="viz-controls" style={{ marginTop: 14, marginBottom: 0 }}>
-        <button className="ss-preset" onClick={add} disabled={dogs.length >= POOL.length}>+ naya Dog banao</button>
+        <button className="ss-preset" onClick={add} disabled={dogs.length >= POOL.length}>+ Add a Dog</button>
         <button className="ss-preset" onClick={reset}>reset</button>
       </div>
 

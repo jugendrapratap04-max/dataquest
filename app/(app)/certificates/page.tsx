@@ -28,8 +28,8 @@ export default async function CertificatesPage() {
       {/* Topbar already says what certificates are — only add what it can't. */}
       <p className="page-intro">
         {earnedCount > 0
-          ? <>Abhi tak <b>{earnedCount} earned</b> 🎉 — resume aur LinkedIn pe daal sakte ho.</>
-          : <>Abhi ek bhi earned nahi. Pehla certificate paas hi hai — Python track poora karo!</>}
+          ? <><b>{earnedCount} earned</b> so far 🎉 — put them on your resume and LinkedIn.</>
+          : <>None earned yet. The first one is close — finish the Python track!</>}
       </p>
       <div className="certs">
         {cards.map(({ t, state }) => (
@@ -41,13 +41,13 @@ export default async function CertificatesPage() {
             {state === "earned" && (
               <div className="cert-earned">
                 <span className="cert-status on">✓ Earned</span>
-                <Link className="btn btn-primary cert-get" href={`/certificates/${t.slug}`}>Certificate dekho →</Link>
+                <Link className="btn btn-primary cert-get" href={`/certificates/${t.slug}`}>View certificate →</Link>
               </div>
             )}
             {(state === "prog" || state === "new") && (
               <div className="cert-prog">
                 <span className={`cert-status ${state === "new" ? "lock" : "prog"}`}>
-                  {state === "new" ? "○ Shuru nahi kiya" : "● In progress"}
+                  {state === "new" ? "○ Not started" : "● In progress"}
                 </span>
                 <div className="pbar"><i style={{ width: `${t.pct}%` }} /></div>
                 <div className="cert-meta">{t.pct}% done · {t.lessonsDone}/{t.totalLessons} lessons · {t.problemsDone}/{t.totalProblems} problems</div>

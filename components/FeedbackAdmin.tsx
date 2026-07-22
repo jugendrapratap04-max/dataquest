@@ -12,10 +12,10 @@ const CAT_LABEL: Record<string, string> = { bug: "🐞 Bug", idea: "💡 Idea", 
 function ago(iso: string) {
   const d = new Date(iso);
   const mins = Math.round((Date.now() - d.getTime()) / 60000);
-  if (mins < 1) return "abhi";
-  if (mins < 60) return `${mins}m pehle`;
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
   const hrs = Math.round(mins / 60);
-  if (hrs < 24) return `${hrs}h pehle`;
+  if (hrs < 24) return `${hrs}h ago`;
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
@@ -55,7 +55,7 @@ export function FeedbackAdmin({ items }: { items: Item[] }) {
 
       {shown.length === 0 ? (
         <section className="card pad" style={{ textAlign: "center", color: "var(--ink-faint)" }}>
-          {filter === "new" ? "Koi naya feedback nahi — sab dekh liya. 🎉" : "Abhi tak koi feedback nahi aaya."}
+          {filter === "new" ? "No new feedback — all caught up. 🎉" : "No feedback has come in yet."}
         </section>
       ) : (
         <div className="fa-list">
@@ -65,8 +65,8 @@ export function FeedbackAdmin({ items }: { items: Item[] }) {
                 <span className={`fa-cat fa-${f.category}`}>{CAT_LABEL[f.category] || f.category}</span>
                 <span className="fa-meta">{f.who} · {ago(f.when)}</span>
                 {f.status === "new"
-                  ? <button className="fa-mark" onClick={() => mark(f.id, "seen")}>Dekh liya ✓</button>
-                  : <button className="fa-mark seen" onClick={() => mark(f.id, "new")}>↩ naya karo</button>}
+                  ? <button className="fa-mark" onClick={() => mark(f.id, "seen")}>Mark as seen ✓</button>
+                  : <button className="fa-mark seen" onClick={() => mark(f.id, "new")}>↩ Mark as new</button>}
               </div>
               <p className="fa-msg">{f.message}</p>
               {f.path && <div className="fa-path mono">{f.path} · {f.email}</div>}

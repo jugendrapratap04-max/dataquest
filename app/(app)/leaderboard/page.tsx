@@ -32,11 +32,11 @@ export default async function LeaderboardPage() {
       {/* Topbar already explains the leaderboard — only add what it can't. */}
       {myRank > 0 && (
         <p className="page-intro">
-          Tumhari rank abhi <b>#{myRank}</b> hai — {users.length} logon me. 🔥
+          You are currently ranked <b>#{myRank}</b> out of {users.length}. 🔥
         </p>
       )}
       <div className="card pad">
-        <div className="sec-head"><h2>Top Learners<span className="sub">XP ke hisaab se · all-time</span></h2></div>
+        <div className="sec-head"><h2>Top Learners<span className="sub">by XP · all-time</span></h2></div>
         <ul className="lb">
           {users.map((u, i) => {
             const isMe = me && u.id === me.id;
