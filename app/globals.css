@@ -665,6 +665,38 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .quiz-sec.medium .quiz-lvl { border-left-color:var(--accent); }
 .quiz-sec.hard .quiz-lvl { border-left-color:var(--bad); }
 
+/* ---- Reading progress + lesson outline ---- */
+.readbar { position:fixed; top:0; left:0; right:0; height:3px; background:transparent; z-index:60; pointer-events:none; }
+.readbar > i { display:block; height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width .12s linear; }
+
+/* Zero-height scroll target so a heading lands below the sticky topbar. */
+.anchor { display:block; height:0; scroll-margin-top:86px; }
+
+.toc { padding:14px 16px; margin:0 0 22px; }
+.toc h3 { font-size:12px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 10px; }
+.toc ol { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.toc li a { display:flex; align-items:baseline; gap:10px; padding:6px 8px; border-radius:8px; font-size:13.5px; color:var(--ink-soft); text-decoration:none; border-left:2px solid transparent; }
+.toc li a:hover { background:var(--panel-2); color:var(--ink); }
+.toc li.on > a { background:var(--accent-soft); color:var(--ink); border-left-color:var(--accent); font-weight:600; }
+.toc .toc-n { font-family:var(--mono); font-size:11px; font-weight:700; color:var(--accent-2); min-width:14px; flex:none; }
+.toc .toc-t { flex:1; }
+.toc .toc-m { font-family:var(--mono); font-size:11px; color:var(--ink-faint); flex:none; }
+.toc li.landmark .toc-t { color:var(--ink-faint); }
+.toc li.landmark.on .toc-t { color:var(--ink); }
+
+/* ---- End-of-lesson summary ---- */
+.lsum { padding:16px 18px; margin:26px 0 0; }
+.lsum h3 { font-size:14px; margin:0 0 12px; }
+.lsum-stats { display:flex; gap:10px; flex-wrap:wrap; }
+.lsum-stats > div { flex:1 1 92px; text-align:center; padding:11px 8px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line); }
+.lsum-stats b { display:block; font-family:var(--mono); font-size:19px; color:var(--accent-2); line-height:1.2; }
+.lsum-stats span { font-size:11.5px; color:var(--ink-faint); }
+.lsum-next { font-size:13px; color:var(--ink-soft); margin:12px 0 0; }
+
+/* Breathing room between major concepts — the page was one long wall of text. */
+.prose h2 { margin-top:44px; padding-top:26px; border-top:1px solid var(--line); }
+.prose h2:first-of-type { margin-top:26px; }
+
 /* ---- Scaffolding ladder: worked example -> faded -> trace -> debug ---- */
 .worked { padding:16px 18px; margin:22px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
 .worked h3, .faded h3, .trace h3, .debug h3 { font-size:14px; margin:0 0 6px; }

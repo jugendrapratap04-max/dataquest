@@ -6,6 +6,9 @@ import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
 import { LessonQuiz } from "@/components/LessonQuiz";
 import { FadedExample, TraceCheck } from "@/components/LessonPractice";
+import { ReadingProgress, LessonToc } from "@/components/LessonProgress";
+import { lessonOutline } from "@/lib/lesson-outline";
+import { Fragment } from "react";
 import { VizBlock } from "@/components/viz/VizBlock";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -279,6 +282,11 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
   const blocks: any[] = JSON.parse(lesson.contentJson || "[]");
   const objectives = blocks.find((b) => b.t === "objectives");
   const rest = blocks.filter((b) => b.t !== "objectives");
+  // Section map + per-section minutes, both derived from the content itself.
+  // A short lesson does not need a table of contents.
+  const { outline, anchors, total, readMinutes, workMinutes } = lessonOutline(rest);
+  const showToc = outline.length >= 4;
+  const concepts = (blocks.find((b) => b.t === "recap")?.items ?? []).length;
 
   const practiceHref = lesson.problems[0] ? `/practice/${lesson.problems[0].slug}` : "/practice";
   const idx = siblings.findIndex((s) => s.id === lesson.id);
@@ -287,13 +295,17 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="learn-layout">
+      <ReadingProgress />
       <article>
         <div className="crumb">Roadmap / {lesson.track.title.split(" — ")[0]} / <b>{lesson.title}</b></div>
         <div className="lesson-head">
           <div className="eyebrow">Lesson {lesson.order} · {lesson.track.title.split(" — ").pop()}</div>
           <h1>{lesson.title}</h1>
           <div className="lh-meta">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {lesson.minutes} min read</span>
+            {/* Measured from the content, not typed in by hand — and split,
+                because "39 min" reads as 39 minutes of reading and scares
+                people off a lesson that is only ~10 minutes of text. */}
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ~{readMinutes} min read{workMinutes > 1 ? ` · ~${workMinutes} min practice` : ""}</span>
             {lesson.problems.length > 0 && (
               <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg> {lesson.problems.length} practice questions</span>
             )}
@@ -302,8 +314,29 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
         </div>
 
         {objectives && <Block b={objectives} />}
+        {showToc && <LessonToc outline={outline} />}
         <div className="prose">
-          {rest.map((b, i) => <Block key={i} b={b} />)}
+          {rest.map((b, i) => (
+            <Fragment key={i}>
+              {anchors.get(i) && <span id={anchors.get(i)} className="anchor" aria-hidden="true" />}
+              <Block b={b} />
+            </Fragment>
+          ))}
+        </div>
+
+        {/* Closing summary. Every number here is real — key ideas counted from
+            the recap, minutes from the outline, progress from the database. No
+            invented XP: finishing a lesson does not pay XP, solving problems
+            does, and saying otherwise would be a lie the dashboard exposes. */}
+        <div className="card lsum">
+          <h3>What you just covered</h3>
+          <div className="lsum-stats">
+            <div><b>{concepts}</b><span>key ideas</span></div>
+            <div><b>~{total}</b><span>minutes</span></div>
+            {lesson.problems.length > 0 && <div><b>{lesson.problems.length}</b><span>problems waiting</span></div>}
+            {user && <div><b>{doneIds.size}/{siblings.length}</b><span>lessons done</span></div>}
+          </div>
+          {next && <p className="lsum-next">Up next: <b>{next.title}</b></p>}
         </div>
 
         <div className="cta">
