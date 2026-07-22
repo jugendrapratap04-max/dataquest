@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress } from "@/lib/progress";
 import { PrintButton } from "@/components/PrintButton";
@@ -10,7 +10,7 @@ import { PrintButton } from "@/components/PrintButton";
 export default async function CertificatePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const { tracks } = await getProgress(user.id);
   const t = tracks.find((x) => x.slug === slug);

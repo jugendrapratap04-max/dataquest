@@ -1,9 +1,10 @@
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { ResumeBuilder } from "@/components/ResumeBuilder";
 
 export default async function ResumePage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
   return (
     <>
       <p className="page-intro">

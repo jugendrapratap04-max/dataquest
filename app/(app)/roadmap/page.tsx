@@ -3,10 +3,12 @@ import { getProgress } from "@/lib/progress";
 import { PhaseList, type Phase } from "@/components/PhaseList";
 
 export default async function RoadmapPage() {
+  // Open to visitors — the roadmap is the clearest picture of what's on offer,
+  // so it should be visible before signing up. A guest id matches no progress
+  // rows, which is exactly the view a guest should get: every track at 0%.
   const user = await getCurrentUser();
-  if (!user) return null;
 
-  const { tracks } = await getProgress(user.id);
+  const { tracks } = await getProgress(user?.id ?? "__guest__");
 
   const phases: Phase[] = tracks.map((t) => ({
     id: t.id, order: t.order, title: t.title, subtitle: t.subtitle, status: t.status,

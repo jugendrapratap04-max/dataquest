@@ -136,6 +136,21 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .userbox { display:flex; align-items:center; gap:10px; padding:9px; border-radius:11px; border:1px solid var(--line); background:var(--panel-2); }
 .userbox .av { width:34px; height:34px; border-radius:9px; flex:none; background:linear-gradient(150deg,var(--teal),#0A6B60); color:#fff; display:grid; place-items:center; font-family:var(--mono); font-weight:700; }
 .userbox .nm { font-size:12.5px; font-weight:650; line-height:1.2; } .userbox .rl { font-size:11px; color:var(--ink-faint); }
+/* Signed-out visitor: member features stay visible with a lock, so it's obvious
+   what an account gets you, and the sidebar foot becomes the sign-up ask. */
+.nav-item.locked { opacity:.7; }
+.nav-lock { margin-left:auto; display:inline-flex; color:var(--ink-faint); }
+.nav-lock svg { width:13px; height:13px; }
+.guestbox { border:1px solid color-mix(in srgb,var(--accent) 32%,transparent); background:var(--accent-soft); border-radius:12px; padding:13px 14px; }
+.gb-t { font-size:13.5px; font-weight:700; color:var(--ink); }
+.gb-d { font-size:11.5px; color:var(--ink-soft); line-height:1.5; margin:4px 0 10px; }
+.btn.gb-cta { width:100%; justify-content:center; padding:9px 12px; font-size:13px; }
+.gb-alt { display:block; text-align:center; font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+.gb-alt:hover { color:var(--ink); }
+.guest-cta { display:flex; align-items:center; gap:10px; }
+.gc-link { font-size:13.5px; font-weight:600; color:var(--ink-soft); white-space:nowrap; }
+.gc-link:hover { color:var(--ink); }
+.btn.gc-btn { padding:9px 15px; font-size:13px; white-space:nowrap; }
 
 /* Mobile: the sidebar becomes a slide-in drawer behind a hamburger, so nav is
    reachable without a 100vh sidebar burying the whole first screen. The old rule

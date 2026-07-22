@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress } from "@/lib/progress";
@@ -8,7 +9,7 @@ function SealIcon() {
 
 export default async function CertificatesPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
   const { tracks } = await getProgress(user.id);
 
   const cards = tracks.map((t) => {

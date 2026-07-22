@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -37,10 +38,13 @@ const THEMES: Theme[] = [
 
 type Item = { title: string; slug: string; sub: string; kind: "lesson" | "problem" };
 
-export function Topbar({ user }: { user: { name: string; streak: number; xp: number; isNew?: boolean } }) {
+export function Topbar({ user }: { user: { name: string; streak: number; xp: number; isNew?: boolean } | null }) {
   const pathname = usePathname();
   const router = useRouter();
   const [title, sub] = pick(pathname);
+  // Declared before the effects below, which use it as a dependency. A visitor
+  // has no XP, so free themes only.
+  const xp = user?.xp ?? 0;
 
   const [theme, setTheme] = useState<string>("light");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -59,12 +63,12 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     // locked theme left in localStorage by a higher-XP account on the same
     // browser would apply — and show as both active and 🔒 in the menu.
     const savedT = THEMES.find((t) => t.id === saved);
-    const cur = (savedT && user.xp >= savedT.xp) ? savedT.id
+    const cur = (savedT && xp >= savedT.xp) ? savedT.id
       : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.setAttribute("data-theme", cur);
     if (cur !== saved) { try { localStorage.setItem("dq-theme", cur); } catch {} }
     setTheme(cur);
-  }, [user.xp]);
+  }, [xp]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -106,13 +110,13 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     router.push(it.kind === "lesson" ? `/learn/${it.slug}` : `/practice/${it.slug}`);
   };
 
-  const firstName = user.name.split(" ")[0];
+  const firstName = user ? user.name.split(" ")[0] : "";
   const current = THEMES.find((t) => t.id === theme) ?? THEMES[0];
 
   return (
     <header className="topbar">
       <div className="greet">
-        <h1>{title.replace("{greeting}", user.isNew ? "Welcome" : "Welcome back").replace("{name}", firstName)}</h1>
+        <h1>{title.replace("{greeting}", user?.isNew ? "Welcome" : "Welcome back").replace("{name}", firstName)}</h1>
         <p>{sub}</p>
       </div>
       <div className="top-actions">
@@ -141,16 +145,23 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
             </div>
           )}
         </div>
-        <div className="streak-chip"><span>🔥</span><b>{user.streak}</b><span className="lbl">streak</span></div>
+        {user ? (
+          <div className="streak-chip"><span>🔥</span><b>{user.streak}</b><span className="lbl">streak</span></div>
+        ) : (
+          <div className="guest-cta">
+            <Link href="/login" className="gc-link">Sign in</Link>
+            <Link href="/signup" className="btn btn-primary gc-btn">Start free</Link>
+          </div>
+        )}
         <div className="theme-wrap" ref={themeRef}>
           <button className="icon-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Theme chuno" aria-expanded={menuOpen}>
             <span className="theme-sw" style={{ width: 18, height: 18, background: current.sw }} />
           </button>
           {menuOpen && (
             <div className="theme-menu" role="menu">
-              <div className="tm-h"><span>Theme</span><span className="coins">🪙 {user.xp.toLocaleString()}</span></div>
+              <div className="tm-h"><span>Theme</span><span className="coins">🪙 {xp.toLocaleString()}</span></div>
               {THEMES.map((t) => {
-                const locked = user.xp < t.xp;
+                const locked = xp < t.xp;
                 const active = theme === t.id;
                 return (
                   <button
@@ -180,7 +191,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
       </div>
       {toast && (
         <div className="theme-toast" role="status">
-          🔒 <span><b>{toast.name}</b> theme {toast.need.toLocaleString()} coins pe unlock — abhi {user.xp.toLocaleString()} 🪙</span>
+          🔒 <span><b>{toast.name}</b> theme {toast.need.toLocaleString()} coins pe unlock — abhi {xp.toLocaleString()} 🪙</span>
         </div>
       )}
     </header>

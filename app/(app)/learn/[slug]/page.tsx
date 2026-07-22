@@ -159,8 +159,9 @@ function Block({ b }: { b: any }) {
 
 export default async function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // Open to everyone — a visitor reads the whole lesson. Only the progress
+  // (which lessons are ticked) and the "mark complete" action need an account.
   const user = await getCurrentUser();
-  if (!user) return null;
 
   const lesson = await prisma.lesson.findUnique({
     where: { slug },
@@ -172,9 +173,9 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
     where: { trackId: lesson.trackId },
     orderBy: { order: "asc" },
   });
-  const doneRows = await prisma.lessonProgress.findMany({
-    where: { userId: user.id, status: "done" },
-  });
+  const doneRows = user
+    ? await prisma.lessonProgress.findMany({ where: { userId: user.id, status: "done" } })
+    : [];
   const doneIds = new Set(doneRows.map((d) => d.lessonId));
 
   const blocks: any[] = JSON.parse(lesson.contentJson || "[]");
@@ -209,7 +210,17 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
 
         <div className="cta">
           <div className="pad">
-            {lesson.problems.length > 0 ? (
+            {!user ? (
+              <>
+                <div className="eyebrow">You&apos;re reading as a guest</div>
+                <h3>Keep this progress — it&apos;s free</h3>
+                <p>
+                  Reading stays free forever. An account saves which lessons you&apos;ve finished,
+                  checks your code and pays XP, and unlocks certificates and study rooms.
+                </p>
+                <Link className="btn btn-primary" href="/signup">Create free account →</Link>
+              </>
+            ) : lesson.problems.length > 0 ? (
               <>
                 <div className="eyebrow">Ab sabse zaroori step</div>
                 <h3>Padh liya? Ab practice karo 💪</h3>

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getActivity, getStreak } from "@/lib/progress";
 
@@ -8,7 +9,7 @@ const level = (n: number) => (n === 0 ? "" : n === 1 ? "l1" : n <= 3 ? "l2" : "l
 
 export default async function ProgressPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const p = await getProgress(user.id);
   const activity = await getActivity(user.id, 28);

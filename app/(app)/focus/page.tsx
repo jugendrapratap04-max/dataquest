@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { FocusClient } from "@/components/FocusClient";
@@ -5,7 +6,7 @@ import { derivePhase, focusPct } from "@/lib/focus";
 
 export default async function FocusPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const open = await prisma.studySession.findFirst({
     where: { userId: user.id, endedAt: null, roomId: null },

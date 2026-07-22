@@ -17,37 +17,41 @@ const ResumeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
 const TimerIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>);
 const RoomIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><path d="M16 6a3 3 0 0 1 0 6M18 20v-1a5 5 0 0 0-2-4"/></svg>);
 
-type Item = { href: string; label: string; icon: React.ReactNode; count?: string };
+// `member: true` = needs an account. Visitors still see these, with a lock, so
+// it's obvious what signing up gets you — hiding them would hide the reason.
+type Item = { href: string; label: string; icon: React.ReactNode; count?: string; member?: boolean };
 
 const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Learn", items: [
-    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon /> },
+    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon />, member: true },
     { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: `${roadmapPct}%` },
     { href: "/learn", label: "Lessons", icon: <BookIcon /> },
-    { href: "/notes", label: "Notes", icon: <NoteIcon /> },
+    { href: "/notes", label: "Notes", icon: <NoteIcon />, member: true },
   ]},
   { label: "Practice", items: [
     { href: "/practice", label: "Compiler", icon: <CodeIcon /> },
     { href: "/projects", label: "Projects", icon: <BoxIcon /> },
   ]},
   { label: "Study", items: [
-    { href: "/focus", label: "Focus Mode", icon: <TimerIcon /> },
-    { href: "/rooms", label: "Study Rooms", icon: <RoomIcon /> },
+    { href: "/focus", label: "Focus Mode", icon: <TimerIcon />, member: true },
+    { href: "/rooms", label: "Study Rooms", icon: <RoomIcon />, member: true },
   ]},
   { label: "Progress", items: [
-    { href: "/leaderboard", label: "Leaderboard", icon: <TrophyIcon /> },
-    { href: "/certificates", label: "Certificates", icon: <CertIcon /> },
-    { href: "/resume", label: "Resume + ATS", icon: <ResumeIcon /> },
-    { href: "/progress", label: "Analytics", icon: <ChartIcon /> },
+    { href: "/leaderboard", label: "Leaderboard", icon: <TrophyIcon />, member: true },
+    { href: "/certificates", label: "Certificates", icon: <CertIcon />, member: true },
+    { href: "/resume", label: "Resume + ATS", icon: <ResumeIcon />, member: true },
+    { href: "/progress", label: "Analytics", icon: <ChartIcon />, member: true },
   ]},
 ];
 
-export function Sidebar({ user, roadmapPct }: { user: { name: string; role: string }; roadmapPct: number }) {
+const LockIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>);
+
+export function Sidebar({ user, roadmapPct }: { user: { name: string; role: string } | null; roadmapPct: number }) {
   const pathname = usePathname();
   // Every nav href is now a real path (dashboard moved to /dashboard so "/" could
   // become the public landing page), so a plain prefix match is enough.
   const isActive = (href: string) => pathname.startsWith(href);
-  const initials = user.name.split(" ").map((n) => n[0]).slice(0, 1).join("");
+  const initials = user ? user.name.split(" ").map((n) => n[0]).slice(0, 1).join("") : "";
   const nav = groups(roadmapPct);
 
   // On desktop the sidebar is always shown (CSS ignores this state). On mobile it's
@@ -79,27 +83,47 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
       {nav.map((g) => (
         <div key={g.label}>
           <div className="nav-lbl">{g.label}</div>
-          {g.items.map((it) => (
-            <Link key={it.href} href={it.href} className={`nav-item${isActive(it.href) ? " active" : ""}`} onClick={() => setOpen(false)}>
-              {it.icon}
-              {it.label}
-              {it.count && <span className="count">{it.count}</span>}
-            </Link>
-          ))}
+          {g.items.map((it) => {
+            const locked = !!it.member && !user;
+            return (
+              <Link
+                key={it.href}
+                href={locked ? "/signup" : it.href}
+                className={`nav-item${isActive(it.href) ? " active" : ""}${locked ? " locked" : ""}`}
+                onClick={() => setOpen(false)}
+                title={locked ? "Sign up to unlock" : undefined}
+              >
+                {it.icon}
+                {it.label}
+                {locked ? <span className="nav-lock"><LockIcon /></span> : it.count && <span className="count">{it.count}</span>}
+              </Link>
+            );
+          })}
         </div>
       ))}
       <div className="side-foot">
-        <div className="userbox">
-          <div className="av">{initials}</div>
-          <div>
-            <div className="nm">{user.name}</div>
-            <div className="rl">{user.role}</div>
+        {user ? (
+          <>
+            <div className="userbox">
+              <div className="av">{initials}</div>
+              <div>
+                <div className="nm">{user.name}</div>
+                <div className="rl">{user.role}</div>
+              </div>
+            </div>
+            <button className="logout-btn" onClick={logout}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+              Logout
+            </button>
+          </>
+        ) : (
+          <div className="guestbox">
+            <div className="gb-t">Reading is free.</div>
+            <div className="gb-d">Make an account to save your progress, earn certificates and study with friends.</div>
+            <Link href="/signup" className="btn btn-primary gb-cta" onClick={() => setOpen(false)}>Create free account</Link>
+            <Link href="/login" className="gb-alt" onClick={() => setOpen(false)}>I already have one</Link>
           </div>
-        </div>
-        <button className="logout-btn" onClick={logout}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
-          Logout
-        </button>
+        )}
       </div>
       </aside>
     </>

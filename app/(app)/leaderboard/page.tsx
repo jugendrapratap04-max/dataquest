@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 
@@ -15,6 +16,7 @@ function publicName(name: string): string {
 
 export default async function LeaderboardPage() {
   const me = await getCurrentUser();
+  if (!me) redirect("/login");
   // Same guard as every other authed page. The layout already redirects, so this
   // is belt-and-braces — but leaving one page out is how the next page copied
   // from it ends up without one.

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { FeedbackAdmin } from "@/components/FeedbackAdmin";
@@ -7,7 +8,7 @@ import { FeedbackAdmin } from "@/components/FeedbackAdmin";
 // the shared demo account.
 export default async function FeedbackInboxPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const adminEmail = process.env.ADMIN_EMAIL;
   const isAdmin = !!adminEmail && user.email === adminEmail;

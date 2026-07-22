@@ -9,15 +9,18 @@ const dotColor = (d: string) =>
   d === "Medium" ? "var(--accent)" : d === "Hard" ? "var(--bad)" : d === "Super Hard" ? "#6D4BD1" : "var(--good)";
 
 export default async function PracticeList() {
+  // Open to visitors: the problem list and the editor are readable and runnable
+  // without an account. Only "solved" ticks and XP need one.
   const user = await getCurrentUser();
-  if (!user) return null;
   const problems = await prisma.problem.findMany({
     include: { lesson: true },
     orderBy: [{ order: "asc" }, { title: "asc" }],
   });
-  const solved = await prisma.submission.findMany({
-    where: { userId: user.id, passed: true }, distinct: ["problemId"],
-  });
+  const solved = user
+    ? await prisma.submission.findMany({
+        where: { userId: user.id, passed: true }, distinct: ["problemId"],
+      })
+    : [];
   const solvedIds = new Set(solved.map((s) => s.problemId));
 
   const groups = ORDER.map((d) => ({ d, items: problems.filter((p) => p.difficulty === d) })).filter((g) => g.items.length);

@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
@@ -9,7 +10,7 @@ const iconClass = (slug: string) =>
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
 
   const p = await getProgress(user.id);
   const { streak, bestStreak } = await getStreak(user.id);

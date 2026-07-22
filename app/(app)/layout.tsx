@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { ActivityPing } from "@/components/ActivityPing";
@@ -7,33 +6,46 @@ import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak } from "@/lib/progress";
 import { prisma } from "@/lib/prisma";
 
-// The authed app shell. Anyone without a valid session is sent to /login.
+// The app shell — now open to visitors, not just members.
+//
+// Reading is free: lessons, practice, and the roadmap render for anyone, the
+// way W3Schools works. Only the personal pages (dashboard, progress, notes,
+// certificates, rooms…) redirect to /login, and each does that itself. Asking
+// someone to sign up before they can see a single lesson was costing us the
+// visitors we most wanted.
+//
+// For a signed-out visitor this does no per-user work at all — no progress,
+// streak or activity queries — so an open page stays cheap.
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
 
-  // "Welcome back" is a lie on someone's first visit.
-  const isNew =
-    user.xp === 0 &&
-    (await prisma.lessonProgress.count({ where: { userId: user.id } })) === 0 &&
-    (await prisma.submission.count({ where: { userId: user.id } })) === 0;
+  let roadmapPct = 0;
+  let streak = 0;
+  let isNew = false;
 
-  const { lessonsDone, totalLessons, problemsDone, totalProblems } = await getProgress(user.id);
-  const totalUnits = totalLessons + totalProblems;
-  const roadmapPct = totalUnits ? Math.round(((lessonsDone + problemsDone) / totalUnits) * 100) : 0;
-  const { streak } = await getStreak(user.id);
+  if (user) {
+    // "Welcome back" is a lie on someone's first visit.
+    isNew =
+      user.xp === 0 &&
+      (await prisma.lessonProgress.count({ where: { userId: user.id } })) === 0 &&
+      (await prisma.submission.count({ where: { userId: user.id } })) === 0;
+
+    const { lessonsDone, totalLessons, problemsDone, totalProblems } = await getProgress(user.id);
+    const totalUnits = totalLessons + totalProblems;
+    roadmapPct = totalUnits ? Math.round(((lessonsDone + problemsDone) / totalUnits) * 100) : 0;
+    ({ streak } = await getStreak(user.id));
+  }
 
   return (
     <div className="app">
-      {/* Every authed page reports activity, so a focus session still counts
-          you as studying while you're in the Practice tab it told you to open. */}
-      <ActivityPing />
-      {/* Beta feedback capture, floating on every authed page. */}
-      <FeedbackButton />
-      <Sidebar user={{ name: user.name, role: user.role }} roadmapPct={roadmapPct} />
+      {/* Both only make sense for a member: activity feeds a focus session, and
+          feedback is tied to an account we can reply to. */}
+      {user && <ActivityPing />}
+      {user && <FeedbackButton />}
+      <Sidebar user={user ? { name: user.name, role: user.role } : null} roadmapPct={roadmapPct} />
       <main className="main">
         <div className="wrap">
-          <Topbar user={{ name: user.name, streak, isNew, xp: user.xp }} />
+          <Topbar user={user ? { name: user.name, streak, isNew, xp: user.xp } : null} />
           {children}
         </div>
       </main>

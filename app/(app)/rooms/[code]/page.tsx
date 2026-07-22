@@ -9,7 +9,7 @@ import { JoinGate } from "@/components/JoinGate";
 // you chose to do.
 export default async function RoomPage({ params }: { params: Promise<{ code: string }> }) {
   const user = await getCurrentUser();
-  if (!user) return null;
+  if (!user) redirect("/login");
   const { code } = await params;
 
   const room = await prisma.room.findUnique({
