@@ -23,10 +23,20 @@ async function loadRoom(code: string) {
   return prisma.room.findUnique({
     where: { code: code.toUpperCase() },
     include: {
-      host: { select: { id: true, name: true } },
+      host: { select: { id: true, name: true, email: true } },
       members: { include: { user: { select: { id: true, name: true } } } },
     },
   });
+}
+
+// Voice is closed while it is still being tested: it only works in rooms opened
+// by the ADMIN_EMAIL account, so a room code that leaks cannot be turned into a
+// free voice channel by strangers. Same shape as the feedback gate — no default,
+// so an unset ADMIN_EMAIL means voice is off for everybody rather than open to
+// everybody. Remove this once voice is ready to be public.
+function voiceAllowedIn(room: { host: { email: string } }) {
+  const admin = process.env.ADMIN_EMAIL;
+  return !!admin && room.host.email === admin;
 }
 
 /** Fast-forward the stored phase if the wall clock has moved past it. Called on
@@ -132,7 +142,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
       breakMinutes: room.breakMinutes,
       hostName: room.host.name,
       iAmHost: room.hostId === user.id,
-      voiceEnabled: room.voiceEnabled,
+      // Both have to be true: the host's switch, and the test-phase gate.
+      voiceEnabled: room.voiceEnabled && voiceAllowedIn(room),
+      // So the panel can say which of the two is the reason, instead of blaming
+      // the host for a lock the host cannot lift.
+      voiceLocked: !voiceAllowedIn(room),
       endedAt: room.endedAt?.toISOString() ?? null,
     },
     signals: inbox.map((s) => ({ from: s.fromId, kind: s.kind, payload: s.payload })),
@@ -231,6 +245,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     const on = body.on === true;
     // The host's switch is enforced here, not just hidden in the UI — with it
     // off, nobody can obtain the offers needed to build a connection.
+    if (on && !voiceAllowedIn(room)) return NextResponse.json({ error: "Voice is still in testing and is limited to invited sessions" }, { status: 403 });
     if (on && !room.voiceEnabled) return NextResponse.json({ error: "Voice is off in this room" }, { status: 403 });
     await prisma.roomMember.update({
       where: { id: me.id },
@@ -255,6 +270,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   }
 
   if (action === "signal") {
+    // Enforced here, not just in the UI: without an offer no connection can be
+    // built, so blocking the relay is what actually closes voice off.
+    if (!voiceAllowedIn(room)) return NextResponse.json({ error: "Voice is still in testing and is limited to invited sessions" }, { status: 403 });
     if (!room.voiceEnabled) return NextResponse.json({ error: "Voice is off in this room" }, { status: 403 });
     const to = String(body.to ?? "");
     const kind = String(body.kind ?? "");

@@ -49,11 +49,13 @@ function waitForIce(pc: RTCPeerConnection): Promise<void> {
 }
 
 export function VoiceCall({
-  meId, members, voiceEnabled, iAmHost, signals, pollSeq, post,
+  meId, members, voiceEnabled, voiceLocked, iAmHost, signals, pollSeq, post,
 }: {
   meId: string;
   members: VoiceMember[];
   voiceEnabled: boolean;
+  /** Closed for everyone during the test phase, not by the host's switch. */
+  voiceLocked?: boolean;
   iAmHost: boolean;
   signals: VoiceSignal[];
   pollSeq: number;
@@ -362,9 +364,13 @@ export function VoiceCall({
   if (!voiceEnabled) {
     return (
       <div className="voice off">
-        <div className="voice-head"><span>🎙️ Voice</span><span className="voice-tag">off</span></div>
-        <p className="voice-note">{iAmHost ? "You have turned voice off for this room." : "The host has turned voice off for this room."}</p>
-        {iAmHost && (
+        <div className="voice-head"><span>🎙️ Voice</span><span className="voice-tag">{voiceLocked ? "in testing" : "off"}</span></div>
+        <p className="voice-note">
+          {voiceLocked
+            ? "Voice is still being tested, so it only runs in sessions we invite people to. It will open to every room once it is ready."
+            : iAmHost ? "You have turned voice off for this room." : "The host has turned voice off for this room."}
+        </p>
+        {iAmHost && !voiceLocked && (
           <button className="btn btn-ghost" onClick={() => void post({ action: "roomVoice", on: true })}>Turn voice on</button>
         )}
       </div>

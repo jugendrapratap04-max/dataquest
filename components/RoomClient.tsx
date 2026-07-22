@@ -21,7 +21,7 @@ type State = {
   room: {
     id: string; code: string; name: string; subject: string; topic: string; maxParticipants: number;
     isPublic: boolean; focusMinutes: number; breakMinutes: number; hostName: string;
-    iAmHost: boolean; voiceEnabled: boolean; endedAt: string | null;
+    iAmHost: boolean; voiceEnabled: boolean; voiceLocked: boolean; endedAt: string | null;
   };
   phase: "focus" | "discussion" | "ended";
   cycle: number; secondsLeft: number; phaseSeconds: number;
@@ -371,6 +371,7 @@ export function RoomClient({ code }: { code: string }) {
                 meId={st.members.find((m) => m.isMe)?.userId ?? ""}
                 members={st.members.map((m) => ({ userId: m.userId, name: m.name, isMe: m.isMe, inVoice: m.inVoice, micMuted: m.micMuted }))}
                 voiceEnabled={st.room.voiceEnabled}
+                voiceLocked={st.room.voiceLocked}
                 iAmHost={st.room.iAmHost}
                 signals={st.signals ?? []}
                 pollSeq={pollSeq}
