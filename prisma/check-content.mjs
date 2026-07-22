@@ -191,9 +191,41 @@ for (const L of lessons) {
   }
 }
 
+// ------------------------------------------------- quiz answer positions ---
+// A quiz is only a check on understanding if the answer's POSITION carries no
+// information. This was 78 of 102 answers at option B and none ever at D, so
+// "always pick B" scored 76% platform-wide without reading a word. Guarding it
+// here because the bias creeps back one hand-written question at a time.
+const seen = [0, 0, 0, 0];
+let quizQs = 0;
+for (const L of lessons) {
+  let content;
+  try { content = JSON.parse(L.contentJson || "[]"); } catch { continue; }
+  for (const b of content) {
+    if (b.t !== "quiz" || !Array.isArray(b.items)) continue;
+    const d = [0, 0, 0, 0];
+    for (const q of b.items) {
+      if (!Array.isArray(q.options) || typeof q.correct !== "number") continue;
+      if (q.correct < 0 || q.correct >= q.options.length)
+        fails.push(`[quiz] ${L.slug}: correct index ${q.correct} is outside its ${q.options.length} options`);
+      if (new Set(q.options).size !== q.options.length)
+        fails.push(`[quiz] ${L.slug}: duplicate option text in "${String(q.q).slice(0, 40)}"`);
+      d[q.correct]++; seen[q.correct]++; quizQs++;
+    }
+    const n = b.items.length;
+    const top = Math.max(...d);
+    if (n >= 4 && top / n > 0.5)
+      fails.push(`[quiz] ${L.slug}: ${top}/${n} answers sit at option ${"ABCD"[d.indexOf(top)]} (${JSON.stringify(d)}) — a student can score by always picking it. Spread the answers across A/B/C/D.`);
+  }
+}
+if (quizQs >= 40) seen.forEach((c, i) => {
+  if (c === 0) fails.push(`[quiz] option ${"ABCD"[i]} is never the correct answer in any quiz (${quizQs} questions) — students notice.`);
+});
+
 // ------------------------------------------------------------------ report ---
 console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql)`);
 console.log(`lessons:  ${lessons.length} (${blocks} blocks)`);
+console.log(`quizzes:  ${quizQs} questions, answers at ${JSON.stringify(seen)} across A/B/C/D`);
 if (fails.length === 0) {
   console.log("\nAll content checks passed.");
 } else {
