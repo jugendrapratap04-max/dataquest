@@ -311,29 +311,75 @@ const L2 = [
 ];
 
 const L3 = [
-  { t: "objectives", items: ["if / else se decisions lena","elif se multiple cases handle karna","Indentation ka role samajhna"] },
-  { t: "hook", q: "ATM ko kaise pata chalta hai ki paise dene hain ya \"insufficient balance\" bolna hai?", why: "Har app har second yahi kar rahi hai — <b>check karo, phir tay karo</b>. Login sahi hai ya nahi, cart khaali hai ya nahi, user adult hai ya nahi. Ye poora kaam ek hi cheez pe tika hai jo aaj seekhoge." },
-  { t: "think", q: "Marks ke hisaab se grade dena hai: 90+ → A, 75+ → B, 40+ → C, warna Fail. Ek student ke 82 marks hain. Agar tum <b>chaar alag</b> <code>if</code> likh do (elif nahi), to kya hoga?", a: "Chaaron <code>if</code> alag-alag check honge. 82 <code>>= 75</code> bhi hai aur <code>>= 40</code> bhi — matlab <b>B aur C dono</b> print ho jayenge. <br/><br/><code>elif</code> ka poora point yahi hai: jaise hi koi ek match kare, <b>baaki chhod do</b>. Ye sirf sundarta nahi — ye correctness hai." },
-  { t: "h2", n: "1", text: "if aur else" },
-  { t: "def", term: "Conditional statement", en: "A conditional statement executes a block of code only when a given condition evaluates to true.", hi: "Condition ka jawaab hamesha <code>True</code> ya <code>False</code> hota hai — usi pe tay hota hai ki andar wala block chalega ya nahi." },
-  { t: "p", html: "Program ko decision lena sikhate hain: <b>agar</b> condition True hai to ye karo, <b>warna</b> wo. Andar ka code <b>indent</b> (4 space) hota hai." },
-  { t: "code", file: "ifelse.py", code: "age = 20\nif age >= 18:\n    print(\"Adult\")\nelse:\n    print(\"Minor\")", output: "Adult" },
-  { t: "note", variant: "tip", html: "<b>Indentation zaroori hai:</b> Python me curly braces nahi — code block sirf spaces se banta hai. 4 space standard." },
-  { t: "h2", n: "2", text: "elif — beech ke cases" },
-  { t: "p", html: "Ek se zyada conditions ke liye <code>elif</code> (else-if). Upar se neeche check hoti hain — jo pehli True mile wahi chalti hai." },
-  { t: "code", file: "grade.py", code: "marks = 82\nif marks >= 90:\n    print(\"A\")\nelif marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")\nelse:\n    print(\"Fail\")", output: "B" },
-  { t: "analogy", concept: "if / elif / else", real: "Security guard ki checklist", html: "Guard upar se neeche padhta hai: \"VIP pass hai? → andar bhejo.\" \"Nahi? Normal ticket hai? → line me lagao.\" \"Wo bhi nahi? → wapas bhejo.\" Jaise hi ek match ho, wo <b>ruk jaata hai</b> — baaki nahi padhta. <code>elif</code> bilkul yahi karta hai." },
-  { t: "mistakes", items: [
-    { bad: "if marks >= 40:\nprint(\"Pass\")", why: "Indent nahi kiya. Python me curly braces nahi hote — block <b>sirf spaces</b> se banta hai. Bina indent ke <code>IndentationError</code> milega.", fix: "if marks >= 40:\n    print(\"Pass\")" },
-    { bad: "if marks >= 40:\n  print(\"Pass\")\n      print(\"Done\")", why: "Ek hi block me alag-alag indent. Python ko fixed 4 space nahi chahiye, par ek block ke andar <b>consistent</b> chahiye. Tabs aur spaces mix karna sabse bura — dikhta same hai, error milta hai.", fix: "if marks >= 40:\n    print(\"Pass\")\n    print(\"Done\")" },
-    { bad: "if marks >= 40:\n    print(\"C\")\nif marks >= 75:\n    print(\"B\")", why: "Alag <code>if</code> matlab dono independently check honge — 82 marks pe <b>C aur B dono</b> print ho jayenge. Ek hi cheez me se ek chunni ho to <code>elif</code> chahiye.", fix: "if marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")" },
+  { t: "objectives", items: [
+    "Make a program decide, with <code>if</code> and <code>else</code>",
+    "Handle several cases with <code>elif</code> — and know why the order matters",
+    "Understand how indentation defines a block",
+    "Write a one-line conditional (the ternary)",
   ]},
-  { t: "recap", items: ["if → condition True to chalega","elif → aur cases (upar se neeche check)","else → koi match na ho to","Indentation (4 space) block banata hai"] },
+  { t: "hook", q: "How does an ATM know whether to hand over the cash or say \"insufficient balance\"?", why: "Every app you use is doing this every second — <b>check something, then decide</b>. Is the login right? Is the cart empty? Is this user an adult? All of it rests on the one idea you learn here." },
+  { t: "think", q: "Grades: 90+ is A, 75+ is B, 40+ is C, otherwise Fail. A student has 82. If you write <b>four separate</b> <code>if</code> statements instead of using <code>elif</code>, what happens?", a: "All four are checked independently. 82 is <code>>= 75</code> <i>and</i> <code>>= 40</code>, so <b>both B and C get printed</b>.<br/><br/>That is the entire point of <code>elif</code>: the moment one matches, <b>stop looking</b>. It is not a tidiness choice, it is a correctness one." },
+
+  { t: "h2", n: "1", text: "if and else" },
+  { t: "def", term: "Conditional statement", en: "A conditional statement runs a block of code only when a given condition is true.", hi: "In plain words: the condition always answers <code>True</code> or <code>False</code>, and that answer decides whether the block underneath runs at all." },
+  { t: "p", html: "You are teaching the program to choose: <b>if</b> this is true do that, <b>otherwise</b> do something else. The code belonging to a branch is <b>indented</b> — four spaces." },
+  { t: "code", file: "ifelse.py", code: "age = 20\n\nif age >= 18:\n    print(\"Adult\")\nelse:\n    print(\"Minor\")", output: "Adult" },
+  { t: "note", variant: "tip", html: "<b>Indentation is the syntax.</b> Python has no curly braces — the spaces are what make a block. Four is the convention, and staying consistent inside a block is the rule." },
+
+  { t: "h2", n: "2", text: "elif — the cases in between" },
+  { t: "p", html: "For more than two outcomes, use <code>elif</code> (short for else-if). Python checks them <b>from top to bottom and stops at the first true one</b>." },
+  { t: "code", file: "grade.py", code: "marks = 82\n\nif marks >= 90:\n    print(\"A\")\nelif marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")\nelse:\n    print(\"Fail\")", output: "B" },
+  { t: "viz", name: "condition-flow" },
+  { t: "p", html: "Move the marks to 92 in that panel and watch the second line. <code>marks >= 40</code> is perfectly true — and it still never runs, because Python already had its answer. <b>A condition being true is not enough; it has to be reached.</b>" },
+  { t: "analogy", concept: "if / elif / else", real: "A guard with a checklist", html: "The guard reads top to bottom: \"VIP pass? → send them in.\" \"No? Regular ticket? → join the queue.\" \"Neither? → turn them away.\" The moment one matches he <b>stops reading</b>. That is exactly what <code>elif</code> does." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is how every data rule gets written — flagging a transaction as high value, bucketing customers into segments, deciding whether a row is clean enough to keep. Getting the <i>order</i> of the conditions wrong is one of the most common bugs in a real pipeline, and it never crashes; it quietly produces the wrong answer." },
+
+  { t: "h2", n: "3", text: "The one-line version" },
+  { t: "p", html: "When a decision only picks between two values, Python has a shorter form. The condition sits in the <b>middle</b>, which is the opposite of most languages:" },
+  { t: "code", file: "ternary.py", code: "age = 15\nstatus = \"Adult\" if age >= 18 else \"Minor\"\nprint(status)", output: "Minor" },
+  { t: "note", variant: "warn", html: "Fine for a small assignment. Nesting one inside another gets unreadable fast — when that happens, go back to a normal <code>if</code>." },
+
+  { t: "trace", intro: "Read it in order and work out what each name holds. The trap is which line actually gets reached.", code: "score = 88\nresult = \"none\"\nif score >= 95:\n    result = \"top\"\nelif score >= 60:\n    result = \"good\"\nelif score >= 85:\n    result = \"great\"", steps: [
+    { q: "After line 4, <code>result</code> is", answer: "none", why: "<code>88 >= 95</code> is False, so that body never ran — <code>result</code> still holds what line 2 put there." },
+    { q: "After line 6, <code>result</code> is", answer: "good", why: "<code>88 >= 60</code> is True, so this branch runs and the chain is finished." },
+    { q: "After line 8, <code>result</code> is", answer: "good", why: "Here is the real lesson. <code>88 >= 85</code> is true, but Python stopped at the branch above and never looked at this one. A stricter condition placed <b>after</b> a looser one is unreachable — the classic ordering bug." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Print <code>Pass</code> when <code>marks</code> is 40 or more.", code: "marks = 55\nif marks >= 40:\n    print(\"Pass\")", out: "Pass" },
+    { task: "Print <code>Pass</code> or <code>Fail</code> using <code>else</code>.", code: "marks = 30\nif marks >= 40:\n    print(\"Pass\")\nelse:\n    print(\"Fail\")", out: "Fail" },
+    { task: "Three bands: 75+ prints <code>A</code>, 40+ prints <code>B</code>, otherwise <code>C</code>.", code: "marks = 62\nif marks >= 75:\n    print(\"A\")\nelif marks >= 40:\n    print(\"B\")\nelse:\n    print(\"C\")", out: "B" },
+    { task: "Check two things at once — print <code>Eligible</code> only if age is 18+ <b>and</b> the person has an ID.", code: "age = 20\nhas_id = True\nif age >= 18 and has_id:\n    print(\"Eligible\")", out: "Eligible" },
+    { task: "Print <code>Weekend</code> if the day is Saturday <b>or</b> Sunday.", code: "day = \"Sunday\"\nif day == \"Saturday\" or day == \"Sunday\":\n    print(\"Weekend\")", out: "Weekend" },
+    { task: "Use a nested <code>if</code>: only check the password once you know the user exists.", code: "user = \"aarav\"\npassword = \"secret\"\nif user:\n    if password == \"secret\":\n        print(\"Logged in\")", out: "Logged in" },
+    { task: "Write the same two-way decision as a one-line ternary.", code: "marks = 82\nprint(\"Pass\" if marks >= 40 else \"Fail\")", out: "Pass" },
+    { task: "Print <code>Empty</code> when a list has nothing in it — without using <code>len()</code>.", code: "items = []\nif not items:\n    print(\"Empty\")", out: "Empty" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "if marks >= 40:\nprint(\"Pass\")", why: "Not indented. Python has no braces — a block is <b>made of spaces</b>. Without the indent you get <code>IndentationError</code> and nothing runs at all.", fix: "if marks >= 40:\n    print(\"Pass\")" },
+    { bad: "if marks = 40:", why: "<code>=</code> stores a value; a condition needs <code>==</code>, which compares. Python catches this as a <code>SyntaxError</code> rather than quietly assigning — a kindness some other languages do not offer.", fix: "if marks == 40:" },
+    { bad: "if marks >= 40:\n    print(\"C\")\nif marks >= 75:\n    print(\"B\")", why: "Two separate <code>if</code>s are two separate questions, both asked. At 82 marks <b>both C and B</b> print. When exactly one outcome should win, they have to be one chain.", fix: "if marks >= 75:\n    print(\"B\")\nelif marks >= 40:\n    print(\"C\")" },
+    { bad: "if marks >= 40:\n  print(\"Pass\")\n      print(\"Done\")", why: "One block, two different indents. Python does not insist on four spaces, but it does insist that a block is <b>consistent</b>. Mixing tabs with spaces is the worst version — it looks aligned and still fails.", fix: "if marks >= 40:\n    print(\"Pass\")\n    print(\"Done\")" },
+  ]},
+
+  { t: "debug", intro: "This should give 20% off to anyone spending 5000 or more, and 10% to anyone spending 1000 or more. A customer spends 6000 and gets 10%. Read it before opening the fix.", code: "amount = 6000\n\nif amount >= 1000:\n    discount = 10\nelif amount >= 5000:\n    discount = 20\nelse:\n    discount = 0\n\nprint(discount)", symptom: "prints 10, but 6000 should get 20", q: "Nothing errors and every line looks correct. So why is the answer wrong?", fix: "amount = 6000\n\nif amount >= 5000:\n    discount = 20\nelif amount >= 1000:\n    discount = 10\nelse:\n    discount = 0\n\nprint(discount)", why: "The conditions are in the wrong order. 6000 satisfies <code>>= 1000</code> first, Python stops there, and the 20% branch is unreachable for <b>every</b> amount. <b>In an if/elif chain the strictest condition goes first.</b> Notice this bug never crashes — it just hands the wrong discount to every big customer, which is exactly why bugs like it survive in real systems." },
+
+  { t: "recap", items: [
+    "<code>if</code> runs its block only when the condition is <b>True</b>",
+    "<code>elif</code> adds more cases, checked <b>top to bottom</b>",
+    "Python <b>stops at the first true branch</b> — later ones are never asked",
+    "Put the <b>strictest</b> condition first, or it becomes unreachable",
+    "Indentation makes the block — four spaces, kept consistent",
+    "<code>value_a if condition else value_b</code> is the one-line form",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>elif</code> aur alag-alag <code>if</code> me kya farak hai?", a: "Alag <code>if</code> <b>sabhi</b> check hote hain — kai sach ho sakte hain. <code>elif</code> me pehla match milte hi baaki <b>skip</b> ho jaate hain. Grade jaise mutually exclusive cases me <code>elif</code> hi sahi hai, warna ek se zyada branch chal jayenge." },
-    { level: "beginner", q: "Python me indentation itna zaroori kyun hai?", a: "Kyunki Python me block banane ke liye <b>koi braces nahi</b> — indentation hi syntax hai. Dusri languages me indent sirf padhne ke liye hota hai; Python me wo hi batata hai ki code kis block ka hissa hai." },
-    { level: "intermediate", q: "Python me kaunsi cheezein <code>False</code> maani jaati hain?", a: "<code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, khaali <code>\"\"</code>, khaali <code>[]</code>, <code>{}</code>, <code>()</code>, <code>set()</code>. Baaki sab <b>truthy</b>. Isliye <code>if items:</code> likhna <code>if len(items) > 0:</code> se zyada Pythonic hai — par dhyan raho, <code>0</code> valid value ho to ye bug ban jaata hai." },
-    { level: "intermediate", q: "Python me ternary (one-line if) kaise likhte hain?", a: "<code>status = \"Adult\" if age >= 18 else \"Minor\"</code> — condition <b>beech</b> me aati hai, dusri languages ke <code>? :</code> se ulta. Chhoti assignment ke liye theek hai; nested ternary padhne layak nahi rehta — wahan normal <code>if</code> hi use karo." },
+    { level: "beginner", q: "What is the difference between <code>elif</code> and separate <code>if</code> statements?", a: "Separate <code>if</code>s are all evaluated, so more than one branch can run. In an <code>if/elif</code> chain the first true branch wins and the rest are skipped entirely. For mutually exclusive cases like grades, <code>elif</code> is the correct choice — separate <code>if</code>s would produce two answers." },
+    { level: "beginner", q: "Why does indentation matter so much in Python?", a: "Because there are <b>no braces</b> — the indentation <i>is</i> the syntax that defines a block. In most languages indentation is a readability convention that can disagree with the braces; in Python, code that looks nested is nested, and inconsistent indentation is a hard error." },
+    { level: "intermediate", q: "Which values are treated as False in Python?", a: "<code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, empty <code>\"\"</code>, <code>[]</code>, <code>{}</code>, <code>()</code> and <code>set()</code>. Everything else is truthy, which is why <code>if items:</code> is preferred over <code>if len(items) > 0:</code>. The catch: if <code>0</code> is a legitimate value, that shortcut becomes a bug — check <code>is not None</code> instead." },
+    { level: "intermediate", q: "How do you write a ternary in Python?", a: "<code>status = \"Adult\" if age >= 18 else \"Minor\"</code> — the condition sits in the middle, the reverse of C-style <code>? :</code>. It is an expression, so it fits anywhere a value fits, including inside a comprehension. Nesting them destroys readability, so past one level use a normal <code>if</code>." },
+    { level: "intermediate", q: "In an if/elif chain, does the order of conditions affect correctness or only style?", a: "Correctness. Evaluation stops at the first true branch, so a broader condition placed above a narrower one makes the narrower one unreachable — checking <code>amount >= 1000</code> before <code>amount >= 5000</code> means nobody ever reaches the higher tier. It raises no error and produces only wrong output, which makes it genuinely dangerous." },
   ]},
 ];
 
@@ -2305,10 +2351,19 @@ export const QUIZZES = {
     { q: "<code>print(\"ha\" * 3)</code> kya dega?", options: ["9", "hahaha", "ha ha ha", "TypeError"], correct: 1, why: "<code>*</code> string aur int pe <b>repeat</b> karta hai — <code>\"ha\"</code> teen baar = <code>hahaha</code>." },
   ],
   "conditionals": [
-    { q: "<code>x = 5</code>. <code>if x > 3:</code> print A, <code>elif x > 4:</code> print B — kya chhapega?", options: ["A", "B", "A aur B", "kuch nahi"], correct: 0, why: "<code>if</code> match ho gaya (5>3), to <code>elif</code> check hi nahi hota — chahe wo bhi True ho. Sirf <b>A</b>." },
-    { q: "<code>if 0:</code> ka block chalega?", options: ["Haan", "Nahi", "SyntaxError", "kabhi-kabhi"], correct: 1, why: "<code>0</code> falsy hai, to condition False — block <b>skip</b> ho jaata hai." },
-    { q: "<code>if x = 5:</code> likha to?", options: ["x 5 ho jaata", "SyntaxError", "True", "kuch nahi"], correct: 1, why: "<code>=</code> assignment hai; condition me <b>==</b> chahiye. Ye <code>SyntaxError</code> deta hai — sabse aam beginner galti." },
-    { q: "<code>\"pass\" if marks >= 40 else \"fail\"</code>, <code>marks = 35</code> — result?", options: ["pass", "fail", "35", "error"], correct: 1, why: "Ternary: condition (<code>35 >= 40</code>) False, to <code>else</code> waala — <b>fail</b>." },
+    // Easy
+    { level: "easy", q: "When does the block under an <code>if</code> run?", options: ["Always", "Only when the condition is True", "Only when the condition is False", "Once per program"], correct: 1, why: "The condition answers True or False, and only True runs the block underneath." },
+    { level: "easy", q: "What makes a block belong to an <code>if</code> in Python?", options: ["Curly braces", "A semicolon", "Indentation", "The word then"], correct: 2, why: "Python has no braces — the indentation <b>is</b> the syntax. Four spaces is the convention." },
+    { level: "easy", q: "<code>marks = 30</code>. Which prints with <code>if marks >= 40: print(\"Pass\") else: print(\"Fail\")</code>?", options: ["Pass", "Fail", "both", "nothing"], correct: 1, why: "<code>30 >= 40</code> is False, so the <code>else</code> branch runs." },
+    // Medium
+    { level: "medium", q: "<code>x = 5</code>. <code>if x > 3:</code> prints A, <code>elif x > 4:</code> prints B. What appears?", options: ["A", "B", "A and B", "nothing"], correct: 0, why: "The <code>if</code> matched, so the <code>elif</code> is never checked — even though <code>5 > 4</code> is also true. Only <b>A</b>." },
+    { level: "medium", q: "<code>if marks >= 40:</code> printing C, then a <b>separate</b> <code>if marks >= 75:</code> printing B. With marks = 82?", options: ["only B", "only C", "C and B both print", "SyntaxError"], correct: 2, why: "Separate <code>if</code>s are separate questions, both asked. 82 satisfies both, so both print — this is why mutually exclusive cases need one <code>elif</code> chain." },
+    { level: "medium", q: "What does <code>if marks = 40:</code> do?", options: ["Sets marks to 40", "Compares marks with 40", "SyntaxError", "Always True"], correct: 2, why: "<code>=</code> assigns, <code>==</code> compares. Python refuses this outright rather than letting it silently assign inside a condition." },
+    { level: "medium", q: "<code>status = \"Adult\" if age >= 18 else \"Minor\"</code> with <code>age = 15</code> gives?", options: ["Adult", "Minor", "True", "SyntaxError"], correct: 1, why: "In Python's ternary the condition sits in the middle. It is False, so the <code>else</code> value is chosen." },
+    // Hard — not answerable by re-reading
+    { level: "hard", q: "A discount chain checks <code>amount >= 1000</code> first and <code>amount >= 5000</code> second. What happens at amount = 6000?", options: ["Gets the 5000 tier", "Gets the 1000 tier", "Gets both", "Crashes"], correct: 1, why: "It stops at the first true branch, so the higher tier is unreachable for every amount. No error, just a permanently wrong answer — put the strictest condition first." },
+    { level: "hard", q: "<code>items = []</code>. What does <code>if not items:</code> do?", options: ["Runs the block", "Skips the block", "TypeError", "Depends on the contents"], correct: 0, why: "An empty list is falsy, so <code>not items</code> is True and the block runs. That is why <code>if not items:</code> is the Pythonic empty check." },
+    { level: "hard", q: "<code>count = 0</code>. Why can <code>if count:</code> be a bug where <code>if count is not None:</code> is not?", options: ["They are identical", "0 is falsy, so a real value of zero is treated as missing", "if count: raises an error", "is not None is slower"], correct: 1, why: "Truthiness collapses \"empty\" and \"zero\" into the same answer. If <b>0</b> is a legitimate value — zero sales, zero errors — the truthy shortcut silently skips it. Check against <code>None</code> when zero means something." },
   ],
   "loops": [
     { q: "<code>for i in range(1, 4): print(i)</code> — kya chhapega?", options: ["1 2 3 4", "1 2 3", "0 1 2 3", "1 2"], correct: 1, why: "<code>range(1, 4)</code> = 1, 2, 3 — <b>stop (4) excluded</b>." },

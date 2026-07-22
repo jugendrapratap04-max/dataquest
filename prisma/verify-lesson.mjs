@@ -53,8 +53,18 @@ for (const b of lesson.content) {
     });
   }
   if (b.t === "debug") {
-    cases.push({ what: "debug: broken code raises the claimed error", code: b.code.replace(/input\([^)]*\)/g, '"21"'), claim: `__ERR__${b.symptom}` });
-    cases.push({ what: "debug: the fix runs clean", code: b.fix.replace(/input\([^)]*\)/g, '"21"'), claim: null });
+    const broken = b.code.replace(/input\([^)]*\)/g, '"21"');
+    const fixed = b.fix.replace(/input\([^)]*\)/g, '"21"');
+    // A bug does not have to crash. The most dangerous ones run perfectly and
+    // return the wrong answer, so a symptom that isn't an exception is checked
+    // differently: the broken code must run, and must disagree with the fix.
+    if (/error|exception|traceback/i.test(b.symptom ?? "")) {
+      cases.push({ what: "debug: broken code raises the claimed error", code: broken, claim: `__ERR__${b.symptom}` });
+    } else {
+      cases.push({ what: "debug: broken code runs (a silent bug, not a crash)", code: broken, claim: null });
+      cases.push({ what: "debug: broken output differs from the fix", code: broken, claim: `__DIFFERS__${fixed}` });
+    }
+    cases.push({ what: "debug: the fix runs clean", code: fixed, claim: null });
   }
 }
 
@@ -64,6 +74,12 @@ for (const c of cases) {
   const r = run(c.code);
   if (c.claim === null) {                       // must simply run without error
     r.ok ? console.log(`  ok   ${c.what} (runs clean)`) : fail(c, `crashed: ${r.out}`);
+  } else if (String(c.claim).startsWith("__DIFFERS__")) {  // must run, and disagree with the fix
+    const fixedRun = run(String(c.claim).slice("__DIFFERS__".length));
+    if (!r.ok) fail(c, `the broken code crashed: ${r.out}`);
+    else if (!fixedRun.ok) fail(c, `the fix crashed: ${fixedRun.out}`);
+    else if (r.out === fixedRun.out) fail(c, `broken and fixed print the same thing (${JSON.stringify(r.out)}) — then there is no bug to find`);
+    else console.log(`  ok   ${c.what}  (broken ${JSON.stringify(r.out)} vs fixed ${JSON.stringify(fixedRun.out)})`);
   } else if (String(c.claim).startsWith("__ERR__")) {   // must fail with this error
     const want = c.claim.slice(7);
     if (r.ok) fail(c, `expected an error, but it ran and printed ${JSON.stringify(r.out)}`);

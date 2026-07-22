@@ -1,6 +1,7 @@
 "use client";
 
 import { CodeRunner } from "./CodeRunner";
+import { ConditionFlow } from "./ConditionFlow";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -18,6 +19,7 @@ import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
+  "condition-flow": ConditionFlow,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
