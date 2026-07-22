@@ -40,7 +40,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       });
       const data = await res.json();
       if (!res.ok) { setErr(data.error || "Kuch galat ho gaya."); setBusy(false); return; }
-      router.push("/");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       setErr("Network issue — dobara try karo.");

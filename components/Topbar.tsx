@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 const titles: Record<string, [string, string]> = {
-  "/": ["{greeting}, {name}", "Aaj ka target — 1 topic padho, phir 5 problems solve karo."],
+  "/dashboard": ["{greeting}, {name}", "Aaj ka target — 1 topic padho, phir 5 problems solve karo."],
   "/roadmap": ["Data Science Skill Sheet", "Zero to job-ready — 9 phases, do career checkpoints."],
   "/learn": ["Lessons", "Pehle samjho, phir aage badho — ek time pe ek topic."],
   "/practice": ["Practice Arena", "Jo padha, usi pe abhi likh ke dekho — tabhi pakka hota hai."],
@@ -17,8 +17,7 @@ const titles: Record<string, [string, string]> = {
 };
 
 function pick(pathname: string): [string, string] {
-  if (pathname === "/") return titles["/"];
-  const key = Object.keys(titles).find((k) => k !== "/" && pathname.startsWith(k));
+  const key = Object.keys(titles).find((k) => pathname.startsWith(k));
   return key ? titles[key] : ["DataMarg", "Learn. Practice. Get job-ready."];
 }
 

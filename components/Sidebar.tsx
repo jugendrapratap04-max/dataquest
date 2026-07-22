@@ -21,7 +21,7 @@ type Item = { href: string; label: string; icon: React.ReactNode; count?: string
 
 const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Learn", items: [
-    { href: "/", label: "Dashboard", icon: <HomeIcon /> },
+    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon /> },
     { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: `${roadmapPct}%` },
     { href: "/learn", label: "Lessons", icon: <BookIcon /> },
     { href: "/notes", label: "Notes", icon: <NoteIcon /> },
@@ -44,8 +44,9 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
 
 export function Sidebar({ user, roadmapPct }: { user: { name: string; role: string }; roadmapPct: number }) {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  // Every nav href is now a real path (dashboard moved to /dashboard so "/" could
+  // become the public landing page), so a plain prefix match is enough.
+  const isActive = (href: string) => pathname.startsWith(href);
   const initials = user.name.split(" ").map((n) => n[0]).slice(0, 1).join("");
   const nav = groups(roadmapPct);
 

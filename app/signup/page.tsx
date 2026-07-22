@@ -4,6 +4,6 @@ import { AuthForm } from "@/components/AuthForm";
 
 export default async function SignupPage() {
   const user = await getCurrentUser();
-  if (user) redirect("/");
+  if (user) redirect("/dashboard");
   return <AuthForm mode="signup" />;
 }
