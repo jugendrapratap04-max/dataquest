@@ -19,7 +19,7 @@ const typeName = { int: "int", float: "float", str: "str", bool: "bool" };
 export function VariablesPlayground() {
   const [vars, setVars] = useState<Var[]>([
     { id: 1, name: "age", raw: "21", py: "21", type: "int" },
-    { id: 2, name: "name", raw: "Freya", py: '"Freya"', type: "str" },
+    { id: 2, name: "name", raw: "Priya", py: '"Priya"', type: "str" },
   ]);
   const [nm, setNm] = useState("");
   const [val, setVal] = useState("");
@@ -38,15 +38,15 @@ export function VariablesPlayground() {
   return (
     <div className="viz">
       <div className="viz-head">
-        <span className="viz-title">🧠 Memory Playground — variables ko dekho</span>
+        <span className="viz-title">🧠 Memory Playground — see your variables</span>
         <span className="viz-badge">interactive</span>
       </div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Har variable ek <b>dabba</b> hai. Naam do, value do, aur dekho Python usse kaunsa <b>type</b> deta hai. Box pe click karke <span className="kbd">type()</span> ka jawaab dekho.
+        Every variable is a <b>labelled box</b>. Give it a name and a value, and watch which <b>type</b> Python picks. Click a box to see what <span className="kbd">type()</span> would answer.
       </p>
 
       <div className="viz-controls">
-        <input className="viz-input" style={{ width: 110 }} placeholder="naam (age)" value={nm} onChange={(e) => setNm(e.target.value)} />
+        <input className="viz-input" style={{ width: 110 }} placeholder="name (age)" value={nm} onChange={(e) => setNm(e.target.value)} />
         <span className="mono" style={{ color: "var(--accent-2)", fontWeight: 700 }}>=</span>
         <input className="viz-input" style={{ width: 130 }} placeholder="value (21)" value={val} onChange={(e) => setVal(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
         <button className="btn btn-primary" style={{ padding: "8px 14px" }} onClick={add}>Assign →</button>
@@ -54,7 +54,7 @@ export function VariablesPlayground() {
       </div>
 
       <div className="mem-grid">
-        {vars.length === 0 && <div style={{ color: "var(--ink-faint)", fontSize: 13, fontFamily: "var(--mono)" }}>// koi variable nahi — upar se ek banao</div>}
+        {vars.length === 0 && <div style={{ color: "var(--ink-faint)", fontSize: 13, fontFamily: "var(--mono)" }}>// no variables yet — create one above</div>}
         {vars.map((v) => (
           <button key={v.id} className="mem-box" onClick={() => setReveal(reveal === v.id ? null : v.id)}>
             <div className="lbl">{v.name}</div>

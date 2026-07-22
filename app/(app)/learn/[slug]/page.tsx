@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/session";
 import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
 import { LessonQuiz } from "@/components/LessonQuiz";
+import { FadedExample, TraceCheck } from "@/components/LessonPractice";
 import { VizBlock } from "@/components/viz/VizBlock";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -13,7 +14,7 @@ function Block({ b }: { b: any }) {
     case "objectives":
       return (
         <div className="card obj">
-          <h3>Is lesson ke baad tum kya kar paoge</h3>
+          <h3>What you&apos;ll be able to do after this lesson</h3>
           <ul>
             {b.items.map((it: string, i: number) => (
               <li key={i}>
@@ -41,7 +42,7 @@ function Block({ b }: { b: any }) {
         <details className="think">
           <summary>
             🤔 <span dangerouslySetInnerHTML={{ __html: b.q }} />
-            <span className="think-hint"> — pehle khud socho, phir kholo</span>
+            <span className="think-hint"> — make a guess first, then open</span>
           </summary>
           <div className="think-a" dangerouslySetInnerHTML={{ __html: b.a }} />
         </details>
@@ -73,12 +74,12 @@ function Block({ b }: { b: any }) {
     case "mistakes":
       return (
         <div className="card mistakes">
-          <h3>🚩 Yahan beginners phaste hain</h3>
+          <h3>🚩 Where beginners get stuck</h3>
           {b.items.map((m: any, i: number) => (
             <div className="mk" key={i}>
-              <div className="mk-bad"><span>Galat</span><pre>{m.bad}</pre></div>
+              <div className="mk-bad"><span>Wrong</span><pre>{m.bad}</pre></div>
               <div className="mk-why" dangerouslySetInnerHTML={{ __html: m.why }} />
-              <div className="mk-fix"><span>Sahi</span><pre>{m.fix}</pre></div>
+              <div className="mk-fix"><span>Right</span><pre>{m.fix}</pre></div>
             </div>
           ))}
         </div>
@@ -87,7 +88,7 @@ function Block({ b }: { b: any }) {
     case "interview":
       return (
         <div className="card iv">
-          <h3>🎤 Interview me aisa poochha jaata hai</h3>
+          <h3>🎤 How this is asked in interviews</h3>
           {b.items.map((q: any, i: number) => (
             <details className="iv-q" key={i}>
               {/* q.q carries inline <code> markup like the answer does — render it,
@@ -138,6 +139,103 @@ function Block({ b }: { b: any }) {
               <p>{d.desc}</p>
               <div className="ex">{d.ex}</div>
             </div>
+          ))}
+        </div>
+      );
+    // Rung 1 of the ladder: a fully solved example whose steps carry SUBGOAL
+    // LABELS. Labelling the steps (rather than leaving one undivided block of
+    // code) measurably improves learning, retention and transfer — students
+    // learn the *shape* of the solution, not just this one answer.
+    case "worked":
+      return (
+        <div className="card worked">
+          <h3>🧩 Worked example — {b.title}</h3>
+          {b.goal && <p className="wk-goal" dangerouslySetInnerHTML={{ __html: b.goal }} />}
+          <ol className="wk-steps">
+            {b.steps.map((s: any, i: number) => (
+              <li key={i}>
+                <div className="wk-label">{s.label}</div>
+                <pre dangerouslySetInnerHTML={{ __html: highlightPython(s.code) }} />
+                {s.why && <div className="wk-why" dangerouslySetInnerHTML={{ __html: s.why }} />}
+              </li>
+            ))}
+          </ol>
+          {b.full && (
+            <div className="wk-full">
+              <div className="wk-label">All together</div>
+              <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.full) }} />
+              {b.output && <div className="wk-out">Output: <b>{b.output}</b></div>}
+            </div>
+          )}
+        </div>
+      );
+
+    // Rung 2: the same solution with pieces removed. Less load than a blank
+    // page, and it shows the student which piece they actually don't know.
+    case "faded":
+      return (
+        <div className="card faded">
+          <h3>🪜 Your turn — fill the blanks</h3>
+          {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
+          <FadedExample code={b.code} blanks={b.blanks} output={b.output} />
+        </div>
+      );
+
+    // A student who cannot say what a variable holds at line 5 cannot write
+    // line 6. Tracing is the cheapest way to test the mental model directly.
+    case "trace":
+      return (
+        <div className="card trace">
+          <h3>🔍 Trace the code</h3>
+          {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
+          <TraceCheck code={b.code} steps={b.steps} />
+        </div>
+      );
+
+    // Broken code to repair. Research-backed, and it is literally the job —
+    // most real programming time is spent reading code that misbehaves.
+    case "debug":
+      return (
+        <div className="card debug">
+          <h3>🐞 Find the bug</h3>
+          {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
+          <pre className="dbg-code" dangerouslySetInnerHTML={{ __html: highlightPython(b.code) }} />
+          {b.symptom && <div className="dbg-symptom"><span>What Python says</span><pre>{b.symptom}</pre></div>}
+          <details className="dr">
+            <summary>
+              <span className="dr-n">?</span>
+              <span dangerouslySetInnerHTML={{ __html: b.q || "Which line is wrong, and why?" }} />
+              <span className="dr-hint">show the fix</span>
+            </summary>
+            <div className="dr-a">
+              <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.fix) }} />
+              {b.why && <div className="wk-why" dangerouslySetInnerHTML={{ __html: b.why }} />}
+            </div>
+          </details>
+        </div>
+      );
+
+    // One drill per operation, so no step of a topic gets skipped. Deliberately
+    // ungraded self-checks (the graded version is the practice problems) — the
+    // answer stays hidden until the student has committed to one, same active
+    // recall as `think`.
+    case "drills":
+      return (
+        <div className="card drills">
+          <h3>✍️ Try these yourself</h3>
+          {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
+          {b.items.map((d: any, i: number) => (
+            <details className="dr" key={i}>
+              <summary>
+                <span className="dr-n">{i + 1}</span>
+                <span dangerouslySetInnerHTML={{ __html: d.task }} />
+                <span className="dr-hint">show answer</span>
+              </summary>
+              <div className="dr-a">
+                <pre dangerouslySetInnerHTML={{ __html: highlightPython(d.code) }} />
+                {d.out && <div className="dr-out">Output: <b>{d.out}</b></div>}
+              </div>
+            </details>
           ))}
         </div>
       );
@@ -222,17 +320,17 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
               </>
             ) : lesson.problems.length > 0 ? (
               <>
-                <div className="eyebrow">Ab sabse zaroori step</div>
-                <h3>Padh liya? Ab practice karo 💪</h3>
-                <p>Sirf padhne se skill nahi aati — likhne se aati hai. {lesson.problems.length} chhote questions solve karo.</p>
+                <div className="eyebrow">The step that actually matters</div>
+                <h3>Read it? Now write it 💪</h3>
+                <p>Reading does not build the skill — writing code does. Solve the {lesson.problems.length} short questions for this lesson.</p>
                 <LessonComplete lessonId={lesson.id} href={practiceHref} label="Start practice →" />
               </>
             ) : (
               <>
                 <div className="eyebrow">Lesson complete</div>
-                <h3>Shabaash — ye topic clear! ✅</h3>
-                <p>{next ? "Mark complete karke agle lesson pe badho." : "Ye module ka aakhri lesson tha — roadmap pe wapas jao."}</p>
-                <LessonComplete lessonId={lesson.id} href={next ? `/learn/${next.slug}` : "/roadmap"} label={next ? "Complete & agla lesson →" : "Complete & roadmap →"} />
+                <h3>Nice — this topic is done ✅</h3>
+                <p>{next ? "Mark it complete and move to the next lesson." : "That was the last lesson in this track — head back to the roadmap."}</p>
+                <LessonComplete lessonId={lesson.id} href={next ? `/learn/${next.slug}` : "/roadmap"} label={next ? "Complete & next lesson →" : "Complete & roadmap →"} />
               </>
             )}
           </div>

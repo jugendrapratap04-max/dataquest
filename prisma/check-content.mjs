@@ -131,25 +131,42 @@ const PLAIN = {
   mistakes: ["items[].bad", "items[].fix"], interview: ["items[].level"],
   dtypes: ["items[].tag", "items[].name", "items[].desc", "items[].ex"],
   quiz: ["items[].options[]"],
+  // drills: items[].code goes through highlightPython (like code.code), so it is
+  // markup by the time it renders — only the plain-text output line is checked.
+  drills: ["items[].out"],
+  worked: ["title", "steps[].label", "output"],
+  faded: ["blanks[].answer", "output"],
+  trace: ["steps[].answer"],
+  debug: ["symptom"],
 };
 const HTML = {
   objectives: ["items[]"], hook: ["q", "why"], think: ["q", "a"], def: ["hi"], analogy: ["html"],
   mistakes: ["items[].why"], interview: ["items[].q", "items[].a"],
   p: ["html"], psoft: ["html"], note: ["html"], recap: ["items[]"],
   quiz: ["items[].q", "items[].why"],
+  drills: ["intro", "items[].task"],
+  worked: ["goal", "steps[].why"],
+  faded: ["intro", "blanks[].why"],
+  trace: ["intro", "steps[].q", "steps[].why"],
+  debug: ["intro", "q", "why"],
 };
+// Resolves a field spec against a block. Supports "field", "arr[]",
+// "arr[].field" and one extra level of nesting, "arr[].field[]" — the array is
+// named in the spec, so blocks that use `steps`/`blanks` instead of `items`
+// work without a special case each.
 const pick = (obj, spec) => {
-  // Quiz options are an array inside each item — one extra level of nesting.
-  if (spec === "items[].options[]") {
+  const m = spec.match(/^(\w+)\[\](?:\.(.+))?$/);
+  if (!m) return [[spec, obj[spec]]];
+  const [, arr, rest] = m;
+  const list = obj[arr] ?? [];
+  if (!rest) return list.map((it, i) => [`${arr}[${i}]`, it]);
+  const nested = rest.match(/^(\w+)\[\]$/);
+  if (nested) {
     const out = [];
-    (obj.items ?? []).forEach((it, i) => (it?.options ?? []).forEach((o, j) => out.push([`items[${i}].options[${j}]`, o])));
+    list.forEach((it, i) => (it?.[nested[1]] ?? []).forEach((o, j) => out.push([`${arr}[${i}].${nested[1]}[${j}]`, o])));
     return out;
   }
-  if (spec.startsWith("items[]")) {
-    const rest = spec.slice("items[]".length).replace(/^\./, "");
-    return (obj.items ?? []).map((it, i) => [`items[${i}]${rest ? "." + rest : ""}`, rest ? it?.[rest] : it]);
-  }
-  return [[spec, obj[spec]]];
+  return list.map((it, i) => [`${arr}[${i}].${rest}`, it?.[rest]]);
 };
 const TAG = /<\/?(code|b|i|strong|em|pre|br|span|p|ul|li|div)\b[^>]*>/i;
 

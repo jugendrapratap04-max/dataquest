@@ -17,11 +17,11 @@ export function CastingLab() {
   return (
     <div className="viz">
       <div className="viz-head">
-        <span className="viz-title">🔄 Casting Lab — type badal ke dekho</span>
+        <span className="viz-title">🔄 Casting Lab — change the type and watch</span>
         <span className="viz-badge">interactive</span>
       </div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 14px" }}>
-        Ek value <span className="kbd">marks = &quot;85&quot;</span> hai — ye <b>string</b> hai. Neeche button dabao aur dekho har cast kya karta hai, aur <span className="kbd">+ 5</span> chalega ya nahi.
+        You start with <span className="kbd">marks = &quot;85&quot;</span> — a <b>string</b>. Press a button below to see what each cast does, and whether <span className="kbd">+ 5</span> then works.
       </p>
 
       <div className="cast-flow">
@@ -45,7 +45,7 @@ export function CastingLab() {
         </div>
       )}
       {result && !result.ok && (
-        <div className="note warn" style={{ marginTop: 12 }}><span className="i">⚠️</span><div>String ko number ke saath jodne se <b>TypeError</b> aata hai. Number chahiye to <span className="kbd">int()</span> ya <span className="kbd">float()</span> use karo.</div></div>
+        <div className="note warn" style={{ marginTop: 12 }}><span className="i">⚠️</span><div>Adding a string to a number raises <b>TypeError</b>. If you want a number, cast it with <span className="kbd">int()</span> or <span className="kbd">float()</span> first.</div></div>
       )}
     </div>
   );
