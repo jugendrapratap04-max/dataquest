@@ -14,7 +14,8 @@
     "db:reset": "prisma migrate reset --force && node prisma/seed.mjs",
     "db:studio": "prisma studio",
     "db:check": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON prisma/check-content.mjs",
-    "verify:lesson": "node prisma/verify-lesson.mjs"
+    "verify:lesson": "node prisma/verify-lesson.mjs",
+    "syllabus": "node prisma/check-syllabus.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
