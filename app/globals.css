@@ -1225,3 +1225,5 @@ select.inp { cursor:pointer; }
 .vp-state.bad { color:var(--bad); }
 .voice-actions { display:flex; gap:7px; flex-wrap:wrap; }
 .voice-actions .btn { padding:7px 12px; font-size:12.5px; }
+.vp.me { border-color:color-mix(in srgb,var(--accent) 30%,transparent); }
+.voice-actions .btn.on { border-color:var(--accent); color:var(--accent-2); }

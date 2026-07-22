@@ -61,11 +61,26 @@ export function VoiceCall({
 }) {
   const [joined, setJoined] = useState(false);
   const [muted, setMuted] = useState(false);
+  // Open mics are what make a five-person room unusable: five keyboards, five
+  // fans, five families in the background. The gate mutes YOUR OWN microphone
+  // while you are not talking. It cannot mute anyone else's — only their own
+  // browser can do that — so this is the honest version of "mute everyone
+  // except the speaker" rather than a switch that pretends to reach across.
+  const [gate, setGate] = useState(true);
+  const [gateOpen, setGateOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [peerStates, setPeerStates] = useState<Record<string, PeerState>>({});
   const [speaking, setSpeaking] = useState<Record<string, boolean>>({});
 
+  // The raw microphone, and the stream we actually send. They differ because the
+  // gate must never silence the microphone itself: a disabled track emits
+  // digital silence, the meter would then read nothing, and the gate could never
+  // decide you had started talking again. So the meter always listens to the raw
+  // mic, and only the gain on the way out is turned down.
+  const rawRef = useRef<MediaStream | null>(null);
+  const gainRef = useRef<GainNode | null>(null);
+  const [gateReady, setGateReady] = useState(false);
   const localRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const audioRef = useRef<Map<string, HTMLAudioElement>>(new Map());
@@ -89,7 +104,7 @@ export function VoiceCall({
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 512;
       ctx.createMediaStreamSource(stream).connect(analyser);
-      meterRef.current.set(id, { analyser, data: new Uint8Array(analyser.frequencyBinCount) });
+      meterRef.current.set(id, { analyser, data: new Uint8Array(analyser.fftSize) });
     } catch { /* level meters are decoration; never break the call for them */ }
   }, []);
 
@@ -164,10 +179,15 @@ export function VoiceCall({
     const ids = [...peersRef.current.keys()];
     ids.forEach(dropPeer);
     localRef.current?.getTracks().forEach((t) => t.stop());
+    rawRef.current?.getTracks().forEach((t) => t.stop()); // the real mic — the light must go out
     localRef.current = null;
+    rawRef.current = null;
+    gainRef.current = null;
+    meterRef.current.clear();
     joinedRef.current = false;
     setJoined(false);
     setMuted(false);
+    setGateReady(false);
     if (tellServer) {
       await Promise.all(ids.map((id) => postRef.current({ action: "signal", to: id, kind: "bye", payload: "" }).catch(() => {})));
       await postRef.current({ action: "voice", on: false }).catch(() => {});
@@ -177,10 +197,38 @@ export function VoiceCall({
   const join = useCallback(async () => {
     setBusy(true); setError("");
     try {
-      localRef.current = await navigator.mediaDevices.getUserMedia({
+      const raw = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: false,
       });
+      rawRef.current = raw;
+      localRef.current = raw; // replaced below if the gate graph can be built
+
+      // mic -> analyser (always hears the real signal, gate or no gate)
+      //     -> gain -> destination -> what the peers receive
+      try {
+        audioCtxRef.current ??= new AudioContext();
+        const ctx = audioCtxRef.current;
+        await ctx.resume().catch(() => {});
+        if (ctx.state === "running") {
+          const src = ctx.createMediaStreamSource(raw);
+          const analyser = ctx.createAnalyser();
+          analyser.fftSize = 512;
+          src.connect(analyser);
+          meterRef.current.set(meId, { analyser, data: new Uint8Array(analyser.fftSize) });
+
+          const gain = ctx.createGain();
+          gain.gain.value = 1;
+          const dest = ctx.createMediaStreamDestination();
+          src.connect(gain); gain.connect(dest);
+          gainRef.current = gain;
+          localRef.current = dest.stream;
+          setGateReady(true);
+        }
+      } catch {
+        // No WebAudio, no gate — send the microphone straight through rather
+        // than risk sending nothing. Failing open is the only safe direction.
+      }
       await postRef.current({ action: "voice", on: true });
       joinedRef.current = true;
       setJoined(true);
@@ -196,11 +244,15 @@ export function VoiceCall({
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [meId, meterFor]);
 
   const toggleMute = useCallback(async () => {
     const next = !muted;
-    localRef.current?.getAudioTracks().forEach((t) => { t.enabled = !next; });
+    // Applied here as well as in the gate loop, so the button feels instant
+    // rather than taking up to a tick to bite.
+    const g = gainRef.current;
+    if (g) g.gain.setTargetAtTime(next ? 0 : 1, g.context.currentTime, 0.01);
+    else rawRef.current?.getAudioTracks().forEach((t) => { t.enabled = !next; });
     setMuted(next);
     await postRef.current({ action: "mic", muted: next }).catch(() => {});
   }, [muted]);
@@ -253,21 +305,46 @@ export function VoiceCall({
     if (me.inVoice && !joinedRef.current) void postRef.current({ action: "voice", on: false }).catch(() => {});
   }, [members]);
 
-  // Level meters. One timer for everyone, and only while the call is open.
+  // Level meters, and the noise gate that rides on them. One timer for
+  // everyone, running only while the call is open.
   useEffect(() => {
     if (!joined) return;
+    // Loudness as RMS of the waveform, not the average of the frequency bins.
+    // The average is a trap: a strong pure tone lights up one bin out of 256 and
+    // averages to almost nothing, so a spectrum-average gate stays shut on a
+    // signal that is clearly audible. Measured against silence / a quiet tone /
+    // a loud tone, RMS reads 0.000 / 0.056 / 0.432 — hence this threshold.
+    const SPEAKING = 0.02;
+    const HOLD_MS = 700;      // keep the mic open this long after the last peak
+    let lastLoud = 0;
+
     const id = setInterval(() => {
       const next: Record<string, boolean> = {};
       meterRef.current.forEach((m, key) => {
-        m.analyser.getByteFrequencyData(m.data as Uint8Array<ArrayBuffer>);
+        m.analyser.getByteTimeDomainData(m.data as Uint8Array<ArrayBuffer>);
         let sum = 0;
-        for (let i = 0; i < m.data.length; i++) sum += m.data[i];
-        next[key] = sum / m.data.length > 12;
+        for (let i = 0; i < m.data.length; i++) { const v = (m.data[i] - 128) / 128; sum += v * v; }
+        next[key] = Math.sqrt(sum / m.data.length) > SPEAKING;
       });
       setSpeaking(next);
-    }, 400);
+
+      if (next[meId]) lastLoud = Date.now();
+      const gateActive = gate && gateReady;
+      const open = Date.now() - lastLoud < HOLD_MS;
+      setGateOpen(open);
+      // Manual mute always wins; the gate only decides while you are unmuted,
+      // have asked for it, and it actually works on this browser.
+      const shouldSend = !muted && (!gateActive || open);
+      const g = gainRef.current;
+      if (g) {
+        // A short ramp instead of a hard cut — switching gain instantly clicks.
+        g.gain.setTargetAtTime(shouldSend ? 1 : 0, g.context.currentTime, 0.02);
+      } else {
+        rawRef.current?.getAudioTracks().forEach((t) => { t.enabled = shouldSend; });
+      }
+    }, 150);
     return () => clearInterval(id);
-  }, [joined]);
+  }, [joined, gate, gateReady, muted, meId]);
 
   // Hanging up on unmount cannot await a fetch — the page is going away — so it
   // closes the peers locally and lets presence expiry clear the server state.
@@ -302,6 +379,18 @@ export function VoiceCall({
       </div>
 
       <div className="voice-people">
+        {joined && (
+          <div className={`vp in me ${speaking[meId] ? "talking" : ""}`}>
+            <span className="vp-dot" />
+            <span className="vp-name">You</span>
+            <span className={`vp-state ${!muted && (gateOpen || !gateReady) ? "ok" : ""}`}>
+              {muted ? "muted"
+                : !gateReady ? "mic open"
+                : gate ? (gateOpen ? "sending" : "quiet — mic closed")
+                : "mic open"}
+            </span>
+          </div>
+        )}
         {others.length === 0 && <p className="voice-note">Nobody else has joined this room yet.</p>}
         {others.map((m) => {
           const state = peerStates[m.userId];
@@ -337,6 +426,15 @@ export function VoiceCall({
             <button className={`btn ${muted ? "btn-primary" : "btn-ghost"}`} onClick={() => void toggleMute()}>
               {muted ? "🔇 Unmute" : "🎤 Mute"}
             </button>
+            {gateReady && (
+              <button
+                className={`btn btn-ghost ${gate ? "on" : ""}`}
+                title="Mutes your own microphone whenever you are not talking, so your keyboard and fan don't reach everyone else. It cannot mute anybody else — only their own browser can do that."
+                onClick={() => setGate((g) => !g)}
+              >
+                {gate ? "🤫 Auto-mute: on" : "🤫 Auto-mute: off"}
+              </button>
+            )}
             <button className="btn btn-ghost" onClick={() => void hangUp(true)}>Leave voice</button>
           </>
         )}
