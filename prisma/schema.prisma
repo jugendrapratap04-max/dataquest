@@ -17,12 +17,12 @@ model User {
   email        String   @unique
   passwordHash String   @default("")
   role         String   @default("Aspiring Data Analyst")
-  xp        Int      @default(0)
+  xp           Int      @default(0)
   // No streak column. It was a seeded constant nothing ever wrote to: the demo
   // account showed 12 days against three submissions, and every real signup was
   // told to keep its "0-day streak" alive forever. Derived from submissions in
   // lib/progress.ts now, exactly like Track.status was.
-  createdAt DateTime @default(now())
+  createdAt    DateTime @default(now())
 
   lessonProgress LessonProgress[]
   submissions    Submission[]
@@ -31,69 +31,69 @@ model User {
   notebook       NotebookEntry[]
   roomMembers    RoomMember[]
   roomMessages   RoomMessage[]
-  hostedRooms    Room[]          @relation("RoomHost")
+  hostedRooms    Room[]           @relation("RoomHost")
   feedback       Feedback[]
 }
 
 model Track {
-  id         String   @id @default(cuid())
-  slug       String   @unique
+  id         String  @id @default(cuid())
+  slug       String  @unique
   order      Int
   title      String
   subtitle   String
-  icon       String   @default("Py")
-  whyText    String   @default("")
-  weeks      String   @default("")
-  level      String   @default("Beginner")
-  milestone  String   @default("")
-  toolsCsv   String   @default("")
+  icon       String  @default("Py")
+  whyText    String  @default("")
+  weeks      String  @default("")
+  level      String  @default("Beginner")
+  milestone  String  @default("")
+  toolsCsv   String  @default("")
   // Just the syllabus skill names: ["Variables", "Loops", ...]. Whether a skill is
   // done, and whether a track is done/now/locked, are per-user and derived in
   // lib/progress.ts. They used to be stored here, which meant every user saw the
   // same seeded "Python done, 33% job-ready" regardless of what they'd actually done.
-  skillsJson String   @default("[]")
-  checkpoint String?                  // e.g. "Data Analyst · ₹4-8 LPA"
+  skillsJson String  @default("[]")
+  checkpoint String? // e.g. "Data Analyst · ₹4-8 LPA"
 
   lessons Lesson[]
 }
 
 model Lesson {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String @id @default(cuid())
+  slug        String @unique
   order       Int
   title       String
-  minutes     Int      @default(10)
-  level       String   @default("Beginner")
-  contentJson String   @default("[]") // ordered content blocks
+  minutes     Int    @default(10)
+  level       String @default("Beginner")
+  contentJson String @default("[]") // ordered content blocks
   trackId     String
-  track       Track    @relation(fields: [trackId], references: [id])
+  track       Track  @relation(fields: [trackId], references: [id])
 
   problems Problem[]
   progress LessonProgress[]
 }
 
 model Problem {
-  id            String  @id @default(cuid())
-  slug          String  @unique
-  order         Int     @default(0)
+  id            String @id @default(cuid())
+  slug          String @unique
+  order         Int    @default(0)
   title         String
-  difficulty    String  @default("Easy")
-  tagsCsv       String  @default("")
-  descriptionMd String  @default("")
-  examplesJson  String  @default("[]") // [{input, output}]
-  starterCode   String  @default("")
-  solutionCode  String  @default("") // python: reference fn | sql: reference query
-  functionName  String  @default("") // python only
-  testsJson     String  @default("[]") // python only: [{args:[...], expected:...}]
-  hintsJson     String  @default("[]")
-  xp            Int     @default(20)
+  difficulty    String @default("Easy")
+  tagsCsv       String @default("")
+  descriptionMd String @default("")
+  examplesJson  String @default("[]") // [{input, output}]
+  starterCode   String @default("")
+  solutionCode  String @default("") // python: reference fn | sql: reference query
+  functionName  String @default("") // python only
+  testsJson     String @default("[]") // python only: [{args:[...], expected:...}]
+  hintsJson     String @default("[]")
+  xp            Int    @default(20)
 
   // "python" runs in Pyodide against testsJson; "sql" runs in sql.js against
   // sqlSetup, and is graded by diffing the result set with solutionCode's.
-  kind     String @default("python")
-  sqlSetup String @default("") // CREATE TABLE + INSERT, run on a fresh in-memory db
-  lessonId      String?
-  lesson        Lesson? @relation(fields: [lessonId], references: [id])
+  kind     String  @default("python")
+  sqlSetup String  @default("") // CREATE TABLE + INSERT, run on a fresh in-memory db
+  lessonId String?
+  lesson   Lesson? @relation(fields: [lessonId], references: [id])
 
   submissions Submission[]
 }
@@ -139,8 +139,8 @@ model Feedback {
   userId    String
   category  String   @default("other") // "bug" | "idea" | "other"
   message   String
-  path      String   @default("")      // the page they were on when reporting
-  status    String   @default("new")   // "new" | "seen" — for triage
+  path      String   @default("") // the page they were on when reporting
+  status    String   @default("new") // "new" | "seen" — for triage
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
@@ -160,30 +160,30 @@ model Feedback {
 
 // One sitting of focused study — solo, or attached to a room.
 model StudySession {
-  id       String  @id @default(cuid())
-  userId   String
-  roomId   String?
-  topic    String  @default("General")
-  goal     String  @default("")
+  id           String  @id @default(cuid())
+  userId       String
+  roomId       String?
+  topic        String  @default("General")
+  goal         String  @default("")
   // Minutes per phase, copied at start so changing a room's settings later
   // doesn't rewrite history.
-  focusMinutes Int @default(30)
-  breakMinutes Int @default(5)
+  focusMinutes Int     @default(30)
+  breakMinutes Int     @default(5)
 
-  startedAt DateTime  @default(now())
-  endedAt   DateTime?
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
   // Set on each heartbeat. Active time accrues from the gap between beats, so
   // the client reports only "I'm still here" and never how long it was here —
   // otherwise a focus score would be worth exactly as much as the honesty of
   // whoever opened devtools.
-  lastBeatAt DateTime @default(now())
+  lastBeatAt     DateTime  @default(now())
   // Wall-clock seconds the session was open, vs seconds this user was actually
   // present and interacting. focusPct is derived from these two, never stored.
-  elapsedSeconds Int  @default(0)
-  activeSeconds  Int  @default(0)
-  cyclesDone     Int  @default(0)
-  problemsSolved Int  @default(0)
-  messagesUsed   Int  @default(0)
+  elapsedSeconds Int       @default(0)
+  activeSeconds  Int       @default(0)
+  cyclesDone     Int       @default(0)
+  problemsSolved Int       @default(0)
+  messagesUsed   Int       @default(0)
 
   user     User            @relation(fields: [userId], references: [id])
   room     Room?           @relation(fields: [roomId], references: [id])
@@ -196,15 +196,15 @@ model StudySession {
 // student can push it to the room's discussion queue when the break starts.
 // The queue is just the rows where queued = true — it needs no model of its own.
 model NotebookEntry {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   sessionId String?
   roomId    String?
   text      String
-  resolved  Boolean  @default(false)
-  queued    Boolean  @default(false) // in the room's discussion queue
-  queuedAt  DateTime?               // queue order; null when not queued
-  createdAt DateTime @default(now())
+  resolved  Boolean   @default(false)
+  queued    Boolean   @default(false) // in the room's discussion queue
+  queuedAt  DateTime? // queue order; null when not queued
+  createdAt DateTime  @default(now())
 
   user    User          @relation(fields: [userId], references: [id])
   session StudySession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -232,6 +232,9 @@ model Room {
   phaseStartedAt DateTime @default(now())
   cycle          Int      @default(1)
 
+  // Host switch for the voice call. Off means nobody can join or stay in it.
+  voiceEnabled Boolean @default(true)
+
   createdAt DateTime  @default(now())
   endedAt   DateTime?
 
@@ -240,6 +243,7 @@ model Room {
   messages RoomMessage[]
   sessions StudySession[]
   notebook NotebookEntry[]
+  signals  RoomSignal[]
 
   @@index([isPublic, endedAt])
 }
@@ -249,15 +253,20 @@ model RoomMember {
   roomId String
   userId String
 
-  joinedAt   DateTime @default(now())
+  joinedAt      DateTime @default(now())
   // Presence is derived from this: no heartbeat for a while = "away".
   // Nothing needs to push a leave event; a closed tab simply stops beating.
-  lastSeenAt DateTime @default(now())
-  activeSeconds Int   @default(0)
-  status     String   @default("studying") // studying | away | left
-  handRaised Boolean  @default(false)
-  needsHelp  Boolean  @default(false)
-  messagesUsed Int    @default(0)
+  lastSeenAt    DateTime @default(now())
+  activeSeconds Int      @default(0)
+  status        String   @default("studying") // studying | away | left
+  handRaised    Boolean  @default(false)
+  needsHelp     Boolean  @default(false)
+  messagesUsed  Int      @default(0)
+
+  // Voice call. inVoice = this member has the call open; micMuted is their own
+  // switch, mirrored here only so everyone else can render a muted icon.
+  inVoice  Boolean @default(false)
+  micMuted Boolean @default(false)
 
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id])
@@ -280,4 +289,26 @@ model RoomMessage {
   user User @relation(fields: [userId], references: [id])
 
   @@index([roomId, createdAt])
+}
+
+// WebRTC signalling, carried on the room's existing 2.5s poll instead of a
+// socket server — that is what keeps voice at zero infrastructure cost.
+//
+// One row per offer/answer, not per ICE candidate: the browser gathers all its
+// candidates first and ships them inside the SDP (non-trickle). Trickling over
+// a 2.5s poll would take half a minute to connect; this takes two polls.
+// Rows are deleted the moment their recipient collects them.
+model RoomSignal {
+  id      String @id @default(cuid())
+  roomId  String
+  fromId  String
+  toId    String
+  kind    String // offer | answer | bye
+  payload String // the SDP, with candidates already embedded
+
+  createdAt DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, toId, createdAt])
 }

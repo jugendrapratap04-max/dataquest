@@ -79,9 +79,24 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
         focusPct: focusPct(m.activeSeconds, elapsed),
         handRaised: m.handRaised,
         needsHelp: m.needsHelp,
+        inVoice: m.inVoice,
+        micMuted: m.micMuted,
       };
     })
     .filter((m) => m.status !== "left");
+
+  // Collect the WebRTC messages addressed to me and delete them in the same
+  // breath — they are single-use, and a replayed offer would rebuild a
+  // connection the browser has already torn down. Read-then-delete is safe
+  // because only this user ever reads this user's rows.
+  const inbox = await prisma.roomSignal.findMany({
+    where: { roomId: room.id, toId: user.id },
+    orderBy: { createdAt: "asc" },
+    take: 20,
+  });
+  if (inbox.length) {
+    await prisma.roomSignal.deleteMany({ where: { id: { in: inbox.map((s) => s.id) } } });
+  }
 
   // The discussion queue: everyone's queued doubts, oldest first. The text is
   // shared only once its author queues it — until then the notebook is private,
@@ -117,8 +132,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
       breakMinutes: room.breakMinutes,
       hostName: room.host.name,
       iAmHost: room.hostId === user.id,
+      voiceEnabled: room.voiceEnabled,
       endedAt: room.endedAt?.toISOString() ?? null,
     },
+    signals: inbox.map((s) => ({ from: s.fromId, kind: s.kind, payload: s.payload })),
     phase: st.phase,
     cycle: st.cycle,
     secondsLeft: st.secondsLeft,
@@ -205,7 +222,71 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
     return NextResponse.json({ ok: true });
   }
 
+  // ---- voice call ----------------------------------------------------------
+  // Signalling only. No audio ever touches the server: once two browsers have
+  // swapped an offer and an answer through here, the sound goes peer to peer.
+  // That is what makes voice cost nothing to run.
+
+  if (action === "voice") {
+    const on = body.on === true;
+    // The host's switch is enforced here, not just hidden in the UI — with it
+    // off, nobody can obtain the offers needed to build a connection.
+    if (on && !room.voiceEnabled) return NextResponse.json({ error: "Voice is off in this room" }, { status: 403 });
+    await prisma.roomMember.update({
+      where: { id: me.id },
+      data: { inVoice: on, micMuted: on ? me.micMuted : false, lastSeenAt: now },
+    });
+    if (!on) {
+      // Drop anything queued for or from this member; a stale offer would try
+      // to reconnect someone who has just hung up.
+      await prisma.roomSignal.deleteMany({
+        where: { roomId: room.id, OR: [{ toId: user.id }, { fromId: user.id }] },
+      });
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === "mic") {
+    await prisma.roomMember.update({
+      where: { id: me.id },
+      data: { micMuted: body.muted === true, lastSeenAt: now },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  if (action === "signal") {
+    if (!room.voiceEnabled) return NextResponse.json({ error: "Voice is off in this room" }, { status: 403 });
+    const to = String(body.to ?? "");
+    const kind = String(body.kind ?? "");
+    const payload = String(body.payload ?? "");
+    if (!["offer", "answer", "bye"].includes(kind)) return NextResponse.json({ error: "Bad kind" }, { status: 400 });
+    // An SDP with candidates embedded is a few KB; anything much larger is not
+    // one of ours.
+    if (payload.length > 64_000) return NextResponse.json({ error: "Payload too large" }, { status: 400 });
+    // You can only signal someone who is actually in this room — otherwise the
+    // endpoint would be a way to push data at any user id you can guess.
+    const peer = room.members.find((m) => m.userId === to && m.status !== "left");
+    if (!peer) return NextResponse.json({ error: "Peer not in room" }, { status: 404 });
+
+    await prisma.roomSignal.create({
+      data: { roomId: room.id, fromId: user.id, toId: to, kind, payload },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
   // ---- host controls -------------------------------------------------------
+
+  if (action === "roomVoice") {
+    if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
+    const on = body.on === true;
+    await prisma.room.update({ where: { id: room.id }, data: { voiceEnabled: on } });
+    if (!on) {
+      // Turning it off has to actually clear the call, not just grey the button.
+      await prisma.roomMember.updateMany({ where: { roomId: room.id }, data: { inVoice: false, micMuted: false } });
+      await prisma.roomSignal.deleteMany({ where: { roomId: room.id } });
+    }
+    return NextResponse.json({ ok: true });
+  }
 
   if (action === "skip") {
     if (room.hostId !== user.id) return NextResponse.json({ error: "Sirf host" }, { status: 403 });
@@ -245,7 +326,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ code: s
   }
 
   if (action === "leave") {
-    await prisma.roomMember.update({ where: { id: me.id }, data: { status: "left", lastSeenAt: now } });
+    await prisma.roomMember.update({ where: { id: me.id }, data: { status: "left", inVoice: false, micMuted: false, lastSeenAt: now } });
+    await prisma.roomSignal.deleteMany({ where: { roomId: room.id, OR: [{ toId: user.id }, { fromId: user.id }] } });
     const summary = await closeSessionFor(room.id, user.id, now);
     return NextResponse.json({ ok: true, summary });
   }

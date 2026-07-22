@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { VoiceCall, type VoiceSignal } from "@/components/VoiceCall";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { mmss, humanDuration, QUICK_REPLIES, EMOJIS } from "@/lib/focus";
@@ -10,6 +11,7 @@ type Member = {
   userId: string; name: string; isHost: boolean; isMe: boolean;
   status: "studying" | "away" | "left"; activeSeconds: number; focusPct: number;
   handRaised: boolean; needsHelp: boolean;
+  inVoice: boolean; micMuted: boolean;
 };
 type QueueItem = { id: string; text: string; name: string; mine: boolean };
 type Msg = { id: string; name: string; kind: string; text: string; mine: boolean };
@@ -19,11 +21,12 @@ type State = {
   room: {
     id: string; code: string; name: string; subject: string; topic: string; maxParticipants: number;
     isPublic: boolean; focusMinutes: number; breakMinutes: number; hostName: string;
-    iAmHost: boolean; endedAt: string | null;
+    iAmHost: boolean; voiceEnabled: boolean; endedAt: string | null;
   };
   phase: "focus" | "discussion" | "ended";
   cycle: number; secondsLeft: number; phaseSeconds: number;
   members: Member[]; queue: QueueItem[]; messages: Msg[]; messagesLeft: number;
+  signals: VoiceSignal[];
 };
 
 const POLL_MS = 2500;
@@ -50,12 +53,19 @@ export function RoomClient({ code }: { code: string }) {
   const phaseRef = useRef<string>("");
   const roomIdRef = useRef<string>("");
 
+  // Bumped once per successful poll. VoiceCall keys its work on this rather
+  // than on `st`, so a batch of signalling messages is consumed exactly once —
+  // the server deletes them as it hands them over, so a second pass would drop
+  // them on the floor.
+  const [pollSeq, setPollSeq] = useState(0);
+
   const poll = useCallback(async () => {
     const r = await fetch(`/api/rooms/${code}`).then((x) => x.json()).catch(() => null);
     if (!r) return;
     if (r.error) { setErr(r.error); return; }
     setSt(r);
     setEndsAt(Date.now() + r.secondsLeft * 1000);
+    setPollSeq((n) => n + 1);
   }, [code]);
 
   useEffect(() => {
@@ -343,15 +353,30 @@ export function RoomClient({ code }: { code: string }) {
           </div>
 
           {tab === "people" && (
-            <ul className="rs-people">
-              {st.members.map((m) => (
-                <li key={m.userId}>
-                  <span className={`dot ${m.status}`} />
-                  <span className="rs-nm">{m.isMe ? "Tum" : m.name}{m.isHost && <span className="tag" style={{ marginLeft: 6 }}>host</span>}</span>
-                  <span className="rs-pct num">{m.focusPct}%</span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className="rs-people">
+                {st.members.map((m) => (
+                  <li key={m.userId}>
+                    <span className={`dot ${m.status}`} />
+                    <span className="rs-nm">
+                      {m.isMe ? "Tum" : m.name}
+                      {m.isHost && <span className="tag" style={{ marginLeft: 6 }}>host</span>}
+                      {m.inVoice && <span title={m.micMuted ? "in voice, muted" : "in voice"} style={{ marginLeft: 6 }}>{m.micMuted ? "🔇" : "🎙️"}</span>}
+                    </span>
+                    <span className="rs-pct num">{m.focusPct}%</span>
+                  </li>
+                ))}
+              </ul>
+              <VoiceCall
+                meId={st.members.find((m) => m.isMe)?.userId ?? ""}
+                members={st.members.map((m) => ({ userId: m.userId, name: m.name, isMe: m.isMe, inVoice: m.inVoice, micMuted: m.micMuted }))}
+                voiceEnabled={st.room.voiceEnabled}
+                iAmHost={st.room.iAmHost}
+                signals={st.signals ?? []}
+                pollSeq={pollSeq}
+                post={act}
+              />
+            </>
           )}
 
           {tab === "queue" && (
