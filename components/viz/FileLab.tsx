@@ -133,7 +133,9 @@ export function FileLab() {
           open(&quot;notes.txt&quot;, &quot;{mode}&quot;) ▶
         </button>
         <button className="btn btn-ghost" style={{ padding: "8px 14px" }} disabled={!isOpen} onClick={doRead}>f.read()</button>
-        <button className="btn btn-ghost" style={{ padding: "8px 14px" }} disabled={!isOpen} onClick={doWrite}>f.write(&quot;gamma\\n&quot;)</button>
+        {/* A JS string, not JSX text: in JSX text a backslash is literal, so
+            `\\n` would render as two backslashes and disagree with the log. */}
+        <button className="btn btn-ghost" style={{ padding: "8px 14px" }} disabled={!isOpen} onClick={doWrite}>{`f.write(${JSON.stringify(ADDED)})`}</button>
         <button className="btn btn-ghost" style={{ padding: "8px 14px" }} disabled={!isOpen}
                 onClick={() => { setOpenMode(null); setCur(null); setWiped(false); say("f.close()  →  saved and closed", "ok"); }}>f.close()</button>
         <button className="btn btn-ghost" style={{ padding: "8px 14px" }} disabled={isOpen || text === null}
