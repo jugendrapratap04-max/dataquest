@@ -99,6 +99,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ code: s
   // breath — they are single-use, and a replayed offer would rebuild a
   // connection the browser has already torn down. Read-then-delete is safe
   // because only this user ever reads this user's rows.
+  // Sweep anything nobody came back for. A browser that closes mid-handshake
+  // leaves its offer behind, and an offer is only meaningful for a few seconds —
+  // delivering a minute-old one would try to reconnect someone who has gone.
+  await prisma.roomSignal.deleteMany({
+    where: { roomId: room.id, createdAt: { lt: new Date(now.getTime() - 60_000) } },
+  });
+
   const inbox = await prisma.roomSignal.findMany({
     where: { roomId: room.id, toId: user.id },
     orderBy: { createdAt: "asc" },

@@ -49,7 +49,9 @@ for (const b of lesson.content) {
       const v = s.q.match(/<code>(\w+)<\/code>/);
       if (!m || !v) { cases.push({ what: `trace step ${i + 1} (unparseable question)`, code: "raise SystemExit('cannot parse')", claim: "" }); return; }
       const upto = b.code.split("\n").slice(0, Number(m[1])).join("\n");
-      cases.push({ what: `trace: after line ${m[1]}, ${v[1]}`, code: `${upto}\nprint(${v[1]})`, claim: s.answer });
+      // `accept` lists equally-correct spellings a student might type. The
+      // checker has to honour them too, or it fails a lesson for being lenient.
+      cases.push({ what: `trace: after line ${m[1]}, ${v[1]}`, code: `${upto}\nprint(${v[1]})`, claim: s.answer, accept: s.accept ?? [] });
     });
   }
   if (b.t === "debug") {
@@ -86,9 +88,11 @@ for (const c of cases) {
     else if (!r.out.includes(want)) fail(c, `claimed: ${JSON.stringify(want)}\n        actual : ${JSON.stringify(r.out)}`);
     else console.log(`  ok   ${c.what}`);
   } else {
-    const want = String(c.claim).replace(/\r\n/g, "\n").trimEnd();
+    const norm = (x) => String(x).replace(/\r\n/g, "\n").trimEnd();
+    const want = norm(c.claim);
+    const ok = [want, ...(c.accept ?? []).map(norm)].includes(r.out);
     if (!r.ok) fail(c, `crashed: ${r.out}`);
-    else if (r.out !== want) fail(c, `claimed: ${JSON.stringify(want)}\n        actual : ${JSON.stringify(r.out)}`);
+    else if (!ok) fail(c, `claimed: ${JSON.stringify(want)}\n        actual : ${JSON.stringify(r.out)}`);
     else console.log(`  ok   ${c.what}`);
   }
 }

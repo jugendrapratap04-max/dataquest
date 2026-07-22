@@ -444,29 +444,77 @@ const L5 = [
 ];
 
 const L6 = [
-  { t: "objectives", items: ["Dictionary (key-value) banana aur use karna","Value access aur add karna","Set (unique items) samajhna"] },
-  { t: "hook", q: "10 lakh users me se ek ka email dhoondhna hai. List me dhoondhoge — kitna time lagega?", why: "List me computer ko <b>ek-ek karke</b> 10 lakh tak check karna pad sakta hai. Dict me? Wo seedha wahan jaata hai — chahe 10 users ho ya 10 crore, time <b>utna hi</b> rehta hai. Ye jaadu nahi, ek trick hai jo aaj samajhoge." },
-  { t: "think", q: "Dict itna tez kaise hai? Wo bina poori list dekhe seedha sahi jagah kaise pahunch jaata hai?", a: "Key ko ek function se guzaarke ek <b>number</b> banaya jaata hai — usse <b>hash</b> kehte hain. Wo number batata hai ki memory me <b>kis khaane me</b> dekhna hai. Matlab dhoondhna nahi padta, <b>seedha calculate</b> ho jaata hai.<br/><br/>Isiliye dict ki key <b>immutable</b> honi chahiye — key badal gayi to hash badal jayega, aur value hamesha ke liye kho jayegi. Yahi wajah hai ki list key nahi ban sakti, tuple ban sakta hai." },
-  { t: "h2", n: "1", text: "Dictionary — key : value" },
-  { t: "def", term: "Dictionary", en: "A dictionary is a mutable collection of key-value pairs, where each key maps to exactly one value.", hi: "Key se value <b>seedha</b> milti hai — dhoondhna nahi padta. Key <b>unique</b> aur <b>immutable</b> honi chahiye (string, number, tuple — list nahi)." },
-  { t: "p", html: "Dict me har value ka ek <b>naam (key)</b> hota hai. Curly braces <code>{}</code> me <code>key: value</code>." },
-  { t: "code", file: "dict.py", code: "student = {\"name\": \"Freya\", \"age\": 21}\nprint(student[\"name\"])       # Freya\nstudent[\"city\"] = \"Delhi\"   # naya add\nprint(student)", output: "Freya\n{'name': 'Freya', 'age': 21, 'city': 'Delhi'}" },
-  { t: "note", variant: "tip", html: "<b>List vs Dict:</b> List me number index (0,1,2), Dict me apna naam wala key. Naam se dhoondhna ho to dict." },
-  { t: "h2", n: "2", text: "Set — unique items" },
-  { t: "p", html: "Set me har item sirf ek baar — duplicate apne aap hat jaate hain. Unique count ke liye best." },
-  { t: "code", file: "set.py", code: "marks = [90, 85, 90, 70, 85]\nunique = set(marks)   # {90, 85, 70}\nprint(len(unique))    # 3", output: "3" },
-  { t: "analogy", concept: "Dictionary", real: "Phone ki contact list", html: "Tum number yaad nahi rakhte — <b>naam</b> yaad rakhte ho. \"Amma\" type kiya, number aa gaya. Naam = <b>key</b>, number = <b>value</b>. Aur dhyan do: do \"Amma\" nahi ho sakte — key hamesha unique hoti hai. Naya number save karo to purana <b>replace</b> ho jaata hai. Dict bilkul yahi karta hai." },
-  { t: "mistakes", items: [
-    { bad: 'student["email"]  # key hai hi nahi', why: "Missing key pe <code>KeyError</code> aata hai aur program <b>ruk</b> jaata hai. Agar key ka pakka na ho to <code>.get()</code> use karo — wo error ki jagah <code>None</code> (ya tumhara default) deta hai.", fix: 'student.get("email", "N/A")' },
-    { bad: 'd = {["a"]: 1}', why: "List <b>key nahi ban sakti</b> — wo mutable hai, aur badalne pe uska hash badal jayega, matlab value hamesha ke liye kho jayegi. <code>TypeError: unhashable type</code>. Tuple chalega, kyunki wo badalta nahi.", fix: 'd = {("a",): 1}' },
-    { bad: "s = {}   # khaali set banana tha", why: "<code>{}</code> khaali <b>dict</b> banata hai, set nahi — Python me <code>{}</code> pehle dict ke liye tha. Khaali set ke liye <code>set()</code> hi likhna padta hai.", fix: "s = set()" },
+  { t: "objectives", items: [
+    "Build a dictionary and get a value straight out of it by key",
+    "Add, change and safely read keys that might not exist",
+    "Use a set to get unique items — and know what it silently throws away",
+    "Choose correctly between a list, a set and a dictionary",
   ]},
-  { t: "recap", items: ["Dict {} = key:value pairs","d[key] se access, d[new]=val se add","Set {} = sirf unique items","set(list) se duplicates hatao"] },
+  { t: "hook", q: "You need one user's email out of ten lakh. How long does that take?", why: "In a list the computer may have to check <b>every single one</b>. In a dictionary it goes straight there — and it takes the <b>same time</b> whether you have ten users or ten crore. That is not magic, it is one trick, and you will understand it in the next two minutes." },
+  { t: "think", q: "How can a dictionary jump straight to the right place without looking through everything first?", a: "The key is passed through a function that turns it into a <b>number</b> — that number is called a <b>hash</b>. The number says which slot in memory to look in. So nothing is searched; the location is <b>calculated</b>.<br/><br/>That is also why a key must be <b>immutable</b>. If a key could change, its hash would change, and the value would be stranded in a slot nobody can compute their way back to. It is exactly why a list cannot be a key and a tuple can." },
+
+  { t: "h2", n: "1", text: "Dictionary — key to value" },
+  { t: "def", term: "Dictionary", en: "A dictionary is a mutable collection of key-value pairs, where each key maps to exactly one value.", hi: "In plain words: you look things up by name instead of by position, and the lookup does not get slower as the dictionary grows." },
+  { t: "p", html: "Every value has a <b>name</b> — its key. You write them inside curly braces as <code>key: value</code>." },
+  { t: "code", file: "dict.py", code: "student = {\"name\": \"Priya\", \"age\": 21}\n\nprint(student[\"name\"])\n\nstudent[\"city\"] = \"Delhi\"   # a key that did not exist is added\nstudent[\"age\"] = 22         # a key that did exist is replaced\nprint(student)", output: "Priya\n{'name': 'Priya', 'age': 22, 'city': 'Delhi'}" },
+  { t: "note", variant: "tip", html: "<b>List or dictionary?</b> A list finds things by position — <code>marks[0]</code>. A dictionary finds them by name — <code>student[\"age\"]</code>. If you would have to remember <i>which number</i> something is, you wanted a dictionary." },
+
+  { t: "h2", n: "2", text: "Reading a key that might not be there" },
+  { t: "p", html: "Asking for a key that does not exist does not give you an empty answer — it <b>stops the program</b> with <code>KeyError</code>. When you are not certain, use <code>.get()</code>." },
+  { t: "code", file: "safe.py", code: "student = {\"name\": \"Priya\"}\n\nprint(student.get(\"email\"))            # missing -> None, no crash\nprint(student.get(\"email\", \"not set\"))  # or your own default\nprint(\"name\" in student)               # just checking? use in", output: "None\nnot set\nTrue" },
+  { t: "note", variant: "warn", html: "<code>student[\"email\"]</code> on a missing key raises <code>KeyError</code> and everything after it stops. On a 50,000-row file that means the whole job dies on row 12,000 — which is why <code>.get()</code> shows up so often in real data code." },
+
+  { t: "h2", n: "3", text: "Set — unique things only" },
+  { t: "p", html: "A set holds each item <b>once</b>. Repeats are dropped as they go in, without a word." },
+  { t: "code", file: "set.py", code: "marks = [90, 85, 90, 70, 85]\n\nunique = set(marks)\nprint(unique)\nprint(len(marks), \"values ->\", len(unique), \"unique\")", output: "{90, 85, 70}\n5 values -> 3 unique" },
+  { t: "viz", name: "collection-bench" },
+  { t: "p", html: "Add a city that is already in there and watch the three panels stop agreeing. The list keeps both rows, the set quietly drops one, and the dictionary keeps one key with the <b>last</b> value. Nothing errors in any of them — which is exactly what makes this worth seeing rather than reading." },
+  { t: "analogy", concept: "Dictionary", real: "The contacts on your phone", html: "You do not remember numbers, you remember <b>names</b>. Type \"Amma\", the number appears. Name = <b>key</b>, number = <b>value</b>. And notice you cannot have two contacts saved under exactly the same name — saving again <b>replaces</b> the old number. A dictionary behaves identically." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> counting unique customers, removing duplicate order IDs, and mapping a product code to its price are all this, all day. The set is also the fastest way to answer \"is this ID one I have already seen?\" — a check that runs millions of times in a real pipeline." },
+
+  { t: "trace", intro: "Work out what each container ends up holding. Nothing here raises an error — that is the difficulty.", code: "sales = {}\nsales[\"mumbai\"] = 120\nsales[\"delhi\"] = 95\nsales[\"mumbai\"] = 150\ncities = set([\"mumbai\", \"delhi\", \"mumbai\"])\nunique_cities = len(cities)\ntotal = len(sales) + unique_cities", steps: [
+    { q: "After line 4, <code>sales</code> is", answer: "{'mumbai': 150, 'delhi': 95}", why: "Line 4 does not add a second Mumbai — one key holds one value, so 150 simply replaces 120. Two keys, not three. This one is safe to ask by its printout because a dictionary keeps <b>insertion order</b>; the set below is not." },
+    { q: "After line 6, <code>unique_cities</code> is", answer: "2", why: "Three names went into the set and two came out — the repeated \"mumbai\" was dropped on the way, silently. Note the question asks for the <b>count</b>, not the printout: a set has no guaranteed order, so what you see when you print one is never something to rely on." },
+    { q: "After line 7, <code>total</code> is", answer: "4", why: "Two keys plus two unique cities. Five values were written in total and four survived — the two that vanished, with no error, are the whole point of this lesson." },
+  ]},
+
+  { t: "drills", intro: "One per operation. Write each before opening the answer.", items: [
+    { task: "Create a dictionary for a city and its sales, then print the sales.", code: "sales = {\"mumbai\": 120}\nprint(sales[\"mumbai\"])", out: "120" },
+    { task: "Add a second city to that dictionary.", code: "sales = {\"mumbai\": 120}\nsales[\"delhi\"] = 95\nprint(sales)", out: "{'mumbai': 120, 'delhi': 95}" },
+    { task: "Change Mumbai's value to 150.", code: "sales = {\"mumbai\": 120}\nsales[\"mumbai\"] = 150\nprint(sales)", out: "{'mumbai': 150}" },
+    { task: "Read a key that does not exist — without crashing.", code: "sales = {\"mumbai\": 120}\nprint(sales.get(\"pune\", 0))", out: "0" },
+    { task: "Check whether a key is present.", code: "sales = {\"mumbai\": 120}\nprint(\"mumbai\" in sales)", out: "True" },
+    { task: "Remove a key.", code: "sales = {\"mumbai\": 120, \"delhi\": 95}\ndel sales[\"delhi\"]\nprint(sales)", out: "{'mumbai': 120}" },
+    { task: "Loop over the dictionary printing each key and its value.", code: "sales = {\"mumbai\": 120, \"delhi\": 95}\nfor city, amount in sales.items():\n    print(city, amount)", out: "mumbai 120\ndelhi 95" },
+    { task: "Count how many <b>unique</b> values are in a list.", code: "marks = [90, 85, 90, 70]\nprint(len(set(marks)))", out: "3" },
+    { task: "Find the items common to two lists, using sets.", code: "a = [1, 2, 3, 4]\nb = [3, 4, 5]\nprint(sorted(set(a) & set(b)))", out: "[3, 4]" },
+    { task: "Make an empty set — careful, it is not what you would guess.", code: "s = set()\nprint(type(s))", out: "<class 'set'>" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: 'student["email"]', why: "A missing key raises <code>KeyError</code> and the program <b>stops</b>. When you cannot be sure the key is there, use <code>.get()</code> — it hands back <code>None</code>, or a default you choose, instead of ending the run.", fix: 'student.get("email", "N/A")' },
+    { bad: 'd = {["a"]: 1}', why: "A list cannot be a key. It is mutable, so its hash could change, and the value would be stranded where nothing can find it — <code>TypeError: unhashable type</code>. A tuple works, because it never changes.", fix: 'd = {("a",): 1}' },
+    { bad: "s = {}", why: "That makes an empty <b>dictionary</b>, not a set — the braces belonged to dictionaries first. The mistake is quiet: <code>s.add(1)</code> then fails with <code>AttributeError</code> and the message points at the wrong line entirely.", fix: "s = set()" },
+    { bad: "ids = set(all_ids)\ntotal = sum(ids)", why: "Converting to a set to \"clean up\" a list of IDs also deletes every legitimate repeat. If the same customer really did order twice, that order is now gone and the total is wrong — with no error to warn you.", fix: "ids = set(all_ids)   # only when duplicates are genuinely unwanted" },
+  ]},
+
+  { t: "debug", intro: "This should count how many orders each city made. It reports 1 for every city. Read it before opening the fix.", code: "orders = [\"mumbai\", \"delhi\", \"mumbai\", \"mumbai\", \"delhi\"]\n\ncounts = {}\nfor city in orders:\n    counts[city] = 1\n\nprint(counts)", symptom: "prints {'mumbai': 1, 'delhi': 1} — every city shows 1", q: "The loop clearly runs five times. So why is nothing above 1?", fix: "orders = [\"mumbai\", \"delhi\", \"mumbai\", \"mumbai\", \"delhi\"]\n\ncounts = {}\nfor city in orders:\n    counts[city] = counts.get(city, 0) + 1\n\nprint(counts)", why: "The loop does run five times — and every time it <b>overwrites</b> the key with 1 instead of adding to what was already there. One key holds one value, so the previous count is simply gone. <code>counts.get(city, 0) + 1</code> reads the old number first, defaulting to 0 the first time a city appears. This is the single most common dictionary bug there is, and like the others in this lesson it produces a clean-looking wrong answer rather than a crash." },
+
+  { t: "recap", items: [
+    "A dictionary maps a <b>key</b> to one value — lookup by name, not position",
+    "<code>d[key]</code> raises <code>KeyError</code> if it is missing; <code>d.get(key, default)</code> does not",
+    "Assigning an existing key <b>replaces</b> its value — it does not add a second one",
+    "A set keeps each item <b>once</b>, dropping repeats silently",
+    "Keys must be immutable — tuple yes, list no",
+    "<code>{}</code> is an empty dictionary; an empty set is <code>set()</code>",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "List ki jagah dict kab use karoge?", a: "Jab cheez <b>naam se</b> dhoondhni ho, position se nahi. List me item dhoondhna matlab poori list scan karna (O(n)); dict me key se seedha milta hai (O(1)) — chahe 10 items ho ya 10 lakh." },
-    { level: "beginner", q: "<code>d[\"key\"]</code> aur <code>d.get(\"key\")</code> me kya farak hai?", a: "Key na ho to <code>d[\"key\"]</code> <code>KeyError</code> phenkta hai aur program rukta hai; <code>d.get(\"key\")</code> chup-chaap <code>None</code> deta hai (ya <code>d.get(\"key\", default)</code>). Key ka pakka ho to bracket theek — kyunki tab error <b>chahiye</b>, taaki bug chhupe nahi." },
-    { level: "intermediate", q: "Dict ki key kya-kya ban sakti hai, aur kyun?", a: "Sirf <b>hashable</b> cheezein — string, number, tuple. List/dict/set nahi, kyunki wo <b>mutable</b> hain. Dict key ka hash nikaal ke uski jagah tay karta hai; key badal gayi to hash badal jayega aur value dhoondhi nahi ja sakegi. Isiliye immutable ka rule hai." },
-    { level: "intermediate", q: "Dict me lookup O(1) kaise hota hai?", a: "<b>Hash table.</b> Key ko hash function se ek number me badalte hain, wo number batata hai ki kis slot me dekhna hai — scan nahi, seedha calculation. Do keys ka hash same ho jaye (<b>collision</b>) to Python usse internally handle kar leta hai. Isiliye O(1) <b>average</b> hai, worst case nahi." },
+    { level: "beginner", q: "What is the difference between a list and a dictionary?", a: "A list is ordered and indexed by position; a dictionary maps keys to values and is looked up by key. The practical difference is cost: finding a value in a list means scanning it, while a dictionary lookup is roughly constant time no matter how large it grows." },
+    { level: "beginner", q: "What happens if you assign to a key that already exists?", a: "The value is replaced. A key appears at most once, so there is no way to have two entries under the same key — which is why building counters with <code>d[k] = 1</code> instead of <code>d[k] = d.get(k, 0) + 1</code> is such a common bug." },
+    { level: "intermediate", q: "Why must dictionary keys be immutable?", a: "The slot a key lives in is computed from its hash. If the key could change after being stored, its hash would change, and the value would sit in a slot nothing can compute its way back to. So <code>str</code>, <code>int</code> and <code>tuple</code> can be keys; <code>list</code> and <code>dict</code> cannot — attempting it raises <code>TypeError: unhashable type</code>." },
+    { level: "intermediate", q: "When would you use a set instead of a list?", a: "When you only care whether something is present and duplicates are meaningless — deduplicating IDs, or testing membership. <code>x in some_set</code> is roughly constant time while <code>x in some_list</code> scans. The trade-off is that a set has no order and no positions, and it will discard duplicates you might actually have needed." },
+    { level: "intermediate", q: "Are dictionaries ordered in Python?", a: "Since Python 3.7 a dictionary preserves <b>insertion order</b>, and that is a language guarantee, not an implementation detail. Sets do not — never rely on the order you see when printing one. If you need a dictionary sorted by key or value, sort it explicitly with <code>sorted(d.items())</code>." },
   ]},
 ];
 
@@ -2378,10 +2426,19 @@ export const QUIZZES = {
     { q: "List aur tuple me — kaunsa <b>badla</b> ja sakta hai?", options: ["tuple", "list", "dono", "koi nahi"], correct: 1, why: "<b>list</b> mutable (badalti hai), <b>tuple</b> immutable (fix). Data fix rakhna ho to tuple." },
   ],
   "dicts-sets": [
-    { q: "<code>d = {\"a\": 1}; print(d[\"b\"])</code> — kya hoga?", options: ["None", "KeyError", "0", "\"b\""], correct: 1, why: "Key <code>\"b\"</code> hai hi nahi → <b>KeyError</b>. Safe access ke liye <code>d.get(\"b\")</code> — wo None deta hai." },
-    { q: "<code>set([1, 2, 2, 3, 3, 3])</code> me kitne items honge?", options: ["6", "3", "2", "1"], correct: 1, why: "Set <b>duplicates hata deta</b> hai — sirf unique: {1, 2, 3} = <b>3</b> items." },
-    { q: "Key miss hone par crash NA ho — kaunsa sahi?", options: ["d[\"x\"]", "d.get(\"x\")", "d.key(\"x\")", "get(d, \"x\")"], correct: 1, why: "<code>d.get(\"x\")</code> key na mile to <b>None</b> deta hai (crash nahi). <code>d[\"x\"]</code> KeyError deta." },
-    { q: "Ek dict me do baar same key daalo to?", options: ["dono rehti", "aakhri value jeetegi", "error", "pehli value rehti"], correct: 1, why: "Dict me key <b>unique</b> hoti hai — same key dubara daalo to <b>aakhri value</b> purani ko replace kar deti hai." },
+    // Easy
+    { level: "easy", q: "How do you read the value stored under the key <code>\"age\"</code>?", options: ["student(\"age\")", "student[\"age\"]", "student.age()", "student->age"], correct: 1, why: "Square brackets with the key. A dictionary is looked up by name, not by position." },
+    { level: "easy", q: "<code>set([1, 2, 2, 3, 3, 3])</code> holds how many items?", options: ["6", "3", "2", "1"], correct: 1, why: "A set keeps each item once, so the repeats are dropped: {1, 2, 3} — three items." },
+    { level: "easy", q: "What does <code>s = {}</code> create?", options: ["An empty set", "An empty dictionary", "An empty list", "An error"], correct: 1, why: "Braces belonged to dictionaries first. An empty set has to be written <code>set()</code> — and getting this wrong fails later, at the first <code>.add()</code>, not here." },
+    // Medium
+    { level: "medium", q: "<code>d = {\"a\": 1}</code>. What does <code>print(d[\"b\"])</code> do?", options: ["Prints None", "Prints 0", "Raises KeyError", "Adds the key b"], correct: 2, why: "A missing key stops the program with <code>KeyError</code>. Use <code>d.get(\"b\")</code> when the key may not be there." },
+    { level: "medium", q: "<code>d = {\"a\": 1}</code>, then <code>d[\"a\"] = 5</code>. What is in <code>d</code>?", options: ["{'a': 1, 'a': 5}", "{'a': 5}", "{'a': 1}", "TypeError"], correct: 1, why: "A key appears at most once, so assigning to it <b>replaces</b> the value. There is no way to get a second entry under the same key." },
+    { level: "medium", q: "<code>d.get(\"missing\", 0)</code> returns what?", options: ["KeyError", "None", "0", "False"], correct: 2, why: "<code>.get()</code> hands back the default you pass, which is why <code>0</code> is so useful when you are counting." },
+    { level: "medium", q: "Why does <code>d = {[\"a\"]: 1}</code> fail?", options: ["Lists are too long", "A list is mutable, so it cannot be hashed", "You need double quotes", "It does not fail"], correct: 1, why: "The slot a key lives in is computed from its hash. A mutable key could change and strand its own value — hence <code>TypeError: unhashable type</code>. A tuple works." },
+    // Hard — the silent ones
+    { level: "hard", q: "You loop over 5 orders doing <code>counts[city] = 1</code>. Every city shows 1. Why?", options: ["The loop runs once", "Each pass overwrites the key instead of adding to it", "Dictionaries cannot hold numbers", "It should raise KeyError"], correct: 1, why: "The loop runs all five times — and each time replaces the value with 1, wiping the previous count. The fix is <code>counts.get(city, 0) + 1</code>, which reads the old number first. This bug never crashes; it just reports the wrong number." },
+    { level: "hard", q: "A list of 5 order IDs contains a genuine repeat. You do <code>ids = set(ids)</code> then sum them. What happened?", options: ["Nothing, the total is right", "A real order was silently deleted from the total", "It raises an error", "The sum doubles"], correct: 1, why: "Converting to a set removes duplicates, including the ones that were real data. If a customer genuinely ordered twice, that order is gone from the total — with no error to warn you. Deduplicate only when duplicates are actually unwanted." },
+    { level: "hard", q: "Which is safe to rely on: the printed order of a dictionary, or of a set?", options: ["Both", "Neither", "The dictionary only", "The set only"], correct: 2, why: "Since Python 3.7 a dictionary preserves <b>insertion order</b> as a language guarantee. A set gives no order guarantee at all, so code that depends on how a set prints will work on your machine and fail somewhere else." },
   ],
   "functions": [
     { q: "<code>def f(): print(\"hi\")</code>, phir <code>x = f()</code>. <code>x</code> me kya?", options: ["\"hi\"", "None", "error", "\"\""], correct: 1, why: "Function me koi <code>return</code> nahi, to wo <b>None</b> return karta hai — <code>x = None</code> (\"hi\" sirf print hua)." },
