@@ -789,14 +789,87 @@ const L12 = [
 ];
 
 const L13 = [
-  { t: "objectives", items: ["Module import karna","pip se package install karna","Virtual environment ka concept"] },
-  { t: "h2", n: "1", text: "import — ready code use karo" },
-  { t: "p", html: "Doosron ka likha code use karne ke liye <code>import</code>. Python me hazaaron ready modules hain." },
-  { t: "code", file: "import.py", code: "import math\nprint(math.sqrt(16))   # 4.0\nprint(round(math.pi, 2))  # 3.14", output: "4.0\n3.14" },
-  { t: "h2", n: "2", text: "pip aur virtual environment" },
-  { t: "p", html: "<code>pip install pandas</code> se koi bhi package install karo. <b>venv</b> har project ke packages alag rakhta hai." },
-  { t: "note", variant: "tip", html: "<b>DS ke liye:</b> pandas, numpy, matplotlib, scikit-learn — sab pip se aate hain, aur tumhare aage ke tracks me use honge." },
-  { t: "recap", items: ["import se module use karo","pip install se package lao","venv project packages alag rakhta hai","DS libraries pip se aati hain"] },
+  { t: "objectives", items: [
+    "Use <code>import</code>, <code>from … import</code> and <code>as</code> — and know what each one binds",
+    "Understand that importing <b>runs</b> the file, once",
+    "Write your own module, and guard it with <code>if __name__ == \"__main__\"</code>",
+    "Avoid the trap of naming your file after a module you import",
+    "Know what <code>pip</code> and a virtual environment are actually for",
+  ]},
+  { t: "hook", q: "You save a file called <code>random.py</code> to practise random numbers. The next day a different script in the same folder does <code>import random</code> and dies with <code>AttributeError: module 'random' has no attribute 'randint'</code>. Is Python broken?", why: "No — Python found <b>your</b> file first. The folder your script lives in is searched <b>before</b> the standard library, so your little practice file quietly replaced a module the whole language depends on. Nothing warns you, and the error names <code>random</code>, which sends you looking in exactly the wrong place." },
+  { t: "think", q: "If <code>import math</code> gives you <code>math.sqrt</code>, why does <code>from math import sqrt</code> make <code>math.sqrt</code> stop working?", a: "Because the two statements bind <b>different names</b>. <code>import math</code> puts one name in your file — <code>math</code> — and everything is reached through it. <code>from math import sqrt</code> puts <code>sqrt</code> in your file and <b>never binds <code>math</code> at all</b>.<br/><br/>So <code>math.sqrt(16)</code> after a <code>from</code> import is not a typo — <code>math</code> genuinely does not exist in that file." },
+
+  { t: "h2", n: "1", text: "The three ways to import" },
+  { t: "def", term: "Module", en: "A module is simply a Python file, and importing it makes the names defined inside it available in the file doing the import.", hi: "In plain words: there is nothing special about a module. Any <code>.py</code> file you write is one — <code>import</code> is just Python running that file and handing you its names." },
+  { t: "p", html: "<code>import math</code> binds the module. <code>import math as m</code> binds only the nickname. <code>from math import sqrt</code> binds only that one name. Which you choose decides what is legal on the next line." },
+  { t: "code", file: "forms.py", code: "import math\nprint(math.sqrt(16))\n\nimport statistics as st\nprint(st.mean([2, 4, 6, 8]))\n\nfrom math import ceil, floor\nprint(ceil(4.2), floor(4.8))", output: "4.0\n5\n5 4" },
+  { t: "viz", name: "import-lab" },
+  { t: "p", html: "Click through the five statements above. Every one of them &quot;imports math&quot;, and every one leaves a different set of names in your file — which is the whole reason <code>NameError</code> shows up on a line that looks obviously correct." },
+  { t: "analogy", concept: "import vs from-import", real: "A labelled toolbox", html: "<code>import math</code> puts the whole <b>labelled toolbox</b> on your bench: you must say <code>math.sqrt</code>, but you always know where a tool came from. <code>from math import sqrt</code> takes the one spanner out and <b>leaves the box in the van</b> — <code>sqrt</code> works bare, and <code>math</code> is simply not there. <code>from math import *</code> tips all 61 tools onto the bench at once, and if one has the same name as a tool you already had, yours is buried." },
+
+  { t: "h2", n: "2", text: "Importing runs the file — once" },
+  { t: "p", html: "An import is not a lookup, it is an <b>execution</b>. Python runs the whole file top to bottom, keeps the result in <code>sys.modules</code>, and every later import of the same module reuses that — it does not run again." },
+  { t: "code", file: "helpers.py", code: "# helpers.py — a module of your own\n\ndef clean(name):\n    return name.strip().title()\n\nprint(\"helpers loaded\")\n\nif __name__ == \"__main__\":\n    print(\"running helpers.py directly\")\n    print(clean(\"  aarav  \"))", output: "helpers loaded\nrunning helpers.py directly\nAarav" },
+  { t: "p", html: "Run that file directly and you see all three lines. <code>import helpers</code> from another file and you see only <b>helpers loaded</b> — because <code>__name__</code> is <code>\"helpers\"</code> then, not <code>\"__main__\"</code>." },
+  { t: "note", variant: "key", html: "📌 <b>That is what the <code>__main__</code> guard is for.</b> Anything outside it runs on <b>every</b> import. Test code, a <code>print</code>, a database call left at the bottom of a file — all of it fires the moment somebody imports your module. The guard is how you say &quot;only when this file is the one being run&quot;." },
+
+  { t: "h2", n: "3", text: "Your own modules, and the name that bites" },
+  { t: "p", html: "Any <code>.py</code> file next to your script can be imported by its filename without the extension. That convenience is also the trap: Python searches <b>your folder first</b>, so a file named after a real module hides the real one." },
+  { t: "code", file: "which_one.py", code: "import json\n\n# When an import misbehaves, ask the module where it was loaded FROM.\n# A path inside your own project means you have shadowed the real one.\nprint(\"json\" in json.__file__)\nprint(json.__name__)", output: "True\njson" },
+  { t: "p", html: "<code>__file__</code> is the diagnostic. If <code>import random</code> starts failing, print <code>random.__file__</code> — when it points at your own folder instead of Python's <code>Lib</code>, you have found the culprit in one line." },
+  { t: "note", variant: "warn", html: "<b>Never name a file after something you import.</b> <code>random.py</code>, <code>math.py</code>, <code>json.py</code>, <code>csv.py</code>, <code>email.py</code> and <code>test.py</code> are the ones that catch people. If it has already happened, delete the stray <code>.py</code> <b>and</b> its <code>.pyc</code> in <code>__pycache__</code>, or the broken import survives the fix." },
+
+  { t: "h2", n: "4", text: "pip and virtual environments" },
+  { t: "p", html: "The standard library ships with Python. Everything else — pandas, numpy, matplotlib, scikit-learn — is installed with <code>pip</code>, which downloads from PyPI. A <b>virtual environment</b> gives each project its own private set of those packages." },
+  { t: "note", variant: "tip", html: "<b>The four commands worth memorising</b> (these run in the terminal, not in a <code>.py</code> file):<pre>python -m venv .venv          # create the environment\n.venv\\Scripts\\activate        # Windows  (mac/Linux: source .venv/bin/activate)\npip install pandas            # install into THIS project only\npip freeze > requirements.txt # record exactly what you installed</pre>" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> without a venv, every project shares one global set of packages — so upgrading pandas for a new project silently breaks the one you shipped last month, and there is no record of which versions ever worked. <code>requirements.txt</code> is what lets a teammate reproduce your environment exactly, and it is the first thing an interviewer looks for in a GitHub repo." },
+
+  { t: "trace", intro: "Two imports of the same module, done two different ways. Work out each value.", code: "import math\n\na = math.sqrt(16)\nb = math.floor(3.9)\n\nfrom math import pi\n\nc = round(pi, 2)\nd = \"math\" in dir()\ne = \"pi\" in dir()\nf = \"sqrt\" in dir()", steps: [
+    { q: "After line 3, <code>a</code> is", answer: "4.0", why: "<code>math.sqrt</code> always returns a float, even for a perfect square — so 4.0, not 4." },
+    { q: "After line 8, <code>c</code> is", answer: "3.14", why: "<code>from math import pi</code> bound the bare name <code>pi</code>, so it can be used without a prefix." },
+    { q: "After line 10, <code>e</code> is", answer: "True", why: "<code>pi</code> is now a name in this file, because the <code>from</code> import put it there directly." },
+    { q: "After line 11, <code>f</code> is", answer: "False", why: "This is the point of the whole lesson. <code>from math import pi</code> brought <b>only</b> <code>pi</code> — <code>sqrt</code> was never bound as a bare name, even though <code>math.sqrt</code> works fine, because <code>math</code> is still imported from line 1." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Each runs on its own — write it before opening the answer.", items: [
+    { task: "Import <code>math</code> and print the square root of 81.", code: "import math\n\nprint(math.sqrt(81))", out: "9.0" },
+    { task: "Import <code>math</code> under the nickname <code>m</code> and round 7.8 down.", code: "import math as m\n\nprint(m.floor(7.8))", out: "7" },
+    { task: "Bring in just <code>ceil</code>, and use it bare.", code: "from math import ceil\n\nprint(ceil(4.2))", out: "5" },
+    { task: "Bring in <code>pi</code> and <code>e</code> together, each rounded to 2 places.", code: "from math import pi, e\n\nprint(round(pi, 2), round(e, 2))", out: "3.14 2.72" },
+    { task: "Show that <code>random.seed</code> makes results repeatable.", code: "import random\n\nrandom.seed(42)\na = random.randint(1, 100)\n\nrandom.seed(42)\nb = random.randint(1, 100)\n\nprint(a == b)", out: "True" },
+    { task: "Use <code>statistics.mean</code> on a list of marks.", code: "from statistics import mean\n\nprint(mean([2, 4, 6, 8]))", out: "5" },
+    { task: "Format a fixed date as day-month-year.", code: "from datetime import date\n\nprint(date(2026, 7, 23).strftime(\"%d-%m-%Y\"))", out: "23-07-2026" },
+    { task: "Ask a module what it contains, without leaving Python.", code: "import math\n\nprint(\"sqrt\" in dir(math))", out: "True" },
+    { task: "Print the special name Python gives the file being run.", code: "print(__name__)", out: "__main__" },
+    { task: "Turn a dictionary into JSON text with the <code>json</code> module.", code: "import json\n\nprint(json.dumps({\"name\": \"Aarav\", \"marks\": 91}))", out: "{\"name\": \"Aarav\", \"marks\": 91}" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "from math import sqrt\n\nprint(math.sqrt(16))", why: "<code>from math import sqrt</code> never binds <code>math</code>, so this is a <code>NameError</code> — not a typo. Either use <code>sqrt(16)</code>, or import the module instead.", fix: "import math\n\nprint(math.sqrt(16))" },
+    { bad: "# a file you saved as random.py\nimport random\n\nprint(random.randint(1, 6))", why: "Your own folder is searched first, so <code>import random</code> imports <b>this very file</b> and then cannot find <code>randint</code> in it. Renaming the file fixes it — but delete <code>__pycache__/random.pyc</code> too, or the stale copy keeps winning.", fix: "# rename the file to dice_practice.py\nimport random\n\nprint(random.randint(1, 6))" },
+    { bad: "from math import *\nfrom statistics import *\n\nprint(pow(2, 3))", why: "Two star-imports means 61 names from one module and more from the next, and you cannot see which came from where. Here <code>math.pow</code> quietly replaces the builtin <code>pow</code>, so a whole number turns into <code>8.0</code>.", fix: "import math\nimport statistics\n\nprint(pow(2, 3))" },
+    { bad: "# helpers.py\ndef clean(s):\n    return s.strip()\n\nprint(clean(\"  test  \"))", why: "That <code>print</code> is outside a <code>__main__</code> guard, so it runs every single time anybody imports <code>helpers</code> — test output appearing in the middle of somebody else's program.", fix: "# helpers.py\ndef clean(s):\n    return s.strip()\n\nif __name__ == \"__main__\":\n    print(clean(\"  test  \"))" },
+  ]},
+
+  { t: "debug", intro: "A script counting how many password combinations are possible. No error, no warning — and the answer is the wrong type. Read it before opening the fix.", code: "from math import *\n\nsymbols = 26\nlength = 4\n\ncombos = pow(symbols, length)\n\nprint(\"combinations:\", combos)\nprint(\"type:\", type(combos).__name__)", symptom: "prints combinations: 456976.0 and type: float", q: "Nothing here mentions floats, and pow() on two whole numbers should give a whole number. Where did the decimal come from?", fix: "import math\n\nsymbols = 26\nlength = 4\n\ncombos = pow(symbols, length)\n\nprint(\"combinations:\", combos)\nprint(\"type:\", type(combos).__name__)", why: "<code>from math import *</code> poured all 61 of math's public names into the file, and exactly one of them — <code>pow</code> — has the same name as a Python builtin. So the <code>pow</code> being called on that line is <b>math.pow</b>, which always returns a float, not the builtin <code>pow</code>, which returns an int for integer arguments.<br/><br/>Nothing is misspelled and nothing errors: a name you never wrote was silently replaced by one you never asked for. Switching to <code>import math</code> leaves the builtin alone, and the count is an <code>int</code> again. This is the concrete reason <code>from x import *</code> is banned in production code — you cannot tell, by reading the file, which <code>pow</code> you are calling." },
+
+  { t: "recap", items: [
+    "<code>import math</code> binds <b>math</b> · <code>import math as m</code> binds <b>only m</b> · <code>from math import sqrt</code> binds <b>only sqrt</b>",
+    "After a <code>from</code> import, <code>math.…</code> is a <code>NameError</code> — <code>math</code> was never bound",
+    "Importing <b>runs</b> the file, top to bottom, and only the first time",
+    "<code>if __name__ == \"__main__\":</code> keeps your test code from firing on import",
+    "Your own folder is searched first — never name a file <code>random.py</code>, <code>json.py</code>, <code>csv.py</code>",
+    "<code>from x import *</code> hides where names came from and can replace builtins",
+    "<code>python -m venv .venv</code> per project, then <code>pip install</code> and <code>pip freeze &gt; requirements.txt</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between <code>import math</code> and <code>from math import sqrt</code>?", a: "They bind different names. <code>import math</code> puts the module object in your namespace, so everything is reached as <code>math.something</code> and the origin of each name stays obvious. <code>from math import sqrt</code> puts only <code>sqrt</code> in your namespace and does not bind <code>math</code> at all, so <code>math.sqrt</code> would raise <code>NameError</code>. The first is preferred in most code precisely because it keeps the source of a name visible." },
+    { level: "beginner", q: "What does <code>if __name__ == \"__main__\":</code> do?", a: "Python sets a module's <code>__name__</code> to <code>\"__main__\"</code> when that file is the one being run, and to the module's own name when it is imported. So the guard runs a block only on direct execution. Without it, any demo code, prints or test calls at the bottom of a file execute every time somebody imports it." },
+    { level: "intermediate", q: "Why is <code>from module import *</code> discouraged?", a: "It binds every public name at once — <code>math</code> alone is 61 — so a reader cannot tell which module a name came from, and static analysis cannot either. Worse, it silently overwrites names you already have, including builtins: after <code>from math import *</code>, <code>pow</code> is <code>math.pow</code> and returns a float instead of an int. With two star-imports, whichever came last wins, so the bug depends on line order." },
+    { level: "intermediate", q: "What happens if you name your file <code>random.py</code>?", a: "The directory of the running script sits at the front of <code>sys.path</code>, so <code>import random</code> finds your file instead of the standard library one. Everything that depends on the real module then fails with confusing <code>AttributeError</code>s naming <code>random</code>. Renaming the file fixes it, but the cached <code>__pycache__/random.pyc</code> has to go too, or the stale bytecode keeps being used." },
+    { level: "intermediate", q: "Why use a virtual environment instead of installing packages globally?", a: "Because projects need different, often conflicting, versions of the same library. A venv gives each project an isolated <code>site-packages</code>, so upgrading pandas for a new project cannot break one you already shipped. Paired with <code>pip freeze > requirements.txt</code>, it also makes the environment reproducible — a colleague, a CI runner or a server can install the exact versions you tested against." },
+  ]},
 ];
 
 const L14 = [
@@ -2674,6 +2747,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "modules": [
+    // Easy
+    { level: "easy", q: "After <code>from math import sqrt</code>, what does <code>math.sqrt(16)</code> do?", options: ["Returns 4.0", "Raises NameError, because math was never bound", "Returns 4", "Returns None"], correct: 1, why: "The <code>from</code> form binds only <code>sqrt</code>. The name <code>math</code> is not in the file at all, so using it is a NameError — not a typo." },
+    { level: "easy", q: "What does <code>import statistics as st</code> put in your file?", options: ["Both statistics and st", "Only statistics", "Every function inside statistics", "Only st"], correct: 3, why: "The <code>as</code> form binds the nickname and nothing else — after it, <code>statistics</code> itself is undefined." },
+    { level: "easy", q: "What is a Python module?", options: ["A Python file whose names you can import", "A special file type only Python's authors can write", "A compiled binary", "A folder of scripts"], correct: 0, why: "There is nothing special about it — any <code>.py</code> file you write is a module, and importing it just runs that file and hands you its names." },
+    // Medium
+    { level: "medium", q: "What does <code>if __name__ == \"__main__\":</code> protect against?", options: ["Syntax errors in the module", "Importing the same module twice", "Code running every time the file is imported", "Circular imports"], correct: 2, why: "<code>__name__</code> is <code>\"__main__\"</code> only when the file is the one being run. Without the guard, demo prints and test calls fire on every import." },
+    { level: "medium", q: "You save a file as <code>random.py</code>. Another script in that folder runs <code>import random</code>. What happens?", options: ["Python prefers the standard library", "Python imports YOUR file, because your folder is searched first", "Python raises ImportError", "Python merges both"], correct: 1, why: "The running script's own folder sits at the front of <code>sys.path</code>, so your file wins and everything expecting the real module fails with confusing AttributeErrors." },
+    { level: "medium", q: "How many times does Python run a module's code if three different files import it?", options: ["Three times", "Zero times", "Once per function called", "Once"], correct: 3, why: "The first import executes the file and caches the result in <code>sys.modules</code>; later imports reuse it without re-running." },
+    { level: "medium", q: "Which command records the exact package versions a project needs?", options: ["pip list --all", "python -m venv .venv", "pip freeze > requirements.txt", "pip install --record"], correct: 2, why: "<code>pip freeze</code> writes each installed package with its pinned version, which is what lets a teammate or a server reproduce your environment." },
+    // Hard
+    { level: "hard", q: "After <code>from math import *</code>, why does <code>pow(2, 3)</code> return <code>8.0</code> instead of <code>8</code>?", options: ["Python 3 changed pow to return floats", "The star import replaced the builtin pow with math.pow", "Because 2 and 3 are being coerced to floats", "It is a bug in math"], correct: 1, why: "The star import binds all 61 of math's public names, and exactly one — <code>pow</code> — collides with a builtin. <code>math.pow</code> always returns a float, so a whole-number count silently becomes a float." },
+    { level: "hard", q: "You renamed your stray <code>random.py</code>, but the broken import persists. Why?", options: ["Python caches imports for 24 hours", "The rename needs a restart of the OS", "requirements.txt still lists it", "A stale random.pyc is left in __pycache__"], correct: 3, why: "Python caches compiled bytecode next to the source. Deleting the <code>__pycache__</code> entry as well as the <code>.py</code> is what actually clears it." },
+    { level: "hard", q: "Why use a virtual environment instead of installing everything globally?", options: ["It makes pip install faster", "It compiles packages to machine code", "Projects need conflicting versions, and a venv isolates them", "It is required by PyPI"], correct: 2, why: "Two projects often need different versions of the same library. Without isolation, upgrading for one silently breaks the other, and nothing records which versions ever worked." },
   ],
 
   "file-handling": [

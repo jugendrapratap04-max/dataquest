@@ -342,6 +342,24 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .crumb a:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 @media (max-width:900px){ .crumb { font-size:13px; margin-bottom:8px; } .crumb a { display:inline-flex; align-items:center; min-height:44px; } }
 .rh-back { display:inline-block; margin-bottom:6px; }
+
+/* Import Lab — bound names on the left, what that makes legal on the right. */
+.imp-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:14px; }
+@media (max-width:700px){ .imp-grid { grid-template-columns:minmax(0,1fr); } }
+.imp-names { display:flex; flex-wrap:wrap; gap:6px; min-height:34px; align-items:flex-start; animation:viz-land .24s ease-out; }
+.imp-chip { font-family:var(--mono); font-size:12px; padding:4px 9px; border-radius:6px; background:var(--teal-soft);
+            border:1px solid color-mix(in srgb,var(--teal) 32%,transparent); color:var(--teal); }
+.imp-chip.more { background:var(--panel-2); border-color:var(--line); color:var(--ink-faint); font-style:italic; }
+.imp-note { font-size:12px; line-height:1.55; color:var(--ink-soft); margin-top:10px; }
+.imp-tests { display:flex; flex-direction:column; gap:7px; }
+.imp-row { display:grid; grid-template-columns:auto auto minmax(0,1fr); gap:8px; align-items:baseline;
+           background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:7px 10px; }
+.imp-row.bad { border-color:color-mix(in srgb,var(--bad) 30%,transparent); }
+.imp-expr { font-family:var(--mono); font-size:12px; color:var(--ink); }
+.imp-arrow { color:var(--ink-faint); font-size:11px; }
+.imp-out { font-family:var(--mono); font-size:11.5px; word-break:break-word; animation:viz-land .22s ease-out; }
+.imp-row.ok .imp-out { color:var(--good); }
+.imp-row.bad .imp-out { color:var(--bad); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
