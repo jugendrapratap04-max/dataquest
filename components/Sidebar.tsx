@@ -26,6 +26,7 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
     { href: "/dashboard", label: "Dashboard", icon: <HomeIcon />, member: true },
     { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: `${roadmapPct}%` },
     { href: "/learn", label: "Lessons", icon: <BookIcon /> },
+    { href: "/book", label: "Written Notes", icon: <BookIcon /> },
     { href: "/notes", label: "Notes", icon: <NoteIcon />, member: true },
   ]},
   { label: "Practice", items: [

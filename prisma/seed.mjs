@@ -65,6 +65,112 @@ const P = (order, slug, title, functionName, descriptionMd, examples, starter, s
 /* ------------------------------------------------------------------ */
 /* Lesson content                                                      */
 /* ------------------------------------------------------------------ */
+const L0 = [
+  { t: "objectives", items: [
+    "Run your very first Python program",
+    "Follow how Python reads a file — line by line, top to bottom",
+    "Write comments, and understand Python's one unusual rule: indentation",
+    "Ask a person for input with <code>input()</code>",
+    "Say why data science picked Python out of every language there is",
+  ]},
+  { t: "hook", q: "Excel already makes charts. So why does a data scientist need to write code at all?", why: "Because a spreadsheet quietly gives up. Somewhere past a million rows it crawls, and when your manager says <b>\"redo last month's report with the new file\"</b>, you do the entire thing again by hand. Code does not forget the steps, does not get tired, and runs again in one second." },
+  { t: "think", q: "You spent a whole day cleaning 50,000 rows in Excel. Next month the same file arrives with fresh data. What do you actually have to do?", a: "All of it again — and worse, there is <b>no record</b> of what you did, so you cannot even be sure you repeat it the same way. That is the real reason analysts move to code: a script is a <b>written record of every step</b>. Re-running it costs a second, anyone can read what it did, and it is identical every time." },
+
+  { t: "h2", n: "1", text: "What Python actually is" },
+  { t: "def", term: "Python", en: "Python is a programming language: a set of words and rules for writing instructions a computer can carry out.", hi: "In plain words: you write the steps, Python performs them — exactly, in order, and as many times as you ask." },
+  { t: "analogy", concept: "A program", real: "A recipe", html: "A recipe is a list of steps in a fixed order, written so that <i>anybody</i> can follow it and get the same dish. A program is the same thing written for a computer — with one difference: the computer follows it <b>exactly</b>, including your mistakes. It will never guess what you meant." },
+  { t: "code", file: "first.py", code: "print(\"Hello, DataMarg!\")", output: "Hello, DataMarg!" },
+  { t: "psoft", html: "That is a complete Python program. One line. <code>print()</code> is an instruction that means <strong>\"put this on the screen\"</strong>, and the thing inside the quotes is what gets put there." },
+  { t: "note", variant: "tip", html: "<b>Try changing it.</b> Put your own name in the quotes and run it again. Breaking and fixing a one-line program is the cheapest lesson you will ever get." },
+
+  { t: "h2", n: "2", text: "How Python runs your file" },
+  { t: "p", html: "Python reads your file the way you read a page: <strong>top to bottom, one line at a time</strong>. It finishes a line completely before it looks at the next one. Almost every confusing bug a beginner hits comes from forgetting this." },
+  { t: "viz", name: "code-runner" },
+  { t: "p", html: "Two things in there surprise nearly everyone the first time:" },
+  { t: "p", html: "<strong>Storing something is silent.</strong> Three of those five lines put a value into memory and printed nothing at all. A program that stores ten things and never calls <code>print()</code> looks, from the outside, like it did nothing." },
+  { t: "p", html: "<strong>The right-hand side is worked out first.</strong> On <code>total = marks + bonus</code>, Python calculates <code>82 + 5</code> and only then puts <code>87</code> under the name <code>total</code>." },
+
+  { t: "h2", n: "3", text: "Comments — notes for humans" },
+  { t: "p", html: "Anything after a <code>#</code> is ignored by Python completely. Comments are how you leave an explanation for the next person who reads your code — which, six months from now, is you." },
+  { t: "code", file: "comments.py", code: "# GST is 18% in India\nprice = 1000\ntotal = price * 1.18   # add the tax\nprint(total)", output: "1180.0" },
+  { t: "note", variant: "tip", html: "<b>Write comments about <i>why</i>, not <i>what</i>.</b> <code># add the tax</code> is useful. <code># multiply price by 1.18</code> just repeats the code back at you." },
+
+  { t: "h2", n: "4", text: "Indentation — Python's one unusual rule" },
+  { t: "p", html: "Most languages use curly braces to show what belongs inside what. Python uses <strong>spaces at the start of a line</strong>, and it is strict about them. Indented lines belong to the line above; a stray space is a real error, not a style opinion." },
+  { t: "code", file: "indent.py", code: "marks = 85\n\nif marks > 40:\n    print(\"Passed\")      # indented -> belongs to the if\n    print(\"Well done\")   # also inside the if\n\nprint(\"Result printed\")  # not indented -> always runs", output: "Passed\nWell done\nResult printed" },
+  { t: "note", variant: "warn", html: "<b>Use 4 spaces, and never mix tabs with spaces.</b> Python treats them as different, so a file that looks perfectly lined up on your screen can still fail with <code>IndentationError</code>. Every editor can be set to insert spaces when you press Tab — set it once and forget it." },
+
+  { t: "h2", n: "5", text: "Asking a person for something" },
+  { t: "p", html: "<code>input()</code> stops the program, waits for someone to type, and hands you whatever they typed." },
+  { t: "code", file: "greet.py", code: "name = input(\"What is your name? \")\nprint(\"Hello,\", name)\nprint(\"Welcome to DataMarg\")" },
+  { t: "note", variant: "warn", html: "<b>Remember this one — it causes more beginner bugs than anything else:</b> <code>input()</code> always gives you <b>text</b>, even when the person types a number. <code>input()</code> then <code>+ 1</code> will not add — you will meet this properly in the next lesson." },
+
+  { t: "h2", n: "6", text: "Why data science picked Python" },
+  { t: "p", html: "There are hundreds of programming languages. Data science settled on this one for three reasons, and none of them is that it is easy:" },
+  { t: "dtypes", items: [
+    { tag: "1", name: "It reads like English", desc: "Less time fighting syntax means more time on the actual problem.", ex: "if marks > 40:" },
+    { tag: "2", name: "The libraries are already written", desc: "pandas, NumPy, Matplotlib, scikit-learn — decades of work you import in one line.", ex: "import pandas as pd" },
+    { tag: "3", name: "It is what the jobs ask for", desc: "Job posts, interviews and existing company code are overwhelmingly Python.", ex: "python, sql, pandas" },
+  ]},
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> a data analyst's day is mostly reading a file, cleaning it, calculating something, and reporting the answer. Every one of those is a Python line you will have written by the end of this track — and the shape you saw in Code Runner (store → calculate → show) is the shape of nearly all of it." },
+
+  { t: "h2", n: "7", text: "Putting it together" },
+  { t: "worked", title: "a small report that greets a student and shows their total", goal: "Read it before writing anything. Notice the <b>order</b>: nothing appears on screen until a <code>print()</code> runs, and nothing can be used before it has been stored.", steps: [
+    { label: "1. Show a heading first", code: "print(\"--- Result ---\")", why: "Python runs top to bottom, so whatever you print first appears first. Order on the page is order on the screen." },
+    { label: "2. Store what you were given", code: "name = \"Priya\"\nmarks = 78", why: "These two lines print nothing. Storing is silent — that is normal, not a mistake." },
+    { label: "3. Work out the new value", code: "total = marks + 12", why: "The right side is calculated first (78 + 12), and only then does 90 go into <code>total</code>." },
+    { label: "4. Show the result", code: "print(name, \"scored\", total)", why: "<code>print()</code> with commas puts a space between each piece automatically." },
+  ], full: "print(\"--- Result ---\")   # 1. heading\nname = \"Priya\"            # 2. store\nmarks = 78\ntotal = marks + 12        # 3. calculate\nprint(name, \"scored\", total)  # 4. show", output: "--- Result ---\nPriya scored 90" },
+  { t: "faded", intro: "Same shape, different student. Three pieces are missing — fill them in and press Check.", code: "print(\"--- Result ---\")\nname = \"Rahul\"\nmarks = 64\ntotal = marks ____ 6\n____(name, \"scored\", ____)", blanks: [
+    { answer: "+", accept: ["plus"], why: "Step 3 — the bonus is added to the marks before anything is stored." },
+    { answer: "print", why: "Step 4 — nothing reaches the screen without <code>print()</code>." },
+    { answer: "total", why: "Print the value you just calculated, not <code>marks</code> — otherwise the bonus never shows up." },
+  ], output: "--- Result ---\nRahul scored 70" },
+
+  { t: "trace", intro: "Nothing here prints anything — it all happens silently in memory, which is exactly the point. Work out the values in your head, line by line.", code: "total = 10\nbonus = 5\ntotal = total + bonus\nbonus = 0", steps: [
+    { q: "After line 3, <code>total</code> is", answer: "15", why: "Line 3 works out the right side first using the current values (10 + 5), then stores 15 back under <code>total</code>." },
+    { q: "After line 4, <code>bonus</code> is", answer: "0", why: "Line 4 simply replaces what <code>bonus</code> held. Straightforward — it is the next one that catches people." },
+    { q: "After line 4, <code>total</code> is", answer: "15", why: "This is the one worth pausing on. Line 3 already <b>finished</b> the calculation and stored 15. Changing <code>bonus</code> afterwards does not reach back and redo it — Python ran that line once, top to bottom, and moved on." },
+  ]},
+
+  { t: "drills", intro: "Short ones. Type each yourself before opening the answer.", items: [
+    { task: "Print your own name.", code: "print(\"Aarav\")", out: "Aarav" },
+    { task: "Print the number <code>2026</code> — no quotes needed.", code: "print(2026)", out: "2026" },
+    { task: "Print two lines, <code>one</code> then <code>two</code>.", code: "print(\"one\")\nprint(\"two\")", out: "one\ntwo" },
+    { task: "Print <code>Total: 90</code> using a comma between the two pieces.", code: "print(\"Total:\", 90)", out: "Total: 90" },
+    { task: "Store 50 in <code>marks</code>, then print it.", code: "marks = 50\nprint(marks)", out: "50" },
+    { task: "Write a line that Python ignores completely.", code: "# Python never reads this line\nprint(\"but it reads this\")", out: "but it reads this" },
+    { task: "Print <code>Passed</code> only when <code>marks</code> is above 40 — mind the indentation.", code: "marks = 55\nif marks > 40:\n    print(\"Passed\")", out: "Passed" },
+    { task: "Ask for a name and greet the person.", code: "name = input(\"Name: \")\nprint(\"Hi\", name)" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "print(Hello)", why: "Without quotes, Python thinks <code>Hello</code> is the <b>name of something you stored earlier</b>, goes looking for it, and finds nothing — <code>NameError</code>. Text always needs quotes.", fix: "print(\"Hello\")" },
+    { bad: "Print(\"Hello\")", why: "Python is <b>case-sensitive</b>. The instruction is <code>print</code>, all lowercase. <code>Print</code> is simply a name it has never heard of.", fix: "print(\"Hello\")" },
+    { bad: "print(\"Hello\"", why: "The bracket was opened and never closed, so Python keeps reading, looking for the end, and runs off the edge of the file — <code>SyntaxError</code>. Every <code>(</code> needs its <code>)</code>.", fix: "print(\"Hello\")" },
+    { bad: "marks = 85\n    print(marks)", why: "Nothing was indented <i>into</i> — there is no <code>if</code> or loop above it — so that extra space is meaningless and Python refuses the file with <code>IndentationError</code>. Indent only when a line belongs inside something.", fix: "marks = 85\nprint(marks)" },
+  ]},
+
+  { t: "debug", intro: "This is meant to print a student's total. It crashes instead. Read it and decide what is wrong before opening the fix.", code: "print(\"Total:\", total)\ntotal = 90", symptom: "NameError: name 'total' is not defined", q: "Both lines look fine on their own. So what is wrong?", fix: "total = 90\nprint(\"Total:\", total)", why: "Nothing is wrong with either line — the <b>order</b> is wrong. Python runs top to bottom, so on line 1 it goes looking for <code>total</code>, which does not exist yet; line 2 has not happened. <b>You must store something before you can use it.</b> Reading errors as \"what had not happened yet?\" will solve a surprising share of your bugs." },
+
+  { t: "recap", items: [
+    "A program is a recipe: steps in order, followed <b>exactly</b>",
+    "Python reads <b>top to bottom, one line at a time</b> — store before you use",
+    "Storing is silent; only <code>print()</code> puts anything on screen",
+    "<code>#</code> starts a comment — explain <i>why</i>, not <i>what</i>",
+    "Indentation is a rule, not a style — 4 spaces, never mixed with tabs",
+    "<code>input()</code> hands you <b>text</b>, always",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Is Python compiled or interpreted?", a: "Python is <b>interpreted</b> — the interpreter reads and executes your file line by line, rather than turning the whole program into a machine-code executable first. That is why an error on line 40 still lets lines 1–39 run, and why Python is quick to try things in but slower than C at raw number-crunching." },
+    { level: "beginner", q: "What does <code>print()</code> do, and what does it return?", a: "It writes its arguments to standard output, separated by spaces. Worth knowing: it <b>returns <code>None</code></b>, so <code>x = print(\"hi\")</code> puts <code>None</code> in <code>x</code>. Printing and returning are different things — a beginner mixing them up is very common." },
+    { level: "beginner", q: "Why does Python use indentation instead of braces?", a: "Readability by force. In other languages the indentation is a convention that can lie about what the braces actually say; in Python the layout <i>is</i> the structure, so code that looks nested is nested. The trade-off is that whitespace becomes a real error, and mixing tabs with spaces breaks files." },
+    { level: "intermediate", q: "Why does data science use Python rather than a faster language?", a: "Because the slow part is rarely Python. Libraries like NumPy and pandas do the heavy work in compiled C under a Python surface, so you get C speed with Python's readability. Add the ecosystem — scikit-learn, Matplotlib, Jupyter — and the productivity wins by far more than the raw language speed loses." },
+    { level: "intermediate", q: "What is the difference between a script and a program here?", a: "In practice, very little in Python — a <code>.py</code> file you run top to bottom is usually called a script. The distinction that matters at work is whether the file is a one-off (a script you ran once to clean a dataset) or something re-run and depended on, which needs structure, tests and a <code>if __name__ == \"__main__\"</code> entry point." },
+  ]},
+];
+
 const L1 = [
   { t: "objectives", items: [
     "Create a variable and store a value in it",
@@ -767,7 +873,8 @@ const L38 = [
 /* Lessons + their problems                                            */
 /* ------------------------------------------------------------------ */
 const pythonLessons = [
-  { slug: "variables-data-types", order: 1, title: "Variables & Data Types", minutes: 18, content: L1, problems: [
+  { slug: "getting-started", order: 1, title: "Meet Python — Your First Program", minutes: 14, content: L0, problems: [] },
+  { slug: "variables-data-types", order: 2, title: "Variables & Data Types", minutes: 18, content: L1, problems: [
     P(1, "marks-total", "Marks Total", "add_marks",
       "Ek student ke do subjects ke marks tumhe **string** me diye hain (jaise `\"85\"`). Ek function `add_marks(a, b)` banao jo dono ko **int** me convert kare aur **total** return kare.",
       [{ input: 'a="85", b="5"', output: "90" }, { input: 'a="40", b="60"', output: "100" }],
@@ -793,7 +900,7 @@ const pythonLessons = [
       ["Multiplication ka operator * hai.", "return length * width"],
       ["variables","int"]) ]},
 
-  { slug: "operators", order: 2, title: "Operators & Expressions", minutes: 10, content: L2, problems: [
+  { slug: "operators", order: 3, title: "Operators & Expressions", minutes: 10, content: L2, problems: [
     P(1, "add-two", "Add Two Numbers", "add_two",
       "Ek function `add_two(a, b)` banao jo dono numbers ka sum return kare.",
       [{ input: "a=3, b=4", output: "7" }, { input: "a=10, b=-2", output: "8" }],
@@ -813,7 +920,7 @@ const pythonLessons = [
       [{ args: [2,3], expected: 8 }, { args: [5,2], expected: 25 }, { args: [10,0], expected: 1 }],
       ["Power ka operator ** hai.", "return base ** exp"], ["power"]) ]},
 
-  { slug: "conditionals", order: 3, title: "Conditionals (if / else)", minutes: 11, content: L3, problems: [
+  { slug: "conditionals", order: 4, title: "Conditionals (if / else)", minutes: 11, content: L3, problems: [
     P(1, "grade", "Grade Calculator", "grade",
       "Ek function `grade(marks)` banao jo return kare: `\"A\"` (>=90), `\"B\"` (>=75), `\"C\"` (>=40), warna `\"Fail\"`.",
       [{ input: "marks=95", output: '"A"' }, { input: "marks=50", output: '"C"' }],
@@ -835,7 +942,7 @@ const pythonLessons = [
       [{ args: [5], expected: "positive" }, { args: [-3], expected: "negative" }, { args: [0], expected: "zero" }],
       ["Teen cases: >0, <0, aur baaki (0).", "if / elif / else."], ["conditionals"]) ]},
 
-  { slug: "loops", order: 4, title: "Loops (for / while)", minutes: 12, content: L4, problems: [
+  { slug: "loops", order: 5, title: "Loops (for / while)", minutes: 12, content: L4, problems: [
     P(1, "sum-to-n", "Sum 1 to N", "sum_to_n",
       "Ek function `sum_to_n(n)` banao jo `1 + 2 + ... + n` ka total return kare.",
       [{ input: "n=5", output: "15" }, { input: "n=10", output: "55" }],
@@ -855,7 +962,7 @@ const pythonLessons = [
       [{ args: [5], expected: 120 }, { args: [0], expected: 1 }, { args: [3], expected: 6 }],
       ["r = 1 se shuru karo, loop me multiply karo.", "range(1, n+1)."], ["loops"]) ]},
 
-  { slug: "lists-tuples", order: 5, title: "Lists & Tuples", minutes: 13, content: L5, problems: [
+  { slug: "lists-tuples", order: 6, title: "Lists & Tuples", minutes: 13, content: L5, problems: [
     P(1, "list-sum", "List Sum", "list_sum",
       "Ek function `list_sum(nums)` banao jo list ke saare numbers ka total return kare.",
       [{ input: "nums=[1,2,3]", output: "6" }, { input: "nums=[10]", output: "10" }],
@@ -875,7 +982,7 @@ const pythonLessons = [
       [{ args: [[1,2,3]], expected: [3,2,1] }, { args: [["a","b"]], expected: ["b","a"] }, { args: [[7]], expected: [7] }],
       ["Slicing trick: lst[::-1] list ulta kar deta hai.", "Ya reversed() + list()."], ["lists","slicing"]) ]},
 
-  { slug: "dicts-sets", order: 6, title: "Dictionaries & Sets", minutes: 12, content: L6, problems: [
+  { slug: "dicts-sets", order: 7, title: "Dictionaries & Sets", minutes: 12, content: L6, problems: [
     P(1, "get-value", "Get Value by Key", "get_value",
       "Ek function `get_value(d, key)` banao jo dict `d` me se `key` ki value return kare.",
       [{ input: 'd={"a":1,"b":2}, key="b"', output: "2" }],
@@ -895,7 +1002,7 @@ const pythonLessons = [
       [{ args: [{ a: 1 }, "a"], expected: true }, { args: [{ a: 1 }, "z"], expected: false }],
       ["'in' operator check karta hai.", "return key in d"], ["dict"]) ]},
 
-  { slug: "functions", order: 7, title: "Functions", minutes: 14, content: L7, problems: [
+  { slug: "functions", order: 8, title: "Functions", minutes: 14, content: L7, problems: [
     P(1, "square", "Square a Number", "square",
       "Ek function `square(n)` banao jo n ka square (n × n) return kare.",
       [{ input: "n=5", output: "25" }, { input: "n=-3", output: "9" }],
@@ -915,7 +1022,7 @@ const pythonLessons = [
       [{ args: [0], expected: 32 }, { args: [100], expected: 212 }, { args: [37], expected: 98.6 }],
       ["Formula seedha lagao: c * 9/5 + 32.", "BODMAS ka dhyaan — * aur / pehle."], ["functions","math"]) ]},
 
-  { slug: "strings", order: 8, title: "String Methods & Slicing", minutes: 12, content: L8, problems: [
+  { slug: "strings", order: 9, title: "String Methods & Slicing", minutes: 12, content: L8, problems: [
     P(1, "reverse-string", "Reverse a String", "reverse_string",
       "Ek function `reverse_string(s)` banao jo string ko ulta karke return kare.",
       [{ input: 's="abc"', output: '"cba"' }, { input: 's="hello"', output: '"olleh"' }],
@@ -935,7 +1042,7 @@ const pythonLessons = [
       [{ args: ["banana", "a"], expected: 3 }, { args: ["hello", "l"], expected: 2 }, { args: ["abc", "z"], expected: 0 }],
       ["String me built-in .count() hota hai.", "return s.count(ch)"], ["strings"]) ]},
 
-  { slug: "comprehensions", order: 9, title: "List Comprehensions", minutes: 11, content: L9, problems: [
+  { slug: "comprehensions", order: 10, title: "List Comprehensions", minutes: 11, content: L9, problems: [
     P(1, "squares", "List of Squares", "squares",
       "Ek function `squares(n)` banao jo `[1², 2², ..., n²]` list return kare. Comprehension use karo.",
       [{ input: "n=3", output: "[1, 4, 9]" }, { input: "n=4", output: "[1, 4, 9, 16]" }],
@@ -955,7 +1062,7 @@ const pythonLessons = [
       [{ args: [["hi","bye"]], expected: [2,3] }, { args: [["a"]], expected: [1] }, { args: [[]], expected: [] }],
       ["[len(w) for w in words].", "len() se length milti hai."], ["comprehension"]) ]},
 
-  { slug: "oop", order: 10, title: "Classes & Objects (OOP)", minutes: 15, content: L10, problems: [
+  { slug: "oop", order: 11, title: "Classes & Objects (OOP)", minutes: 15, content: L10, problems: [
     P(1, "circle-area", "Circle Area (OOP)", "circle_area",
       "`Circle` class me `area()` method poora karo — area = `3 × r × r` (pi ko 3 maan lo). `circle_area(r)` uska area deta hai.",
       [{ input: "r=2", output: "12" }, { input: "r=3", output: "27" }],
@@ -971,7 +1078,7 @@ const pythonLessons = [
       [{ args: ["Bruno"], expected: "Bruno woof" }, { args: ["Tommy"], expected: "Tommy woof" }],
       ["self.name se naam milega.", 'return self.name + " woof"'], ["oop","class"]) ]},
 
-  { slug: "error-handling", order: 11, title: "Error Handling (try / except)", minutes: 11, content: L11, problems: [
+  { slug: "error-handling", order: 12, title: "Error Handling (try / except)", minutes: 11, content: L11, problems: [
     P(1, "safe-divide", "Safe Divide", "safe_divide",
       "Ek function `safe_divide(a, b)` banao jo `a / b` return kare, par agar `b` zero hai to `0` return kare (try/except).",
       [{ input: "a=10, b=2", output: "5" }, { input: "a=5, b=0", output: "0" }],
@@ -985,11 +1092,11 @@ const pythonLessons = [
       [{ args: ["42"], expected: 42 }, { args: ["abc"], expected: 0 }, { args: ["7"], expected: 7 }],
       ["try me int(s).", "except ValueError: return 0"], ["error-handling"]) ]},
 
-  { slug: "file-handling", order: 12, title: "File Handling", minutes: 9, content: L12, problems: [] },
+  { slug: "file-handling", order: 13, title: "File Handling", minutes: 9, content: L12, problems: [] },
 
-  { slug: "modules", order: 13, title: "Modules, pip & venv", minutes: 9, content: L13, problems: [] },
+  { slug: "modules", order: 14, title: "Modules, pip & venv", minutes: 9, content: L13, problems: [] },
 
-  { slug: "numbers-math", order: 14, title: "Numbers & the Math Module", minutes: 11, content: L14, problems: [
+  { slug: "numbers-math", order: 15, title: "Numbers & the Math Module", minutes: 11, content: L14, problems: [
     P(1, "round-to", "Round a Number", "round_to",
       "Ek function `round_to(n, digits)` banao jo `n` ko `digits` decimal tak round kare.",
       [{ input: "n=3.14159, digits=2", output: "3.14" }, { input: "n=5.6789, digits=2", output: "5.68" }],
@@ -1003,7 +1110,7 @@ const pythonLessons = [
       [{ args: [5, 8], expected: 3 }, { args: [10, 3], expected: 7 }, { args: [4, 4], expected: 0 }],
       ["abs() value ko positive bana deta hai.", "return abs(a - b)"], ["numbers","math"]) ]},
 
-  { slug: "string-formatting", order: 15, title: "String Formatting & f-strings", minutes: 11, content: L15, problems: [
+  { slug: "string-formatting", order: 16, title: "String Formatting & f-strings", minutes: 11, content: L15, problems: [
     P(1, "greet-age", "Greet with Age", "greet_age",
       "Ek function `greet_age(name, age)` banao jo `<name> is <age>` return kare. f-string use karo.",
       [{ input: 'name="Freya", age=21', output: '"Freya is 21"' }],
@@ -1023,7 +1130,7 @@ const pythonLessons = [
       [{ args: ["hello world"], expected: "Hello World" }, { args: ["data science"], expected: "Data Science" }],
       [".title() method use karo.", "return s.title()"], ["strings"]) ]},
 
-  { slug: "booleans", order: 16, title: "Booleans & Truthiness", minutes: 10, content: L16, problems: [
+  { slug: "booleans", order: 17, title: "Booleans & Truthiness", minutes: 10, content: L16, problems: [
     P(1, "is-adult", "Is Adult?", "is_adult",
       "Ek function `is_adult(age)` banao jo `True` return kare agar age 18 ya usse zyada hai.",
       [{ input: "age=18", output: "True" }, { input: "age=10", output: "False" }],
@@ -1037,7 +1144,7 @@ const pythonLessons = [
       [{ args: [""], expected: true }, { args: ["a"], expected: false }, { args: ["hi"], expected: false }],
       ["len(s) length deta hai.", "len(s) == 0 hone pe khaali."], ["boolean","strings"]) ]},
 
-  { slug: "lambda", order: 17, title: "Lambda Functions", minutes: 11, content: L17, problems: [
+  { slug: "lambda", order: 18, title: "Lambda Functions", minutes: 11, content: L17, problems: [
     P(1, "square-all", "Square All (map + lambda)", "square_all",
       "Ek function `square_all(nums)` banao jo har number ka square return kare. `map` + `lambda` use karo.",
       [{ input: "nums=[1,2,3]", output: "[1, 4, 9]" }, { input: "nums=[0,5]", output: "[0, 25]" }],
@@ -1051,9 +1158,9 @@ const pythonLessons = [
       [{ args: [["bbb","a","cc"]], expected: ["a","cc","bbb"] }, { args: [["hi","a"]], expected: ["a","hi"] }],
       ["sorted(words, key=lambda w: len(w)).", "key batata hai kis hisaab se sort karna."], ["lambda"]) ]},
 
-  { slug: "scope", order: 18, title: "Variable Scope", minutes: 9, content: L18, problems: [] },
+  { slug: "scope", order: 19, title: "Variable Scope", minutes: 9, content: L18, problems: [] },
 
-  { slug: "json", order: 19, title: "Working with JSON", minutes: 11, content: L19, problems: [
+  { slug: "json", order: 20, title: "Working with JSON", minutes: 11, content: L19, problems: [
     P(1, "get-json-field", "Read a JSON Field", "get_json_field",
       "Ek function `get_json_field(text, key)` banao jo JSON string me se `key` ki value return kare.",
       [{ input: 'text=\'{"name":"Freya","age":21}\', key="age"', output: "21" }],
@@ -1061,9 +1168,9 @@ const pythonLessons = [
       [{ args: ['{"name":"Freya","age":21}', "age"], expected: 21 }, { args: ['{"city":"Delhi"}', "city"], expected: "Delhi" }],
       ["json.loads(text) se string -> dict.", "Phir data[key]."], ["json"]) ]},
 
-  { slug: "dates", order: 20, title: "Dates & Time", minutes: 9, content: L20, problems: [] },
+  { slug: "dates", order: 21, title: "Dates & Time", minutes: 9, content: L20, problems: [] },
 
-  { slug: "more-operators", order: 21, title: "More Operators (Membership, Identity, Bitwise)", minutes: 10, content: L21, problems: [
+  { slug: "more-operators", order: 22, title: "More Operators (Membership, Identity, Bitwise)", minutes: 10, content: L21, problems: [
     P(1, "is-member", "Is Member?", "is_member",
       "Ek function `is_member(item, items)` banao jo `True` return kare agar `item` list `items` me hai.",
       [{ input: "item=2, items=[1,2,3]", output: "True" }, { input: "item=5, items=[1,2]", output: "False" }],
@@ -1077,7 +1184,7 @@ const pythonLessons = [
       [{ args: [6, 3], expected: 2 }, { args: [12, 10], expected: 8 }, { args: [5, 5], expected: 5 }],
       ["& operator bitwise AND karta hai.", "return a & b"], ["operators","bitwise"]) ]},
 
-  { slug: "match-case", order: 22, title: "Match-Case Statement", minutes: 9, content: L22, problems: [
+  { slug: "match-case", order: 23, title: "Match-Case Statement", minutes: 9, content: L22, problems: [
     P(1, "day-type", "Weekend or Weekday", "day_type",
       "Ek function `day_type(day)` banao jo `\"weekend\"` return kare agar day `\"Sat\"` ya `\"Sun\"` hai, warna `\"weekday\"`. match-case use karo.",
       [{ input: 'day="Sat"', output: '"weekend"' }, { input: 'day="Mon"', output: '"weekday"' }],
@@ -1085,7 +1192,7 @@ const pythonLessons = [
       [{ args: ["Sat"], expected: "weekend" }, { args: ["Sun"], expected: "weekend" }, { args: ["Mon"], expected: "weekday" }],
       ['case "Sat" | "Sun": weekend.', "case _: default (weekday)."], ["match"]) ]},
 
-  { slug: "advanced-functions", order: 23, title: "Advanced Functions (*args, recursion)", minutes: 13, content: L23, problems: [
+  { slug: "advanced-functions", order: 24, title: "Advanced Functions (*args, recursion)", minutes: 13, content: L23, problems: [
     P(1, "sum-all", "Sum All (*args)", "sum_all",
       "Ek function `sum_all(*args)` banao jo koi bhi ginti ke numbers ka total return kare.",
       [{ input: "1, 2, 3", output: "6" }, { input: "5, 10", output: "15" }],
@@ -1099,7 +1206,7 @@ const pythonLessons = [
       [{ args: [5], expected: 120 }, { args: [0], expected: 1 }, { args: [4], expected: 24 }],
       ["Base case: if n <= 1: return 1.", "Warna n * factorial_rec(n-1)."], ["functions","recursion"]) ]},
 
-  { slug: "inheritance", order: 24, title: "OOP: Inheritance", minutes: 13, content: L24, problems: [
+  { slug: "inheritance", order: 25, title: "OOP: Inheritance", minutes: 13, content: L24, problems: [
     P(1, "cat-speak", "Inherit & Override", "cat_speak",
       "`Cat` class `Animal` se inherit karti hai. `speak()` ko override karo taaki wo `<name> says meow` return kare.",
       [{ input: 'name="Kitty"', output: '"Kitty says meow"' }],
@@ -1108,7 +1215,7 @@ const pythonLessons = [
       [{ args: ["Kitty"], expected: "Kitty says meow" }, { args: ["Tom"], expected: "Tom says meow" }],
       ["self.name Animal se inherit hua hai.", 'return self.name + " says meow"'], ["oop","inheritance"]) ]},
 
-  { slug: "encapsulation", order: 25, title: "OOP: Encapsulation & Polymorphism", minutes: 12, content: L25, problems: [
+  { slug: "encapsulation", order: 26, title: "OOP: Encapsulation & Polymorphism", minutes: 12, content: L25, problems: [
     P(1, "final-balance", "Bank Account (Encapsulation)", "final_balance",
       "`Account` class me `deposit()` method poora karo (private `__balance` me amount jodo). `final_balance(deposits)` saare deposits ke baad balance deta hai.",
       [{ input: "deposits=[100,50,25]", output: "175" }],
@@ -1117,7 +1224,7 @@ const pythonLessons = [
       [{ args: [[100,50,25]], expected: 175 }, { args: [[10]], expected: 10 }, { args: [[]], expected: 0 }],
       ["self.__balance += amt.", "Private variable methods se hi badalta hai."], ["oop","encapsulation"]) ]},
 
-  { slug: "dunder-methods", order: 26, title: "OOP: Static & Dunder Methods", minutes: 12, content: L26, problems: [
+  { slug: "dunder-methods", order: 27, title: "OOP: Static & Dunder Methods", minutes: 12, content: L26, problems: [
     P(1, "team-size", "Team Size (__len__)", "team_size",
       "`Team` class ka `__len__` method poora karo taaki `len(team)` members ki ginti de. `team_size(members)` use call karta hai.",
       [{ input: 'members=["a","b","c"]', output: "3" }],
@@ -1126,7 +1233,7 @@ const pythonLessons = [
       [{ args: [["a","b","c"]], expected: 3 }, { args: [[]], expected: 0 }, { args: [["x"]], expected: 1 }],
       ["__len__ me return len(self.members).", "len(obj) automatically __len__ call karta hai."], ["oop","dunder"]) ]},
 
-  { slug: "iterators-generators", order: 27, title: "Iterators & Generators", minutes: 13, content: L27, problems: [
+  { slug: "iterators-generators", order: 28, title: "Iterators & Generators", minutes: 13, content: L27, problems: [
     P(1, "first-squares", "Generator: First Squares", "first_squares",
       "Ek generator `gen_squares(n)` complete karo jo 1² se n² tak yield kare. `first_squares(n)` unki list deta hai.",
       [{ input: "n=3", output: "[1, 4, 9]" }, { input: "n=4", output: "[1, 4, 9, 16]" }],
@@ -1135,9 +1242,9 @@ const pythonLessons = [
       [{ args: [3], expected: [1,4,9] }, { args: [1], expected: [1] }, { args: [4], expected: [1,4,9,16] }],
       ["yield i * i loop ke andar.", "yield ek-ek value deta hai."], ["generators"]) ]},
 
-  { slug: "decorators", order: 28, title: "Decorators & Closures", minutes: 12, content: L28, problems: [] },
+  { slug: "decorators", order: 29, title: "Decorators & Closures", minutes: 12, content: L28, problems: [] },
 
-  { slug: "regex", order: 29, title: "Regular Expressions (RegEx)", minutes: 12, content: L29, problems: [
+  { slug: "regex", order: 30, title: "Regular Expressions (RegEx)", minutes: 12, content: L29, problems: [
     P(1, "find-numbers", "Find All Numbers", "find_numbers",
       "Ek function `find_numbers(text)` banao jo text me se saare numbers (as strings) ki list return kare. `re.findall` use karo.",
       [{ input: 'text="Order 123, bill 456"', output: '["123", "456"]' }],
@@ -1151,10 +1258,10 @@ const pythonLessons = [
       [{ args: ["abc7"], expected: true }, { args: ["abc"], expected: false }, { args: ["12"], expected: true }],
       ['re.search(r"\\d", s) digit dhoondta hai.', "bool() se True/False."], ["regex"]) ]},
 
-  { slug: "concurrency", order: 30, title: "Concurrency — Threads & Processes", minutes: 11, content: L30, problems: [] },
-  { slug: "async", order: 31, title: "Async Programming (asyncio)", minutes: 11, content: L31, problems: [] },
+  { slug: "concurrency", order: 31, title: "Concurrency — Threads & Processes", minutes: 11, content: L30, problems: [] },
+  { slug: "async", order: 32, title: "Async Programming (asyncio)", minutes: 11, content: L31, problems: [] },
 
-  { slug: "collections-itertools", order: 32, title: "collections, itertools & functools", minutes: 13, content: L32, problems: [
+  { slug: "collections-itertools", order: 33, title: "collections, itertools & functools", minutes: 13, content: L32, problems: [
     P(1, "top-item", "Most Common Item", "top_item",
       "Ek function `top_item(items)` banao jo list me sabse zyada baar aane wala item return kare. `Counter` use karo.",
       [{ input: 'items=["a","b","a"]', output: '"a"' }, { input: "items=[1,2,2,3,2]", output: "2" }],
@@ -1174,12 +1281,12 @@ const pythonLessons = [
       [{ args: [[1,2,3,4]], expected: 24 }, { args: [[5]], expected: 5 }, { args: [[2,3]], expected: 6 }],
       ["reduce(lambda a,b: a*b, nums).", "reduce list ko ek value me samet deta hai."], ["functools"]) ]},
 
-  { slug: "system-modules", order: 33, title: "System Modules — os, sys, pathlib", minutes: 10, content: L33, problems: [] },
-  { slug: "data-persistence", order: 34, title: "CSV, Pickle & SQLite", minutes: 11, content: L34, problems: [] },
-  { slug: "testing", order: 35, title: "Testing — unittest & pytest", minutes: 11, content: L35, problems: [] },
-  { slug: "debugging-logging", order: 36, title: "Debugging & Logging", minutes: 10, content: L36, problems: [] },
+  { slug: "system-modules", order: 34, title: "System Modules — os, sys, pathlib", minutes: 10, content: L33, problems: [] },
+  { slug: "data-persistence", order: 35, title: "CSV, Pickle & SQLite", minutes: 11, content: L34, problems: [] },
+  { slug: "testing", order: 36, title: "Testing — unittest & pytest", minutes: 11, content: L35, problems: [] },
+  { slug: "debugging-logging", order: 37, title: "Debugging & Logging", minutes: 10, content: L36, problems: [] },
 
-  { slug: "clean-code", order: 37, title: "Clean Code — PEP 8, Docstrings, Type Hints", minutes: 11, content: L37, problems: [
+  { slug: "clean-code", order: 38, title: "Clean Code — PEP 8, Docstrings, Type Hints", minutes: 11, content: L37, problems: [
     P(1, "repeat-text", "Repeat with Type Hints", "repeat",
       "Ek function `repeat(text, n)` banao (type hints ke saath) jo `text` ko `n` baar repeat kare.",
       [{ input: 'text="ab", n=3', output: '"ababab"' }, { input: 'text="x", n=0', output: '""' }],
@@ -1187,7 +1294,7 @@ const pythonLessons = [
       [{ args: ["ab", 3], expected: "ababab" }, { args: ["x", 0], expected: "" }, { args: ["hi", 2], expected: "hihi" }],
       ["String ko number se multiply kar sakte ho: text * n.", 'text="x", n=0 pe khaali string.'], ["clean-code"]) ]},
 
-  { slug: "project-git", order: 38, title: "Project Structure & Git Basics", minutes: 10, content: L38, problems: [] },
+  { slug: "project-git", order: 39, title: "Project Structure & Git Basics", minutes: 10, content: L38, problems: [] },
 ];
 
 /* ===================== STATISTICS lessons ===================== */
@@ -2161,6 +2268,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "getting-started": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which line prints the word <b>Hello</b> on screen?", options: ["print(Hello)", "print(\"Hello\")", "Print(\"Hello\")", "say(\"Hello\")"], correct: 1, why: "Text needs quotes, and the instruction is lowercase <code>print</code>. Without quotes Python looks for something you stored called <code>Hello</code>." },
+    { level: "easy", q: "In what order does Python run the lines of your file?", options: ["Top to bottom, one at a time", "All at once", "Bottom to top", "Whatever order is fastest"], correct: 0, why: "Top to bottom, finishing each line before starting the next. Most beginner bugs come from forgetting this." },
+    { level: "easy", q: "What does Python do with a line starting with <code>#</code>?", options: ["Prints it", "Ignores it completely", "Treats it as an error", "Runs it twice"], correct: 1, why: "It is a comment — a note for humans. Python skips it entirely." },
+    // Medium — apply it
+    { level: "medium", q: "<code>marks = 90</code> is the whole program. What appears on screen?", options: ["90", "marks = 90", "Nothing", "An error"], correct: 2, why: "Storing is <b>silent</b>. Without a <code>print()</code>, a working program can look like it did nothing at all." },
+    { level: "medium", q: "<code>print(\"Total:\", 90)</code> — what exactly is printed?", options: ["Total:90", "Total: 90", "\"Total:\" 90", "Total:, 90"], correct: 1, why: "A comma inside <code>print()</code> prints each piece with a <b>single space</b> between them." },
+    { level: "medium", q: "<code>x = 5</code>, then <code>x = x + 3</code>, then <code>print(x)</code>. What prints?", options: ["5", "8", "53", "x + 3"], correct: 1, why: "The right side is worked out first (5 + 3), and 8 goes back under the same name." },
+    { level: "medium", q: "A person types <code>7</code> at <code>age = input()</code>. What is in <code>age</code>?", options: ["the number 7", "the text \"7\"", "nothing", "an error"], correct: 1, why: "<code>input()</code> <b>always</b> hands back text, even when it looks like a number. This is the single most common beginner bug." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "<code>print(\"Total:\", 90)</code> vs <code>print(\"Total:\" + 90)</code> — what happens with the second one?", options: ["Same output", "Total:90", "TypeError", "Total: 90"], correct: 2, why: "A comma prints things side by side whatever their type. A <code>+</code> means <i>join</i>, and you cannot join text to a number — <code>TypeError</code>. Same-looking line, completely different rule." },
+    { level: "hard", q: "<code>x = print(\"hi\")</code>. What ends up inside <code>x</code>?", options: ["\"hi\"", "None", "an error", "an empty string"], correct: 1, why: "<code>print()</code> puts text on screen and <b>returns <code>None</code></b>. Showing something and handing something back are different actions — a distinction that catches people well past their first week." },
+    { level: "hard", q: "A file has <code>print(total)</code> on line 1 and <code>total = 5</code> on line 2. What happens?", options: ["Prints 5", "Prints nothing", "NameError", "Prints None"], correct: 2, why: "Both lines are fine; the <b>order</b> is wrong. On line 1 nothing called <code>total</code> exists yet, so Python stops with <code>NameError</code>. You must store before you use." },
+  ],
   "variables-data-types": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which line correctly stores the text <b>Priya</b> in a variable?", options: ["name = Priya", "name = \"Priya\"", "\"name\" = Priya", "Priya = name"], correct: 1, why: "Text must sit inside quotes, and the <b>name goes on the left</b> of <code>=</code>. Without quotes Python would look for a variable called <code>Priya</code>." },

@@ -20,7 +20,9 @@ const run = (code) => {
   const f = join(dir, "s.py");
   writeFileSync(f, code, "utf8");
   try {
-    return { ok: true, out: execFileSync("python", [f], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).replace(/\r\n/g, "\n").trimEnd() };
+    // Canned stdin so snippets that demonstrate input() actually run instead of
+    // dying on EOF. Anything claiming output must match what these lines produce.
+    return { ok: true, out: execFileSync("python", [f], { encoding: "utf8", input: "Aarav\n21\n85\n", stdio: ["pipe", "pipe", "pipe"] }).replace(/\r\n/g, "\n").trimEnd() };
   } catch (e) {
     const err = (e.stderr || "").replace(/\r\n/g, "\n").trimEnd();
     return { ok: false, out: err.split("\n").filter(Boolean).pop() ?? "" };

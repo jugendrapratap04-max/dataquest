@@ -33,22 +33,29 @@ async function main() {
   const coverage = Object.fromEntries(TAUGHT.map((t) => [t, 0]));
   let total = 0;
 
-  for (const lessons of Object.values(trackLessons)) {
+  let created = 0;
+  for (const [trackSlug, lessons] of Object.entries(trackLessons)) {
     for (const l of lessons ?? []) {
+      const data = {
+        order: l.order, // kept in sync, so inserting a lesson can renumber the rest
+        title: l.title,
+        minutes: l.minutes,
+        level: l.level || "Beginner",
+        contentJson: JSON.stringify(lessonContent(l)),
+      };
       const existing = await prisma.lesson.findUnique({ where: { slug: l.slug } });
       if (!existing) {
-        missing.push(l.slug);
+        // Adding a lesson used to mean a destructive re-seed. It doesn't now.
+        const track = await prisma.track.findUnique({ where: { slug: trackSlug }, select: { id: true } });
+        if (!track) { missing.push(l.slug); continue; }
+        await prisma.lesson.create({ data: { ...data, slug: l.slug, trackId: track.id } });
+        created++;
+        total++;
+        const newTypes = new Set(l.content.map((b) => b.t));
+        for (const t of TAUGHT) if (newTypes.has(t)) coverage[t]++;
         continue;
       }
-      await prisma.lesson.update({
-        where: { slug: l.slug },
-        data: {
-          title: l.title,
-          minutes: l.minutes,
-          level: l.level || "Beginner",
-          contentJson: JSON.stringify(lessonContent(l)),
-        },
-      });
+      await prisma.lesson.update({ where: { slug: l.slug }, data });
       updated++;
       total++;
       const types = new Set(l.content.map((b) => b.t));
@@ -56,8 +63,8 @@ async function main() {
     }
   }
 
-  console.log(`✅ lessons refreshed: ${updated}`);
-  if (missing.length) console.log(`⚠  in seed but not in db: ${missing.join(", ")}`);
+  console.log(`✅ lessons refreshed: ${updated}${created ? `, created: ${created}` : ""}`);
+  if (missing.length) console.log(`⚠  in seed but no such track in db: ${missing.join(", ")}`);
 
   console.log(`\n   Teaching-block coverage (of ${total} lessons):`);
   for (const t of TAUGHT) {

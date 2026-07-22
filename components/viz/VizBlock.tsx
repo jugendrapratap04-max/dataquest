@@ -1,5 +1,6 @@
 "use client";
 
+import { CodeRunner } from "./CodeRunner";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -16,6 +17,7 @@ import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
 const REGISTRY: Record<string, React.ComponentType> = {
+  "code-runner": CodeRunner,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
