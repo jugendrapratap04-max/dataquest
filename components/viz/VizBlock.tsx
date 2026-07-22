@@ -5,6 +5,7 @@ import { ConditionFlow } from "./ConditionFlow";
 import { CollectionBench } from "./CollectionBench";
 import { FunctionMachine } from "./FunctionMachine";
 import { FloatLab } from "./FloatLab";
+import { FileLab } from "./FileLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -26,6 +27,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "collection-bench": CollectionBench,
   "function-machine": FunctionMachine,
   "float-lab": FloatLab,
+  "file-lab": FileLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
