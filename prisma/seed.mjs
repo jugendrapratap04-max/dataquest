@@ -724,28 +724,82 @@ const L13 = [
 ];
 
 const L14 = [
-  { t: "objectives", items: ["<b>int</b> vs <b>float</b>, aur <code>/</code> vs <code>//</code> vs <code>%</code>","<code>**</code>, <code>round</code>, <code>abs</code>","<code>math</code> module","Float ki <b>precision</b> gotcha (money ka khatra)"] },
-  { t: "hook", q: "Python se poochho: <code>0.1 + 0.2</code> kitna hai? Tumhe lagega <code>0.3</code>. Par Python bolta hai <code>0.30000000000000004</code> — kyun??", why: "Ye bug nahi — computer decimals ko <b>binary</b> me store karta hai, aur kuch decimals (jaise 0.1) binary me poore fit hi nahi hote. Isiliye <b>paison ka hisaab float se karna khatarnaak</b> hai." },
-  { t: "def", term: "int vs float", en: "int is a whole number with unlimited size; float is a decimal number stored in limited binary precision.", hi: "<b>int</b> = poora number (<code>7</code>, <code>-100</code>), Python me kitna bhi bada. <b>float</b> = decimal (<code>3.14</code>), par <b>seemit precision</b> ke saath — isiliye kabhi-kabhi thoda-sa off hota hai." },
-  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> saara analysis numbers pe — averages, totals, percentages, growth. Do cheezein rozana: (1) <code>/</code> hamesha <b>float</b> deta hai, <code>//</code> <b>poora</b> (floor); (2) float precision — money/exact hisaab me <code>round()</code> lagao ya <code>Decimal</code> use karo, warna paise idhar-udhar." },
-  { t: "h2", n: "1", text: "Division ki teen shaklein" },
-  { t: "p", html: "<code>/</code> normal bhaag (<b>float</b> deta hai, hamesha). <code>//</code> <b>floor</b> division (neeche wala poora). <code>%</code> <b>remainder</b> (bacha hua). <code>**</code> power." },
-  { t: "code", file: "div.py", code: "print(7 / 2)     # 3.5   (float)\nprint(7 // 2)    # 3     (poora, neeche)\nprint(7 % 2)     # 1     (remainder)\nprint(2 ** 5)    # 32    (power)", output: "3.5\n3\n1\n32" },
-  { t: "h2", n: "2", text: "round, abs aur math" },
-  { t: "p", html: "<code>round(x, n)</code> n decimal tak, <code>abs(x)</code> minus hataao. <code>import math</code> se <code>sqrt</code>, <code>ceil</code> (upar), <code>floor</code> (neeche), <code>pi</code>." },
-  { t: "code", file: "math.py", code: "import math\nprint(round(3.567, 1))  # 3.6\nprint(abs(-7))          # 7\nprint(math.sqrt(16))    # 4.0\nprint(math.ceil(4.1))   # 5", output: "3.6\n7\n4.0\n5" },
-  { t: "think", q: "<code>10 / 3</code> aur <code>10 // 3</code> — dono ka result kya hoga?", a: "<code>10 / 3</code> → <b>3.3333…</b> (float, poora bhaag). <code>10 // 3</code> → <b>3</b> (floor, neeche wala poora — decimal phenk deta hai). Yaad rakho: <code>/</code> hamesha float, <code>//</code> poora." },
-  { t: "analogy", concept: "Float precision", real: "Decimal me 1/3", html: "Tum decimal me <code>1/3</code> likho to <code>0.3333…</code> — kabhi khatam nahi hota, isliye tum kahin round kar dete ho, thoda error aa jaata hai. Computer ke saath yahi hai par <b>binary</b> me — <code>0.1</code> jaise numbers binary me theek fit nahi hote, isliye halka-sa off. Bug nahi, ganit ki majboori." },
+  { t: "objectives", items: [
+    "Tell <code>int</code> from <code>float</code>, and <code>/</code> from <code>//</code> from <code>%</code>",
+    "Use <code>round</code>, <code>abs</code>, <code>**</code> and the <code>math</code> module",
+    "Understand why <code>0.1 + 0.2</code> is not <code>0.3</code>",
+    "Compare decimals safely — and know when money needs <code>Decimal</code>",
+  ]},
+  { t: "hook", q: "Ask Python what <code>0.1 + 0.2</code> is. You expect <code>0.3</code>. It answers <code>0.30000000000000004</code>. Why?", why: "This is not a bug and not a Python quirk — every language storing decimals in binary does it. Some decimals, 0.1 among them, simply <b>cannot be written exactly</b> in binary, the same way 1/3 cannot be written exactly in decimal. Which is why doing money in floats is genuinely dangerous." },
+  { t: "think", q: "If <code>0.1</code> cannot be stored exactly, why does <code>print(0.1)</code> show a clean <code>0.1</code>?", a: "Because printing <b>rounds for you</b>. Python shows the shortest text that would read back as the same stored number, so the mess stays hidden until two of them are added and the error becomes big enough to surface.<br/><br/>That is what makes this bug so slippery: everything looks perfect right up until a comparison fails or a total is a paisa short." },
+
+  { t: "h2", n: "1", text: "The three kinds of division" },
+  { t: "def", term: "int and float", en: "An int is a whole number of unlimited size; a float is a decimal number held in limited binary precision.", hi: "In plain words: an <code>int</code> is exact however large it gets, while a <code>float</code> trades exactness for the ability to hold decimals." },
+  { t: "p", html: "<code>/</code> is ordinary division and <b>always</b> gives a float. <code>//</code> is floor division — the whole number below. <code>%</code> is the remainder, and <code>**</code> is power." },
+  { t: "code", file: "div.py", code: "print(7 / 2)    # ordinary division -> always a float\nprint(7 // 2)   # floor division -> the whole number below\nprint(7 % 2)    # remainder\nprint(2 ** 5)   # power\n\nprint(-7 // 2)  # careful: floor means DOWN, not towards zero", output: "3.5\n3\n1\n32\n-4" },
+  { t: "note", variant: "warn", html: "That last line surprises people. <code>//</code> rounds <b>down</b>, not towards zero — so <code>-7 // 2</code> is <code>-4</code>, not <code>-3</code>. If you want to chop towards zero, use <code>int(-7 / 2)</code>." },
+
+  { t: "h2", n: "2", text: "round, abs and the math module" },
+  { t: "p", html: "<code>round(x, n)</code> rounds to n decimal places, <code>abs(x)</code> drops the sign. Import <code>math</code> for the rest." },
+  { t: "code", file: "math_tools.py", code: "import math\n\nprint(round(3.567, 1))\nprint(abs(-7))\nprint(math.sqrt(16))\nprint(math.ceil(4.1))    # always up\nprint(math.floor(4.9))   # always down", output: "3.6\n7\n4.0\n5\n4" },
+  { t: "note", variant: "tip", html: "<b>Python rounds half to even.</b> <code>round(2.5)</code> is <code>2</code> and <code>round(3.5)</code> is <code>4</code> — not a mistake, it is banker's rounding, which stops a long column of numbers drifting upward. It catches almost everybody once." },
+
+  { t: "h2", n: "3", text: "Why decimals go wrong" },
+  { t: "p", html: "Binary can write halves and quarters perfectly. It cannot finish writing 0.1, so what gets stored is very slightly off — and two slightly-off numbers add up to a visibly-off answer." },
+  { t: "viz", name: "float-lab" },
+  { t: "p", html: "Press <b>Add 0.1</b> ten times in that panel. Each step looks fine, and the total lands on <code>0.9999999999999999</code>. Nothing errored, nothing warned you, and <code>total == 1.0</code> is now <code>False</code>." },
+  { t: "analogy", concept: "Float precision", real: "Writing 1/3 in decimal", html: "Write <code>1/3</code> as a decimal and you get 0.3333… forever, so you stop somewhere and accept a tiny error. The computer has the same problem in <b>binary</b>, just with different fractions — 0.1 is one it cannot finish. It is arithmetic, not a defect." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is a real bug class in data work. A revenue total summed over a million float rows can land a fraction off, and a report that must balance to the paisa will not. The rule money systems follow: <b>store amounts as integer paise</b>, or use <code>Decimal</code> — and never compare two floats with <code>==</code>." },
+
+  { t: "h2", n: "4", text: "Comparing decimals safely" },
+  { t: "code", file: "compare.py", code: "total = 0.1 + 0.2\n\nprint(total == 0.3)                 # False — do not do this\nprint(round(total, 2) == 0.3)       # fine for a fixed number of places\n\nimport math\nprint(math.isclose(total, 0.3))     # the general answer", output: "False\nTrue\nTrue" },
+  { t: "note", variant: "tip", html: "<code>math.isclose</code> is the one to reach for when you do not know the scale in advance — it compares relative to the size of the numbers instead of a fixed number of decimals." },
+
+  { t: "trace", intro: "Work out each value. Two of these are the traps.", code: "a = 7 / 2\nb = 7 // 2\nc = -7 // 2\nd = round(2.5)\ne = 0.1 + 0.2 == 0.3", steps: [
+    { q: "After line 2, <code>b</code> is", answer: "3", why: "Floor division throws the decimal away and hands back an int — 3, not 3.5." },
+    { q: "After line 3, <code>c</code> is", answer: "-4", why: "Floor means <b>down the number line</b>, not towards zero. -3.5 rounds down to -4. This is the one people get wrong." },
+    { q: "After line 4, <code>d</code> is", answer: "2", why: "Banker's rounding: a value sitting exactly halfway goes to the nearest <b>even</b> number, so 2.5 becomes 2 while 3.5 becomes 4." },
+    { q: "After line 5, <code>e</code> is", answer: "False", why: "0.1 + 0.2 stores as 0.30000000000000004, so the comparison is False. Correct arithmetic, wrong test." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Print <code>17 / 5</code> and <code>17 // 5</code> side by side.", code: "print(17 / 5, 17 // 5)", out: "3.4 3" },
+    { task: "Find the remainder when 17 is divided by 5.", code: "print(17 % 5)", out: "2" },
+    { task: "Check whether a number is even, using <code>%</code>.", code: "n = 14\nprint(n % 2 == 0)", out: "True" },
+    { task: "Raise 3 to the power 4.", code: "print(3 ** 4)", out: "81" },
+    { task: "Round 3.14159 to two decimal places.", code: "print(round(3.14159, 2))", out: "3.14" },
+    { task: "Get the square root of 144.", code: "import math\nprint(math.sqrt(144))", out: "12.0" },
+    { task: "Round 4.1 up, and 4.9 down.", code: "import math\nprint(math.ceil(4.1), math.floor(4.9))", out: "5 4" },
+    { task: "Show that <code>0.1 + 0.2 == 0.3</code> is False.", code: "print(0.1 + 0.2 == 0.3)", out: "False" },
+    { task: "Compare the same two numbers <b>safely</b>.", code: "import math\nprint(math.isclose(0.1 + 0.2, 0.3))", out: "True" },
+    { task: "Split 1000 rupees between 3 people — whole rupees each, and what is left over.", code: "each = 1000 // 3\nleft = 1000 % 3\nprint(each, left)", out: "333 1" },
+  ]},
+
   { t: "mistakes", items: [
-    { bad: "total = 0.1 + 0.2\nif total == 0.3:      # kabhi True nahi!\n    print(\"exact\")", why: "<code>0.1 + 0.2</code> == <code>0.30000000000000004</code>, to <code>== 0.3</code> <b>False</b> hai. Floats ko seedha <code>==</code> se compare mat karo.", fix: "if round(total, 2) == 0.3:\n    print(\"close enough\")" },
-    { bad: "half = 7 / 2\nprint(items[half])    # TypeError", why: "<code>/</code> hamesha <b>float</b> deta hai (<code>3.5</code>), aur index int hona chahiye. Poora chahiye to <code>//</code>.", fix: "half = 7 // 2   # 3 (int)\nprint(items[half])" },
-  ] },
-  { t: "recap", items: ["<code>/</code> float, <code>//</code> poora (floor), <code>%</code> remainder, <code>**</code> power","<code>round</code>, <code>abs</code>, aur <code>math</code>: <code>sqrt/ceil/floor/pi</code>","float ki precision seemit — <code>==</code> se compare mat karo","paise/exact hisaab me <code>round()</code> ya <code>Decimal</code>"] },
+    { bad: "total = 0.1 + 0.2\nif total == 0.3:\n    print(\"exact\")", why: "<code>0.1 + 0.2</code> is stored as <code>0.30000000000000004</code>, so this is <b>never</b> True. Never compare two floats with <code>==</code>.", fix: "import math\nif math.isclose(total, 0.3):\n    print(\"close enough\")" },
+    { bad: "half = 7 / 2\nprint(items[half])", why: "<code>/</code> always produces a float, and an index has to be an int — so this raises <code>TypeError</code>. Use <code>//</code> when you want a position.", fix: "half = 7 // 2\nprint(items[half])" },
+    { bad: "price = 0.1\ntotal = 0\nfor _ in range(10):\n    total += price", why: "Ten additions of a value binary cannot store exactly leaves <code>0.9999999999999999</code>. On an invoice that is a paisa short, and no error is raised to tell you.", fix: "paise = 10\ntotal = 0\nfor _ in range(10):\n    total += paise   # keep money in whole paise" },
+    { bad: "print(round(2.5))", why: "This gives <b>2</b>, not 3. Python rounds a value sitting exactly halfway to the nearest <b>even</b> number. It is deliberate — it stops long columns of numbers drifting upward — but it surprises everyone the first time.", fix: "import math\nprint(math.floor(2.5 + 0.5))   # if you really want half-up" },
+  ]},
+
+  { t: "debug", intro: "A bill for five items at ₹19.99 each. The total prints perfectly and the check still fails. Read it before opening the fix.", code: "price = 19.99\ntotal = 0\n\nfor _ in range(5):\n    total += price\n\nprint(\"Total:\", round(total, 2))\nprint(total == 99.95)", symptom: "prints Total: 99.95 and then False", q: "The total on screen is exactly right. So how can the comparison be False?", fix: "import math\n\nprice = 19.99\ntotal = 0\n\nfor _ in range(5):\n    total += price\n\nprint(\"Total:\", round(total, 2))\nprint(math.isclose(total, 99.95))", why: "You are looking at two different numbers. <code>round(total, 2)</code> makes a <b>tidied copy</b> for display — that is the 99.95 on screen. The comparison on the next line tests the <b>stored</b> value, which is <code>99.94999999999999</code>, because five additions of a number binary cannot hold exactly have drifted. So the screen and the verdict disagree, and the bug looks impossible. <code>math.isclose</code> asks the question you actually meant. For money the sturdier answer is to keep amounts in whole paise as integers, or use <code>Decimal</code>." },
+
+  { t: "recap", items: [
+    "<code>/</code> always gives a float · <code>//</code> floors <b>downward</b> · <code>%</code> is the remainder · <code>**</code> is power",
+    "<code>-7 // 2</code> is <code>-4</code> — floor means down, not towards zero",
+    "<code>round(2.5)</code> is <code>2</code> — Python rounds half to even",
+    "Binary cannot store 0.1 exactly, so decimal sums drift",
+    "Never compare floats with <code>==</code> — use <code>round()</code> or <code>math.isclose()</code>",
+    "For money: whole paise as integers, or <code>Decimal</code>",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>/</code> aur <code>//</code> me farak?", a: "<code>/</code> normal bhaag, hamesha <b>float</b> (<code>7/2 = 3.5</code>). <code>//</code> <b>floor</b> division — neeche wala poora number (<code>7//2 = 3</code>). Index/count ke liye <code>//</code>." },
-    { level: "intermediate", q: "<code>0.1 + 0.2 == 0.3</code> False kyun?", a: "Floats binary me store hote hain aur <code>0.1</code>/<code>0.2</code> binary me poore represent nahi hote — halki si error rehti hai (<code>0.3000…04</code>). Isiliye floats ko <code>==</code> se nahi, <code>round()</code> ya <code>math.isclose()</code> se compare karo." },
-    { level: "intermediate", q: "Paison ke liye float kyun nahi?", a: "Precision errors jud ke paise idhar-udhar kar dete hain. Money ke liye Python ka <code>decimal.Decimal</code> (exact decimal) ya integer paise (100 = ₹1) use karo." },
-  ] },
+    { level: "beginner", q: "What is the difference between <code>/</code> and <code>//</code>?", a: "<code>/</code> is true division and always returns a float, even for <code>4 / 2</code>, which gives <code>2.0</code>. <code>//</code> is floor division and returns the whole number below the result — an int when both operands are ints. Indexes and counts want <code>//</code>." },
+    { level: "beginner", q: "Why does <code>0.1 + 0.2 == 0.3</code> return False?", a: "Floats are stored in binary, and 0.1 has no exact binary representation — the same way 1/3 has no exact decimal one. The stored value is fractionally off, so the sum is <code>0.30000000000000004</code>. Compare with <code>math.isclose</code> or round both sides first." },
+    { level: "intermediate", q: "How would you handle currency in Python?", a: "Not with floats. Either store amounts as integers in the smallest unit — paise rather than rupees — or use <code>decimal.Decimal</code>, which does base-10 arithmetic exactly and lets you set the rounding rule. Financial code that sums millions of float rows will not balance, and the discrepancy is very hard to trace afterwards." },
+    { level: "intermediate", q: "What does <code>round(2.5)</code> return, and why?", a: "<code>2</code>. Python uses banker's rounding — a value exactly halfway goes to the nearest even number — so <code>round(2.5)</code> is 2 and <code>round(3.5)</code> is 4. Always rounding halves up biases a long column of numbers upward; alternating removes that bias." },
+    { level: "intermediate", q: "Is there a limit to how large an <code>int</code> can be in Python?", a: "No fixed limit — Python ints grow to whatever memory allows, so <code>2 ** 1000</code> is exact. Floats are the opposite: fixed 64-bit precision, roughly 15–17 significant digits, and they lose exactness well before ints do. It is one reason to keep counters and money as ints." },
+  ]},
 ];
 const L15 = [
   { t: "objectives", items: ["f-strings se dynamic strings","Numbers format karna (decimals, comma)","Escape characters"] },
@@ -2531,10 +2585,19 @@ export const QUIZZES = {
     { q: "<code>None</code> check karne ka <b>sahi</b> tareeka?", options: ["x == None", "x is None", "x = None", "None(x)"], correct: 1, why: "<code>is None</code> — identity check, sahi aur tez. <code>== None</code> style-wise galat." },
   ],
   "numbers-math": [
-    { q: "<code>print(10 // 3)</code> ka output?", options: ["3.33", "3", "4", "1"], correct: 1, why: "<code>//</code> = floor division — neeche wala <b>poora</b> number, 3." },
-    { q: "<code>print(10 % 3)</code> — kya aayega?", options: ["3", "1", "0", "3.33"], correct: 1, why: "<code>%</code> = remainder. 10 ÷ 3 = 3, bacha <b>1</b>." },
-    { q: "<code>print(0.1 + 0.2 == 0.3)</code> — result?", options: ["True", "False", "error", "0.3"], correct: 1, why: "Float precision — <code>0.1 + 0.2</code> = <code>0.3000…04</code>, to <code>== 0.3</code> <b>False</b>. Floats ko <code>==</code> se mat compare karo." },
-    { q: "<code>7 / 2</code> ka type aur value?", options: ["int, 3", "float, 3.5", "int, 4", "str"], correct: 1, why: "<code>/</code> <b>hamesha float</b> — <code>3.5</code>. Poora chahiye to <code>//</code>." },
+    // Easy
+    { level: "easy", q: "What is <code>10 // 3</code>?", options: ["3.33", "3", "4", "1"], correct: 1, why: "Floor division keeps the whole number below the answer, and drops the decimal entirely." },
+    { level: "easy", q: "What is <code>10 % 3</code>?", options: ["3", "1", "0", "3.33"], correct: 1, why: "<code>%</code> is the remainder: 3 goes into 10 three times with 1 left over." },
+    { level: "easy", q: "What is <code>2 ** 10</code>?", options: ["20", "100", "1024", "512"], correct: 2, why: "<code>**</code> is power, not multiplication — 2 raised to the 10th is 1024." },
+    // Medium
+    { level: "medium", q: "What is the type and value of <code>4 / 2</code>?", options: ["int, 2", "float, 2.0", "int, 2.0", "float, 2"], correct: 1, why: "<code>/</code> always produces a float, even when the division is exact. Use <code>//</code> if you need an int." },
+    { level: "medium", q: "<code>half = 7 / 2</code>, then <code>items[half]</code>. What happens?", options: ["Works fine", "TypeError — an index must be an int", "Returns None", "Rounds automatically"], correct: 1, why: "<code>7 / 2</code> is <code>3.5</code>, a float, and a list index has to be an int. <code>7 // 2</code> gives 3." },
+    { level: "medium", q: "What does <code>print(0.1 + 0.2 == 0.3)</code> show?", options: ["True", "False", "0.3", "an error"], correct: 1, why: "The sum is stored as <code>0.30000000000000004</code>, so the comparison is False. Correct arithmetic, wrong kind of test." },
+    { level: "medium", q: "Which is the safe way to compare two decimals?", options: ["a == b", "math.isclose(a, b)", "str(a) == str(b)", "a - b == 0"], correct: 1, why: "<code>math.isclose</code> compares relative to the size of the numbers, so it works without you having to guess how many decimal places matter." },
+    // Hard
+    { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
+    { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2", "2.5", "an error"], correct: 1, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
+    { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "The printed value was rounded; the stored one has drifted", "== does not work on floats at all", "The total is a string"], correct: 1, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
   ],
 };
 

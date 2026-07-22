@@ -1428,3 +1428,20 @@ select.inp { cursor:pointer; }
 .fm-val.screen { color:var(--good); }
 .fm-val.given { color:var(--accent-2); }
 .fm-val.none { color:var(--bad); }
+
+/* ---- Float Lab viz (binary floating point) ---- */
+.fl-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+@media (max-width:620px){ .fl-grid { grid-template-columns:minmax(0,1fr); } }
+.fl-cell { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:11px 13px; min-width:0; }
+.fl-cap { font-size:10.5px; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px; }
+.fl-val { font-family:var(--mono); font-size:14px; font-weight:700; word-break:break-all; animation:viz-land .24s ease-out; }
+.fl-val.off { color:var(--bad); }
+.fl-val.same { color:var(--good); }
+.fl-drift { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
+.fl-steps { display:flex; flex-wrap:wrap; gap:6px; min-height:30px; align-items:center; }
+.fl-step { font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:6px; background:var(--panel-2); border:1px solid var(--line); }
+.fl-step.off { color:var(--bad); border-color:color-mix(in srgb,var(--bad) 35%,transparent); }
+.fl-step.just { animation:viz-land .22s ease-out, viz-glow .9s ease-out .22s; }
+.fl-empty { font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+.fl-verdict { font-family:var(--mono); font-size:12px; color:var(--bad); align-self:center; }
+.ss-preset.on { border-color:var(--accent); color:var(--accent-2); }
