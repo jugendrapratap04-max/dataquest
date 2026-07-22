@@ -168,7 +168,8 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
   .side-backdrop { display:block; position:fixed; inset:0; z-index:85;
     background:rgba(8,10,16,.5); opacity:0; pointer-events:none; transition:opacity .22s ease; }
   .side-backdrop.show { opacity:1; pointer-events:auto; }
-  .wrap { padding-top:62px; }
+  /* .wrap's padding-top for the hamburger is set below, after .wrap itself —
+     see the note there. Putting it here looked right and did nothing. */
 }
 /* Reduced motion: neutralise every decorative transition and animation across
    the app — the drawer slide, card pop-ins, the focus-ring easing, hovers, the
@@ -207,6 +208,34 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .streak-chip b { font-family:var(--mono); color:var(--accent-2); } .streak-chip .lbl { font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent-2); opacity:.85; }
 .icon-btn { width:40px; height:40px; border-radius:10px; display:grid; place-items:center; background:var(--panel); border:1px solid var(--line); color:var(--ink-soft); }
 .icon-btn svg { width:18px; height:18px; }
+
+/* Phone shell. Both rules below have to sit *after* the ones they override —
+   a media query adds no specificity, so the plain .wrap/.search rules above
+   would win on source order alone. (The drawer block earlier in this file set
+   .wrap's padding-top and silently lost that fight.)
+
+   1. The hamburger is fixed at the top-left, so the page needs to start below
+      it — otherwise it sits on top of the page title.
+   2. The topbar actions can't share a line with the title: search asks for
+      180px, the guest CTA another 140, the theme swatch 40 — 381px of
+      unshrinkable stuff in a 315px column, which pushed the document out to
+      498px and made every page scroll sideways on a phone. So the actions drop
+      to their own full-width row and the search flexes down instead of forcing
+      the page wider. Under 420px "Sign in" goes too: the drawer's guestbox
+      already carries it ("I already have one") and the search needs the 52px
+      more than we do. */
+@media (max-width:900px){
+  .wrap { padding-top:62px; }
+}
+@media (max-width:760px){
+  .topbar { flex-wrap:wrap; }
+  .top-actions { width:100%; margin-left:0; }
+  .search-wrap { flex:1 1 auto; min-width:0; }
+  .search { min-width:0; }
+}
+@media (max-width:420px){
+  .gc-link { display:none; }
+}
 
 .card { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); }
 .pad { padding:20px; }

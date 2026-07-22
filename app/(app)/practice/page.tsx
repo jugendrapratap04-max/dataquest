@@ -39,7 +39,12 @@ export default async function PracticeList() {
             <h2>{g.d}</h2>
             <span className="cnt">{g.items.filter((p) => solvedIds.has(p.id)).length} / {g.items.length} solved</span>
           </div>
-          <div className="arena" style={{ gridTemplateColumns: "1fr 1fr" }}>
+          {/* No inline grid-template-columns here: .arena already sets two
+              columns, and an inline copy beat the "@media (max-width:560px)"
+              rule that collapses them — so on a phone the cards stayed in two
+              columns, each one wider than half the screen, and the whole page
+              scrolled sideways. */}
+          <div className="arena">
             {g.items.map((p) => (
               <Link key={p.id} href={`/practice/${p.slug}`} className="pcard">
                 <div className="top">
