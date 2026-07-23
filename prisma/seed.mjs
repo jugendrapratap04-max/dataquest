@@ -1382,15 +1382,81 @@ const L20 = [
 ];
 
 const L21 = [
-  { t: "objectives", items: ["Membership (in / not in) operators","Identity (is / is not)","Bitwise operators ki jhalak"] },
-  { t: "h2", n: "1", text: "Membership — in / not in" },
-  { t: "p", html: "<code>in</code> check karta hai koi value list/string me hai ya nahi — jawaab bool. <code>not in</code> ulta." },
-  { t: "code", file: "member.py", code: "nums = [1, 2, 3]\nprint(2 in nums)        # True\nprint(5 not in nums)    # True\nprint(\"a\" in \"cat\")     # True", output: "True\nTrue\nTrue" },
-  { t: "h2", n: "2", text: "Identity aur Bitwise" },
-  { t: "p", html: "<code>is</code> check karta hai do naam <b>same object</b> hain ya nahi (value nahi). <b>Bitwise</b> operators bits pe kaam karte hain: <code>&amp;</code> and, <code>|</code> or, <code>^</code> xor." },
-  { t: "code", file: "identity.py", code: "print(6 & 3)   # 2  (bitwise and)\nprint(6 | 3)   # 7  (bitwise or)\nx = None\nprint(x is None)  # True", output: "2\n7\nTrue" },
-  { t: "note", variant: "tip", html: "<b>Yaad rakho:</b> value compare karne ko <code>==</code>, object identity ke liye <code>is</code>. <code>None</code> hamesha <code>is None</code> se check karo." },
-  { t: "recap", items: ["in / not in — membership","is / is not — same object?","& | ^ — bitwise","None check: 'is None'"] },
+  { t: "objectives", items: [
+    "Test membership with <code>in</code> and <code>not in</code>",
+    "Know that <code>in</code> on a dict checks its <b>keys</b>, not its values",
+    "Tell <code>is</code> (same object) from <code>==</code> (same value) — and when each is right",
+    "Use <code>is None</code> for the singletons <code>None</code>, <code>True</code>, <code>False</code>",
+    "Read the bitwise operators <code>&amp;</code> <code>|</code> <code>^</code> as working bit by bit",
+  ]},
+  { t: "hook", q: "You compare two shopping carts that hold exactly the same items with <code>cart_a is cart_b</code>, expecting <code>True</code>. You get <code>False</code> — even though every item matches. Meanwhile <code>==</code> would have said <code>True</code>. What is <code>is</code> actually asking?", why: "<code>is</code> does not ask &quot;are these equal?&quot; It asks &quot;are these the <b>same object</b> — the same box in memory?&quot; Two carts built separately are two different boxes that happen to hold identical things, so <code>is</code> is <code>False</code> and <code>==</code> is <code>True</code>. Using <code>is</code> to compare values is a bug that passes every test where the two happen to be the same object, then fails the day they are not." },
+  { t: "think", q: "Why should you always write <code>if x is None</code>, never <code>if x == None</code>?", a: "Because there is only ever <b>one</b> <code>None</code> in a running program — it is a singleton. So &quot;is this value None?&quot; is genuinely an identity question, and <code>is</code> answers it directly and fast.<br/><br/><code>==</code> can also be <i>fooled</i>: a class can define <code>__eq__</code> so that <code>x == None</code> returns True for something that is not None. <code>is None</code> cannot be overridden, so it is both the correct question and the safe one." },
+
+  { t: "h2", n: "1", text: "Membership: in and not in" },
+  { t: "def", term: "Membership test", en: "The in operator returns True if a value is found within a container — a list, string, tuple, set or dictionary — and not in is its negation.", hi: "In plain words: <code>in</code> poochta hai \"kya ye cheez andar hai?\" and gives back a plain <code>True</code> or <code>False</code>." },
+  { t: "p", html: "<code>in</code> works across containers. On a string it checks for a substring; on a list, tuple or set it checks the elements." },
+  { t: "code", file: "member.py", code: "nums = [1, 2, 3]\nprint(2 in nums)          # is 2 an element?\nprint(5 not in nums)      # is 5 absent?\n\nprint(\"cat\" in \"category\") # substring test\nprint(\"x\" in \"category\")", output: "True\nTrue\nTrue\nFalse" },
+  { t: "note", variant: "warn", html: "<b>On a dict, <code>in</code> checks the KEYS, not the values.</b> <code>\"name\" in user</code> is True if <code>name</code> is a key; <code>\"Freya\" in user</code> is False even when Freya is a value. To search values, write <code>in user.values()</code>." },
+
+  { t: "h2", n: "2", text: "Identity vs equality: is vs ==" },
+  { t: "def", term: "is versus ==", en: "== compares values — are these two things equal? is compares identity — are these two names bound to the very same object in memory?", hi: "In plain words: <code>==</code> \"same value?\" poochta hai, <code>is</code> \"same object?\". Do alag lists same values ki ho sakti hain (<code>==</code> True) but same object nahi (<code>is</code> False)." },
+  { t: "code", file: "identity.py", code: "a = [1, 2, 3]\nb = [1, 2, 3]     # a separate list with equal contents\nc = a             # the SAME list, another name\n\nprint(a == b)     # equal values?\nprint(a is b)     # same object?\nprint(a is c)     # same object?", output: "True\nFalse\nTrue" },
+  { t: "note", variant: "key", html: "📌 <b>The rule:</b> use <code>==</code> to compare <b>values</b> — which is what you want almost every time. Use <code>is</code> only to compare <b>identity</b>, and in practice that means one thing: checking against the singletons <code>None</code>, <code>True</code> and <code>False</code>. <code>if x is None</code>, never <code>if x == None</code>." },
+  { t: "analogy", concept: "is vs ==", real: "Two identical twins", html: "Two identical twins are <b>equal</b> in every feature you can list — <code>==</code> would say True. But they are still two different people, not one — so <code>is</code> says False. <code>c = a</code> is not a twin; it is the <b>same</b> person answering to a second name, so <code>a is c</code> is True. <code>==</code> looks at the features; <code>is</code> asks whether it is literally the same individual." },
+
+  { t: "h2", n: "3", text: "Bitwise operators" },
+  { t: "p", html: "A whole number is a row of bits, and <code>&amp;</code>, <code>|</code>, <code>^</code> combine two numbers one bit-column at a time. <code>&amp;</code> keeps a 1 only where <b>both</b> have 1; <code>|</code> where <b>either</b> does; <code>^</code> where they <b>differ</b>." },
+  { t: "viz", name: "bitwise-lab" },
+  { t: "code", file: "bitwise.py", code: "print(6 & 3)    # 110 & 011 -> 010\nprint(6 | 3)    # 110 | 011 -> 111\nprint(6 ^ 3)    # 110 ^ 011 -> 101\nprint(5 << 1)   # shift left: 101 -> 1010\nprint(20 >> 2)  # shift right: 10100 -> 101", output: "2\n7\n5\n10\n5" },
+  { t: "note", variant: "tip", html: "<b>Where you meet these:</b> permission flags packed into one integer (read=4, write=2, execute=1, combined with <code>|</code> and tested with <code>&amp;</code>), and later NumPy/Pandas, where <code>&amp;</code> and <code>|</code> — not <code>and</code>/<code>or</code> — combine boolean masks like <code>df[(df.a &gt; 0) &amp; (df.b &lt; 5)]</code>." },
+
+  { t: "trace", intro: "Membership, identity, and a bit of bitwise. Work out each value.", code: "user = {\"name\": \"Freya\", \"age\": 21}\nnums = [1, 2, 3]\n\na = \"name\" in user\nb = \"Freya\" in user\nc = 5 not in nums\nx = [1, 2]\ny = [1, 2]\nd = x == y\ne = x is y\nf = 6 & 3", steps: [
+    { q: "After line 4, <code>a</code> is", answer: "True", why: "<code>in</code> on a dict tests the keys, and <code>name</code> is a key." },
+    { q: "After line 5, <code>b</code> is", answer: "False", why: "<code>Freya</code> is a value, not a key — and <code>in</code> only looks at keys. This is the dict trap." },
+    { q: "After line 6, <code>c</code> is", answer: "True", why: "5 is not an element of <code>nums</code>, so <code>not in</code> is True." },
+    { q: "After line 9, <code>d</code> is", answer: "True", why: "<code>x</code> and <code>y</code> hold equal contents, and <code>==</code> compares value." },
+    { q: "After line 10, <code>e</code> is", answer: "False", why: "They are two separate lists — equal in value but different objects — so <code>is</code> is False." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Check whether 3 is in a list.", code: "nums = [1, 2, 3, 4]\nprint(3 in nums)", out: "True" },
+    { task: "Check whether a substring is inside a word.", code: "print(\"pen\" in \"open\")", out: "True" },
+    { task: "Check whether a key is in a dict.", code: "user = {\"name\": \"Freya\", \"age\": 21}\nprint(\"age\" in user)", out: "True" },
+    { task: "Show that a value is NOT found by <code>in</code> on a dict.", code: "user = {\"name\": \"Freya\"}\nprint(\"Freya\" in user)", out: "False" },
+    { task: "Search a dict's values instead of its keys.", code: "user = {\"name\": \"Freya\"}\nprint(\"Freya\" in user.values())", out: "True" },
+    { task: "Compare two equal lists with <code>==</code> and with <code>is</code>.", code: "a = [1, 2]\nb = [1, 2]\nprint(a == b, a is b)", out: "True False" },
+    { task: "Check a value against None the correct way.", code: "x = None\nprint(x is None)", out: "True" },
+    { task: "Bitwise AND of 12 and 10.", code: "print(12 & 10)", out: "8" },
+    { task: "Bitwise OR and XOR of 6 and 3.", code: "print(6 | 3, 6 ^ 3)", out: "7 5" },
+    { task: "Double a number by shifting its bits left once.", code: "print(5 << 1)", out: "10" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "if user_input == None:\n    print(\"nothing entered\")", why: "<code>== None</code> works by luck and can be fooled by a class that defines <code>__eq__</code>. <code>None</code> is a singleton, so the correct and safe test is identity.", fix: "if user_input is None:\n    print(\"nothing entered\")" },
+    { bad: "config_a = [\"dark\", \"en\"]\nconfig_b = [\"dark\", \"en\"]\nif config_a is config_b:\n    print(\"same settings\")", why: "<code>is</code> asks whether they are the same object, and two separately-built lists never are — so this is <code>False</code> even though the settings match. Value comparison needs <code>==</code>.", fix: "config_a = [\"dark\", \"en\"]\nconfig_b = [\"dark\", \"en\"]\nif config_a == config_b:\n    print(\"same settings\")" },
+    { bad: "user = {\"name\": \"Freya\", \"age\": 21}\nif \"Freya\" in user:\n    print(\"found the user\")", why: "<code>in</code> on a dict checks keys, and <code>Freya</code> is a value — so this is False and the message never prints. Search <code>user.values()</code> to look at values.", fix: "user = {\"name\": \"Freya\", \"age\": 21}\nif \"Freya\" in user.values():\n    print(\"found the user\")" },
+    { bad: "flags = 4\nif flags and 2:\n    print(\"write enabled\")", why: "<code>and</code> is logical, not bitwise — <code>flags and 2</code> just evaluates to 2 (truthy), so this is always True. To test a bit you need <code>&amp;</code>.", fix: "flags = 4\nif flags & 2:\n    print(\"write enabled\")" },
+  ]},
+
+  { t: "debug", intro: "A settings screen checks whether the user's chosen theme matches the saved one before showing 'no changes'. The values are identical, yet it always reports a change. Read it before opening the fix.", code: "def unchanged(current, saved):\n    return current is saved\n\nsaved = [\"dark\", \"english\"]\ncurrent = [\"dark\", \"english\"]   # rebuilt from the form, same values\n\nprint(\"unchanged?\", unchanged(current, saved))", symptom: "prints unchanged? False, even though the lists match", q: "Both lists clearly hold the same two strings. So why does the check say they are not unchanged?", fix: "def unchanged(current, saved):\n    return current == saved\n\nsaved = [\"dark\", \"english\"]\ncurrent = [\"dark\", \"english\"]   # rebuilt from the form, same values\n\nprint(\"unchanged?\", unchanged(current, saved))", why: "<code>is</code> compares <b>identity</b> — whether the two names point at the very same list object in memory. <code>current</code> was rebuilt from the form, so it is a brand-new list that merely holds the same values; it is a different object, and <code>is</code> is <code>False</code>.<br/><br/>What the function actually means to ask is &quot;do these hold the same values?&quot;, which is <code>==</code>. The bug is invisible in quick tests because if you ever compare a list with itself — <code>unchanged(saved, saved)</code> — <code>is</code> returns True and everything looks fine. It only fails once the two are separate objects, which in real use they always are. Reserve <code>is</code> for <code>None</code> and the other singletons; use <code>==</code> for values." },
+
+  { t: "recap", items: [
+    "<code>in</code> / <code>not in</code> test membership and return a bool",
+    "On a <b>dict</b>, <code>in</code> checks the <b>keys</b> — use <code>.values()</code> to search values",
+    "<code>==</code> compares <b>value</b>; <code>is</code> compares <b>identity</b> (same object)",
+    "Two equal lists are <code>==</code> True but <code>is</code> False — they are different objects",
+    "Use <code>is</code> only for the singletons: <code>is None</code>, not <code>== None</code>",
+    "<code>&amp;</code> <code>|</code> <code>^</code> combine numbers bit by bit; <code>&lt;&lt;</code> <code>&gt;&gt;</code> shift bits",
+    "In NumPy/Pandas, boolean masks combine with <code>&amp;</code>/<code>|</code>, not <code>and</code>/<code>or</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between <code>==</code> and <code>is</code>?", a: "<code>==</code> tests whether two objects have equal values, calling the type's <code>__eq__</code>. <code>is</code> tests identity — whether two names refer to the exact same object in memory. Two separately created lists with the same contents are <code>==</code> equal but not <code>is</code> identical. You want <code>==</code> almost always; <code>is</code> is for singletons like <code>None</code>." },
+    { level: "beginner", q: "What does <code>in</code> do on a dictionary?", a: "It checks membership against the dictionary's <b>keys</b>, not its values — <code>\"name\" in user</code> is True only if <code>name</code> is a key. This surprises people who expect it to search values; for that you write <code>value in user.values()</code>, and to search key–value pairs, <code>user.items()</code>." },
+    { level: "intermediate", q: "Why is <code>if x is None</code> preferred over <code>if x == None</code>?", a: "<code>None</code> is a singleton — there is exactly one of it — so the meaningful question is identity, which <code>is</code> answers directly and cannot be overridden. <code>==</code> dispatches to <code>__eq__</code>, which a class can define to return True when compared to None, giving a false positive. <code>is None</code> is both semantically correct and immune to that." },
+    { level: "intermediate", q: "When would you actually use bitwise operators?", a: "Packing several boolean flags into one integer — permissions like read/write/execute as 4/2/1, combined with <code>|</code> and tested with <code>&</code> — is the classic case, along with low-level protocol and hardware work. In data science specifically, NumPy and Pandas overload <code>&</code> and <code>|</code> to combine boolean masks element-wise, so <code>df[(df.a &gt; 0) &amp; (df.b &lt; 5)]</code> uses bitwise operators, not <code>and</code>/<code>or</code>, which would raise." },
+    { level: "intermediate", q: "Can you rely on <code>is</code> for comparing integers or strings?", a: "No. Whether two equal ints or strings are the same object is an implementation detail — CPython caches small integers and some short strings, so <code>256 is 256</code> may be True while <code>257 is 257</code> is not, and the behaviour can differ between versions or interpreters. Never use <code>is</code> to compare numeric or string values; use <code>==</code>. Reserve <code>is</code> for <code>None</code>, <code>True</code> and <code>False</code>." },
+  ]},
 ];
 const L22 = [
   { t: "objectives", items: ["match-case (Python ka switch)","Multiple cases handle karna","Default case (_)"] },
@@ -3105,6 +3171,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "more-operators": [
+    // Easy
+    { level: "easy", q: "What does <code>3 in [1, 2, 3]</code> return?", options: ["False", "3", "True", "[3]"], correct: 2, why: "<code>in</code> tests membership and gives back a bool — 3 is an element, so True." },
+    { level: "easy", q: "<code>\"cat\" in \"category\"</code> — what does <code>in</code> check on a string?", options: ["Whether it is a substring", "Whether it is equal", "The length", "The first letter"], correct: 0, why: "On a string, <code>in</code> is a substring test, and \"cat\" starts \"category\", so it is True." },
+    { level: "easy", q: "Which operator compares VALUE (are these equal)?", options: ["is", "&", "in", "=="], correct: 3, why: "<code>==</code> compares value. <code>is</code> compares identity — whether they are the same object." },
+    // Medium
+    { level: "medium", q: "On a dict, what does <code>in</code> check?", options: ["The values", "The keys", "Both keys and values", "The length"], correct: 1, why: "<code>in</code> on a dict tests the keys. To search values, use <code>in d.values()</code>." },
+    { level: "medium", q: "<code>a = [1,2]; b = [1,2]</code>. What is <code>a is b</code>?", options: ["True", "Error", "None", "False"], correct: 3, why: "They are two separate lists — equal in value (<code>==</code> True) but different objects, so <code>is</code> is False." },
+    { level: "medium", q: "How should you check whether <code>x</code> is None?", options: ["x is None", "x == None", "x = None", "x in None"], correct: 0, why: "<code>None</code> is a singleton, so identity is the right question. <code>is None</code> is correct and can't be fooled by a custom <code>__eq__</code>." },
+    { level: "medium", q: "What is <code>6 & 3</code>?", options: ["9", "2", "7", "5"], correct: 1, why: "Bitwise AND keeps a 1 only where both bits are 1: 110 & 011 = 010 = 2." },
+    // Hard
+    { level: "hard", q: "Why can using <code>is</code> to compare two equal lists be a silent bug?", options: ["is only works on numbers", "is is slower", "is always returns False", "It's True only when they're literally the same object, not just equal"], correct: 3, why: "<code>is</code> compares identity. Two separately-built equal lists are different objects, so it returns False — and it passes any test where you accidentally compare an object with itself." },
+    { level: "hard", q: "Can you rely on <code>is</code> to compare two equal integers?", options: ["Yes, always", "Only for numbers over 256", "No — int caching is implementation-specific, use ==", "Only inside functions"], correct: 2, why: "Whether equal ints are the same object depends on the interpreter's caching, so <code>256 is 256</code> may differ from <code>257 is 257</code>. Use <code>==</code> for values; reserve <code>is</code> for None." },
+    { level: "hard", q: "In Pandas, how do you combine two boolean masks — <code>df.a > 0</code> and <code>df.b < 5</code>?", options: ["with and", "with &", "with +", "with is"], correct: 1, why: "NumPy/Pandas overload <code>&</code> and <code>|</code> for element-wise mask combining; <code>and</code>/<code>or</code> would raise on an array." },
   ],
 
   "dates": [
