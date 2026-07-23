@@ -1541,15 +1541,86 @@ const L22 = [
   ]},
 ];
 const L23 = [
-  { t: "objectives", items: ["*args se koi bhi ginti ke arguments","**kwargs se named arguments","Recursion (function khud ko call kare)"] },
-  { t: "h2", n: "1", text: "*args aur **kwargs" },
-  { t: "p", html: "<code>*args</code> se function koi bhi ginti ke positional arguments le sakta hai (tuple ban jaate hain). <code>**kwargs</code> named arguments (dict) leta hai." },
-  { t: "code", file: "args.py", code: "def total(*args):\n    return sum(args)\n\nprint(total(1, 2, 3))      # 6\nprint(total(10, 20))       # 30", output: "6\n30" },
-  { t: "h2", n: "2", text: "Recursion" },
-  { t: "p", html: "Recursion = function khud ko call karta hai, ek chhoti problem tak. Har recursion me ek <b>base case</b> zaroori hai (warna infinite)." },
-  { t: "code", file: "rec.py", code: "def factorial(n):\n    if n <= 1:       # base case\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(5))   # 120", output: "120" },
-  { t: "note", variant: "warn", html: "<b>Base case bhoolo mat:</b> recursion kabhi na kabhi rukni chahiye, warna 'RecursionError' aata hai." },
-  { t: "recap", items: ["*args — kitne bhi positional","**kwargs — named (dict)","Recursion = khud ko call","Base case zaroori"] },
+  { t: "objectives", items: [
+    "Accept any number of arguments with <code>*args</code> (a tuple) and <code>**kwargs</code> (a dict)",
+    "Unpack a list or dict <b>into</b> a call with <code>*</code> and <code>**</code>",
+    "Write a recursive function with a <b>base case</b> that stops it",
+    "See a recursive call as a stack that builds up, then unwinds",
+    "Avoid the mutable-default-argument trap — the most famous function bug",
+  ]},
+  { t: "hook", q: "You write <code>def add_item(item, cart=[]):</code> that appends an item to a fresh cart and returns it. The first call gives <code>['apple']</code>. The second call, with a different item, gives <code>['apple', 'banana']</code> — the apple from the <b>last</b> call is still there. Where is it hiding?", why: "In the default value itself. <code>cart=[]</code> is evaluated <b>once</b>, when the function is defined — not each time it is called. So every call that relies on the default shares the <b>same one list</b>, and it keeps everything ever appended to it. It is the single most famous trap in Python, and the fix is a one-line habit." },
+  { t: "think", q: "<code>def total(*args)</code> — what type is <code>args</code> inside the function when you call <code>total(1, 2, 3)</code>?", a: "A <b>tuple</b>: <code>(1, 2, 3)</code>. The <code>*</code> gathers however many positional arguments you pass into one tuple, so <code>len(args)</code> is 3 and you can loop over it or call <code>sum(args)</code>.<br/><br/>Its partner <code>**kwargs</code> does the same for named arguments, but collects them into a <b>dict</b> — <code>{\"x\": 10}</code> for a call like <code>f(x=10)</code>. One star for positional, two for keyword." },
+
+  { t: "h2", n: "1", text: "*args and **kwargs" },
+  { t: "def", term: "*args and **kwargs", en: "In a function definition, *args collects any extra positional arguments into a tuple, and **kwargs collects any extra keyword arguments into a dictionary.", hi: "In plain words: <code>*args</code> se function kitne bhi positional arguments le sakta hai (tuple ban jaate hain), <code>**kwargs</code> se kitne bhi named (dict ban jaate hain)." },
+  { t: "p", html: "The names <code>args</code> and <code>kwargs</code> are just convention — the <code>*</code> and <code>**</code> do the work. Order in the signature is fixed: normal parameters, then <code>*args</code>, then <code>**kwargs</code>." },
+  { t: "code", file: "args.py", code: "def describe(*args, **kwargs):\n    print(\"positional:\", args)\n    print(\"named:\", kwargs)\n\ndescribe(1, 2, 3, name=\"Freya\", age=21)", output: "positional: (1, 2, 3)\nnamed: {'name': 'Freya', 'age': 21}" },
+  { t: "code", file: "mix.py", code: "def order(first, *rest, **opts):\n    return first, rest, opts\n\nprint(order(1, 2, 3, debug=True))", output: "(1, (2, 3), {'debug': True})" },
+  { t: "note", variant: "tip", html: "<b>Why it matters:</b> <code>print</code> itself is <code>print(*args, sep=' ', end='\\n')</code> — that is how it takes any number of things to print. Wrappers and decorators use <code>*args, **kwargs</code> to accept <b>whatever</b> the wrapped function takes and pass it straight through." },
+
+  { t: "h2", n: "2", text: "Unpacking: the star on the call side" },
+  { t: "p", html: "The same stars work in reverse. At a <b>call</b>, <code>*</code> spreads a list into positional arguments and <code>**</code> spreads a dict into keyword arguments." },
+  { t: "code", file: "unpack.py", code: "def point(x, y, z):\n    return f\"({x}, {y}, {z})\"\n\ncoords = [1, 2, 3]\nprint(point(*coords))         # spread the list\n\nvals = {\"x\": 4, \"y\": 5, \"z\": 6}\nprint(point(**vals))          # spread the dict by name", output: "(1, 2, 3)\n(4, 5, 6)" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> unpacking is everywhere in real code. You build a dict of options and splat it into a function — <code>plot(**config)</code> — or forward arguments through a wrapper with <code>func(*args, **kwargs)</code>. In data work you will unpack rows and configuration dicts constantly; it keeps calls short and lets settings live in one place." },
+
+  { t: "h2", n: "3", text: "Recursion: a function that calls itself" },
+  { t: "def", term: "Recursion", en: "Recursion is when a function solves a problem by calling itself on a smaller version of it, stopping at a base case that can be answered directly.", hi: "In plain words: function khud ko chhoti problem pe call karta hai, jab tak ek <b>base case</b> na aa jaye jise seedha answer de sakein." },
+  { t: "p", html: "Every recursion needs two things: a <b>base case</b> that returns without recursing, and a step that moves <b>towards</b> it. Miss the base case and it never stops — <code>RecursionError</code>." },
+  { t: "code", file: "factorial.py", code: "def factorial(n):\n    if n <= 1:            # base case - stops here\n        return 1\n    return n * factorial(n - 1)   # steps towards the base\n\nprint(factorial(5))", output: "120" },
+  { t: "viz", name: "recursion-lab" },
+  { t: "p", html: "Step through that panel. The calls <b>pile up unfinished</b> — each <code>factorial(n)</code> is stuck waiting on <code>factorial(n-1)</code> — until the base case returns 1, and only then do the answers flow back up, multiplying at each step: 1, 2, 6, 24." },
+  { t: "analogy", concept: "Recursion", real: "Nested Russian dolls", html: "Opening recursion is like a stack of Russian dolls. You keep opening each doll to get to the one inside — that is the recursive call going <b>down</b> — until you reach the tiny solid doll that does not open: the <b>base case</b>. Then you close them back up one by one, each doll now holding its answer — that is the stack <b>unwinding</b>. Forget the solid doll and you would open forever; forget the base case and recursion never stops." },
+
+  { t: "h2", n: "4", text: "The mutable default trap" },
+  { t: "p", html: "A default argument is evaluated <b>once</b>, when the function is defined — not on every call. So a mutable default like <code>[]</code> or <code>{}</code> is <b>shared</b> across all calls, and it remembers everything." },
+  { t: "code", file: "trap.py", code: "def add_item(item, cart=[]):    # the [] is created ONCE\n    cart.append(item)\n    return cart\n\nprint(add_item(\"apple\"))\nprint(add_item(\"banana\"))   # apple is still here!", output: "['apple']\n['apple', 'banana']" },
+  { t: "note", variant: "warn", html: "<b>The fix is always the same:</b> default to <code>None</code>, then make the real object inside. <code>def add_item(item, cart=None): if cart is None: cart = []</code>. Now every call that does not pass a cart gets a fresh one. Use this any time a default would be a list, dict, or set." },
+
+  { t: "trace", intro: "Args collection, unpacking, and one recursion. Work out each value.", code: "def collect(*args):\n    return len(args)\n\ndef power(base, exp):\n    return base ** exp\n\ndef countdown(n):\n    if n == 0:\n        return \"done\"\n    return countdown(n - 1)\n\na = collect(4, 5, 6)\nvals = [2, 10]\nb = power(*vals)\nc = countdown(3)", steps: [
+    { q: "After line 14, <code>a</code> is", answer: "3", why: "<code>*args</code> gathered the three arguments into a tuple, and <code>len</code> of it is 3." },
+    { q: "After line 16, <code>b</code> is", answer: "1024", why: "<code>*vals</code> spread <code>[2, 10]</code> into <code>power(2, 10)</code>, which is 2 to the 10th — 1024." },
+    { q: "After line 17, <code>c</code> is", answer: "done", why: "<code>countdown</code> calls itself with n-1 until n hits 0, the base case, which returns \"done\"." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Sum any number of arguments with <code>*args</code>.", code: "def total(*args):\n    return sum(args)\n\nprint(total(1, 2, 3, 4))", out: "10" },
+    { task: "Collect named arguments and return the dict.", code: "def opts(**kwargs):\n    return kwargs\n\nprint(opts(a=1, b=2))", out: "{'a': 1, 'b': 2}" },
+    { task: "Count how many positional arguments were passed.", code: "def count(*args):\n    return len(args)\n\nprint(count(10, 20, 30))", out: "3" },
+    { task: "Unpack a list into a three-argument function.", code: "def add3(a, b, c):\n    return a + b + c\n\nnums = [4, 5, 6]\nprint(add3(*nums))", out: "15" },
+    { task: "Unpack a dict into keyword arguments.", code: "def greet(name, city):\n    return f\"{name} from {city}\"\n\ninfo = {\"name\": \"Freya\", \"city\": \"Delhi\"}\nprint(greet(**info))", out: "Freya from Delhi" },
+    { task: "Write factorial with recursion.", code: "def fact(n):\n    if n <= 1:\n        return 1\n    return n * fact(n - 1)\n\nprint(fact(5))", out: "120" },
+    { task: "Sum numbers from n down to 1 recursively.", code: "def sum_to(n):\n    if n == 0:\n        return 0\n    return n + sum_to(n - 1)\n\nprint(sum_to(5))", out: "15" },
+    { task: "Recursively count down to a base case.", code: "def down(n):\n    if n == 0:\n        return \"liftoff\"\n    return down(n - 1)\n\nprint(down(4))", out: "liftoff" },
+    { task: "Fix the mutable default: give each call a fresh list.", code: "def add(item, cart=None):\n    if cart is None:\n        cart = []\n    cart.append(item)\n    return cart\n\nprint(add(\"a\"))\nprint(add(\"b\"))", out: "['a']\n['b']" },
+    { task: "Mix a normal parameter with <code>*args</code>.", code: "def scale(factor, *nums):\n    return [factor * n for n in nums]\n\nprint(scale(2, 1, 2, 3))", out: "[2, 4, 6]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "def add_item(item, cart=[]):\n    cart.append(item)\n    return cart", why: "The <code>[]</code> is made once at definition, so every call shares it and it accumulates across calls. The fix is to default to <code>None</code> and build the list inside.", fix: "def add_item(item, cart=None):\n    if cart is None:\n        cart = []\n    cart.append(item)\n    return cart" },
+    { bad: "def countdown(n):\n    print(n)\n    countdown(n - 1)", why: "There is no base case, so it recurses forever and dies with <code>RecursionError</code>. Every recursion needs a condition that returns <b>without</b> recursing.", fix: "def countdown(n):\n    if n < 0:\n        return\n    print(n)\n    countdown(n - 1)" },
+    { bad: "def f(**kwargs, *args):\n    pass", why: "The order is wrong — <code>**kwargs</code> must come <b>last</b>. The signature order is fixed: normal parameters, then <code>*args</code>, then <code>**kwargs</code>. This is a <code>SyntaxError</code>.", fix: "def f(*args, **kwargs):\n    pass" },
+    { bad: "nums = [1, 2, 3]\ntotal = sum(nums)\nresult = add3(nums)", why: "Passing the list itself sends <b>one</b> argument (the list) where three are expected. To spread its items into separate arguments you need the star: <code>add3(*nums)</code>.", fix: "nums = [1, 2, 3]\nresult = add3(*nums)" },
+  ]},
+
+  { t: "debug", intro: "A helper builds a shopping cart, one call per customer. Each customer should start empty — but the second customer somehow inherits the first one's items. It runs without error. Read it before opening the fix.", code: "def new_cart(item, cart=[]):\n    cart.append(item)\n    return cart\n\nalice = new_cart(\"apple\")\nbob = new_cart(\"banana\")\n\nprint(\"alice:\", alice)\nprint(\"bob:\", bob)", symptom: "bob's cart is ['apple', 'banana'] — it has alice's apple", q: "Each call passes only its own item and no cart. So how does bob's cart already contain alice's apple?", fix: "def new_cart(item, cart=None):\n    if cart is None:\n        cart = []\n    cart.append(item)\n    return cart\n\nalice = new_cart(\"apple\")\nbob = new_cart(\"banana\")\n\nprint(\"alice:\", alice)\nprint(\"bob:\", bob)", why: "The default <code>cart=[]</code> is created a <b>single time</b>, when the function is defined — not once per call. Every call that does not supply its own cart reuses that one shared list, so alice's <code>append</code> and bob's <code>append</code> both land in it. By bob's turn it already holds <code>\"apple\"</code>.<br/><br/>Worse, <code>alice</code> and <code>bob</code> are now the <b>same list object</b>, so a later change to one silently changes the other. The rule: never use a mutable value (<code>[]</code>, <code>{}</code>, <code>set()</code>) as a default. Default to <code>None</code> and create the real object inside the function, which guarantees each call gets its own." },
+
+  { t: "recap", items: [
+    "<code>*args</code> collects extra positional arguments into a <b>tuple</b>",
+    "<code>**kwargs</code> collects extra keyword arguments into a <b>dict</b>",
+    "Signature order is fixed: normal params, then <code>*args</code>, then <code>**kwargs</code>",
+    "At a call, <code>*list</code> and <code>**dict</code> <b>unpack</b> into arguments",
+    "Recursion needs a <b>base case</b> that returns without recursing — miss it and get <code>RecursionError</code>",
+    "The stack builds up on the way down, then unwinds with the answers on the way up",
+    "<b>Never</b> use <code>[]</code> or <code>{}</code> as a default — default to <code>None</code> and build it inside",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What do <code>*args</code> and <code>**kwargs</code> do?", a: "In a function definition, <code>*args</code> collects any extra positional arguments into a tuple and <code>**kwargs</code> collects any extra keyword arguments into a dict, so the function can accept a variable number of each. The names are convention; the <code>*</code> and <code>**</code> are what matter. They are essential for writing wrappers that accept and forward whatever arguments the wrapped function takes." },
+    { level: "beginner", q: "What is a base case in recursion and why is it required?", a: "The base case is the condition under which the function returns an answer directly, without calling itself. It is what stops the recursion. Without one, the function calls itself endlessly and Python eventually raises <code>RecursionError</code> when the call stack exceeds its limit (about 1000 frames by default). Every recursive function needs a base case and a step that moves towards it." },
+    { level: "intermediate", q: "Explain the mutable default argument problem.", a: "A default argument is evaluated once, when the function is defined, and that single object is reused on every call that relies on the default. So a default like <code>cart=[]</code> is one shared list across all calls, accumulating state and causing separate calls to affect each other. The fix is to default to <code>None</code> and create the mutable object inside the function body, guaranteeing a fresh one per call." },
+    { level: "intermediate", q: "What is the difference between <code>*</code> in a definition versus in a call?", a: "In a definition, <code>*args</code> <b>collects</b> loose positional arguments into a tuple. In a call, <code>*iterable</code> does the reverse — it <b>spreads</b> a list or tuple out into separate positional arguments. Likewise <code>**</code> collects keyword arguments into a dict in a definition, and unpacks a dict into keyword arguments in a call. Same symbols, opposite directions." },
+    { level: "intermediate", q: "When is recursion a good choice, and when is it not?", a: "Recursion shines on problems with a naturally nested or tree-like structure — traversing a file system, walking a JSON tree, divide-and-conquer algorithms — where it mirrors the shape of the data and reads cleanly. It is a poor choice when a simple loop would do, because each call adds a stack frame: deep recursion risks <code>RecursionError</code> and is slower, and naive recursive Fibonacci recomputes the same values exponentially. For linear repetition, prefer a loop; reach for recursion when the problem itself is recursive." },
+  ]},
 ];
 const L24 = [
   { t: "objectives", items: ["Inheritance — ek class doosri se","Parent aur child class","Method override karna"] },
@@ -3245,6 +3316,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "advanced-functions": [
+    // Easy
+    { level: "easy", q: "Inside <code>def f(*args)</code>, what type is <code>args</code>?", options: ["A tuple", "A list", "A dict", "A set"], correct: 0, why: "<code>*args</code> gathers extra positional arguments into a tuple. <code>**kwargs</code> gathers keyword ones into a dict." },
+    { level: "easy", q: "What does every recursive function need to stop?", options: ["A loop", "A base case", "A global variable", "A return type"], correct: 1, why: "A base case returns without recursing. Without it, the function calls itself forever and raises RecursionError." },
+    { level: "easy", q: "What does <code>**kwargs</code> collect?", options: ["Positional arguments", "Nothing", "Keyword arguments into a dict", "The return value"], correct: 2, why: "<code>**kwargs</code> gathers any extra named arguments into a dictionary — one star for positional, two for keyword." },
+    // Medium
+    { level: "medium", q: "<code>add3(a,b,c)</code> and <code>nums=[1,2,3]</code>. How do you call it with the list?", options: ["add3(nums)", "add3(&nums)", "add3(*nums)", "add3([nums])"], correct: 2, why: "<code>*nums</code> at the call site spreads the list into three separate positional arguments." },
+    { level: "medium", q: "When is a default argument value evaluated?", options: ["Once, when the function is defined", "On every call", "Only when passed", "When the module is imported each time"], correct: 0, why: "Defaults are evaluated once at definition. That is exactly why a mutable default like <code>[]</code> is shared across calls." },
+    { level: "medium", q: "What is the correct signature order?", options: ["**kwargs, *args, params", "*args, params, **kwargs", "params, **kwargs, *args", "params, *args, **kwargs"], correct: 3, why: "Normal parameters first, then <code>*args</code>, then <code>**kwargs</code> — any other order is a SyntaxError." },
+    { level: "medium", q: "<code>def greet(**k)</code> called as <code>greet(name=\"F\")</code>. What is <code>k</code>?", options: ["('F',)", "'name=F'", "['F']", "{'name': 'F'}"], correct: 3, why: "Keyword arguments are collected into a dict, so <code>k</code> is <code>{'name': 'F'}</code>." },
+    // Hard
+    { level: "hard", q: "<code>def f(item, cart=[])</code> appends and returns cart. Called twice with 'a' then 'b'. What is the second result?", options: ["['b']", "['a', 'b']", "['a']", "[]"], correct: 1, why: "The default list is created once and shared, so it keeps 'a' from the first call — the mutable default trap. The second call returns ['a', 'b']." },
+    { level: "hard", q: "How do you fix the mutable-default bug?", options: ["Use cart=() instead", "Default to None, build the list inside", "Make cart global", "Add *args"], correct: 1, why: "Default to <code>None</code>, then <code>if cart is None: cart = []</code> — this creates a fresh list on every call that omits the argument." },
+    { level: "hard", q: "What happens if a recursive function has no base case?", options: ["It returns None", "It runs once", "RecursionError when the stack limit is hit", "It becomes a loop"], correct: 2, why: "With nothing to stop it, the calls stack up past Python's limit (~1000) and it raises RecursionError." },
   ],
 
   "match-case": [

@@ -14,6 +14,7 @@ import { JsonBridge } from "./JsonBridge";
 import { StrftimeLab } from "./StrftimeLab";
 import { BitwiseLab } from "./BitwiseLab";
 import { MatchLab } from "./MatchLab";
+import { RecursionLab } from "./RecursionLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -44,6 +45,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "strftime-lab": StrftimeLab,
   "bitwise-lab": BitwiseLab,
   "match-lab": MatchLab,
+  "recursion-lab": RecursionLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
