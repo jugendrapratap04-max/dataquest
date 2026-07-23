@@ -443,6 +443,26 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .jb-code { font-family:var(--mono); font-size:13px; color:var(--accent-2); }
 .jb-note-in { font-size:11.5px; color:var(--ink-soft); }
 .jb-down { font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-align:center; padding:2px 0; }
+
+/* Strftime Lab — the format string broken into annotated %-token chips. */
+.ss-preset.trap { border-color:color-mix(in srgb,var(--bad) 35%,transparent); }
+.ss-preset.trap.on { border-color:var(--bad); color:var(--bad); }
+.sf-tokens { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; background:var(--panel-2);
+             border:1px solid var(--line); border-radius:10px; padding:14px 13px; min-height:74px; }
+.sf-tok { display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 9px; border-radius:8px;
+          background:var(--panel); border:1px solid color-mix(in srgb,var(--teal) 28%,transparent); animation:viz-land .22s ease-out; }
+.sf-tok.bad { border-color:color-mix(in srgb,var(--bad) 50%,transparent); background:color-mix(in srgb,var(--bad) 8%,transparent); }
+.sf-code { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--teal); }
+.sf-tok.bad .sf-code { color:var(--bad); }
+.sf-out { font-family:var(--mono); font-size:13px; color:var(--ink); }
+.sf-desc { font-size:9px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-faint); white-space:nowrap; }
+.sf-lit { font-family:var(--mono); font-size:13px; color:var(--ink-faint); align-self:center; padding-bottom:18px; }
+.sf-result { margin-top:12px; display:flex; align-items:center; gap:10px; padding:10px 13px; border-radius:9px;
+             background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); }
+.sf-result.bad { background:color-mix(in srgb,var(--bad) 8%,transparent); border-color:color-mix(in srgb,var(--bad) 40%,transparent); }
+.sf-rlabel { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); }
+.sf-rval { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--teal); }
+.sf-result.bad .sf-rval { color:var(--bad); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

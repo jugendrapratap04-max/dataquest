@@ -1298,12 +1298,87 @@ const L19 = [
   ]},
 ];
 const L20 = [
-  { t: "objectives", items: ["datetime module","Aaj ki date nikaalna","Date formatting (strftime)"] },
-  { t: "h2", n: "1", text: "Dates ke saath kaam" },
-  { t: "p", html: "<code>datetime</code> module se dates handle karo — DS me time-series, logs, filtering me zaroori." },
-  { t: "code", file: "date.py", code: "from datetime import datetime\nnow = datetime.now()\nprint(now.year)                  # 2026\nprint(now.strftime(\"%d-%m-%Y\"))  # 16-07-2026", output: "2026\n16-07-2026" },
-  { t: "note", variant: "tip", html: "<b>strftime</b> se date apni marzi ke format me: <code>%d</code> din, <code>%m</code> mahina, <code>%Y</code> saal." },
-  { t: "recap", items: ["datetime module","datetime.now() = abhi","strftime se format","DS time-series me zaroori"] },
+  { t: "objectives", items: [
+    "Build a date with <code>datetime</code>, and read its parts",
+    "Format a date to text with <code>strftime</code> — and read the %-codes",
+    "Parse text back into a date with <code>strptime</code>",
+    "Add and subtract time with <code>timedelta</code>",
+    "Never confuse <code>%m</code> (month) with <code>%M</code> (minute)",
+  ]},
+  { t: "hook", q: "Your log timestamps look perfect for months — <code>14:07</code>, <code>09:07</code>, <code>23:07</code>. Then someone asks why every single event happened at 7 minutes past the hour. What went wrong?", why: "The format string said <code>%H:%m</code>, not <code>%H:%M</code>. Lowercase <code>%m</code> is the <b>month</b> — and it was July, so every timestamp printed 07 where the minutes should be. The codes are case-sensitive, nothing ever errored, and the logs were quietly wrong from the first day." },
+  { t: "think", q: "Why does <code>strftime</code> need a format string at all — why not just print the date?", a: "Because there is no single right way to write a date. <code>23/07/2026</code>, <code>July 23, 2026</code>, <code>2026-07-23</code> and <code>Thu 23 Jul</code> are all the same instant, and different places, files and APIs each expect a different one.<br/><br/>The format string is you saying <b>exactly</b> which arrangement you want. <code>strftime</code> takes the date's parts and drops each one into the slot you marked with a %-code." },
+
+  { t: "h2", n: "1", text: "Building and reading a date" },
+  { t: "def", term: "datetime", en: "datetime is an object holding a specific point in time — year, month, day, and optionally hour, minute and second — with methods to format it, compare it, and do arithmetic on it.", hi: "In plain words: a <code>datetime</code> is not text. It is a real object that knows it is the 23rd of July; turning it into readable text is a separate step (<code>strftime</code>)." },
+  { t: "p", html: "You can build a fixed date with <code>datetime(year, month, day, ...)</code>, or get the current moment with <code>datetime.now()</code>. Its parts are plain attributes." },
+  { t: "code", file: "build.py", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23, 14, 5, 9)   # 23 Jul 2026, 14:05:09\n\nprint(dt.year, dt.month, dt.day)\nprint(dt.hour, dt.minute, dt.second)\nprint(dt.weekday())    # 0 = Monday ... 3 = Thursday", output: "2026 7 23\n14 5 9\n3" },
+  { t: "note", variant: "tip", html: "<b><code>datetime.now()</code> gives the current moment</b> — but because it changes every time, the examples here use a <b>fixed</b> date so the output is stable. In your own code, <code>now()</code> is what you will usually call." },
+
+  { t: "h2", n: "2", text: "strftime — date to text" },
+  { t: "p", html: "<code>strftime</code> (\"string-format-time\") walks your format string and replaces each %-code with a part of the date. Everything that is not a code — dashes, colons, spaces — is printed unchanged." },
+  { t: "viz", name: "strftime-lab" },
+  { t: "p", html: "Click through those presets. Each %-code pulls out one piece; the last one, <code>%H:%m</code>, is the trap — lowercase <code>%m</code> is the month, so a clock reads <code>14:07</code> instead of <code>14:05</code>." },
+  { t: "code", file: "format.py", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23, 14, 5, 9)\n\nprint(dt.strftime(\"%d-%m-%Y\"))       # day-month-year\nprint(dt.strftime(\"%A, %d %B %Y\"))   # weekday and month names\nprint(dt.strftime(\"%I:%M %p\"))       # 12-hour clock", output: "23-07-2026\nThursday, 23 July 2026\n02:05 PM" },
+  { t: "note", variant: "warn", html: "<b>Case matters, and it matters most for <code>m</code>.</b> <code>%m</code> is the month (01–12); <code>%M</code> is the minute (00–59). Same letter, different case, completely different number — and swapping them never raises an error." },
+  { t: "analogy", concept: "A format string", real: "Filling in a rubber stamp", html: "<code>strftime</code> is a rubber stamp with labelled slots. <code>%Y</code> is the slot that always gets the year, <code>%d</code> the day, <code>%B</code> the month's name. You arrange the slots and the fixed ink — the dashes and spaces — however you like, press it onto the date, and out comes the text. The date object is untouched; you just took an imprint of it in the shape you asked for." },
+
+  { t: "h2", n: "3", text: "strptime — text back to a date" },
+  { t: "p", html: "The reverse of <code>strftime</code> is <code>strptime</code> (\"string-parse-time\"). You give it the text <b>and</b> the format it is in, and it hands back a real <code>datetime</code> you can do maths on." },
+  { t: "code", file: "parse.py", code: "from datetime import datetime\n\ntext = \"25-12-2026\"\ndt = datetime.strptime(text, \"%d-%m-%Y\")\n\nprint(dt.year, dt.month, dt.day)\nprint(dt.strftime(\"%A\"))    # what weekday is that?", output: "2026 12 25\nFriday" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> dates almost always arrive as <b>text</b> — a CSV column, a JSON field, a log line. Until you <code>strptime</code> them into real datetimes, you cannot sort by date, filter a range, or compute \"how many days between\" — you just have strings, where <code>\"09/2026\"</code> sorts before <code>\"10/2025\"</code>. Parsing dates on the way in is the first step of almost every time-series task, and Pandas' <code>pd.to_datetime</code> is this same idea at scale." },
+
+  { t: "h2", n: "4", text: "timedelta — date arithmetic" },
+  { t: "p", html: "Subtract two dates and you get a <code>timedelta</code> — a span of time. Add a <code>timedelta</code> to a date to move it forward or back." },
+  { t: "code", file: "delta.py", code: "from datetime import date, timedelta\n\nstart = date(2026, 7, 23)\n\ndeadline = start + timedelta(days=10)\nprint(deadline)                       # 10 days later\n\ngap = date(2026, 12, 25) - start\nprint(gap.days, \"days to go\")", output: "2026-08-02\n155 days to go" },
+  { t: "note", variant: "tip", html: "A subtraction gives a <code>timedelta</code>, and its <code>.days</code> is the whole number of days. <code>timedelta</code> takes <code>days</code>, <code>hours</code>, <code>minutes</code>, <code>seconds</code>, <code>weeks</code> — but <b>not</b> months or years, because those are not fixed lengths." },
+
+  { t: "trace", intro: "One fixed date, formatted and shifted several ways. Work out each value.", code: "from datetime import datetime, date, timedelta\n\ndt = datetime(2026, 7, 23, 14, 5, 9)\n\na = dt.strftime(\"%Y-%m-%d\")\nb = dt.strftime(\"%H:%M\")\nc = dt.month\nd = (date(2026, 7, 30) - date(2026, 7, 23)).days\ne = (date(2026, 7, 23) + timedelta(days=3)).strftime(\"%d-%m\")", steps: [
+    { q: "After line 5, <code>a</code> is", answer: "2026-07-23", why: "<code>%Y-%m-%d</code> is year, month, day with dashes — the ISO order." },
+    { q: "After line 6, <code>b</code> is", answer: "14:05", why: "<code>%H:%M</code> is hour then minute, both capital-M for minute. 14:05, not 14:07." },
+    { q: "After line 7, <code>c</code> is", answer: "7", why: "<code>.month</code> is the integer 7 — an attribute of the datetime, no formatting involved." },
+    { q: "After line 8, <code>d</code> is", answer: "7", why: "The 30th minus the 23rd is a 7-day <code>timedelta</code>, and <code>.days</code> reads out 7." },
+    { q: "After line 9, <code>e</code> is", answer: "26-07", why: "Add 3 days to the 23rd to get the 26th, then format as day-month: 26-07." },
+  ]},
+
+  { t: "drills", intro: "One per idea. All use a fixed date so the answer is stable — write each before opening it.", items: [
+    { task: "Build 23 July 2026 and print its year, month, day.", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23)\nprint(dt.year, dt.month, dt.day)", out: "2026 7 23" },
+    { task: "Format that date as day-month-year with dashes.", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23)\nprint(dt.strftime(\"%d-%m-%Y\"))", out: "23-07-2026" },
+    { task: "Print the full weekday name of 23 July 2026.", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23)\nprint(dt.strftime(\"%A\"))", out: "Thursday" },
+    { task: "Format a time as HH:MM (24-hour). Mind the capital M.", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23, 14, 5)\nprint(dt.strftime(\"%H:%M\"))", out: "14:05" },
+    { task: "Parse the text \"01-01-2027\" into a date.", code: "from datetime import datetime\n\ndt = datetime.strptime(\"01-01-2027\", \"%d-%m-%Y\")\nprint(dt.year, dt.month, dt.day)", out: "2027 1 1" },
+    { task: "Add 7 days to 23 July 2026.", code: "from datetime import date, timedelta\n\nprint(date(2026, 7, 23) + timedelta(days=7))", out: "2026-07-30" },
+    { task: "How many days between 23 July and 2 August 2026?", code: "from datetime import date\n\nprint((date(2026, 8, 2) - date(2026, 7, 23)).days)", out: "10" },
+    { task: "Show the month as a short name (Jul).", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23)\nprint(dt.strftime(\"%b\"))", out: "Jul" },
+    { task: "Format in 12-hour clock with AM/PM.", code: "from datetime import datetime\n\ndt = datetime(2026, 7, 23, 14, 5)\nprint(dt.strftime(\"%I:%M %p\"))", out: "02:05 PM" },
+    { task: "Go back 1 day from 1 January 2027 (crosses the year).", code: "from datetime import date, timedelta\n\nprint(date(2027, 1, 1) - timedelta(days=1))", out: "2026-12-31" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "from datetime import datetime\ndt = datetime(2026, 7, 23, 14, 5)\nprint(dt.strftime(\"%H:%m\"))", why: "<code>%m</code> is the <b>month</b>, so this prints <code>14:07</code> — the minute should be capital <code>%M</code>. No error, just a wrong time in every log line.", fix: "from datetime import datetime\ndt = datetime(2026, 7, 23, 14, 5)\nprint(dt.strftime(\"%H:%M\"))" },
+    { bad: "from datetime import datetime\ndt = datetime.strptime(\"23/07/2026\", \"%d-%m-%Y\")", why: "The text uses slashes but the format says dashes, so the pattern does not match and <code>strptime</code> raises <code>ValueError</code>. The format string must mirror the text <b>exactly</b>, separators included.", fix: "from datetime import datetime\ndt = datetime.strptime(\"23/07/2026\", \"%d/%m/%Y\")" },
+    { bad: "from datetime import date, timedelta\nnext_month = date(2026, 7, 23) + timedelta(months=1)", why: "<code>timedelta</code> has no <code>months</code> argument — a month is not a fixed number of days, so this is a <code>TypeError</code>. Use <code>days</code>, or a library like <code>dateutil</code> for calendar months.", fix: "from datetime import date, timedelta\nlater = date(2026, 7, 23) + timedelta(days=30)" },
+    { bad: "birthday = \"1995-08-15\"\nage_days = \"2026-07-23\" - birthday", why: "These are <b>strings</b>, and you cannot subtract text. They look like dates but Python sees two str objects — a <code>TypeError</code>. Parse them first.", fix: "from datetime import datetime\nb = datetime.strptime(\"1995-08-15\", \"%Y-%m-%d\")\nn = datetime.strptime(\"2026-07-23\", \"%Y-%m-%d\")\nage_days = (n - b).days" },
+  ]},
+
+  { t: "debug", intro: "A function stamps each log line with a timestamp. It runs cleanly and the format looks right, but the minutes are wrong on every line. Read it before opening the fix.", code: "from datetime import datetime\n\ndef stamp(dt):\n    return dt.strftime(\"%H:%m\")\n\nprint(stamp(datetime(2026, 7, 23, 14, 5)))\nprint(stamp(datetime(2026, 7, 23, 9, 30)))", symptom: "prints 14:07 and 09:07 — every minute is 07", q: "Both times end in 07, and the real minutes are 05 and 30. Where is 07 coming from?", fix: "from datetime import datetime\n\ndef stamp(dt):\n    return dt.strftime(\"%H:%M\")\n\nprint(stamp(datetime(2026, 7, 23, 14, 5)))\nprint(stamp(datetime(2026, 7, 23, 9, 30)))", why: "The format is <code>%H:%m</code>, and lowercase <code>%m</code> is the <b>month</b>. Both datetimes are in July, so the second half always renders as <code>07</code> — the month — no matter what the real minutes are. The minute code is capital <code>%M</code>.<br/><br/>It is invisible because the output still looks like a time: two digits, a colon, two digits. Nothing is out of range (a month is 01–12, so it even passes for plausible minutes), nothing raises, and the bug only shows up when someone notices every event happened at :07. This is the single most common strftime mistake, and the reason to say the codes out loud — \"capital M for minute\" — when you write them." },
+
+  { t: "recap", items: [
+    "<code>datetime(y, m, d, ...)</code> builds a date; <code>.year</code>, <code>.month</code>, <code>.day</code> read its parts",
+    "<code>datetime.now()</code> is the current moment (non-deterministic, so examples use fixed dates)",
+    "<code>strftime(fmt)</code> = date → text; each %-code is one part, other characters print as-is",
+    "<code>strptime(text, fmt)</code> = text → date; the format must match the text exactly",
+    "<b><code>%m</code> is month, <code>%M</code> is minute</b> — case-sensitive, and swapping them is silent",
+    "<code>%Y</code> year · <code>%d</code> day · <code>%H</code> hour · <code>%B</code>/<code>%A</code> month/weekday names · <code>%p</code> AM/PM",
+    "Subtract dates → <code>timedelta</code>; <code>.days</code> reads the span; add one to shift a date",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between <code>strftime</code> and <code>strptime</code>?", a: "<code>strftime</code> is string-<b>format</b>-time: it turns a datetime object into text using a format string. <code>strptime</code> is string-<b>parse</b>-time: it does the reverse, reading text plus the format it is in and producing a datetime. A memory aid is the extra letters — f for format (out), p for parse (in)." },
+    { level: "beginner", q: "What do <code>%m</code> and <code>%M</code> mean, and why does it matter?", a: "Lowercase <code>%m</code> is the month (01–12); capital <code>%M</code> is the minute (00–59). It matters because the codes are case-sensitive and swapping them raises no error — a format like <code>%H:%m</code> silently prints the month where the minutes should be, which is one of the most common date bugs there is." },
+    { level: "intermediate", q: "Why should you parse date strings into datetime objects instead of leaving them as text?", a: "Because comparisons and arithmetic on date strings are wrong or impossible. Lexicographic string order does not match chronological order unless the format is strictly year-first with zero-padding, and you cannot subtract two strings to get a duration. Parsing to real datetimes lets you sort, filter ranges, and compute differences correctly — it is the first step of essentially every time-series workflow." },
+    { level: "intermediate", q: "What is a <code>timedelta</code>, and what can't it represent?", a: "A <code>timedelta</code> is a duration — a fixed span of days, seconds and microseconds — that you get by subtracting two datetimes or construct directly to shift a date. It deliberately has no months or years arguments, because those are not fixed lengths: a month can be 28 to 31 days. For calendar-aware offsets like \"one month later\" you use a library such as <code>dateutil</code>'s <code>relativedelta</code>." },
+    { level: "intermediate", q: "How would you find the number of days between two dates?", a: "Subtract them — <code>(end - start)</code> — which yields a <code>timedelta</code>, and read its <code>.days</code> attribute. Both operands must be real date or datetime objects, so if they arrived as text you <code>strptime</code> them first. If the two are different types (a <code>date</code> and a <code>datetime</code>) Python raises a TypeError, so keep them consistent." },
+  ]},
 ];
 
 const L21 = [
@@ -3030,6 +3105,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "dates": [
+    // Easy
+    { level: "easy", q: "What does <code>strftime</code> do?", options: ["Turns a datetime into formatted text", "Parses text into a date", "Adds days to a date", "Gets the current time"], correct: 0, why: "strftime = string-<b>format</b>-time: date object → text. Its opposite, <code>strptime</code>, parses text back into a date." },
+    { level: "easy", q: "Which code gives the 4-digit year?", options: ["%y", "%m", "%D", "%Y"], correct: 3, why: "Capital <code>%Y</code> is the 4-digit year (2026); lowercase <code>%y</code> is the 2-digit form (26)." },
+    { level: "easy", q: "You subtract two dates. What do you get back?", options: ["An int of days", "A string", "A timedelta", "A tuple"], correct: 2, why: "Subtracting dates yields a <code>timedelta</code> (a span). Its <code>.days</code> attribute reads out the whole number of days." },
+    // Medium
+    { level: "medium", q: "What does <code>%m</code> mean in a format string?", options: ["The minute", "The month", "The millisecond", "The meridian (AM/PM)"], correct: 1, why: "Lowercase <code>%m</code> is the month (01–12). The minute is capital <code>%M</code> — swapping them is the classic silent date bug." },
+    { level: "medium", q: "<code>datetime.strptime(\"23/07/2026\", \"%d-%m-%Y\")</code> — what happens?", options: ["Works fine", "Returns None", "Swaps to slashes automatically", "ValueError — the separators don't match"], correct: 3, why: "The text uses slashes but the format says dashes. strptime needs the format to mirror the text exactly, so this raises ValueError." },
+    { level: "medium", q: "Why do the lesson's examples use a fixed date instead of <code>datetime.now()</code>?", options: ["now() changes each run, so the output can't be verified", "now() is deprecated", "now() only works online", "Fixed dates are faster"], correct: 0, why: "<code>now()</code> returns a different value every time, so a snippet claiming a specific output would be wrong the next second. Fixed dates keep the output stable." },
+    { level: "medium", q: "Which does <code>timedelta</code> NOT accept as an argument?", options: ["days", "hours", "months", "weeks"], correct: 2, why: "A month is not a fixed number of days, so <code>timedelta</code> has no <code>months</code>. It takes days, hours, minutes, seconds, weeks." },
+    // Hard
+    { level: "hard", q: "<code>datetime(2026, 7, 23, 14, 5).strftime(\"%H:%m\")</code> prints what?", options: ["14:05", "14:07", "02:05", "ValueError"], correct: 1, why: "Lowercase <code>%m</code> is the month, and it is July, so the minute slot shows 07. The correct code is capital <code>%M</code>, which gives 14:05." },
+    { level: "hard", q: "You have two date strings and want the days between them. What must you do first?", options: ["Nothing — subtract the strings", "Concatenate them", "Sort them alphabetically", "strptime both into datetimes"], correct: 3, why: "You cannot subtract strings. Parse each with <code>strptime</code> into real datetimes, then subtract and read <code>.days</code>." },
+    { level: "hard", q: "Why can sorting date STRINGS give the wrong chronological order?", options: ["Strings can't be sorted", "Python sorts dates randomly", "Lexicographic order only matches time if it's zero-padded year-first", "It always works"], correct: 2, why: "As text, <code>\"09/2026\"</code> sorts before <code>\"10/2025\"</code> even though it is later. Only strict year-first zero-padded strings sort chronologically — which is why you parse to real dates." },
   ],
 
   "json": [
