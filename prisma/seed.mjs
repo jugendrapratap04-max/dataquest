@@ -2109,15 +2109,83 @@ const L29 = [
 ];
 
 const L30 = [
-  { t: "objectives", items: ["Concurrency — ek saath kai kaam","Threading vs Multiprocessing","GIL ka concept"] },
-  { t: "h2", n: "1", text: "Ek saath kai kaam kyun?" },
-  { t: "p", html: "Normally code ek-ek line chalta hai. Par jab kai kaam saath karne ho (jaise 100 websites se data laana), tab <b>concurrency</b> time bacha deti hai — warna ek-ek karke ghanton lagta." },
-  { t: "code", file: "thread.py", code: "import threading\n\ndef task(name):\n    print(f\"{name} chal raha hai\")\n\nt = threading.Thread(target=task, args=(\"A\",))\nt.start()\nt.join()", output: "A chal raha hai" },
-  { t: "h2", n: "2", text: "Threading vs Multiprocessing" },
-  { t: "p", html: "<b>Threading</b> — I/O kaam (files, network) ke liye. <b>Multiprocessing</b> — heavy CPU calculation ke liye (kai cores use karta hai). Python ka <b>GIL</b> ek time pe ek hi thread ko Python code chalane deta hai." },
-  { t: "note", variant: "tip", html: "<b>Kahan atkoge iske bina:</b> web scraping, kai APIs se data, bade files — sab bahut slow honge aur pata nahi chalega kaise fast karein." },
-  { t: "note", variant: "warn", html: "<b>Note:</b> ye browser me nahi chalega — VS Code me try karo. Yahan concept clear karo." },
-  { t: "recap", items: ["Concurrency = kai kaam saath","Threading = I/O ke liye","Multiprocessing = CPU-heavy ke liye","GIL: ek time ek thread"] },
+  { t: "objectives", items: [
+    "Run several tasks concurrently with <code>threading</code>",
+    "Understand the <b>GIL</b>: only one thread runs Python at a time",
+    "Choose <b>threads for I/O-bound</b> work, <b>processes for CPU-bound</b>",
+    "Collect results cleanly with <code>ThreadPoolExecutor</code>",
+    "Protect shared state with a <code>Lock</code> to avoid race conditions",
+  ]},
+  { t: "hook", q: "You have 100 web pages to download, each taking a second of waiting. You add threads, expecting it to still take ~100 seconds — the GIL only lets one thread run at a time, right? Instead it finishes in about <b>one</b> second. How, if threads can't run in parallel?", why: "Because downloading is <b>waiting</b>, not computing. While one thread sits idle waiting for a page to arrive, Python hands the GIL to another thread to start its own download. The GIL only blocks two threads from running Python <b>code</b> at once — it does nothing to stop them <b>waiting</b> at the same time. So for I/O-bound work, threads overlap all the waiting and the speedup is huge. For CPU-bound work, where every thread wants to compute, the GIL really does serialise them — and there you need processes." },
+  { t: "think", q: "If Python's GIL means only one thread runs at a time, when are threads actually worth using?", a: "Whenever the work is mostly <b>waiting</b> — network requests, reading files, database calls. During the wait, a thread is not running Python code, so the GIL is free for another thread to make progress. That is <b>I/O-bound</b> work, and threads overlap the idle time beautifully.<br/><br/>For <b>CPU-bound</b> work — crunching numbers, processing images — every thread wants the GIL to compute, so they take turns and there is no speedup. That is when you reach for <code>multiprocessing</code>, which gives each task its own interpreter and its own GIL, so they run truly in parallel across cores." },
+
+  { t: "h2", n: "1", text: "Running a thread" },
+  { t: "def", term: "Concurrency", en: "Concurrency is structuring a program so multiple tasks can be in progress at once; with threads, one interpreter interleaves them, overlapping the time any of them spends waiting.", hi: "In plain words: kai kaam ek saath 'chalu' rakhna. Threads se ek hi interpreter unhe baari-baari aage badhata hai — khaas kar jab koi kaam wait kar raha ho." },
+  { t: "p", html: "<code>threading.Thread(target=func, args=(...))</code> creates a thread; <code>.start()</code> runs it, and <code>.join()</code> waits for it to finish before the main program continues." },
+  { t: "code", file: "thread.py", code: "import threading\n\nresult = []\ndef work(x):\n    result.append(x * x)\n\nt = threading.Thread(target=work, args=(5,))\nt.start()      # run the thread\nt.join()       # wait for it to finish\nprint(result)", output: "[25]" },
+  { t: "note", variant: "warn", html: "<b>Always <code>join()</code> before reading a thread's results.</b> Without it, the main program races ahead and may read the result before the thread has written it. And note <code>args=(5,)</code> needs the trailing comma — <code>(5)</code> is just the number 5, not a tuple." },
+
+  { t: "h2", n: "2", text: "The GIL: why it matters" },
+  { t: "p", html: "Python's <b>Global Interpreter Lock</b> lets only one thread execute Python bytecode at a time. So threads overlap <b>waiting</b> (I/O) but not <b>computing</b> (CPU). That one rule decides which tool to use." },
+  { t: "viz", name: "concurrency-lab" },
+  { t: "p", html: "Click through those scenarios. Threads collapse three I/O tasks into one time slot, because the waiting overlaps — but three CPU tasks still take the full time, because the GIL serialises the computing. Only separate <b>processes</b> speed up CPU work." },
+  { t: "analogy", concept: "The GIL", real: "One kitchen, one chef", html: "Picture a kitchen with a single chef (the GIL). If three dishes each need 10 minutes in the <b>oven</b>, the chef starts all three and waits — the oven does the work in parallel, so all three finish together. That is I/O-bound: the waiting overlaps. But if three dishes each need 10 minutes of <b>the chef chopping</b>, one chef can only chop one at a time — 30 minutes total. That is CPU-bound. To chop in parallel you need <b>more chefs</b> (more processes), not a busier single chef (more threads)." },
+
+  { t: "h2", n: "3", text: "ThreadPoolExecutor: results made easy" },
+  { t: "p", html: "Managing threads by hand gets fiddly. <code>ThreadPoolExecutor</code> runs a pool of workers and hands back results — and <code>.map</code> returns them <b>in order</b>, however the threads finished." },
+  { t: "code", file: "pool.py", code: "from concurrent.futures import ThreadPoolExecutor\n\ndef square(n):\n    return n * n\n\nwith ThreadPoolExecutor(max_workers=3) as ex:\n    results = list(ex.map(square, [1, 2, 3, 4]))\n\nprint(results)     # in the SAME order as the input", output: "[1, 4, 9, 16]" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is the pattern you will actually reach for. Scraping many URLs, calling several APIs, reading a folder of files — wrap the per-item work in a function and hand the list to <code>ThreadPoolExecutor().map</code>. It parallelises the waiting, returns results in order, and cleans up the threads for you. For CPU-heavy work — resizing thousands of images, heavy numeric loops — swap in <code>ProcessPoolExecutor</code>, which sidesteps the GIL with real processes." },
+
+  { t: "h2", n: "4", text: "Shared state and locks" },
+  { t: "p", html: "When threads share data, two of them updating it at once can corrupt it — a <b>race condition</b>. A <code>Lock</code> makes a section run one-thread-at-a-time, so the updates stay correct." },
+  { t: "code", file: "lock.py", code: "import threading\n\ncounter = 0\nlock = threading.Lock()\n\ndef add_1000():\n    global counter\n    for _ in range(1000):\n        with lock:          # only one thread inside at a time\n            counter += 1\n\nthreads = [threading.Thread(target=add_1000) for _ in range(5)]\nfor t in threads: t.start()\nfor t in threads: t.join()\n\nprint(counter)     # exactly 5000, thanks to the lock", output: "5000" },
+  { t: "note", variant: "warn", html: "Without the lock, <code>counter += 1</code> is not atomic — it reads, adds, and writes in separate steps, and two threads can interleave and lose an update, giving a number <b>less</b> than 5000. The result would also vary run to run. A <code>Lock</code> (or keeping shared state to a minimum) is how you keep concurrent code correct." },
+
+  { t: "trace", intro: "Threads, a pool, and a lock. All outputs here are deterministic. Work out each value.", code: "import threading\nfrom concurrent.futures import ThreadPoolExecutor\n\nout = [None, None, None]\ndef store(i):\n    out[i] = i * 10\n\nts = [threading.Thread(target=store, args=(i,)) for i in range(3)]\nfor t in ts: t.start()\nfor t in ts: t.join()\n\na = out\n\ndef cube(n):\n    return n ** 3\nwith ThreadPoolExecutor() as ex:\n    b = list(ex.map(cube, [1, 2, 3]))\n\nc = len(b)", steps: [
+    { q: "After line 12, <code>a</code> is", answer: "[0, 10, 20]", why: "Each thread wrote its own index, so the result is deterministic: out[0]=0, out[1]=10, out[2]=20." },
+    { q: "After line 17, <code>b</code> is", answer: "[1, 8, 27]", why: "<code>ex.map</code> applies cube to 1, 2, 3 and returns the results in input order: 1, 8, 27." },
+    { q: "After line 19, <code>c</code> is", answer: "3", why: "There are three results in <code>b</code>, so its length is 3." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Outputs are deterministic. Write each yourself before opening the answer.", items: [
+    { task: "Run one thread that stores a result, then join.", code: "import threading\n\nresult = []\ndef work(x):\n    result.append(x + 1)\n\nt = threading.Thread(target=work, args=(9,))\nt.start()\nt.join()\nprint(result)", out: "[10]" },
+    { task: "Use ThreadPoolExecutor.map to double a list.", code: "from concurrent.futures import ThreadPoolExecutor\n\ndef double(n):\n    return n * 2\n\nwith ThreadPoolExecutor() as ex:\n    print(list(ex.map(double, [1, 2, 3])))", out: "[2, 4, 6]" },
+    { task: "Run several threads that each write their own index.", code: "import threading\n\nout = [0, 0, 0, 0]\ndef put(i):\n    out[i] = i * i\n\nts = [threading.Thread(target=put, args=(i,)) for i in range(4)]\nfor t in ts: t.start()\nfor t in ts: t.join()\nprint(out)", out: "[0, 1, 4, 9]" },
+    { task: "Protect a shared counter with a Lock.", code: "import threading\n\ncount = 0\nlock = threading.Lock()\ndef inc():\n    global count\n    for _ in range(100):\n        with lock:\n            count += 1\n\nts = [threading.Thread(target=inc) for _ in range(3)]\nfor t in ts: t.start()\nfor t in ts: t.join()\nprint(count)", out: "300" },
+    { task: "Get a return value with submit().result().", code: "from concurrent.futures import ThreadPoolExecutor\n\ndef square(n):\n    return n * n\n\nwith ThreadPoolExecutor() as ex:\n    print(ex.submit(square, 6).result())", out: "36" },
+    { task: "Count how many threads you started.", code: "import threading\n\nts = [threading.Thread(target=lambda: None) for _ in range(5)]\nfor t in ts: t.start()\nfor t in ts: t.join()\nprint(len(ts))", out: "5" },
+    { task: "Map a function over a range with a pool.", code: "from concurrent.futures import ThreadPoolExecutor\n\nwith ThreadPoolExecutor() as ex:\n    print(sum(ex.map(lambda n: n, range(5))))", out: "10" },
+    { task: "Use the pool result to build a total.", code: "from concurrent.futures import ThreadPoolExecutor\n\ndef length(s):\n    return len(s)\n\nwith ThreadPoolExecutor() as ex:\n    print(list(ex.map(length, [\"a\", \"bb\", \"ccc\"])))", out: "[1, 2, 3]" },
+    { task: "Join in a loop over many threads.", code: "import threading\n\ntotal = []\ndef add(x):\n    total.append(x)\n\nts = [threading.Thread(target=add, args=(i,)) for i in range(3)]\nfor t in ts: t.start()\nfor t in ts: t.join()\nprint(sorted(total))", out: "[0, 1, 2]" },
+    { task: "Square a list in order with the pool.", code: "from concurrent.futures import ThreadPoolExecutor\n\nwith ThreadPoolExecutor() as ex:\n    print(list(ex.map(lambda n: n * n, [2, 3, 4])))", out: "[4, 9, 16]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "import threading\ndef greet(name):\n    print(\"hi\", name)\n\nt = threading.Thread(target=greet, args=(\"Freya\"))\nt.start()", why: "<code>args=(\"Freya\")</code> is just the string \"Freya\", not a tuple — so the thread calls <code>greet('F','r','e','y','a')</code> and raises TypeError. Add the trailing comma: <code>args=(\"Freya\",)</code>.", fix: "t = threading.Thread(target=greet, args=(\"Freya\",))\nt.start()" },
+    { bad: "import threading\ndef work():\n    return 1\n\nt = threading.Thread(target=work())\nt.start()", why: "<code>target=work()</code> <b>calls</b> work immediately and passes its return value as the target, so nothing runs in the thread. Pass the function itself, without parentheses: <code>target=work</code>.", fix: "t = threading.Thread(target=work)\nt.start()" },
+    { bad: "counter = 0\ndef inc():\n    global counter\n    for _ in range(100000):\n        counter += 1\n# many threads run inc() with no lock", why: "<code>counter += 1</code> is read-modify-write, not atomic, so threads interleave and lose updates — the total comes out less than expected, and differs each run. Guard shared writes with a <code>Lock</code>.", fix: "lock = threading.Lock()\ndef inc():\n    global counter\n    for _ in range(100000):\n        with lock:\n            counter += 1" },
+    { bad: "import threading\ncpu_heavy = lambda: sum(i*i for i in range(10**7))\nts = [threading.Thread(target=cpu_heavy) for _ in range(4)]", why: "This is CPU-bound work, and the GIL means the four threads take turns rather than run in parallel — no speedup, sometimes slower. Use <code>ProcessPoolExecutor</code> for CPU work.", fix: "from concurrent.futures import ProcessPoolExecutor\nwith ProcessPoolExecutor() as ex:\n    ex.map(cpu_heavy, range(4))" },
+  ]},
+
+  { t: "debug", intro: "A function starts a thread to square a number and tries to use the result. It runs without error, but the result is always None instead of the number. Read it before opening the fix.", code: "import threading\n\ndef square(n):\n    return n * n\n\nresult = threading.Thread(target=square, args=(5,)).start()\nprint(result)", symptom: "prints None instead of 25", q: "The square function clearly returns n*n. So why is the result None?", fix: "from concurrent.futures import ThreadPoolExecutor\n\ndef square(n):\n    return n * n\n\nwith ThreadPoolExecutor() as ex:\n    result = ex.submit(square, 5).result()\nprint(result)", why: "A thread does not hand its return value back to the caller. <code>Thread.start()</code> returns <code>None</code> — it starts the thread and returns immediately — so <code>result</code> is None, and the value <code>square</code> computed is simply lost. Threads communicate through <b>shared state</b> (writing into a list or dict the caller can read afterwards), not through a return value.<br/><br/>The clean fix is <code>ThreadPoolExecutor</code>: <code>ex.submit(square, 5)</code> returns a <code>Future</code>, and <code>.result()</code> waits for the thread and gives you the return value — 25. This is exactly why the executor API exists: it handles collecting results (and re-raising any exception from the worker) so you do not have to wire up shared containers by hand." },
+
+  { t: "recap", items: [
+    "<code>threading.Thread(target=f, args=(...))</code> · <code>.start()</code> runs · <code>.join()</code> waits",
+    "The <b>GIL</b> lets one thread run Python at a time — threads overlap <b>waiting</b>, not <b>computing</b>",
+    "Use <b>threads for I/O-bound</b> work (network, files), <b>processes for CPU-bound</b>",
+    "<code>ThreadPoolExecutor().map</code> runs a pool and returns results <b>in order</b>",
+    "A thread does not return a value — use shared state, or <code>submit().result()</code>",
+    "Shared writes need a <code>Lock</code>, or a race condition loses updates",
+    "<code>args=(x,)</code> needs the comma, and <code>target=f</code> takes the function, not <code>f()</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between concurrency with threads and with processes?", a: "Threads live inside one interpreter and share memory, so they are light and communicate easily, but the GIL means only one runs Python bytecode at a time. Processes each have their own interpreter and memory, so they run in true parallel across cores but are heavier and must pass data explicitly. Threads suit I/O-bound work; processes suit CPU-bound work." },
+    { level: "beginner", q: "What is the GIL?", a: "The Global Interpreter Lock is a mutex in CPython that allows only one thread to execute Python bytecode at any moment. It simplifies memory management but means threads cannot run Python code in parallel. Crucially, a thread releases the GIL while waiting on I/O, so threads still overlap waiting — which is why they help I/O-bound programs but not CPU-bound ones." },
+    { level: "intermediate", q: "When should you use threads versus multiprocessing?", a: "Use threads for I/O-bound work — network requests, file and database access — where tasks spend most of their time waiting, because threads overlap that waiting despite the GIL and are cheap to create. Use multiprocessing for CPU-bound work — heavy computation — because separate processes each have their own GIL and run in genuine parallel across cores. Picking the wrong one is a common cause of code that adds complexity without any speedup." },
+    { level: "intermediate", q: "What is a race condition, and how do you prevent it?", a: "A race condition is when two threads access shared mutable state concurrently and the outcome depends on their timing — for example, two threads both doing <code>counter += 1</code>, which is a non-atomic read-modify-write, can interleave and lose an update. You prevent it by serialising access to the shared state, typically with a <code>Lock</code> using <code>with lock:</code>, or by avoiding shared mutable state altogether and passing results back through a queue or executor." },
+    { level: "intermediate", q: "How do you get a return value out of a thread?", a: "You cannot get it from <code>Thread.start()</code>, which returns None. With the raw threading API you write the result into a shared container — a list or dict the caller reads after <code>join()</code>. The cleaner approach is <code>concurrent.futures</code>: <code>ex.submit(fn, *args)</code> returns a Future whose <code>.result()</code> blocks until the thread finishes and returns the value, re-raising any exception the worker hit. <code>ex.map</code> does the same across an iterable, preserving input order." },
+  ]},
 ];
 const L31 = [
   { t: "objectives", items: ["async / await samajhna","Coroutine kya hai","Kab async use karein"] },
@@ -3739,6 +3807,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "concurrency": [
+    // Easy
+    { level: "easy", q: "What does <code>.join()</code> do on a thread?", options: ["Waits for it to finish", "Starts it", "Merges two threads", "Kills it"], correct: 0, why: "<code>join()</code> blocks the main program until the thread completes — call it before reading the thread's results." },
+    { level: "easy", q: "What is the GIL?", options: ["A garbage collector", "A type of loop", "A lock that lets only one thread run Python at a time", "A logging tool"], correct: 2, why: "The Global Interpreter Lock serialises Python bytecode across threads — so threads overlap waiting, not computing." },
+    { level: "easy", q: "Threads are best for which kind of work?", options: ["CPU-heavy computation", "I/O-bound work (network, files)", "Nothing", "Sorting"], correct: 1, why: "Threads overlap the waiting in I/O-bound tasks. For CPU-bound work the GIL blocks parallelism — use processes." },
+    // Medium
+    { level: "medium", q: "Why do threads NOT speed up CPU-bound work in Python?", options: ["Threads are disabled", "CPUs are too slow", "It needs a lock", "The GIL lets only one run Python at a time"], correct: 3, why: "Every thread needs the GIL to compute, so they take turns — no parallelism. Use multiprocessing for CPU work." },
+    { level: "medium", q: "What does <code>ThreadPoolExecutor.map</code> guarantee about results?", options: ["They are sorted", "They are unique", "They come back in input order", "They are faster"], correct: 2, why: "<code>map</code> returns results in the same order as the inputs, no matter which thread finished first." },
+    { level: "medium", q: "<code>threading.Thread(target=work())</code> — what's wrong?", options: ["work() runs immediately; pass target=work without ()", "Nothing", "It needs args", "It needs a lock"], correct: 0, why: "The parentheses call work now and pass its return value as target. Pass the function itself: <code>target=work</code>." },
+    { level: "medium", q: "For CPU-bound parallelism, what do you use instead of threads?", options: ["More threads", "A bigger GIL", "multiprocessing / ProcessPoolExecutor", "Faster loops"], correct: 2, why: "Separate processes each have their own interpreter and GIL, so they run in true parallel across cores." },
+    // Hard
+    { level: "hard", q: "<code>result = threading.Thread(target=sq, args=(5,)).start()</code>. What is <code>result</code>?", options: ["25", "None", "the thread", "an error"], correct: 1, why: "<code>start()</code> returns None — a thread doesn't hand back a return value. Use ThreadPoolExecutor's submit().result()." },
+    { level: "hard", q: "Two threads run <code>counter += 1</code> in a loop with no lock. The final count is…", options: ["Always correct", "Always zero", "Doubled", "Possibly less than expected, and varies each run"], correct: 3, why: "<code>+= 1</code> is a non-atomic read-modify-write; threads interleave and lose updates — a race condition. Guard it with a Lock." },
+    { level: "hard", q: "How do you cleanly get a worker thread's return value?", options: ["ex.submit(fn, x).result()", "Read Thread.start()", "Thread.return", "It's impossible"], correct: 0, why: "<code>submit</code> returns a Future; <code>.result()</code> waits and returns the value (re-raising any worker exception)." },
   ],
 
   "regex": [

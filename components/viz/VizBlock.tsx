@@ -21,6 +21,7 @@ import { DunderLab } from "./DunderLab";
 import { GeneratorLab } from "./GeneratorLab";
 import { DecoratorLab } from "./DecoratorLab";
 import { RegexLab } from "./RegexLab";
+import { ConcurrencyLab } from "./ConcurrencyLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -58,6 +59,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "generator-lab": GeneratorLab,
   "decorator-lab": DecoratorLab,
   "regex-lab": RegexLab,
+  "concurrency-lab": ConcurrencyLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
