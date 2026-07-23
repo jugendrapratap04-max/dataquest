@@ -534,6 +534,25 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .ih-members { display:flex; flex-wrap:wrap; gap:6px; }
 .ih-members code { font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:5px; background:var(--panel); border:1px solid var(--line); color:var(--ink-soft); }
 .ih-arrow { font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); text-align:center; padding:5px 0; }
+
+/* Encapsulation Lab — access attempts from outside the class, with a verdict. */
+.en-src { font-family:var(--mono); font-size:11.5px; line-height:1.6; background:var(--panel-2); border:1px solid var(--line);
+          border-radius:9px; padding:10px 13px; color:var(--ink-soft); overflow-x:auto; white-space:pre; }
+.en-result { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:11px 13px; border-radius:9px;
+             border:1px solid var(--line); background:var(--panel-2); }
+.en-result.ok { border-color:color-mix(in srgb,var(--good) 40%,transparent); background:color-mix(in srgb,var(--good) 7%,transparent); }
+.en-result.warn { border-color:color-mix(in srgb,var(--accent) 40%,transparent); background:color-mix(in srgb,var(--accent) 8%,transparent); }
+.en-result.bad { border-color:color-mix(in srgb,var(--bad) 40%,transparent); background:color-mix(in srgb,var(--bad) 8%,transparent); }
+.en-code { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); }
+.en-arrow { color:var(--ink-faint); }
+.en-val { font-family:var(--mono); font-size:13px; }
+.en-result.ok .en-val { color:var(--good); }
+.en-result.warn .en-val { color:var(--accent-2); }
+.en-result.bad .en-val { color:var(--bad); }
+.en-verdict { font-family:var(--mono); font-size:10.5px; font-weight:700; margin-left:auto; padding:3px 9px; border-radius:20px; }
+.en-verdict.ok { color:var(--good); background:color-mix(in srgb,var(--good) 14%,transparent); }
+.en-verdict.warn { color:var(--accent-2); background:color-mix(in srgb,var(--accent) 14%,transparent); }
+.en-verdict.bad { color:var(--bad); background:color-mix(in srgb,var(--bad) 14%,transparent); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
