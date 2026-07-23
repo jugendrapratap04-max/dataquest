@@ -480,6 +480,27 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .bw-opline { display:flex; align-items:center; gap:10px; padding-left:74px; }
 .bw-opsym { font-family:var(--mono); font-size:15px; font-weight:700; color:var(--accent-2); }
 .bw-oprule { font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; }
+
+/* Match Lab — the case list with the first-match highlighted and the rest below
+   greyed as unreachable. */
+.ml-match { font-family:var(--mono); font-size:13px; color:var(--accent-2); margin-bottom:8px; }
+.ml-cases { display:flex; flex-direction:column; gap:5px; }
+.ml-case { display:grid; grid-template-columns:22px 1fr auto; gap:10px; align-items:center;
+           padding:8px 11px; border-radius:8px; border:1px solid var(--line); background:var(--panel-2); transition:opacity .2s; }
+.ml-case.skip { opacity:.5; }
+.ml-case.hit { border-color:color-mix(in srgb,var(--teal) 45%,transparent); background:var(--teal-soft); opacity:1; animation:viz-land .24s ease-out; }
+.ml-case.unreached { opacity:.32; }
+.ml-mark { font-family:var(--mono); font-size:13px; text-align:center; color:var(--ink-faint); }
+.ml-case.skip .ml-mark { color:var(--bad); }
+.ml-case.hit .ml-mark { color:var(--teal); font-weight:700; }
+.ml-code { font-family:var(--mono); font-size:12.5px; color:var(--ink); }
+.ml-tag { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-faint); white-space:nowrap; }
+.ml-case.hit .ml-tag { color:var(--teal); font-weight:700; }
+@media (max-width:560px){ .ml-tag { display:none; } .ml-case { grid-template-columns:22px 1fr; } }
+.ml-out { margin-top:12px; padding:10px 13px; border-radius:9px; background:var(--panel-2); border:1px solid var(--line); }
+.ml-out-row { display:flex; align-items:center; gap:10px; }
+.ml-binds { font-size:11.5px; color:var(--ink-soft); margin-top:6px; }
+.ml-binds code { font-family:var(--mono); color:var(--teal); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
