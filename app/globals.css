@@ -375,6 +375,25 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .fmt-cell.empty { border-style:dashed; border-color:color-mix(in srgb,var(--line) 70%,transparent); }
 .fmt-len { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:8px; }
 .fmt-dot { font-family:var(--mono); color:var(--ink-faint); }
+
+/* Lambda Lab — three rows (input, what the lambda computes, output) so the
+   identical middle step is visible across map / filter / sorted. */
+.lam-call { font-family:var(--mono); font-size:13px; color:var(--accent-2); margin-bottom:12px; }
+.lam-call b { color:var(--teal); font-weight:700; }
+.lam-flow { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px 12px; align-items:center; }
+@media (max-width:560px){ .lam-flow { grid-template-columns:minmax(0,1fr); gap:4px 0; } .lam-lab { margin-top:8px; } }
+.lam-lab { font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); text-align:right; }
+@media (max-width:560px){ .lam-lab { text-align:left; } }
+.lam-row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; min-height:34px; }
+.lam-row.out { animation:viz-land .24s ease-out; }
+.lam-cell { font-family:var(--mono); font-size:13px; min-width:30px; padding:5px 9px; border-radius:6px; text-align:center;
+            border:1px solid var(--line); background:var(--panel-2); color:var(--ink); }
+.lam-cell.in { color:var(--ink-soft); }
+.lam-cell.mid { animation:viz-land .22s ease-out; }
+.lam-cell.mid.keep { background:var(--teal-soft); border-color:color-mix(in srgb,var(--teal) 32%,transparent); color:var(--teal); }
+.lam-cell.mid.drop { color:var(--ink-faint); opacity:.55; text-decoration:line-through; }
+.lam-cell.res { background:var(--teal-soft); border-color:color-mix(in srgb,var(--teal) 32%,transparent); color:var(--teal); font-weight:700; }
+.lam-count { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-left:4px; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

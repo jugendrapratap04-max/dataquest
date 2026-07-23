@@ -1056,15 +1056,86 @@ const L16 = [
   ] },
 ];
 const L17 = [
-  { t: "objectives", items: ["Lambda (one-line function) banana","map/sorted ke saath use","Kab use karein"] },
-  { t: "h2", n: "1", text: "Lambda kya hai?" },
-  { t: "p", html: "Lambda ek chhota anonymous function hai — ek line me. <code>lambda arguments: expression</code>." },
-  { t: "code", file: "lambda.py", code: "double = lambda x: x * 2\nprint(double(5))   # 10\n\nadd = lambda a, b: a + b\nprint(add(3, 4))   # 7", output: "10\n7" },
-  { t: "h2", n: "2", text: "map aur sorted ke saath" },
-  { t: "p", html: "Lambda sabse zyada <code>map()</code>, <code>filter()</code>, <code>sorted(key=...)</code> ke saath use hota hai." },
-  { t: "code", file: "lambdause.py", code: "nums = [1, 2, 3]\nsquares = list(map(lambda x: x * x, nums))\nprint(squares)   # [1, 4, 9]", output: "[1, 4, 9]" },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> Pandas me <code>df.apply(lambda ...)</code> har row/column pe function lagane ke liye bahut use hota hai." },
-  { t: "recap", items: ["lambda args: expression","One-line anonymous function","map/filter/sorted ke saath","Pandas apply me common"] },
+  { t: "objectives", items: [
+    "Write a <code>lambda</code>, and know it is just a function with no name",
+    "See why it holds <b>one expression</b> and no statements",
+    "Use it as the throwaway argument to <code>map</code>, <code>filter</code> and <code>sorted</code>",
+    "Sort by a computed key, including two keys at once",
+    "Avoid the late-binding trap when you build lambdas in a loop",
+  ]},
+  { t: "hook", q: "You build a list of ten tiny functions in a loop, one per number, each meant to add its own number. You call them all — and every single one adds <b>9</b>. Not 0, 1, 2… nine, nine, nine. What happened?", why: "The lambdas did not capture the <b>value</b> of the loop variable, they captured the <b>variable itself</b>. By the time you call them, the loop is long over and that variable holds its last value. It is the single most famous lambda trap, it raises no error, and the fix is one small word you would never guess." },
+  { t: "think", q: "<code>double = lambda x: x * 2</code>. How is this different from <code>def double(x): return x * 2</code>?", a: "In what it <b>does</b>, not at all — both build a function that doubles its argument, and <code>double(5)</code> gives 10 either way.<br/><br/>The differences are that the lambda has <b>no name of its own</b> (the name <code>double</code> is just a variable you happened to point at it) and it can hold only a <b>single expression</b> — no <code>if</code> statement, no loop, no second line. That limit is the whole personality of a lambda: it exists for the one-liner you do not want to name." },
+
+  { t: "h2", n: "1", text: "A function with the ceremony removed" },
+  { t: "def", term: "Lambda", en: "A lambda is an anonymous function written as a single expression: the word lambda, its parameters, a colon, and one expression whose value is returned automatically.", hi: "In plain words: <code>lambda x: x * 2</code> is <code>def</code> with everything optional stripped away — no name, no <code>return</code> (the expression is the return), and exactly one line." },
+  { t: "p", html: "<code>lambda arguments: expression</code>. There is no <code>return</code> because the expression <b>is</b> the return value. Assigning one to a name is legal but rare — its real home is being passed straight into another function." },
+  { t: "code", file: "lambda.py", code: "double = lambda x: x * 2\nprint(double(5))\n\nadd = lambda a, b: a + b\nprint(add(3, 4))\n\n# it is genuinely a function\nprint(type(double).__name__)\nprint((lambda x: x + 1)(5))   # define and call on the spot", output: "10\n7\nfunction\n6" },
+  { t: "note", variant: "warn", html: "<b>A lambda holds one expression, not statements.</b> <code>lambda x: return x*2</code> is a <code>SyntaxError</code> — there is no <code>return</code>, and <code>lambda x: if x: …</code> is illegal too. The moment you need an <code>if</code> statement, a loop, or a second line, you need <code>def</code>. (A conditional <i>expression</i>, <code>a if cond else b</code>, is fine — that is one expression.)" },
+
+  { t: "h2", n: "2", text: "Where lambdas actually earn their keep" },
+  { t: "p", html: "You rarely name a lambda. You hand it to a function that will call it for you — <code>map</code> to transform every element, <code>filter</code> to keep some, <code>sorted</code> to decide the order." },
+  { t: "code", file: "hof.py", code: "nums = [5, 2, 8, 1, 4]\n\nprint(list(map(lambda x: x * x, nums)))       # transform each\nprint(list(filter(lambda x: x % 2 == 0, nums)))  # keep the even ones\nprint(sorted(nums, key=lambda x: -x))            # order by a computed key", output: "[25, 4, 64, 1, 16]\n[2, 8, 4]\n[8, 5, 4, 2, 1]" },
+  { t: "viz", name: "lambda-lab" },
+  { t: "p", html: "Notice in that panel that the lambda always does the same small job — one value in, one value out. What changes is the function around it: <code>map</code> keeps the count, <code>filter</code> shrinks it, <code>sorted</code> reorders and throws the keys away." },
+  { t: "analogy", concept: "A lambda passed to sorted", real: "Telling a librarian how to sort", html: "<code>sorted(books)</code> sorts by the books themselves, alphabetically. <code>sorted(books, key=lambda b: b.year)</code> is you telling the librarian <b>&quot;sort by the year printed inside, not the title&quot;</b> — the key function is the one instruction that changes everything, and it never appears on the finished shelf. The books that come back are the same books, just in a new order." },
+
+  { t: "h2", n: "3", text: "Sorting by one key, or two" },
+  { t: "p", html: "The <code>key</code> function is computed once per element and the list is ordered by its result. Return a <b>tuple</b> to sort by several things at once — the second only breaks ties in the first." },
+  { t: "code", file: "sorting.py", code: "people = [(\"Aarav\", 91), (\"Diya\", 91), (\"Kabir\", 80)]\n\n# by marks, highest first\nprint(sorted(people, key=lambda p: -p[1]))\n\n# marks high-to-low, then name A-Z to break ties\nprint(sorted(people, key=lambda p: (-p[1], p[0])))", output: "[('Aarav', 91), ('Diya', 91), ('Kabir', 80)]\n[('Aarav', 91), ('Diya', 91), ('Kabir', 80)]" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> ranking rows by a computed value is daily data work — leaderboards, top-N reports, \"newest first\". A tuple key is how you express \"sort by score descending, then by name\" in one line, and the exact same <code>key=lambda …</code> idea drives Pandas' <code>df.sort_values</code> and <code>df.apply</code> later. Learn it on a plain list now and the DataFrame version is free." },
+
+  { t: "h2", n: "4", text: "The trap: lambdas built in a loop" },
+  { t: "p", html: "A lambda remembers the <b>variable</b> it used, not the value that was in it at the time. Build lambdas in a loop over <code>i</code> and they all share the one <code>i</code> — which, by the time you call them, holds its final value." },
+  { t: "code", file: "trap.py", code: "funcs = [lambda: i for i in range(3)]\nprint([f() for f in funcs])          # NOT [0, 1, 2]\n\n# bind the value now, with a default argument\nfixed = [lambda i=i: i for i in range(3)]\nprint([f() for f in fixed])", output: "[2, 2, 2]\n[0, 1, 2]" },
+  { t: "note", variant: "warn", html: "<b>The fix is <code>i=i</code>.</b> A default argument is evaluated <b>when the lambda is defined</b>, so <code>lambda i=i: i</code> snapshots the current value into the parameter. It looks strange the first time, but it is the standard cure for late binding — and the reason to prefer a named <code>def</code> or a comprehension when the logic grows." },
+
+  { t: "trace", intro: "Each line uses a lambda a different way. Work out the value.", code: "sq = lambda x: x * x\na = sq(4)\n\nnums = [3, 1, 2]\nb = sorted(nums, key=lambda x: -x)\n\nwords = [\"bbb\", \"a\", \"cc\"]\nc = sorted(words, key=lambda w: len(w))\n\nd = list(filter(lambda x: x > 1, nums))\ne = (lambda x, y: x + y)(10, 5)", steps: [
+    { q: "After line 2, <code>a</code> is", answer: "16", why: "<code>sq</code> is an ordinary function that squares its argument, so <code>sq(4)</code> is 16." },
+    { q: "After line 5, <code>b</code> is", answer: "[3, 2, 1]", why: "The key <code>-x</code> makes the largest number sort first, so ascending order of the keys is descending order of the values." },
+    { q: "After line 8, <code>c</code> is", answer: "['a', 'cc', 'bbb']", why: "Sorting by <code>len</code> orders the words shortest to longest: 1, 2, 3 characters." },
+    { q: "After line 10, <code>d</code> is", answer: "[3, 2]", why: "<code>filter</code> keeps the elements where the lambda is True — the numbers greater than 1, in their original order." },
+    { q: "After line 11, <code>e</code> is", answer: "15", why: "The lambda is defined and immediately called with 10 and 5, so it returns their sum." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Make a lambda that cubes a number, and call it on 3.", code: "cube = lambda x: x ** 3\n\nprint(cube(3))", out: "27" },
+    { task: "Square every number in a list with <code>map</code>.", code: "nums = [1, 2, 3, 4]\n\nprint(list(map(lambda x: x * x, nums)))", out: "[1, 4, 9, 16]" },
+    { task: "Keep only the even numbers with <code>filter</code>.", code: "nums = [1, 2, 3, 4, 5, 6]\n\nprint(list(filter(lambda x: x % 2 == 0, nums)))", out: "[2, 4, 6]" },
+    { task: "Sort words from longest to shortest.", code: "words = [\"a\", \"bbb\", \"cc\"]\n\nprint(sorted(words, key=lambda w: -len(w)))", out: "['bbb', 'cc', 'a']" },
+    { task: "Sort names by their last character.", code: "names = [\"Diya\", \"Aarav\", \"Kabir\"]\n\nprint(sorted(names, key=lambda n: n[-1]))", out: "['Diya', 'Kabir', 'Aarav']" },
+    { task: "Sort pairs by the second item, largest first.", code: "pairs = [(\"a\", 2), (\"b\", 5), (\"c\", 1)]\n\nprint(sorted(pairs, key=lambda p: -p[1]))", out: "[('b', 5), ('a', 2), ('c', 1)]" },
+    { task: "Use <code>map</code> to get the length of each word.", code: "words = [\"hi\", \"hello\", \"hey\"]\n\nprint(list(map(lambda w: len(w), words)))", out: "[2, 5, 3]" },
+    { task: "Define and call a two-argument lambda on the spot.", code: "print((lambda a, b: a * b)(6, 7))", out: "42" },
+    { task: "Filter a list of names down to those longer than 3 letters.", code: "names = [\"Diya\", \"Om\", \"Aarav\"]\n\nprint(list(filter(lambda n: len(n) > 3, names)))", out: "['Diya', 'Aarav']" },
+    { task: "Use a conditional expression inside a lambda: 'even' or 'odd'.", code: "parity = lambda x: \"even\" if x % 2 == 0 else \"odd\"\n\nprint(parity(4), parity(7))", out: "even odd" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "add = lambda a, b: return a + b", why: "A lambda has no <code>return</code> — the expression already <b>is</b> the return value, so writing <code>return</code> is a <code>SyntaxError</code>.", fix: "add = lambda a, b: a + b" },
+    { bad: "squares = map(lambda x: x * x, nums)\nprint(squares)", why: "<code>map</code> returns a lazy map object, not a list — this prints something like <code>&lt;map object at 0x…&gt;</code>. You have to consume it, usually with <code>list()</code>.", fix: "squares = list(map(lambda x: x * x, nums))\nprint(squares)" },
+    { bad: "big = lambda x: \n    if x > 100:\n        return \"big\"\n    return \"small\"", why: "This is a whole function's worth of logic — statements and multiple lines — crammed into a form built for one expression. It will not parse. Once you need an <code>if</code> statement, use <code>def</code>.", fix: "def big(x):\n    if x > 100:\n        return \"big\"\n    return \"small\"" },
+    { bad: "funcs = [lambda: i for i in range(3)]\nprint([f() for f in funcs])", why: "Late binding: all three lambdas share the same <code>i</code>, which is 2 by the time they run, so this prints <code>[2, 2, 2]</code>. The lambda captured the variable, not the value.", fix: "funcs = [lambda i=i: i for i in range(3)]\nprint([f() for f in funcs])" },
+  ]},
+
+  { t: "debug", intro: "A dashboard builds one label function per metric in a loop, then calls them to render. Every label comes out wrong in the same way. No error is raised.", code: "metrics = [\"cpu\", \"ram\", \"disk\"]\nlabelers = []\n\nfor name in metrics:\n    labelers.append(lambda v: name + \": \" + str(v))\n\nprint(labelers[0](10))\nprint(labelers[1](20))\nprint(labelers[2](30))", symptom: "every line starts with disk:, even labelers[0]", q: "Three different lambdas were built for three different names. So why do all three say disk?", fix: "metrics = [\"cpu\", \"ram\", \"disk\"]\nlabelers = []\n\nfor name in metrics:\n    labelers.append(lambda v, name=name: name + \": \" + str(v))\n\nprint(labelers[0](10))\nprint(labelers[1](20))\nprint(labelers[2](30))", why: "Every lambda closed over the <b>same variable</b> <code>name</code>, not a copy of its value. The loop finished with <code>name</code> holding its last value, <code>\"disk\"</code>, and only then were the lambdas called — so all three read <code>\"disk\"</code>.<br/><br/>The cure is <code>name=name</code>: a default argument is evaluated at the moment the lambda is <b>defined</b>, so each lambda captures the value <code>name</code> had on that turn of the loop. This is the exact bug from the hook, and it is why building closures in a loop is one of the few places lambdas bite hard — a named function or binding the value explicitly is the honest fix." },
+
+  { t: "recap", items: [
+    "<code>lambda args: expression</code> — a function with no name and no <code>return</code>",
+    "It holds <b>one expression</b>; need a statement, an <code>if</code>, or a loop → use <code>def</code>",
+    "<code>map</code> transforms every element · <code>filter</code> keeps some · <code>sorted(key=…)</code> reorders",
+    "<code>map</code> and <code>filter</code> return lazy objects — wrap them in <code>list()</code>",
+    "A tuple key sorts by several things: <code>key=lambda p: (-p[1], p[0])</code>",
+    "Lambdas in a loop capture the <b>variable</b>, not its value — bind it with <code>x=x</code>",
+    "The same <code>key=lambda</code> idea drives Pandas <code>sort_values</code> and <code>apply</code> later",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is a lambda and how does it differ from a normal function?", a: "It is an anonymous function written as a single expression — <code>lambda x: x * 2</code>. Functionally it is identical to the equivalent <code>def</code>, but it has no name of its own and is restricted to one expression, with no statements and an implicit return. You reach for it when you need a small throwaway function to pass to something like <code>sorted</code> or <code>map</code> and naming it would just be noise." },
+    { level: "beginner", q: "Why can't a lambda contain an <code>if</code> statement or a loop?", a: "Because a lambda's body is a single expression, and statements like <code>if</code>, <code>for</code> and <code>return</code> are not expressions. You can use a conditional <i>expression</i> — <code>a if cond else b</code> — because that evaluates to a value, but the moment you need real control flow the right tool is <code>def</code>." },
+    { level: "intermediate", q: "What does the <code>key</code> argument to <code>sorted</code> do?", a: "It is a function called once per element to produce the value the list is actually sorted by; the elements themselves are returned, just reordered. <code>sorted(words, key=len)</code> sorts by length, and returning a tuple such as <code>key=lambda p: (-p[1], p[0])</code> sorts by several fields at once, with later fields breaking ties in earlier ones. It computes each key once, so it is efficient even on large lists." },
+    { level: "intermediate", q: "What is the late-binding closure problem with lambdas in a loop?", a: "A lambda captures the variables in its enclosing scope by reference, not by value. If you build lambdas in a loop that all refer to the loop variable, they end up sharing it, and by the time they are called the loop has finished and the variable holds its final value — so every lambda sees the same thing. The usual fix is a default argument, <code>lambda x=x: …</code>, which snapshots the value at definition time." },
+    { level: "intermediate", q: "When would you use <code>map</code>/<code>filter</code> with a lambda versus a comprehension?", a: "They overlap heavily, and a list comprehension is usually more readable — <code>[x*x for x in nums]</code> beats <code>list(map(lambda x: x*x, nums))</code>. Reach for <code>map</code>/<code>filter</code> when you already have a named function to pass, when you want the lazy iterator rather than a materialised list, or when passing a function object reads more cleanly than rewriting its body inline. For anything with a condition and a transform together, the comprehension almost always wins." },
+  ]},
 ];
 const L18 = [
   { t: "objectives", items: ["Local vs global variable","Function ke andar/bahar ka farak","global keyword"] },
@@ -2817,6 +2888,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "lambda": [
+    // Easy
+    { level: "easy", q: "What is <code>lambda x: x * 2</code>?", options: ["A one-line anonymous function", "A loop over x", "A variable named lambda", "A type of list"], correct: 0, why: "It is a function with no name, holding a single expression. <code>(lambda x: x*2)(5)</code> gives 10, exactly like a <code>def</code> would." },
+    { level: "easy", q: "Why does a lambda have no <code>return</code> keyword?", options: ["return is optional everywhere", "The expression is the return value", "It never returns anything", "return is spelled differently"], correct: 1, why: "A lambda's body is one expression, and that expression's value is returned automatically — writing <code>return</code> inside is a SyntaxError." },
+    { level: "easy", q: "Which higher-order function KEEPS only some elements based on a test?", options: ["map", "sorted", "filter", "reduce"], correct: 2, why: "<code>filter</code> keeps an element only where the lambda returns True. <code>map</code> transforms every element; <code>sorted</code> reorders them." },
+    // Medium
+    { level: "medium", q: "What does <code>list(map(lambda x: x * x, [1, 2, 3]))</code> return?", options: ["[1, 2, 3]", "6", "[2, 4, 6]", "[1, 4, 9]"], correct: 3, why: "<code>map</code> replaces every element with the lambda's result, so each is squared: 1, 4, 9." },
+    { level: "medium", q: "<code>print(map(lambda x: x, nums))</code> shows <code>&lt;map object at 0x…&gt;</code>. Why?", options: ["map is broken", "map returns a lazy object you must wrap in list()", "nums is empty", "The lambda is wrong"], correct: 1, why: "<code>map</code> and <code>filter</code> return lazy iterators, not lists. Consume them with <code>list()</code> to see the values." },
+    { level: "medium", q: "What does <code>key</code> do in <code>sorted(words, key=lambda w: len(w))</code>?", options: ["Removes duplicates", "Reverses the list", "Filters short words", "Computes the value each element is sorted by"], correct: 3, why: "The key function runs once per element to produce a sort value; the elements themselves are returned, just reordered — here, by length." },
+    { level: "medium", q: "When should you use <code>def</code> instead of a lambda?", options: ["When the body needs a statement, an if, or multiple lines", "When the function takes two arguments", "When you use it with map", "Whenever it returns a number"], correct: 0, why: "A lambda holds a single expression. The moment you need an <code>if</code> statement, a loop, or a second line, it will not parse — that is <code>def</code>'s job." },
+    // Hard
+    { level: "hard", q: "<code>funcs = [lambda: i for i in range(3)]</code>, then <code>[f() for f in funcs]</code>. What is printed?", options: ["[0, 1, 2]", "[2, 2, 2]", "[3, 3, 3]", "[0, 0, 0]"], correct: 1, why: "Late binding: all three lambdas share the one variable <code>i</code>, which holds its final value 2 by the time they are called. Bind it with <code>lambda i=i: i</code> to get [0, 1, 2]." },
+    { level: "hard", q: "How do you sort <code>[('Aarav',91),('Diya',91),('Kabir',80)]</code> by marks high-to-low, then name A-Z?", options: ["key=lambda p: p[1]", "key=lambda p: (p[0], p[1])", "key=lambda p: (-p[1], p[0])", "reverse=True"], correct: 2, why: "A tuple key sorts by each field in turn. <code>-p[1]</code> puts high marks first, and <code>p[0]</code> breaks ties by name ascending." },
+    { level: "hard", q: "Why does <code>lambda i=i: i</code> fix the loop-closure bug?", options: ["Default arguments are evaluated when the lambda is defined", "It renames the variable", "It makes i global", "It runs the lambda immediately"], correct: 0, why: "A default argument is evaluated at definition time, so each lambda snapshots the current value of <code>i</code> into its own parameter instead of sharing the loop variable." },
   ],
 
   "string-formatting": [
