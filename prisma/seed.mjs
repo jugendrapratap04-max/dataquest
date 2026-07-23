@@ -1863,15 +1863,87 @@ const L26 = [
   ]},
 ];
 const L27 = [
-  { t: "objectives", items: ["Iterator vs iterable","Generator (yield) banana","Memory kyun bachti hai"] },
-  { t: "h2", n: "1", text: "Iterables aur Iterators" },
-  { t: "p", html: "<b>Iterable</b> = jispe loop chal sake (list, string). <b>Iterator</b> = ek-ek karke value deta hai (<code>next()</code> se). <code>for</code> loop andar iterator hi use karta hai." },
-  { t: "code", file: "iter.py", code: "it = iter([10, 20, 30])\nprint(next(it))   # 10\nprint(next(it))   # 20", output: "10\n20" },
-  { t: "h2", n: "2", text: "Generators — yield" },
-  { t: "p", html: "Generator function <code>yield</code> se ek-ek value 'produce' karta hai, poori list banaye bina. Bade data pe <b>memory bachaata</b> hai." },
-  { t: "code", file: "gen.py", code: "def squares(n):\n    for i in range(1, n + 1):\n        yield i * i\n\nprint(list(squares(4)))   # [1, 4, 9, 16]", output: "[1, 4, 9, 16]" },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> lakhon rows ek saath memory me nahi aati — generators/chunks se process hoti hain. Isliye ye important hai." },
-  { t: "recap", items: ["Iterable = loop-able (list, str)","Iterator = next() se value","Generator = yield, lazy","Bade data pe memory bachata"] },
+  { t: "objectives", items: [
+    "Tell an <b>iterable</b> (loop-able) from an <b>iterator</b> (produces one value at a time)",
+    "Use <code>iter()</code> and <code>next()</code>, and know <code>StopIteration</code> ends the loop",
+    "Write a <b>generator</b> with <code>yield</code> — lazy, one value at a time",
+    "Understand why generators save memory on huge data",
+    "Avoid the trap: a generator runs <b>once</b>, then it is empty",
+  ]},
+  { t: "hook", q: "You have a generator of sensor readings. You add them up with <code>sum(readings)</code> — get 100, correct. Then you count them with <code>len(list(readings))</code> — and get <b>0</b>. The readings did not vanish. So where did they go?", why: "They were <b>consumed</b>. A generator produces each value once, on demand, and does not keep them. <code>sum</code> pulled every value out to add them, which left the generator empty — so <code>len(list(...))</code> found nothing. A generator is a one-time stream, not a stored list. Iterate it once, and the second pass sees an empty sequence." },
+  { t: "think", q: "A list of a million numbers and a generator of a million numbers both let you loop. What is the difference in memory?", a: "The list holds all million values in memory at once. The generator holds almost <b>nothing</b> — just its current position and the recipe for the next value.<br/><br/>That is the whole point of generators: they produce values <b>lazily</b>, one at a time, so a billion-row file can be processed with a few kilobytes of memory. The list would need gigabytes; the generator streams through it. On big data, this is the difference between a script that runs and one that is killed." },
+
+  { t: "h2", n: "1", text: "Iterables and iterators" },
+  { t: "def", term: "Iterable vs iterator", en: "An iterable is anything you can loop over, like a list or string; an iterator is the object that actually produces the items one at a time via next(), raising StopIteration when done.", hi: "In plain words: <b>iterable</b> woh jispe <code>for</code> chal sake (list, string). <b>iterator</b> woh jo <code>next()</code> pe ek-ek value deta hai. <code>for</code> loop andar-andar iterator hi banata hai." },
+  { t: "p", html: "<code>iter()</code> turns an iterable into an iterator; <code>next()</code> pulls the next value. When there are no more, <code>next()</code> raises <code>StopIteration</code> — which is exactly how a <code>for</code> loop knows to stop." },
+  { t: "code", file: "iter.py", code: "it = iter([10, 20, 30])   # make an iterator\nprint(next(it))           # 10\nprint(next(it))           # 20\nprint(next(it))           # 30\nprint(next(it, \"done\"))   # a default avoids StopIteration", output: "10\n20\n30\ndone" },
+  { t: "note", variant: "tip", html: "A <code>for</code> loop is just this with the plumbing hidden: it calls <code>iter()</code> on your iterable, then <code>next()</code> over and over, and stops when it sees <code>StopIteration</code>. Passing a default to <code>next(it, default)</code> hands back the default instead of raising at the end." },
+
+  { t: "h2", n: "2", text: "Generators: yield" },
+  { t: "def", term: "Generator", en: "A generator is a function that uses yield to produce a sequence of values lazily — it pauses at each yield, hands back one value, and resumes from there on the next call.", hi: "In plain words: <code>yield</code> wali function poori list banaye bina ek-ek value 'produce' karti hai, aur har <code>yield</code> pe ruk jaati hai — agli baar wahin se chalti hai." },
+  { t: "p", html: "A generator function looks normal but uses <code>yield</code> instead of <code>return</code>. Calling it does not run the body — it hands back a generator object that runs a little more each time you ask for a value." },
+  { t: "code", file: "gen.py", code: "def squares(n):\n    for i in range(1, n + 1):\n        yield i * i        # produce, then pause\n\ng = squares(4)\nprint(type(g).__name__)   # generator, not list\nprint(next(g))            # 1\nprint(list(g))            # the rest: [4, 9, 16]", output: "generator\n1\n[4, 9, 16]" },
+  { t: "viz", name: "generator-lab" },
+  { t: "p", html: "Press <code>next()</code> in that panel. Each press runs the function only as far as the next <code>yield</code>, hands back one value, and pauses. After the last one, <code>next()</code> raises <code>StopIteration</code> — and the generator is spent." },
+
+  { t: "h2", n: "3", text: "Lazy means memory-light" },
+  { t: "p", html: "Because a generator computes one value at a time, it never holds the whole sequence. A <b>generator expression</b> — comprehension syntax with round brackets — is the quick way to make one." },
+  { t: "code", file: "lazy.py", code: "# a list builds every value now; a genexp builds them on demand\nnums = [x * x for x in range(1, 5)]      # list: all in memory\ngen = (x * x for x in range(1, 5))       # genexp: lazy\n\nprint(nums)\nprint(type(gen).__name__)   # a generator object, not the values yet\nprint(sum(gen))             # pulls them one at a time", output: "[1, 4, 9, 16]\ngenerator\n30" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is how you process data too big for memory. Reading a 10 GB log line by line, <code>sum(len(line) for line in file)</code> streams it in a few kilobytes; building a list first would try to load all 10 GB and be killed. Pandas' <code>read_csv(..., chunksize=...)</code> is the same idea — hand back pieces lazily. Prefer a generator whenever you only need to pass through data once." },
+  { t: "analogy", concept: "List vs generator", real: "Downloading vs streaming a film", html: "A <b>list</b> is downloading the whole film before you watch — every frame sits on your disk at once, which is fine for a short clip and impossible for a 4K movie on a small phone. A <b>generator</b> is <b>streaming</b>: it fetches the next second only as you watch it, holding almost nothing, so a film of any size plays on any device. The catch is the same too — a live stream plays <b>once</b> as it goes by; to watch again you restart it, exactly as you must rebuild an exhausted generator." },
+
+  { t: "h2", n: "4", text: "The one-pass trap" },
+  { t: "p", html: "A generator is a stream, not a container. Once you have iterated it, it is <b>empty</b> — iterating again yields nothing, with no error to warn you." },
+  { t: "code", file: "onepass.py", code: "g = (x for x in [1, 2, 3])\n\nprint(list(g))   # [1, 2, 3]\nprint(list(g))   # []  - already consumed, no error", output: "[1, 2, 3]\n[]" },
+  { t: "note", variant: "warn", html: "<b>Need the values more than once?</b> Store them in a list — <code>data = list(gen)</code> — and reuse the list, or build a fresh generator each time. Silent emptiness on the second pass is one of the most confusing generator bugs, because nothing errors." },
+
+  { t: "trace", intro: "Iterators and generators, including the one-pass trap. Work out each value.", code: "def evens(n):\n    for i in range(n):\n        if i % 2 == 0:\n            yield i\n\nit = iter([5, 6, 7])\na = next(it)\nb = next(it)\n\ng = evens(6)\nc = list(g)\nd = list(g)\ne = sum(x for x in [1, 2, 3, 4])", steps: [
+    { q: "After line 7, <code>a</code> is", answer: "5", why: "<code>next</code> on a fresh iterator returns the first element, 5." },
+    { q: "After line 8, <code>b</code> is", answer: "6", why: "The next call advances to the second element, 6." },
+    { q: "After line 11, <code>c</code> is", answer: "[0, 2, 4]", why: "<code>evens(6)</code> yields the even numbers below 6: 0, 2, 4." },
+    { q: "After line 12, <code>d</code> is", answer: "[]", why: "The generator was fully consumed on line 11, so the second <code>list(g)</code> is empty — the one-pass trap." },
+    { q: "After line 13, <code>e</code> is", answer: "10", why: "The generator expression yields 1, 2, 3, 4 into <code>sum</code>, giving 10." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Make an iterator and pull the first value.", code: "it = iter([100, 200, 300])\nprint(next(it))", out: "100" },
+    { task: "Use next() with a default so the end doesn't error.", code: "it = iter([])\nprint(next(it, \"empty\"))", out: "empty" },
+    { task: "Write a generator that yields 1, 2, 3.", code: "def one_two_three():\n    yield 1\n    yield 2\n    yield 3\n\nprint(list(one_two_three()))", out: "[1, 2, 3]" },
+    { task: "Generate the squares from 1 to 4.", code: "def squares(n):\n    for i in range(1, n + 1):\n        yield i * i\n\nprint(list(squares(4)))", out: "[1, 4, 9, 16]" },
+    { task: "Yield only the even numbers below 6.", code: "def evens(n):\n    for i in range(n):\n        if i % 2 == 0:\n            yield i\n\nprint(list(evens(6)))", out: "[0, 2, 4]" },
+    { task: "Sum a generator expression without building a list.", code: "print(sum(x * x for x in range(1, 4)))", out: "14" },
+    { task: "Show a generator is empty after one pass.", code: "g = (x for x in [1, 2])\nprint(list(g))\nprint(list(g))", out: "[1, 2]\n[]" },
+    { task: "Count matches with a generator expression.", code: "words = [\"cat\", \"dog\", \"cow\"]\nprint(sum(1 for w in words if w.startswith(\"c\")))", out: "2" },
+    { task: "Take the first two values of an endless generator.", code: "def naturals():\n    n = 1\n    while True:\n        yield n\n        n += 1\n\ng = naturals()\nprint(next(g), next(g))", out: "1 2" },
+    { task: "Turn a generator into a reusable list.", code: "def squares(n):\n    for i in range(1, n + 1):\n        yield i * i\n\ndata = list(squares(3))\nprint(data, sum(data))", out: "[1, 4, 9] 14" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "g = (x for x in [1, 2, 3])\ntotal = sum(g)\ncount = len(list(g))", why: "<code>sum(g)</code> consumes the generator, so <code>list(g)</code> is empty and <code>count</code> is 0. Materialise once into a list and reuse it.", fix: "data = list(x for x in [1, 2, 3])\ntotal = sum(data)\ncount = len(data)" },
+    { bad: "def squares(n):\n    for i in range(n):\n        return i * i", why: "<code>return</code> makes it a normal function that stops at the first value — not a generator. Use <code>yield</code> to produce a sequence.", fix: "def squares(n):\n    for i in range(n):\n        yield i * i" },
+    { bad: "g = (x for x in range(3))\nprint(g[0])", why: "A generator is not indexable — it has no <code>[0]</code>, only <code>next()</code> or iteration. Convert to a list first if you need indexing.", fix: "g = list(x for x in range(3))\nprint(g[0])" },
+    { bad: "gen = squares(1000000)\nbig = list(gen)\nfirst = big[0]", why: "Calling <code>list()</code> on a huge generator defeats the point — it pulls every value into memory, the very thing the generator avoided. Iterate it lazily instead.", fix: "gen = squares(1000000)\nfirst = next(gen)     # just the first, nothing else built" },
+  ]},
+
+  { t: "debug", intro: "A function reports on a stream of temperature readings: the average and how many readings there were. The average is right, but the count always comes back as 0. It runs without error. Read it before opening the fix.", code: "def report(readings):\n    total = sum(readings)\n    count = len(list(readings))\n    avg = total / count if count else 0\n    return avg, count\n\nstream = (t for t in [20, 30, 40, 50])\nprint(report(stream))", symptom: "prints (0, 0) — the count is 0 and so the average is 0 too", q: "The readings are clearly there, and sum() saw them. So why does the count come out as 0?", fix: "def report(readings):\n    data = list(readings)\n    total = sum(data)\n    count = len(data)\n    avg = total / count if count else 0\n    return avg, count\n\nstream = (t for t in [20, 30, 40, 50])\nprint(report(stream))", why: "A generator is a one-time stream. <code>sum(readings)</code> walked through <b>every</b> value to add them up, which left the generator exhausted. By the time <code>len(list(readings))</code> runs, there is nothing left to collect, so the list is empty and the count is 0 — which then makes the average 0 as well.<br/><br/>Nothing errors because an empty generator is perfectly valid; it just yields nothing. The fix is to pull the values into a list <b>once</b> — <code>data = list(readings)</code> — and then compute both the sum and the count from that list, which you can read as many times as you like. Reach for this whenever you need to traverse the same data more than once." },
+
+  { t: "recap", items: [
+    "<b>Iterable</b> = loop-able (list, string) · <b>iterator</b> = produces one value at a time via <code>next()</code>",
+    "<code>next()</code> raises <code>StopIteration</code> at the end — how a <code>for</code> loop knows to stop",
+    "A <b>generator</b> uses <code>yield</code> to produce values lazily, pausing at each one",
+    "Generators are memory-light — they never hold the whole sequence, so they scale to huge data",
+    "A <b>generator expression</b> is a comprehension in round brackets: <code>(x for x in ...)</code>",
+    "A generator runs <b>once</b> — after one pass it is empty, with no error",
+    "Need the values twice? <code>list(gen)</code> once and reuse the list",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between an iterable and an iterator?", a: "An iterable is any object you can loop over — a list, string, dict — because it can produce an iterator. An iterator is the object that does the actual work of yielding items one at a time through <code>next()</code>, raising <code>StopIteration</code> when exhausted. A <code>for</code> loop calls <code>iter()</code> on the iterable to get an iterator, then repeatedly calls <code>next()</code>. Lists are iterable but not their own iterators; a generator is both." },
+    { level: "beginner", q: "What does <code>yield</code> do?", a: "<code>yield</code> turns a function into a generator. Instead of running to completion and returning once, the function pauses at each <code>yield</code>, hands back that value, and resumes from the same spot on the next request. This lets it produce a sequence lazily, one value at a time, keeping its local state between calls without building the whole result in memory." },
+    { level: "intermediate", q: "Why do generators save memory, and when does that matter?", a: "Because they compute values on demand and hold only the current position, never the full sequence. A list of a billion items needs memory for all billion; a generator streams them one at a time in near-constant memory. It matters whenever the data is large or unbounded — reading a huge file, a network stream, or an infinite sequence — where materialising everything would exhaust memory. The trade-off is that you can only pass through the data once." },
+    { level: "intermediate", q: "What happens if you iterate a generator twice?", a: "The second iteration yields nothing, because a generator is consumed as it runs and is not reset. After the first full pass it is exhausted, so a second <code>for</code> or <code>list()</code> sees an empty sequence — and crucially, no error is raised, which makes it a subtle bug. If you need the data more than once, store it in a list and reuse that, or create a new generator each time." },
+    { level: "intermediate", q: "What is the difference between a list comprehension and a generator expression?", a: "Syntax and evaluation. <code>[x for x in it]</code> with square brackets builds a list eagerly, computing and storing every element immediately. <code>(x for x in it)</code> with round brackets creates a generator that computes each element lazily as it is requested. Use the list when you need the values repeatedly, indexing, or a length; use the generator when you only pass through once and want to avoid holding everything in memory — for example <code>sum(x*x for x in big)</code>." },
+  ]},
 ];
 const L28 = [
   { t: "objectives", items: ["Closure samajhna","Decorator kya hai","Kahan use hota hai"] },
@@ -3527,6 +3599,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "iterators-generators": [
+    // Easy
+    { level: "easy", q: "What does <code>next()</code> do on an iterator?", options: ["Returns the next value", "Resets it", "Sorts it", "Counts the items"], correct: 0, why: "<code>next()</code> pulls the next value; at the end it raises StopIteration (or returns a default if you pass one)." },
+    { level: "easy", q: "Which keyword makes a function a generator?", options: ["return", "async", "yield", "gen"], correct: 2, why: "<code>yield</code> turns a function into a generator — it produces values lazily and pauses at each yield." },
+    { level: "easy", q: "What is the main benefit of a generator over a list?", options: ["It's always faster", "It uses far less memory", "It can be indexed", "It sorts automatically"], correct: 1, why: "A generator computes one value at a time and never holds the whole sequence, so it scales to huge or infinite data." },
+    // Medium
+    { level: "medium", q: "<code>g = (x for x in [1,2,3])</code>. What does <code>list(g)</code> give the SECOND time?", options: ["[1, 2, 3] again", "An error", "None", "[] — it's already consumed"], correct: 3, why: "A generator runs once. After the first pass it's exhausted, so the second list(g) is empty — no error." },
+    { level: "medium", q: "What raises when an iterator has no more values?", options: ["ValueError", "StopIteration", "IndexError", "KeyError"], correct: 1, why: "<code>next()</code> raises StopIteration at the end — which is exactly how a for loop knows to stop." },
+    { level: "medium", q: "Which builds a generator, not a list?", options: ["[x for x in it]", "{x for x in it}", "(x for x in it)", "list(it)"], correct: 2, why: "Round brackets make a generator expression (lazy); square brackets make a list (eager)." },
+    { level: "medium", q: "How does a <code>for</code> loop actually work internally?", options: ["It calls iter() then next() until StopIteration", "It copies the list", "It uses recursion", "It checks the length first"], correct: 0, why: "A for loop calls iter() on the iterable, then next() repeatedly, stopping when it sees StopIteration." },
+    // Hard
+    { level: "hard", q: "You need to sum AND count a generator. What must you do?", options: ["Call sum() then len()", "Nothing — it works", "Materialise it to a list once, then use both", "Use two generators"], correct: 2, why: "sum() consumes the generator, leaving nothing to count. Convert to a list once and read it as many times as needed." },
+    { level: "hard", q: "Why does <code>sum(len(line) for line in huge_file)</code> scale to a 10 GB file?", options: ["Files are compressed", "It streams one line at a time, never holding all of it", "It skips most lines", "Python caches it"], correct: 1, why: "The generator expression yields one line at a time, so memory stays flat regardless of file size — building a list would try to load all 10 GB." },
+    { level: "hard", q: "What does <code>next(iter([]), \"done\")</code> return?", options: ["StopIteration", "None", "An empty list", "\"done\""], correct: 3, why: "Passing a default to next() returns that default instead of raising StopIteration when the iterator is empty." },
   ],
 
   "dunder-methods": [

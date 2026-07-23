@@ -566,6 +566,18 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .du-cell.dunder .du-code { color:var(--teal); }
 .du-code.val { color:var(--accent-2); font-weight:700; }
 .du-eq { font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); align-self:center; text-align:center; white-space:nowrap; }
+
+/* Generator Lab — values pulled one at a time from a lazy generator. */
+.gl-fn { font-family:var(--mono); font-size:12px; line-height:1.6; background:var(--panel-2); border:1px solid var(--line);
+         border-radius:9px; padding:10px 13px; color:var(--ink-soft); margin-bottom:12px; overflow-x:auto; white-space:pre; }
+.gl-caption { font-family:var(--mono); font-size:12.5px; color:var(--ink); margin-bottom:10px; min-height:20px; }
+.gl-slots { display:flex; flex-wrap:wrap; gap:8px; align-items:center; min-height:44px; }
+.gl-slot { width:44px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px;
+           font-family:var(--mono); font-size:15px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink-faint); }
+.gl-slot.done { color:var(--teal); border-color:color-mix(in srgb,var(--teal) 28%,transparent); opacity:.6; }
+.gl-slot.just { color:var(--teal); font-weight:700; background:var(--teal-soft); border-color:var(--teal);
+                animation:viz-land .22s ease-out, viz-glow .9s ease-out .22s; }
+.gl-empty { font-family:var(--mono); font-size:11.5px; color:var(--bad); align-self:center; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

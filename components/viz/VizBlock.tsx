@@ -18,6 +18,7 @@ import { RecursionLab } from "./RecursionLab";
 import { InheritanceLab } from "./InheritanceLab";
 import { EncapsulationLab } from "./EncapsulationLab";
 import { DunderLab } from "./DunderLab";
+import { GeneratorLab } from "./GeneratorLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -52,6 +53,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "inheritance-lab": InheritanceLab,
   "encapsulation-lab": EncapsulationLab,
   "dunder-lab": DunderLab,
+  "generator-lab": GeneratorLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
