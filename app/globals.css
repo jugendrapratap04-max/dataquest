@@ -578,6 +578,22 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .gl-slot.just { color:var(--teal); font-weight:700; background:var(--teal-soft); border-color:var(--teal);
                 animation:viz-land .22s ease-out, viz-glow .9s ease-out .22s; }
 .gl-empty { font-family:var(--mono); font-size:11.5px; color:var(--bad); align-self:center; }
+
+/* Decorator Lab — the value flowing through the original then the wrapper. */
+.dc-fn { font-family:var(--mono); font-size:12px; line-height:1.6; background:var(--panel-2); border:1px solid var(--line);
+         border-radius:9px; padding:10px 13px; color:var(--ink-soft); overflow-x:auto; white-space:pre; }
+.dc-sugar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.dc-sugar code { font-family:var(--mono); font-size:12.5px; color:var(--accent-2); }
+.dc-cap { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); }
+.dc-flow { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.dc-stage { width:100%; max-width:340px; text-align:center; padding:9px 12px; border-radius:9px; border:1px solid var(--line); background:var(--panel-2); }
+.dc-stage code { font-family:var(--mono); font-size:13.5px; color:var(--ink); }
+.dc-stage.wrap { border-color:color-mix(in srgb,var(--teal) 40%,transparent); background:var(--teal-soft); animation:viz-land .24s ease-out; }
+.dc-stage.wrap code { color:var(--teal); }
+.dc-stage.out { border-color:color-mix(in srgb,var(--accent) 40%,transparent); background:color-mix(in srgb,var(--accent) 8%,transparent); }
+.dc-final { font-weight:700; color:var(--accent-2) !important; }
+.dc-slabel { font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-bottom:3px; }
+.dc-arrow { font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
