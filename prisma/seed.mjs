@@ -1217,14 +1217,85 @@ const L18 = [
   ]},
 ];
 const L19 = [
-  { t: "objectives", items: ["JSON kya hai","String se Python object (loads)","Python se JSON string (dumps)"] },
-  { t: "h2", n: "1", text: "JSON — data ka common format" },
-  { t: "p", html: "JSON web APIs aur files me data bhejne ka standard format hai — dict jaisa dikhta hai. <code>import json</code>." },
-  { t: "code", file: "json1.py", code: "import json\ntext = '{\"name\": \"Freya\", \"age\": 21}'\ndata = json.loads(text)   # string -> dict\nprint(data[\"name\"])       # Freya", output: "Freya" },
-  { t: "h2", n: "2", text: "dumps — wapas string me" },
-  { t: "code", file: "json2.py", code: "import json\nuser = {\"city\": \"Delhi\", \"active\": True}\nprint(json.dumps(user))", output: '{"city": "Delhi", "active": true}' },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> APIs se data aksar JSON me aata hai — <code>json.loads</code> se Python me lao, phir Pandas me daalo." },
-  { t: "recap", items: ["JSON = data ka standard format","json.loads: string -> dict","json.dumps: dict -> string","APIs JSON me data dete hain"] },
+  { t: "objectives", items: [
+    "Say what JSON is and why every API speaks it",
+    "Turn JSON text into Python with <code>loads</code>, and back with <code>dumps</code>",
+    "Map the types across: <code>true</code>→<code>True</code>, <code>null</code>→<code>None</code>, object→dict",
+    "Read nested JSON, and pretty-print with <code>indent</code>",
+    "Avoid the round-trip traps: string-only keys, and single quotes",
+  ]},
+  { t: "hook", q: "You save a scores dictionary <code>{1: 95, 2: 88}</code> to a JSON file and load it back. The data looks identical. Then <code>scores[1]</code> throws <code>KeyError: 1</code> — for a key that is plainly sitting right there. What changed?", why: "The key. JSON has no integer keys — every key in JSON is a <b>string</b>. So the moment your dict went out to text, <code>1</code> became <code>\"1\"</code>, and it came back as <code>\"1\"</code>. The data looks the same when printed, but <code>scores[1]</code> and <code>scores[\"1\"]</code> are now two different lookups. A round-trip through JSON quietly rewrote your keys." },
+  { t: "think", q: "Why can't you just paste a chunk of JSON straight into a Python file as a dict?", a: "Because JSON is <b>text</b> that only looks like a Python dict — and the spellings differ. JSON writes <code>true</code>, <code>false</code> and <code>null</code> in lowercase, where Python needs <code>True</code>, <code>False</code> and <code>None</code>, and JSON insists on <b>double</b> quotes.<br/><br/>So <code>{\"ok\": true}</code> is valid JSON and a <code>NameError</code> in Python (there is no <code>true</code>). The right move is never to paste it as code — feed it to <code>json.loads</code>, which does the translation for you." },
+
+  { t: "h2", n: "1", text: "loads and dumps" },
+  { t: "def", term: "JSON", en: "JSON (JavaScript Object Notation) is a text format for structured data — objects, arrays, strings, numbers, booleans and null — that almost every web API and config file uses to exchange information.", hi: "In plain words: JSON is how programs send data to each other as <b>text</b>. It looks like a Python dict, but it is a string until you parse it." },
+  { t: "p", html: "The <b>s</b> in <code>loads</code>/<code>dumps</code> stands for <b>string</b>. <code>json.loads</code> reads a string <b>in</b> to Python; <code>json.dumps</code> writes Python <b>out</b> to a string." },
+  { t: "code", file: "roundtrip.py", code: "import json\n\ntext = '{\"name\": \"Freya\", \"age\": 21, \"active\": true}'\ndata = json.loads(text)      # string -> dict\nprint(data[\"name\"], data[\"age\"])\nprint(type(data).__name__)\n\nback = json.dumps(data)      # dict -> string\nprint(back)", output: "Freya 21\ndict\n{\"name\": \"Freya\", \"age\": 21, \"active\": true}" },
+  { t: "note", variant: "tip", html: "Notice <code>true</code> in the text became Python <code>True</code> on the way in, and turned back into <code>true</code> on the way out. <code>loads</code> and <code>dumps</code> translate the spellings for you — which is exactly why you use them instead of pasting." },
+
+  { t: "h2", n: "2", text: "The type bridge" },
+  { t: "p", html: "Each JSON type maps to a Python one. Most keep their shape; three change their <b>spelling</b>, and those three are where beginners get caught." },
+  { t: "viz", name: "json-bridge" },
+  { t: "p", html: "Flip between <code>loads</code> and <code>dumps</code> in that panel, then open <b>the round-trip trap</b> — it walks an int-keyed dict through <code>dumps</code> and back, and shows where <code>KeyError</code> comes from." },
+  { t: "analogy", concept: "loads and dumps", real: "Translating a letter", html: "JSON text is a letter written in a shared language that every service understands. <code>json.loads</code> is <b>translating it into your own language</b> so you can work with it — a Python dict — and <code>json.dumps</code> is translating your reply <b>back</b> so the next service can read it. The letter and your working notes carry the same meaning, but they are not the same object, and a couple of words (<code>true</code>/<code>True</code>) are simply spelled differently in each." },
+
+  { t: "h2", n: "3", text: "Nested data and pretty-printing" },
+  { t: "p", html: "Real JSON nests — objects inside arrays inside objects. You reach in with the same <code>[key]</code> and <code>[index]</code> you already know. <code>dumps</code> with <code>indent</code> makes it readable." },
+  { t: "code", file: "nested.py", code: "import json\n\ntext = '{\"user\": {\"name\": \"Freya\", \"roles\": [\"admin\", \"editor\"]}}'\ndata = json.loads(text)\n\nprint(data[\"user\"][\"name\"])\nprint(data[\"user\"][\"roles\"][0])\n\nprint(json.dumps(data, indent=2, sort_keys=True))", output: "Freya\nadmin\n{\n  \"user\": {\n    \"name\": \"Freya\",\n    \"roles\": [\n      \"admin\",\n      \"editor\"\n    ]\n  }\n}" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is the single most common shape of real data-science input. You call an API, get JSON back, <code>json.loads</code> it, dig out the fields you need, and hand a list of flat dicts to <code>pandas.DataFrame(...)</code>. Every dataset that starts life as an API response passes through exactly these two functions — learning them here is learning the front door of most data work." },
+
+  { t: "h2", n: "4", text: "The two traps" },
+  { t: "p", html: "JSON keys are <b>always strings</b>, so an int-keyed dict does not survive a round-trip. And JSON demands <b>double</b> quotes — single quotes are a parse error, not a nicety." },
+  { t: "code", file: "traps.py", code: "import json\n\n# keys always come back as strings\nscores = {1: 95, 2: 88}\nback = json.loads(json.dumps(scores))\nprint(back)                 # {'1': 95, '2': 88}\nprint(back[\"1\"])            # works\n\n# single quotes are not valid JSON\ntry:\n    json.loads(\"{'name': 'Freya'}\")\nexcept json.JSONDecodeError:\n    print(\"single quotes are invalid JSON\")", output: "{'1': 95, '2': 88}\n95\nsingle quotes are invalid JSON" },
+  { t: "note", variant: "warn", html: "A few Python values simply cannot be written as JSON — a <code>set</code>, a <code>tuple</code> (it comes back as a list), a <code>datetime</code>. <code>json.dumps({1, 2})</code> raises <code>TypeError: Object of type set is not JSON serializable</code>. Convert to a list or a string first." },
+
+  { t: "trace", intro: "Reading and writing JSON, plus one trap. Work out each value.", code: "import json\n\ntext = '{\"n\": 5, \"ok\": true, \"tags\": [\"a\", \"b\"]}'\ndata = json.loads(text)\n\na = data[\"n\"]\nb = data[\"ok\"]\nc = len(data[\"tags\"])\nd = json.dumps({\"x\": None})\ne = type(json.loads(\"42\")).__name__", steps: [
+    { q: "After line 6, <code>a</code> is", answer: "5", why: "The JSON number 5 parses to a Python int, read straight out of the dict by its key." },
+    { q: "After line 7, <code>b</code> is", answer: "True", why: "JSON <code>true</code> (lowercase) becomes Python <code>True</code> — the spelling changes crossing the bridge." },
+    { q: "After line 8, <code>c</code> is", answer: "2", why: "The JSON array became a Python list of two items, so <code>len</code> is 2." },
+    { q: "After line 9, <code>d</code> is", answer: "{\"x\": null}", why: "Going out, Python <code>None</code> is written as JSON <code>null</code>, and the result is a string." },
+    { q: "After line 10, <code>e</code> is", answer: "int", why: "<code>json.loads(\"42\")</code> parses the text 42 into a Python int." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Parse a JSON string and print one field.", code: "import json\n\ntext = '{\"city\": \"Delhi\"}'\ndata = json.loads(text)\nprint(data[\"city\"])", out: "Delhi" },
+    { task: "Turn a Python dict into a JSON string.", code: "import json\n\nuser = {\"name\": \"Freya\", \"age\": 21}\nprint(json.dumps(user))", out: "{\"name\": \"Freya\", \"age\": 21}" },
+    { task: "Show that JSON <code>true</code> becomes Python <code>True</code>.", code: "import json\n\nprint(json.loads('{\"ok\": true}')[\"ok\"])", out: "True" },
+    { task: "Show that Python <code>None</code> becomes JSON <code>null</code>.", code: "import json\n\nprint(json.dumps({\"x\": None}))", out: "{\"x\": null}" },
+    { task: "Read a value from a nested JSON object.", code: "import json\n\ntext = '{\"user\": {\"name\": \"Freya\"}}'\ndata = json.loads(text)\nprint(data[\"user\"][\"name\"])", out: "Freya" },
+    { task: "Get the first item of a JSON array field.", code: "import json\n\ntext = '{\"tags\": [\"a\", \"b\", \"c\"]}'\nprint(json.loads(text)[\"tags\"][0])", out: "a" },
+    { task: "Pretty-print a dict with 2-space indent.", code: "import json\n\nprint(json.dumps({\"a\": 1}, indent=2))", out: "{\n  \"a\": 1\n}" },
+    { task: "Count the keys in a parsed JSON object.", code: "import json\n\ntext = '{\"a\": 1, \"b\": 2, \"c\": 3}'\nprint(len(json.loads(text)))", out: "3" },
+    { task: "Show that an int key comes back as a string.", code: "import json\n\nback = json.loads(json.dumps({7: \"seven\"}))\nprint(list(back.keys()))", out: "['7']" },
+    { task: "Sort keys alphabetically in the output.", code: "import json\n\nprint(json.dumps({\"b\": 1, \"a\": 2}, sort_keys=True))", out: "{\"a\": 2, \"b\": 1}" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "config = {\"debug\": true}", why: "This is JSON spelling in Python code. There is no <code>true</code> in Python, so this is a <code>NameError</code> — the keyword is capitalised <code>True</code>.", fix: "config = {\"debug\": True}" },
+    { bad: "import json\ndata = json.loads(\"{'name': 'Freya'}\")", why: "JSON requires <b>double</b> quotes. Single quotes make this invalid JSON, so <code>loads</code> raises <code>JSONDecodeError</code>. If the source really uses single quotes, it is a Python-dict string, not JSON.", fix: "import json\ndata = json.loads('{\"name\": \"Freya\"}')" },
+    { bad: "import json\nscores = {1: 95, 2: 88}\nback = json.loads(json.dumps(scores))\nprint(back[1])", why: "After a round-trip the keys are strings, so <code>back[1]</code> is a <code>KeyError</code> — the key is <code>\"1\"</code> now. JSON has no integer keys.", fix: "import json\nscores = {1: 95, 2: 88}\nback = json.loads(json.dumps(scores))\nprint(back[\"1\"])" },
+    { bad: "import json\nprint(json.dumps({1, 2, 3}))", why: "A <code>set</code> has no JSON equivalent, so <code>dumps</code> raises <code>TypeError: Object of type set is not JSON serializable</code>. Convert it first.", fix: "import json\nprint(json.dumps(list({1, 2, 3})))" },
+  ]},
+
+  { t: "debug", intro: "A leaderboard reads player scores from a saved JSON file, then looks up player 1. It crashes on the lookup, and the printed data looks completely correct. Read it before opening the fix.", code: "import json\n\nscores = {1: 95, 2: 88, 3: 76}\nsaved = json.dumps(scores)\n\nloaded = json.loads(saved)\nprint(\"data:\", loaded)\n\nprint(\"player 1:\", loaded[1])", symptom: "KeyError: 1", q: "The printed data shows the same numbers, and player 1 is obviously in there. So why does looking up key 1 fail?", fix: "import json\n\nscores = {1: 95, 2: 88, 3: 76}\nsaved = json.dumps(scores)\n\nloaded = json.loads(saved)\nprint(\"data:\", loaded)\n\nprint(\"player 1:\", loaded[str(1)])", why: "JSON keys can only be strings. When <code>json.dumps</code> wrote the dict out, it converted every int key to text — <code>1</code> became <code>\"1\"</code> — and <code>json.loads</code> read them straight back as strings. So <code>loaded</code> is <code>{'1': 95, '2': 88, '3': 76}</code>, and <code>loaded[1]</code> looks for an integer key that no longer exists.<br/><br/>It prints deceptively: <code>'1'</code> and <code>1</code> look the same in the output, which is why the data seems fine right up until the lookup. The direct fix is <code>loaded[str(1)]</code>. The better design is to use string keys from the start when data will travel through JSON, so the round-trip changes nothing — this is also why real APIs return <code>{\"userId\": ...}</code> objects rather than integer-keyed maps." },
+
+  { t: "recap", items: [
+    "JSON is <b>text</b> that looks like a dict; every API and config file speaks it",
+    "<code>json.loads</code>: string → Python · <code>json.dumps</code>: Python → string (the <b>s</b> is \"string\")",
+    "<code>true</code>/<code>false</code>/<code>null</code> ↔ <code>True</code>/<code>False</code>/<code>None</code> — spelling changes",
+    "JSON needs <b>double</b> quotes; single quotes are a parse error",
+    "JSON keys are <b>always strings</b> — an int-keyed dict does not survive a round-trip",
+    "<code>indent=</code> pretty-prints; <code>sort_keys=True</code> orders the keys",
+    "<code>set</code>, <code>tuple</code>, <code>datetime</code> are not serializable — convert first",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What do <code>json.loads</code> and <code>json.dumps</code> do?", a: "<code>loads</code> parses a JSON string into Python objects — an object becomes a dict, an array a list, and so on. <code>dumps</code> does the reverse, serialising a Python object into a JSON string. The <code>s</code> suffix means \"string\"; the versions without it, <code>load</code> and <code>dump</code>, read from and write to a file object directly." },
+    { level: "beginner", q: "How does JSON represent true, false and null compared with Python?", a: "JSON uses lowercase <code>true</code>, <code>false</code> and <code>null</code>, while Python uses <code>True</code>, <code>False</code> and <code>None</code>. <code>json.loads</code> and <code>json.dumps</code> translate between them automatically, which is why you must parse JSON rather than paste it into code — pasted <code>true</code> is a NameError in Python." },
+    { level: "intermediate", q: "Why can a dictionary change after a JSON round-trip?", a: "Because JSON keys are always strings. If you serialise a dict with integer keys and read it back, the keys come back as strings — <code>{1: \"a\"}</code> becomes <code>{\"1\": \"a\"}</code> — so a later <code>d[1]</code> raises KeyError. Tuples are similar: they serialise as arrays and return as lists. Anywhere data crosses JSON, assume keys are strings and sequences are lists." },
+    { level: "intermediate", q: "What kinds of Python values can't be serialised to JSON, and how do you handle them?", a: "Sets, tuples-as-distinct-from-lists, <code>datetime</code> objects, and arbitrary class instances have no JSON equivalent; <code>json.dumps</code> raises <code>TypeError</code> on a set or datetime. You convert first — a set to a list, a datetime to an ISO string with <code>.isoformat()</code> — or pass a <code>default=</code> function to <code>dumps</code> that tells it how to render the unusual type." },
+    { level: "intermediate", q: "What is the difference between <code>json.load</code> and <code>json.loads</code>?", a: "<code>loads</code> takes a string, while <code>load</code> takes a file object and reads the JSON directly from it — you would use <code>json.load(open(\"data.json\"))</code>. The same pairing exists for output: <code>dumps</code> returns a string, <code>dump</code> writes to a file. Choosing the right one saves you manually reading or writing the file's contents." },
+  ]},
 ];
 const L20 = [
   { t: "objectives", items: ["datetime module","Aaj ki date nikaalna","Date formatting (strftime)"] },
@@ -2959,6 +3030,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "json": [
+    // Easy
+    { level: "easy", q: "What does <code>json.loads</code> do?", options: ["Turns a JSON string into Python objects", "Writes JSON to a file", "Turns Python into a JSON string", "Downloads JSON from a URL"], correct: 0, why: "The <b>s</b> means string: <code>loads</code> reads a string IN to Python. <code>dumps</code> writes Python OUT to a string." },
+    { level: "easy", q: "JSON <code>true</code> becomes which Python value after <code>json.loads</code>?", options: ["\"true\"", "1", "True", "true"], correct: 2, why: "JSON is lowercase <code>true</code>; Python is capitalised <code>True</code>. loads translates the spelling for you." },
+    { level: "easy", q: "Which quotes does valid JSON require?", options: ["Single quotes", "Backticks", "No quotes on keys", "Double quotes"], correct: 3, why: "JSON demands double quotes. <code>json.loads(\"{'a': 1}\")</code> raises JSONDecodeError." },
+    // Medium
+    { level: "medium", q: "What does <code>json.dumps({\"x\": None})</code> produce?", options: ["{\"x\": null}", "{\"x\": None}", "{\"x\": \"None\"}", "{'x': null}"], correct: 0, why: "Python <code>None</code> is written as JSON <code>null</code>, and dumps always uses double quotes." },
+    { level: "medium", q: "A JSON array like <code>[1, 2, 3]</code> parses into which Python type?", options: ["tuple", "list", "set", "dict"], correct: 1, why: "JSON arrays become Python lists; JSON objects become dicts." },
+    { level: "medium", q: "Why can't you paste raw JSON as a Python dict literal?", options: ["JSON is always compressed", "Python dicts can't nest", "true/false/null and quote rules differ from Python", "It is too slow"], correct: 2, why: "JSON uses lowercase <code>true</code>/<code>false</code>/<code>null</code> and double quotes; pasted as code, <code>true</code> is a NameError. Use <code>json.loads</code>." },
+    { level: "medium", q: "How do you pretty-print JSON with 2-space indentation?", options: ["json.dumps(d, pretty=True)", "json.dumps(d, indent=2)", "json.pretty(d)", "json.dumps(d, spaces=2)"], correct: 1, why: "The <code>indent=</code> argument controls pretty-printing; <code>sort_keys=True</code> can order the keys too." },
+    // Hard
+    { level: "hard", q: "<code>{1: 95}</code> is dumped to JSON and loaded back. What is the key now?", options: ["The int 1", "The string \"1\"", "Both 1 and \"1\"", "It raises an error"], correct: 1, why: "JSON keys are always strings, so <code>1</code> becomes <code>\"1\"</code> on the way out and stays a string on the way back. <code>back[1]</code> then raises KeyError." },
+    { level: "hard", q: "What does <code>json.dumps({1, 2, 3})</code> do?", options: ["Returns [1, 2, 3]", "Returns {1, 2, 3}", "Raises TypeError — a set is not serializable", "Returns \"{1, 2, 3}\""], correct: 2, why: "A set has no JSON equivalent, so dumps raises <code>TypeError: Object of type set is not JSON serializable</code>. Convert to a list first." },
+    { level: "hard", q: "What is the difference between <code>json.load</code> and <code>json.loads</code>?", options: ["load reads from a file object; loads reads from a string", "load is faster", "loads is for lists only", "They are identical"], correct: 0, why: "<code>loads</code> takes a string; <code>load</code> reads JSON straight from a file object. The same pairing exists for <code>dump</code> vs <code>dumps</code>." },
   ],
 
   "scope": [

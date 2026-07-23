@@ -10,6 +10,7 @@ import { ImportLab } from "./ImportLab";
 import { FormatLab } from "./FormatLab";
 import { LambdaLab } from "./LambdaLab";
 import { ScopeLab } from "./ScopeLab";
+import { JsonBridge } from "./JsonBridge";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -36,6 +37,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "format-lab": FormatLab,
   "lambda-lab": LambdaLab,
   "scope-lab": ScopeLab,
+  "json-bridge": JsonBridge,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
