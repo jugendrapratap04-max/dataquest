@@ -394,6 +394,29 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lam-cell.mid.drop { color:var(--ink-faint); opacity:.55; text-decoration:line-through; }
 .lam-cell.res { background:var(--teal-soft); border-color:color-mix(in srgb,var(--teal) 32%,transparent); color:var(--teal); font-weight:700; }
 .lam-count { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-left:4px; }
+
+/* Scope Lab — the code beside the Local/Global/Built-in boxes, with the box
+   Python resolves the name in lit up (or the unbound-local error state). */
+.sc-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start; }
+@media (max-width:640px){ .sc-grid { grid-template-columns:minmax(0,1fr); } }
+.sc-code { background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:12px 13px; margin:0;
+           font-family:var(--mono); font-size:12.5px; line-height:1.6; white-space:pre-wrap; overflow-x:auto; }
+.sc-boxes { display:flex; flex-direction:column; gap:8px; }
+.sc-box { border:1px solid var(--line); border-radius:9px; padding:9px 12px; background:var(--panel-2);
+          display:flex; flex-direction:column; gap:2px; transition:border-color .2s, background .2s; }
+.sc-box.absent { opacity:.5; }
+.sc-box.found { border-color:color-mix(in srgb,var(--teal) 45%,transparent); background:var(--teal-soft); opacity:1; animation:viz-land .24s ease-out; }
+.sc-box.err { border-color:color-mix(in srgb,var(--bad) 50%,transparent); background:color-mix(in srgb,var(--bad) 8%,transparent); opacity:1; animation:viz-land .24s ease-out; }
+.sc-layer { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); }
+.sc-val { font-family:var(--mono); font-size:12.5px; color:var(--ink); }
+.sc-flag { font-family:var(--mono); font-size:10.5px; color:var(--teal); font-weight:700; margin-top:2px; }
+.sc-flag.err { color:var(--bad); }
+.sc-result { margin-top:12px; display:flex; align-items:center; gap:10px; padding:9px 13px; border-radius:9px;
+             background:var(--panel-2); border:1px solid var(--line); }
+.sc-result.err { border-color:color-mix(in srgb,var(--bad) 40%,transparent); }
+.sc-rlabel { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); }
+.sc-rval { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--accent-2); }
+.sc-result.err .sc-rval { color:var(--bad); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

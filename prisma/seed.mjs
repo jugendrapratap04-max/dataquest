@@ -1138,12 +1138,83 @@ const L17 = [
   ]},
 ];
 const L18 = [
-  { t: "objectives", items: ["Local vs global variable","Function ke andar/bahar ka farak","global keyword"] },
-  { t: "h2", n: "1", text: "Local aur Global" },
-  { t: "p", html: "Function ke <b>andar</b> banaya variable sirf wahin kaam karta hai (local). Bahar wala poore program me (global)." },
-  { t: "code", file: "scope.py", code: "x = 10            # global\n\ndef show():\n    y = 5         # local\n    print(x + y)  # 15\n\nshow()\n# print(y)  # error! y bahar nahi milta", output: "15" },
-  { t: "note", variant: "warn", html: "<b>global keyword:</b> function ke andar global variable badalna ho to pehle <code>global x</code> likhna padta hai." },
-  { t: "recap", items: ["Local = function ke andar","Global = bahar, sab jagah","Local bahar nahi milta","Badalne ko 'global x'"] },
+  { t: "objectives", items: [
+    "Tell a <b>local</b> variable from a <b>global</b> one",
+    "Follow Python's search order: <b>Local → Enclosing → Global → Built-in</b>",
+    "Know that an <b>assignment</b> makes a name local for the <b>whole</b> function",
+    "Explain and fix <code>UnboundLocalError</code> — the scope bug everyone hits",
+    "Use <code>global</code> and <code>nonlocal</code>, and know why you rarely should",
+  ]},
+  { t: "hook", q: "This function reads a global counter and adds one. It has worked in your head a hundred times. You run it and get <code>UnboundLocalError: cannot access local variable 'count'</code> — on the <b>print</b> line, before the line that changes anything. How can reading a variable fail when the variable clearly exists?", why: "Because Python decided <code>count</code> was <b>local</b> before it ran a single line — it saw the <code>count += 1</code> further down and marked the name local for the entire function. So the <code>print</code> reads a local that has not been given a value yet, and the global <code>count</code> sitting right there cannot help. One line at the bottom changed the meaning of a line at the top." },
+  { t: "think", q: "A function does <code>x = 5</code> inside it, while a global <code>x = 100</code> exists outside. After the function runs, what is the global <code>x</code>?", a: "Still <code>100</code>. The assignment inside built a <b>new local</b> <code>x</code> that lived only for that call and vanished when the function returned — it never touched the global.<br/><br/>This is the safety rule that makes functions trustworthy: what happens inside a function stays inside, unless you go out of your way with <code>global</code>. A function cannot quietly corrupt a variable somewhere else just by using the same name." },
+
+  { t: "h2", n: "1", text: "Local and global" },
+  { t: "def", term: "Scope", en: "Scope is the region of code where a name is visible; a variable created inside a function is local to it and does not exist outside.", hi: "In plain words: a name lives in the block that created it. A variable born inside a function is <b>local</b> — the rest of the program cannot see it — while one defined at the top level is <b>global</b>." },
+  { t: "p", html: "<b>Reading</b> a global from inside a function is fine. <b>Assigning</b> is where it changes: an assignment creates a local, separate from any global of the same name." },
+  { t: "code", file: "scope.py", code: "x = 10                 # global\n\ndef show():\n    y = 5              # local to show\n    print(x + y)       # reading the global x is fine\n\nshow()\n\n# print(y)  ->  NameError: y only existed inside show()\nprint(\"done\")", output: "15\ndone" },
+  { t: "note", variant: "tip", html: "A local name is <b>gone</b> the moment the function returns. That is a feature: two functions can both use <code>i</code> or <code>total</code> without ever colliding, because each call gets its own private set of names." },
+
+  { t: "h2", n: "2", text: "The search order: L → E → G → B" },
+  { t: "p", html: "When you use a name, Python looks in four places in order — <b>L</b>ocal, then any <b>E</b>nclosing function, then <b>G</b>lobal, then <b>B</b>uilt-in — and stops at the first one that has it." },
+  { t: "viz", name: "scope-lab" },
+  { t: "p", html: "Click <b>the trap 💥</b> in that panel. The name <code>count</code> is found in the Local box — but it has no value yet, because the assignment that made it local runs <i>later</i>. That is exactly what <code>UnboundLocalError</code> is." },
+  { t: "analogy", concept: "The LEGB search", real: "Looking for scissors in the house", html: "You need scissors. You check the <b>drawer in this room</b> first (Local), then the <b>shared cupboard</b> (Global), then the <b>house toolkit</b> (Built-in), and take the first pair you find. But the moment you write &quot;I keep scissors in this room&quot; on the door — an assignment — Python stops checking the cupboard entirely, even if this room's drawer is still empty. That empty-drawer-with-a-label is <code>UnboundLocalError</code>." },
+
+  { t: "h2", n: "3", text: "Changing a global on purpose" },
+  { t: "p", html: "If you genuinely need a function to rebind a global, say so with <code>global</code>. Without it, <code>count += 1</code> assumes a local and fails; with it, the assignment reaches out to the global." },
+  { t: "code", file: "globalkw.py", code: "score = 0\n\ndef bump():\n    global score      # \"score means the global one\"\n    score += 10\n\nbump()\nbump()\nprint(score)", output: "20" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> reach for <code>global</code> rarely. A function that edits globals is hard to test and hard to trust — its result depends on hidden state, and two of them fighting over the same global is a classic source of bugs. The clean pattern is to <b>take values in as arguments and hand the result back with <code>return</code></b>, so everything the function touches is visible in its signature." },
+
+  { t: "h2", n: "4", text: "Mutating is not rebinding" },
+  { t: "p", html: "There is one subtlety worth knowing. <b>Changing the contents</b> of a global list or dict needs no <code>global</code> — you are not rebinding the name, only editing the object it points at. Only <b>reassignment</b> needs the keyword." },
+  { t: "code", file: "mutate.py", code: "items = []\n\ndef add(x):\n    items.append(x)   # mutating the list - no `global` needed\n\ndef reset():\n    global items\n    items = []        # rebinding the name - `global` required\n\nadd(1)\nadd(2)\nprint(items)", output: "[1, 2]" },
+  { t: "note", variant: "warn", html: "This asymmetry surprises people: <code>items.append(x)</code> works on a global list without a keyword, but <code>items = []</code> does not. The test is simple — does the line put a <b>new object</b> on the name (rebinding, needs <code>global</code>) or change the <b>existing one</b> (mutating, does not)?" },
+
+  { t: "trace", intro: "Reading versus assigning is the whole game. Work out each value.", code: "x = 10\n\ndef read_it():\n    return x + 1\n\ndef local_it():\n    x = 99\n    return x\n\na = read_it()\nb = local_it()\nc = x", steps: [
+    { q: "After line 10, <code>a</code> is", answer: "11", why: "<code>read_it</code> never assigns <code>x</code>, so <code>x</code> is not local — Python reads the global 10 and adds 1." },
+    { q: "After line 11, <code>b</code> is", answer: "99", why: "<code>local_it</code> assigns <code>x = 99</code>, making a local <code>x</code> that it then returns. The global is not involved." },
+    { q: "After line 12, <code>c</code> is", answer: "10", why: "The global <code>x</code> was never changed — <code>local_it</code>'s assignment only ever touched its own private local. This is the point of the lesson." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Read a global from inside a function and return it plus 1.", code: "base = 100\n\ndef next_one():\n    return base + 1\n\nprint(next_one())", out: "101" },
+    { task: "Show that an inner assignment does NOT change the global.", code: "x = 5\n\ndef change():\n    x = 999\n\nchange()\nprint(x)", out: "5" },
+    { task: "Use <code>global</code> to actually change a global counter.", code: "count = 0\n\ndef tick():\n    global count\n    count += 1\n\ntick()\ntick()\nprint(count)", out: "2" },
+    { task: "Prove a local variable does not exist outside its function.", code: "def make():\n    secret = 42\n    return secret\n\nprint(make())", out: "42" },
+    { task: "Mutate a global list from inside a function (no <code>global</code>).", code: "log = []\n\ndef record(x):\n    log.append(x)\n\nrecord(\"a\")\nrecord(\"b\")\nprint(log)", out: "['a', 'b']" },
+    { task: "Two functions each use <code>total</code> — show they do not collide.", code: "def sum_two(a, b):\n    total = a + b\n    return total\n\ndef sum_three(a, b, c):\n    total = a + b + c\n    return total\n\nprint(sum_two(1, 2), sum_three(1, 2, 3))", out: "3 6" },
+    { task: "Read a built-in name — <code>len</code> — inside a function.", code: "def size(seq):\n    return len(seq)\n\nprint(size([1, 2, 3, 4]))", out: "4" },
+    { task: "A nested function reads the enclosing variable.", code: "def outer():\n    msg = \"hi\"\n    def inner():\n        return msg\n    return inner()\n\nprint(outer())", out: "hi" },
+    { task: "Use <code>nonlocal</code> to change an enclosing variable.", code: "def counter():\n    n = 0\n    def tick():\n        nonlocal n\n        n += 1\n        return n\n    return tick()\n\nprint(counter())", out: "1" },
+    { task: "Return a value instead of using <code>global</code> — the clean way.", code: "def bump(count):\n    return count + 1\n\ncount = 0\ncount = bump(count)\ncount = bump(count)\nprint(count)", out: "2" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "total = 0\n\ndef add(x):\n    total = total + x\n\nadd(5)", why: "Assigning <code>total</code> inside makes it local for the whole function, so <code>total + x</code> reads a local that has no value yet — <code>UnboundLocalError</code>. The global <code>total</code> does not help.", fix: "total = 0\n\ndef add(x):\n    global total\n    total = total + x\n\nadd(5)" },
+    { bad: "def show():\n    print(msg)\n\nshow()\nmsg = \"hi\"", why: "<code>msg</code> does not exist yet when <code>show()</code> runs — it is defined on the next line. Globals are looked up <b>when the function runs</b>, not when it is defined, so this is a <code>NameError</code>.", fix: "def show():\n    print(msg)\n\nmsg = \"hi\"\nshow()" },
+    { bad: "def get_total():\n    return total\n\ntotal = 10\nresult = get_total()\ntotal = 20\nprint(result)", why: "Not an error, but a surprise: <code>result</code> is 10. The function read <code>total</code> at the moment it was called, and changing the global afterwards does nothing to a value already returned.", fix: "def get_total(total):\n    return total\n\nresult = get_total(20)\nprint(result)" },
+    { bad: "count = 0\n\ndef reset():\n    count = 0    # meant to clear the global\n\ncount = 5\nreset()\nprint(count)", why: "This prints <code>5</code>, not 0. Without <code>global</code>, <code>count = 0</code> just makes and discards a local — the global is untouched, and the reset silently does nothing.", fix: "count = 0\n\ndef reset():\n    global count\n    count = 0\n\ncount = 5\nreset()\nprint(count)" },
+  ]},
+
+  { t: "debug", intro: "A running total for a shopping cart. The first call crashes, on the line that only READS the total. Read it before opening the fix.", code: "cart_total = 0\n\ndef add_item(price):\n    print(\"was:\", cart_total)\n    cart_total = cart_total + price\n    print(\"now:\", cart_total)\n\nadd_item(50)", symptom: "UnboundLocalError: cannot access local variable 'cart_total'", q: "The global cart_total is 0, right there. So why does reading it — on the 'was:' line, before anything is changed — raise an error?", fix: "cart_total = 0\n\ndef add_item(price):\n    global cart_total\n    print(\"was:\", cart_total)\n    cart_total = cart_total + price\n    print(\"now:\", cart_total)\n\nadd_item(50)", why: "Python scans the whole function <b>before</b> running it and sees <code>cart_total = cart_total + price</code>, an assignment. That decision — &quot;cart_total is local in this function&quot; — applies to <b>every</b> line, including the <code>print</code> above it. So the <code>print</code> tries to read a local that has not been assigned yet, and you get <code>UnboundLocalError</code>. The global with the same name is simply not consulted, because Python already committed to local.<br/><br/><code>global cart_total</code> undoes that: it tells Python the name refers to the global throughout, so the read finds 0 and the write updates the real total. The cleaner design, though, is to avoid the global entirely — <code>return cart_total + price</code> and let the caller keep the running total. A function that reaches out and edits module-level state is the thing that is hard to test later." },
+
+  { t: "recap", items: [
+    "<b>Reading</b> a global inside a function is fine; <b>assigning</b> creates a separate local",
+    "Search order is <b>L → E → G → B</b> (Local, Enclosing, Global, Built-in) — first match wins",
+    "An assignment <b>anywhere</b> in a function makes that name local for the <b>whole</b> function",
+    "<code>UnboundLocalError</code> = you read a name that is local but not yet assigned",
+    "<code>global x</code> lets a function rebind a global; <code>nonlocal x</code> rebinds an enclosing one",
+    "<b>Mutating</b> a global list/dict needs no keyword; only <b>rebinding</b> the name does",
+    "Prefer arguments in and <code>return</code> out over <code>global</code> — it keeps functions testable",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between a local and a global variable?", a: "A local variable is created inside a function and exists only while that function runs; it is invisible to the rest of the program and gone when the function returns. A global is defined at module level and readable from anywhere. The key asymmetry is that a function can <b>read</b> a global freely but <b>assigning</b> to that name creates a local instead, unless you use the <code>global</code> keyword." },
+    { level: "beginner", q: "What is the LEGB rule?", a: "It is the order Python searches for a name: Local, then any Enclosing function's scope, then the module's Global scope, then Built-ins like <code>len</code> and <code>print</code>. The first scope that contains the name wins, which is why a local variable can shadow a global, and a variable named <code>list</code> can shadow the built-in <code>list</code> type." },
+    { level: "intermediate", q: "Why would <code>print(x)</code> raise <code>UnboundLocalError</code> when a global <code>x</code> exists?", a: "Because there is an assignment to <code>x</code> somewhere later in the same function. Python determines a variable's scope at compile time by scanning the whole function body, so a single assignment marks the name local for every line, including reads that come before it. The read then fails because the local has not been given a value yet — and the global is never consulted. Adding <code>global x</code>, or not assigning to the name, resolves it." },
+    { level: "intermediate", q: "When do you need <code>global</code>, and when do you not?", a: "You need it only to <b>rebind</b> a global name — point it at a new object with <code>=</code>, or use <code>+=</code>, which is an assignment. You do <b>not</b> need it to mutate the object a global refers to: <code>my_list.append(x)</code> or <code>my_dict[k] = v</code> change the existing object without rebinding the name, so they work from inside a function directly. The distinction is rebinding the name versus mutating its value." },
+    { level: "intermediate", q: "What does <code>nonlocal</code> do, and how is it different from <code>global</code>?", a: "<code>nonlocal</code> lets an inner function rebind a variable in its nearest enclosing function, rather than creating a new local. <code>global</code> reaches all the way out to module scope. The classic use of <code>nonlocal</code> is a closure that keeps state between calls — an inner <code>tick</code> that does <code>nonlocal n; n += 1</code> — where you want to update the enclosing counter, not a global one." },
+  ]},
 ];
 const L19 = [
   { t: "objectives", items: ["JSON kya hai","String se Python object (loads)","Python se JSON string (dumps)"] },
@@ -2888,6 +2959,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "scope": [
+    // Easy
+    { level: "easy", q: "Where can a variable created inside a function be used?", options: ["Only inside that function", "Anywhere in the program", "Only after the function returns", "In any other function"], correct: 0, why: "A local variable exists only while its function runs and is invisible outside it — that isolation is what lets two functions reuse names like <code>total</code> without colliding." },
+    { level: "easy", q: "Reading a global variable from inside a function (without assigning it)…", options: ["Raises an error", "Works fine", "Needs the global keyword", "Creates a copy"], correct: 1, why: "Reading is always allowed. It is only <b>assignment</b> that creates a local and changes the picture." },
+    { level: "easy", q: "What does the LEGB rule describe?", options: ["The four data types", "How to import modules", "The order Python searches scopes for a name", "The steps to define a function"], correct: 2, why: "Local, Enclosing, Global, Built-in — Python checks them in that order and stops at the first scope that has the name." },
+    // Medium
+    { level: "medium", q: "<code>x = 100</code> globally. A function does <code>x = 5</code> then returns. What is the global <code>x</code> now?", options: ["5", "0", "None", "100"], correct: 3, why: "The inner <code>x = 5</code> made a separate local that vanished when the function returned. The global is untouched." },
+    { level: "medium", q: "To make a function rebind a global counter with <code>count += 1</code>, you must…", options: ["declare global count in the function", "return count", "name it _count", "nothing — it just works"], correct: 0, why: "<code>+=</code> is an assignment, so without <code>global count</code> Python treats count as local and the read half fails with UnboundLocalError." },
+    { level: "medium", q: "Which needs NO <code>global</code> keyword inside a function?", options: ["items = []", "items = items + [1]", "items.append(1)", "items += [1]"], correct: 2, why: "<code>append</code> mutates the existing list without rebinding the name. The other three all reassign <code>items</code>, which requires <code>global</code>." },
+    { level: "medium", q: "When is a global name looked up — at define time or call time?", options: ["When the function is defined", "When Python starts", "Only once, cached forever", "When the function is called"], correct: 3, why: "Globals are resolved when the function runs, so a name defined later in the file is still found — as long as it exists by the time the call happens." },
+    // Hard
+    { level: "hard", q: "<code>print(count)</code> then <code>count += 1</code> in a function, with a global <code>count</code>. What happens on the print line?", options: ["Prints the global count", "UnboundLocalError", "Prints 0", "SyntaxError"], correct: 1, why: "The <code>count += 1</code> below marks <code>count</code> local for the whole function, so the print reads a local that has no value yet. The global is never consulted." },
+    { level: "hard", q: "What does <code>nonlocal</code> do that <code>global</code> does not?", options: ["Nothing — they are aliases", "Rebinds a variable in the ENCLOSING function, not module scope", "Makes a variable read-only", "Creates a new global"], correct: 1, why: "<code>nonlocal</code> targets the nearest enclosing function's variable — the usual case is a closure whose inner function updates a counter held by the outer one." },
+    { level: "hard", q: "Why is editing globals from inside functions discouraged?", options: ["It is slower", "Python forbids it", "It only works once", "It hides state, making functions hard to test and reason about"], correct: 3, why: "A function that depends on and edits hidden module state is unpredictable and hard to test. Passing values in as arguments and returning results keeps everything a function touches visible." },
   ],
 
   "lambda": [
