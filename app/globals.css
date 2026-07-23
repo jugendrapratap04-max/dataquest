@@ -553,6 +553,19 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .en-verdict.ok { color:var(--good); background:color-mix(in srgb,var(--good) 14%,transparent); }
 .en-verdict.warn { color:var(--accent-2); background:color-mix(in srgb,var(--accent) 14%,transparent); }
 .en-verdict.bad { color:var(--bad); background:color-mix(in srgb,var(--bad) 14%,transparent); }
+
+/* Dunder Lab — visible syntax → hidden dunder call → result. */
+.du-flow { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:8px; align-items:stretch; }
+@media (max-width:640px){ .du-flow { grid-template-columns:1fr; } .du-eq { text-align:left; padding:2px 0; } }
+.du-cell { background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:10px 12px; min-width:0;
+           display:flex; flex-direction:column; gap:5px; justify-content:center; }
+.du-cell.dunder { border-color:color-mix(in srgb,var(--teal) 32%,transparent); }
+.du-cell.result { border-color:color-mix(in srgb,var(--accent) 32%,transparent); }
+.du-cap { font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); }
+.du-code { font-family:var(--mono); font-size:13px; color:var(--ink); word-break:break-all; animation:viz-land .22s ease-out; }
+.du-cell.dunder .du-code { color:var(--teal); }
+.du-code.val { color:var(--accent-2); font-weight:700; }
+.du-eq { font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); align-self:center; text-align:center; white-space:nowrap; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
