@@ -520,6 +520,20 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .rl-call { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); }
 .rl-status { font-family:var(--mono); font-size:11.5px; color:var(--ink-soft); text-align:right; }
 .rl-frame.returned .rl-status b { color:var(--teal); }
+
+/* Inheritance Lab — the Dog→Animal lookup chain, lighting up where found. */
+.ih-chain { display:flex; flex-direction:column; gap:0; }
+.ih-cls { border:1px solid var(--line); border-radius:10px; padding:11px 13px; background:var(--panel-2); transition:border-color .2s, background .2s; }
+.ih-cls.found { border-color:color-mix(in srgb,var(--teal) 45%,transparent); background:var(--teal-soft); animation:viz-land .24s ease-out; }
+.ih-cls.passed { opacity:.7; }
+.ih-cls.dim { opacity:.4; }
+.ih-cls-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+.ih-cls-name { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); }
+.ih-cls-tag { font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); }
+.ih-cls.found .ih-cls-tag { color:var(--teal); font-weight:700; }
+.ih-members { display:flex; flex-wrap:wrap; gap:6px; }
+.ih-members code { font-family:var(--mono); font-size:11px; padding:3px 8px; border-radius:5px; background:var(--panel); border:1px solid var(--line); color:var(--ink-soft); }
+.ih-arrow { font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); text-align:center; padding:5px 0; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

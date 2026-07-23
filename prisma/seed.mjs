@@ -1623,12 +1623,83 @@ const L23 = [
   ]},
 ];
 const L24 = [
-  { t: "objectives", items: ["Inheritance — ek class doosri se","Parent aur child class","Method override karna"] },
-  { t: "h2", n: "1", text: "Inheritance kya hai?" },
-  { t: "p", html: "Ek class (child) doosri class (parent) ki saari properties aur methods le leti hai. Code dobara likhne ki zaroorat nahi — reuse!" },
-  { t: "code", file: "inherit.py", code: "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return \"some sound\"\n\nclass Dog(Animal):        # Dog inherits Animal\n    def speak(self):      # override\n        return self.name + \" says woof\"\n\nprint(Dog(\"Bruno\").speak())   # Bruno says woof", output: "Bruno says woof" },
-  { t: "note", variant: "tip", html: "<b>super():</b> parent ka method call karne ke liye <code>super().__init__()</code> use hota hai." },
-  { t: "recap", items: ["class Child(Parent) — inherit","Child ko parent ke methods milte hain","Same method dobara likho = override","super() se parent call karo"] },
+  { t: "objectives", items: [
+    "Make one class inherit another with <code>class Child(Parent)</code>",
+    "Override a method — and know the child's version wins",
+    "Call the parent from the child with <code>super()</code>",
+    "See why a child <code>__init__</code> must call <code>super().__init__()</code>",
+    "Test type with <code>isinstance</code> — a Dog is also an Animal",
+  ]},
+  { t: "hook", q: "Your <code>Dog</code> class inherits <code>Animal</code>. You give <code>Dog</code> its own <code>__init__</code> to store the breed. Now <code>dog.describe()</code> — a method you did not touch, inherited straight from Animal — crashes with <code>AttributeError: 'Dog' object has no attribute 'name'</code>. You never removed name. Where did it go?", why: "It was never set. Writing a new <code>__init__</code> in <code>Dog</code> <b>replaces</b> Animal's — it does not add to it — so Animal's <code>__init__</code>, the one that does <code>self.name = name</code>, never runs. The fix is one line: <code>super().__init__(name)</code>, which calls the parent's setup before you add your own. Override <code>__init__</code> and you take responsibility for the parent's too." },
+  { t: "think", q: "If <code>Dog</code> inherits <code>Animal</code>, and both define <code>speak()</code>, which one runs when you call <code>dog.speak()</code>?", a: "Dog's. Python looks for a method on the <b>child first</b>, and only walks up to the parent if the child does not have it. Since <code>Dog</code> defines its own <code>speak()</code>, that one wins — the parent's is shadowed.<br/><br/>This is what override means: the child's version replaces the parent's <b>for that method only</b>. Every other method the child did not redefine is still inherited unchanged." },
+
+  { t: "h2", n: "1", text: "Inheriting and overriding" },
+  { t: "def", term: "Inheritance", en: "Inheritance lets a child class reuse a parent class's attributes and methods, adding or replacing only what differs, so shared behaviour is written once.", hi: "In plain words: <code>class Dog(Animal)</code> likhne se Dog ko Animal ke saare methods mil jaate hain — dobara likhne ki zaroorat nahi. Jo alag chahiye sirf wahi likho." },
+  { t: "p", html: "<code>class Child(Parent):</code> gives the child everything the parent has. Redefine a method in the child and it <b>overrides</b> the parent's; leave it out and it is <b>inherited</b> as-is." },
+  { t: "code", file: "override.py", code: "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def speak(self):\n        return \"some sound\"\n    def describe(self):\n        return f\"{self.name} is an animal\"\n\nclass Dog(Animal):\n    def speak(self):                 # override\n        return f\"{self.name} says woof\"\n\nd = Dog(\"Bruno\")\nprint(d.speak())        # Dog's version\nprint(d.describe())     # inherited from Animal", output: "Bruno says woof\nBruno is an animal" },
+  { t: "viz", name: "inheritance-lab" },
+  { t: "p", html: "In that panel, <code>speak()</code> is found on <b>Dog</b> (overridden), while <code>describe()</code> falls through to <b>Animal</b> (inherited). Python always checks the child first and stops at the first place the name exists." },
+
+  { t: "h2", n: "2", text: "super(): calling the parent" },
+  { t: "p", html: "<code>super()</code> reaches the parent's version of a method. The most important use is in <code>__init__</code>: run the parent's setup, then add the child's." },
+  { t: "code", file: "super.py", code: "class Animal:\n    def __init__(self, name):\n        self.name = name\n\nclass Dog(Animal):\n    def __init__(self, name, breed):\n        super().__init__(name)     # run Animal's __init__ first\n        self.breed = breed         # then add Dog's own\n\nd = Dog(\"Bruno\", \"Lab\")\nprint(d.name, d.breed)", output: "Bruno Lab" },
+  { t: "note", variant: "warn", html: "<b>If a child defines <code>__init__</code>, it must call <code>super().__init__(...)</code></b> — otherwise the parent's <code>__init__</code> never runs and the attributes it would set (like <code>name</code>) simply do not exist. This is the number-one inheritance bug, and it surfaces later, as an <code>AttributeError</code> in some inherited method." },
+  { t: "analogy", concept: "super() in __init__", real: "Building on a foundation", html: "A parent's <code>__init__</code> lays the <b>foundation</b> — it sets up <code>name</code> and whatever else every animal needs. When <code>Dog</code> writes its own <code>__init__</code> to add a breed, it is building a room on that foundation. <code>super().__init__(name)</code> is pouring the foundation <b>first</b>. Skip it and you are building a room on bare ground — it looks fine until someone leans on <code>self.name</code> and the whole thing falls through." },
+
+  { t: "h2", n: "3", text: "super() to extend, not just replace" },
+  { t: "p", html: "<code>super()</code> also lets a child <b>build on</b> a parent's method instead of fully replacing it — call the parent's version, then add to its result." },
+  { t: "code", file: "extend.py", code: "class Animal:\n    def speak(self):\n        return \"some sound\"\n\nclass Puppy(Animal):\n    def speak(self):\n        return super().speak() + \" (but tiny)\"\n\nprint(Puppy().speak())", output: "some sound (but tiny)" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> inheritance models an <b>is-a</b> relationship — a Dog <i>is an</i> Animal — and it is how frameworks let you customise their behaviour. You subclass a base <code>Model</code>, <code>Exception</code>, or <code>TestCase</code> and override one or two methods while inheriting the rest. In data science you will subclass scikit-learn estimators and custom exception types the same way. Prefer <b>composition</b> (an object holding another) when the relationship is really <i>has-a</i>, not <i>is-a</i>." },
+
+  { t: "h2", n: "4", text: "isinstance: a Dog is an Animal" },
+  { t: "p", html: "Because a child <b>is a</b> kind of its parent, <code>isinstance</code> against either class is True. This is what lets a function written for <code>Animal</code> accept any subclass." },
+  { t: "code", file: "isinstance.py", code: "class Animal: pass\nclass Dog(Animal): pass\n\nd = Dog()\nprint(isinstance(d, Dog))       # yes, obviously\nprint(isinstance(d, Animal))    # yes - a Dog IS an Animal\nprint(isinstance(Animal(), Dog))  # no - an Animal is not a Dog", output: "True\nTrue\nFalse" },
+
+  { t: "trace", intro: "Override, inherit, and super. Work out each value.", code: "class Base:\n    def __init__(self, x):\n        self.x = x\n    def show(self):\n        return f\"base {self.x}\"\n\nclass Child(Base):\n    def show(self):\n        return f\"child {self.x}\"\n\nc = Child(5)\na = c.show()\nb = isinstance(c, Base)\nd = c.x", steps: [
+    { q: "After line 12, <code>a</code> is", answer: "child 5", why: "Child overrides <code>show()</code>, so its version runs — and <code>self.x</code> is 5, set by the inherited __init__." },
+    { q: "After line 13, <code>b</code> is", answer: "True", why: "A Child is a Base, so <code>isinstance(c, Base)</code> is True." },
+    { q: "After line 14, <code>d</code> is", answer: "5", why: "Child has no __init__, so it inherited Base's, which set <code>self.x = 5</code>." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Make Dog inherit Animal and inherit its method.", code: "class Animal:\n    def speak(self):\n        return \"sound\"\n\nclass Dog(Animal):\n    pass\n\nprint(Dog().speak())", out: "sound" },
+    { task: "Override speak() in Dog.", code: "class Animal:\n    def speak(self):\n        return \"sound\"\n\nclass Dog(Animal):\n    def speak(self):\n        return \"woof\"\n\nprint(Dog().speak())", out: "woof" },
+    { task: "Use super().__init__ to set an inherited attribute.", code: "class Animal:\n    def __init__(self, name):\n        self.name = name\n\nclass Dog(Animal):\n    def __init__(self, name, breed):\n        super().__init__(name)\n        self.breed = breed\n\nd = Dog(\"Bruno\", \"Lab\")\nprint(d.name, d.breed)", out: "Bruno Lab" },
+    { task: "Call an inherited method that uses an inherited attribute.", code: "class Animal:\n    def __init__(self, name):\n        self.name = name\n    def describe(self):\n        return f\"{self.name}\"\n\nclass Cat(Animal):\n    pass\n\nprint(Cat(\"Kitty\").describe())", out: "Kitty" },
+    { task: "Extend a parent method with super().", code: "class Animal:\n    def speak(self):\n        return \"sound\"\n\nclass Puppy(Animal):\n    def speak(self):\n        return super().speak() + \"!\"\n\nprint(Puppy().speak())", out: "sound!" },
+    { task: "Check that a Dog is an Animal.", code: "class Animal:\n    pass\n\nclass Dog(Animal):\n    pass\n\nprint(isinstance(Dog(), Animal))", out: "True" },
+    { task: "Show a parent is NOT an instance of its child.", code: "class Animal:\n    pass\n\nclass Dog(Animal):\n    pass\n\nprint(isinstance(Animal(), Dog))", out: "False" },
+    { task: "Inherit an attribute set in the parent __init__.", code: "class Vehicle:\n    def __init__(self):\n        self.wheels = 4\n\nclass Car(Vehicle):\n    pass\n\nprint(Car().wheels)", out: "4" },
+    { task: "Override one method, inherit another.", code: "class Shape:\n    def name(self):\n        return \"shape\"\n    def sides(self):\n        return 0\n\nclass Square(Shape):\n    def sides(self):\n        return 4\n\ns = Square()\nprint(s.name(), s.sides())", out: "shape 4" },
+    { task: "Use issubclass to check the class relationship.", code: "class Animal:\n    pass\n\nclass Dog(Animal):\n    pass\n\nprint(issubclass(Dog, Animal))", out: "True" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "class Animal:\n    def __init__(self, name):\n        self.name = name\n\nclass Dog(Animal):\n    def __init__(self, breed):\n        self.breed = breed\n\nd = Dog(\"Lab\")\nprint(d.name)", why: "Dog's __init__ replaced Animal's and never called <code>super().__init__</code>, so <code>self.name</code> was never set — <code>AttributeError</code>. Call the parent's init first.", fix: "class Animal:\n    def __init__(self, name):\n        self.name = name\n\nclass Dog(Animal):\n    def __init__(self, name, breed):\n        super().__init__(name)\n        self.breed = breed\n\nd = Dog(\"Bruno\", \"Lab\")\nprint(d.name)" },
+    { bad: "class Dog(Animal):\n    def speak(self):\n        return Animal.speak() + \" woof\"", why: "Calling <code>Animal.speak()</code> with no instance skips <code>self</code>. Use <code>super().speak()</code>, which passes the current instance automatically.", fix: "class Dog(Animal):\n    def speak(self):\n        return super().speak() + \" woof\"" },
+    { bad: "class Dog extends Animal:\n    pass", why: "<code>extends</code> is Java, not Python. Python puts the parent in parentheses after the class name.", fix: "class Dog(Animal):\n    pass" },
+    { bad: "class Animal:\n    def __init__(self, name):\n        name = name", why: "<code>name = name</code> just reassigns the local parameter to itself — it never stores anything on the object. Attributes must be set on <code>self</code>.", fix: "class Animal:\n    def __init__(self, name):\n        self.name = name" },
+  ]},
+
+  { t: "debug", intro: "A BankAccount base class sets the balance; a SavingsAccount adds an interest rate. Creating a savings account works, but reading its balance crashes. Read it before opening the fix.", code: "class BankAccount:\n    def __init__(self, balance):\n        self.balance = balance\n\nclass SavingsAccount(BankAccount):\n    def __init__(self, balance, rate):\n        self.rate = rate\n\ns = SavingsAccount(1000, 0.05)\nprint(\"rate:\", s.rate)\nprint(\"balance:\", s.balance)", symptom: "AttributeError: 'SavingsAccount' object has no attribute 'balance'", q: "SavingsAccount was created with a balance of 1000. So why does reading s.balance say it does not exist?", fix: "class BankAccount:\n    def __init__(self, balance):\n        self.balance = balance\n\nclass SavingsAccount(BankAccount):\n    def __init__(self, balance, rate):\n        super().__init__(balance)\n        self.rate = rate\n\ns = SavingsAccount(1000, 0.05)\nprint(\"rate:\", s.rate)\nprint(\"balance:\", s.balance)", why: "Defining <code>__init__</code> in <code>SavingsAccount</code> <b>replaced</b> the parent's — it did not extend it. So <code>BankAccount.__init__</code>, the only place <code>self.balance</code> is ever set, never ran. The 1000 was passed in and then dropped on the floor, because nothing assigned it.<br/><br/>The rate works because <code>SavingsAccount.__init__</code> sets it directly; the balance fails because it belongs to the parent's setup. <code>super().__init__(balance)</code> runs the parent's __init__ first, storing the balance, and then the child adds its rate. The rule: whenever a subclass writes its own <code>__init__</code>, it is responsible for calling the parent's." },
+
+  { t: "recap", items: [
+    "<code>class Child(Parent):</code> — the child inherits the parent's methods and attributes",
+    "Redefine a method to <b>override</b> it; the child's version wins for that method only",
+    "Python looks on the <b>child first</b>, then walks up to the parent",
+    "<code>super().__init__(...)</code> runs the parent's setup — required when the child defines <code>__init__</code>",
+    "<code>super().method()</code> also lets you <b>extend</b> a parent method, not just replace it",
+    "A child <b>is a</b> parent, so <code>isinstance(child, Parent)</code> is True",
+    "Miss <code>super().__init__</code> and inherited methods crash with <code>AttributeError</code> later",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is inheritance and why use it?", a: "Inheritance lets one class, the child, reuse the attributes and methods of another, the parent, so shared behaviour is written once and specialised where it differs. You write <code>class Dog(Animal)</code> and Dog gets everything Animal has, overriding only what should behave differently. It models an <b>is-a</b> relationship and reduces duplication." },
+    { level: "beginner", q: "What does it mean to override a method?", a: "It means the child class defines a method with the same name as one in the parent, and the child's version runs for instances of the child. Python resolves methods by looking at the child's class first and walking up to the parent only if it is not found, so the override shadows the parent's version for that one method while everything else stays inherited." },
+    { level: "intermediate", q: "What does <code>super()</code> do, and why is it important in <code>__init__</code>?", a: "<code>super()</code> gives access to the parent class's methods from within the child. In <code>__init__</code> it is essential: defining an <code>__init__</code> in the child replaces the parent's entirely, so the parent's initialisation — the code that sets its attributes — will not run unless you call <code>super().__init__(...)</code>. Skip it and any attribute the parent was supposed to set is missing, which later surfaces as an AttributeError." },
+    { level: "intermediate", q: "How does Python decide which method to run on an object?", a: "It follows the Method Resolution Order (MRO) — the chain from the object's class up through its parents to <code>object</code>. For a call like <code>d.speak()</code> Python checks Dog, then Animal, then object, and runs the first <code>speak</code> it finds. You can inspect this chain with <code>Dog.__mro__</code>. With multiple inheritance the MRO also determines which parent's method wins." },
+    { level: "intermediate", q: "When should you prefer composition over inheritance?", a: "When the relationship is really <b>has-a</b> rather than <b>is-a</b>. A Car <i>has an</i> Engine, so the Car should hold an Engine object, not inherit from Engine. Inheritance couples the child tightly to the parent's implementation, so deep or inappropriate hierarchies become fragile; composition keeps the pieces independent and easier to change. A common guideline is to use inheritance only for genuine is-a relationships and reach for composition otherwise." },
+  ]},
 ];
 const L25 = [
   { t: "objectives", items: ["Encapsulation — data chhupana","Private variables (__)","Polymorphism — same naam, alag kaam"] },
@@ -3316,6 +3387,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "inheritance": [
+    // Easy
+    { level: "easy", q: "How does <code>Dog</code> inherit from <code>Animal</code>?", options: ["class Dog(Animal):", "class Dog extends Animal:", "class Dog: inherit Animal", "class Dog -> Animal:"], correct: 0, why: "Python puts the parent in parentheses: <code>class Dog(Animal):</code>. <code>extends</code> is Java." },
+    { level: "easy", q: "If Dog and Animal both define <code>speak()</code>, which runs for a Dog?", options: ["Dog's — the child's version wins", "Animal's", "Both, in order", "It errors"], correct: 0, why: "Python looks on the child first, so Dog's <code>speak()</code> overrides Animal's for Dog instances." },
+    { level: "easy", q: "What does <code>super()</code> give you access to?", options: ["The child's methods", "Global variables", "The parent class's methods", "A new object"], correct: 2, why: "<code>super()</code> reaches the parent class — most importantly <code>super().__init__()</code> to run the parent's setup." },
+    // Medium
+    { level: "medium", q: "A Dog defines its own <code>__init__</code> but never calls <code>super().__init__()</code>. What happens to the parent's attributes?", options: ["They are set automatically", "They are never set", "They become None", "Python calls it for you"], correct: 1, why: "Defining __init__ in the child replaces the parent's, so the parent's setup never runs and its attributes are missing." },
+    { level: "medium", q: "<code>isinstance(dog, Animal)</code> where Dog inherits Animal — what is it?", options: ["False", "Error", "None", "True"], correct: 3, why: "A Dog is-a Animal, so isinstance against the parent is True. That's what lets Animal-typed code accept any subclass." },
+    { level: "medium", q: "What does <code>super().speak()</code> inside Dog.speak() let you do?", options: ["Extend the parent's method instead of just replacing it", "Skip the parent entirely", "Delete the parent method", "Rename speak"], correct: 0, why: "Calling the parent's version and adding to its result lets the child build on it rather than replace it wholesale." },
+    { level: "medium", q: "A child class with NO <code>__init__</code> is created. Which init runs?", options: ["None runs", "The parent's __init__", "An empty one", "It errors"], correct: 1, why: "If the child doesn't define __init__, the parent's is inherited and runs as-is." },
+    // Hard
+    { level: "hard", q: "Reading <code>dog.name</code> raises <code>AttributeError</code> even though Dog inherits Animal. The likely cause?", options: ["name is private", "Animal has no name", "isinstance failed", "Dog's __init__ skipped super().__init__, so name was never set"], correct: 3, why: "The parent's __init__ (which sets self.name) never ran because the child's __init__ didn't call super().__init__." },
+    { level: "hard", q: "What is the MRO (method resolution order) for <code>class Dog(Animal)</code>?", options: ["Animal, Dog, object", "Dog, object, Animal", "Dog, Animal, object", "object, Animal, Dog"], correct: 2, why: "Python searches the child first, then parents, then object: Dog → Animal → object. Inspect it with <code>Dog.__mro__</code>." },
+    { level: "hard", q: "When should you prefer composition over inheritance?", options: ["Always", "Never", "When the relationship is has-a, not is-a", "Only for exceptions"], correct: 2, why: "Inheritance models is-a (a Dog is an Animal). A Car has-a Engine, so it should hold an Engine object rather than inherit from it." },
   ],
 
   "advanced-functions": [

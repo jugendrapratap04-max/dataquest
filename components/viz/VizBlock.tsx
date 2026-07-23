@@ -15,6 +15,7 @@ import { StrftimeLab } from "./StrftimeLab";
 import { BitwiseLab } from "./BitwiseLab";
 import { MatchLab } from "./MatchLab";
 import { RecursionLab } from "./RecursionLab";
+import { InheritanceLab } from "./InheritanceLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -46,6 +47,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "bitwise-lab": BitwiseLab,
   "match-lab": MatchLab,
   "recursion-lab": RecursionLab,
+  "inheritance-lab": InheritanceLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
