@@ -2027,15 +2027,85 @@ const L28 = [
   ]},
 ];
 const L29 = [
-  { t: "objectives", items: ["RegEx kya hai","re.findall / re.search","Common patterns (\\d, \\w)"] },
-  { t: "h2", n: "1", text: "Regular Expressions" },
-  { t: "p", html: "RegEx text me pattern dhoondhne/nikaalne ka powerful tool hai — data cleaning me bahut kaam aata hai. <code>import re</code>." },
-  { t: "code", file: "re1.py", code: "import re\ntext = \"Order 123, bill 456\"\nprint(re.findall(r\"\\d+\", text))   # ['123', '456']", output: "['123', '456']" },
-  { t: "h2", n: "2", text: "Common patterns" },
-  { t: "p", html: "<code>\\d</code> = digit, <code>\\w</code> = letter/number, <code>+</code> = ek ya zyada, <code>.</code> = koi bhi char. <code>re.search</code> pehla match deta hai." },
-  { t: "code", file: "re2.py", code: "import re\nprint(bool(re.search(r\"\\d\", \"abc7\")))  # True (digit hai)\nprint(bool(re.search(r\"\\d\", \"abc\")))   # False", output: "True\nFalse" },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> phone numbers, emails, dates text me se nikaalne ke liye RegEx best hai." },
-  { t: "recap", items: ["re module — pattern matching","findall = saare matches (list)","search = pehla match","\\d digit, \\w word, + one-or-more"] },
+  { t: "objectives", items: [
+    "Search and extract text patterns with the <code>re</code> module",
+    "Use the core tools: <code>findall</code>, <code>search</code>, <code>sub</code>",
+    "Read the common symbols: <code>\\d</code>, <code>\\w</code>, <code>+</code>, <code>{n}</code>, <code>[…]</code>, <code>^</code>, <code>$</code>",
+    "Know why regex patterns must be <b>raw strings</b> (<code>r\"…\"</code>)",
+    "Tell <code>match</code> (start only) from <code>search</code> (anywhere)",
+  ]},
+  { t: "hook", q: "You write <code>re.search(\"\\bcat\", \"the cat\")</code> to find the word <code>cat</code>. It returns nothing — no match, in a string that obviously contains \"cat\". Drop nothing but add one letter, <code>r</code>, and it works. What was wrong?", why: "The missing <code>r</code>. In an ordinary Python string, <code>\\b</code> is not \"word boundary\" — it is the <b>backspace</b> character. So <code>\"\\bcat\"</code> is a backspace followed by <code>cat</code>, which is nowhere in your text. Only in a <b>raw</b> string, <code>r\"\\bcat\"</code>, does <code>\\b</code> stay as the two characters the regex engine reads as a word boundary. This is why every regex pattern should be a raw string." },
+  { t: "think", q: "Why do regex patterns almost always start with <code>r</code>, as in <code>r\"\\d+\"</code>?", a: "Because regex is built from backslash sequences — <code>\\d</code>, <code>\\w</code>, <code>\\b</code>, <code>\\s</code> — and Python's normal strings <b>also</b> use the backslash for escapes. Without the <code>r</code>, Python tries to interpret <code>\\d</code> as a string escape (it is not a valid one and warns), and <code>\\b</code> silently becomes a backspace.<br/><br/>A raw string, <code>r\"…\"</code>, turns that off: the backslash stays a literal backslash, and the regex engine gets exactly the characters you typed. It is a habit, not a special case — always make regex patterns raw." },
+
+  { t: "h2", n: "1", text: "findall, search and existence" },
+  { t: "def", term: "Regular expression", en: "A regular expression is a pattern describing a set of strings, used to search, extract, validate and replace text; Python's re module compiles and runs them.", hi: "In plain words: regex ek pattern hai jo batata hai \"aisi text dhoondho\". <code>import re</code> karke text me se numbers, emails, dates nikaal sakte ho." },
+  { t: "p", html: "<code>re.findall</code> returns every match as a list. <code>re.search</code> returns the first match object (or <code>None</code>), so <code>bool(re.search(...))</code> answers \"is it there at all?\"." },
+  { t: "code", file: "basics.py", code: "import re\n\ntext = \"Order 123, bill 456\"\nprint(re.findall(r\"\\d+\", text))          # every run of digits\n\nprint(bool(re.search(r\"\\d\", \"abc7\")))    # is there a digit?\nprint(bool(re.search(r\"\\d\", \"abc\")))", output: "['123', '456']\nTrue\nFalse" },
+  { t: "note", variant: "tip", html: "<code>findall</code> gives you the <b>strings</b> directly, which is what you usually want for extraction. <code>search</code> gives a <b>match object</b> — call <code>.group()</code> on it to get the text, or just wrap it in <code>bool()</code> to test existence." },
+
+  { t: "h2", n: "2", text: "The common symbols" },
+  { t: "p", html: "A handful of symbols cover most needs: <code>\\d</code> a digit, <code>\\w</code> a letter/digit/underscore, <code>+</code> one-or-more, <code>{n}</code> exactly n, <code>[…]</code> any one listed character." },
+  { t: "viz", name: "regex-lab" },
+  { t: "code", file: "symbols.py", code: "import re\n\ntext = \"Call 98765 or 43210, code A7\"\nprint(re.findall(r\"\\d+\", text))       # runs of digits\nprint(re.findall(r\"\\d{5}\", text))     # exactly five digits\nprint(re.findall(r\"[A-Z]\\d\", text))    # a capital then a digit", output: "['98765', '43210', '7']\n['98765', '43210']\n['A7']" },
+  { t: "note", variant: "tip", html: "Click the patterns in the panel above and watch them light up the matches. <code>\\d{5}</code> catches the two phone numbers but not the lone <code>7</code>; <code>[A-Z]\\d</code> catches only <code>A7</code>. Seeing what a pattern grabs is far faster than decoding the symbols in your head." },
+
+  { t: "h2", n: "3", text: "Groups and sub" },
+  { t: "p", html: "Parentheses <b>capture</b> parts of a match, read back with <code>.group(n)</code>. <code>re.sub</code> replaces every match with something else." },
+  { t: "code", file: "groups.py", code: "import re\n\nm = re.search(r\"(\\w+)@(\\w+)\", \"user@gmail\")\nprint(m.group(1))        # before the @\nprint(m.group(2))        # after the @\n\nprint(re.sub(r\"\\d+\", \"#\", \"a1b22c333\"))   # mask every number", output: "user\ngmail\na#b#c#" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> regex is a data-cleaning workhorse. Pulling order ids out of free-text notes, validating email or phone formats, stripping currency symbols before <code>float()</code>, masking sensitive digits in logs — all a line or two of <code>re</code>. In Pandas, <code>df[\"col\"].str.extract(r\"…\")</code> and <code>.str.replace(r\"…\")</code> run regex across a whole column at once, so the patterns you learn here scale straight to a DataFrame." },
+
+  { t: "h2", n: "4", text: "match vs search, and anchors" },
+  { t: "p", html: "<code>re.match</code> only looks at the <b>start</b> of the string; <code>re.search</code> looks anywhere. <code>^</code> and <code>$</code> anchor a pattern to the start and end — useful for validating a whole string." },
+  { t: "code", file: "anchors.py", code: "import re\n\nprint(bool(re.match(r\"cat\", \"the cat\")))   # False - not at the START\nprint(bool(re.search(r\"cat\", \"the cat\")))  # True  - found anywhere\n\nprint(bool(re.match(r\"^\\d+$\", \"12345\")))    # whole string is digits\nprint(bool(re.match(r\"^\\d+$\", \"12a45\")))    # has a letter -> False", output: "False\nTrue\nTrue\nFalse" },
+  { t: "analogy", concept: "match vs search", real: "Reading a name tag vs scanning a crowd", html: "<code>re.match</code> is checking the <b>name tag at the door</b> — it only reads the very start of the string and answers whether that begins with your pattern. <code>re.search</code> is <b>scanning the whole crowd</b> for anyone matching. Most of the time you want <code>search</code>; reach for <code>match</code> only when the thing genuinely has to be at the beginning, and use <code>^…$</code> when the pattern must cover the <b>entire</b> string, like validating that an input is all digits." },
+
+  { t: "trace", intro: "findall, search, match, sub. Work out each value.", code: "import re\n\ntext = \"a1 b22 c333\"\n\na = re.findall(r\"\\d+\", text)\nb = len(a)\nc = bool(re.search(r\"z\", text))\nd = bool(re.match(r\"\\d\", text))\ne = re.sub(r\"\\d\", \"*\", \"a1b2\")", steps: [
+    { q: "After line 5, <code>a</code> is", answer: "['1', '22', '333']", why: "<code>\\d+</code> grabs each run of digits: 1, 22, 333." },
+    { q: "After line 6, <code>b</code> is", answer: "3", why: "There are three matches in the list, so its length is 3." },
+    { q: "After line 7, <code>c</code> is", answer: "False", why: "There is no <code>z</code> anywhere in the text, so <code>search</code> finds nothing." },
+    { q: "After line 8, <code>d</code> is", answer: "False", why: "<code>match</code> only checks the start, and the text begins with <code>a</code>, not a digit." },
+    { q: "After line 9, <code>e</code> is", answer: "a*b*", why: "<code>sub</code> replaces every single digit with <code>*</code>: a1b2 becomes a*b*." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Find all runs of digits in a string.", code: "import re\n\nprint(re.findall(r\"\\d+\", \"a12 b3 c456\"))", out: "['12', '3', '456']" },
+    { task: "Test whether a string contains any digit.", code: "import re\n\nprint(bool(re.search(r\"\\d\", \"hello2\")))", out: "True" },
+    { task: "Find all whole words with \\w+.", code: "import re\n\nprint(re.findall(r\"\\w+\", \"hi there_42!\"))", out: "['hi', 'there_42']" },
+    { task: "Match exactly three digits.", code: "import re\n\nprint(re.findall(r\"\\d{3}\", \"12 345 6789\"))", out: "['345', '678']" },
+    { task: "Find every vowel with a character class.", code: "import re\n\nprint(re.findall(r\"[aeiou]\", \"education\"))", out: "['e', 'u', 'a', 'i', 'o']" },
+    { task: "Replace every digit with a hash.", code: "import re\n\nprint(re.sub(r\"\\d\", \"#\", \"a1b2c3\"))", out: "a#b#c#" },
+    { task: "Capture the two parts around an @.", code: "import re\n\nm = re.search(r\"(\\w+)@(\\w+)\", \"om@mail\")\nprint(m.group(1), m.group(2))", out: "om mail" },
+    { task: "Validate a whole string is digits with ^ and $.", code: "import re\n\nprint(bool(re.match(r\"^\\d+$\", \"90210\")))", out: "True" },
+    { task: "Show match only checks the start.", code: "import re\n\nprint(bool(re.match(r\"\\d\", \"abc9\")))", out: "False" },
+    { task: "Extract simple emails from text.", code: "import re\n\nprint(re.findall(r\"\\w+@\\w+\\.\\w+\", \"a@b.com and c@d.org\"))", out: "['a@b.com', 'c@d.org']" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "import re\nprint(bool(re.search(\"\\bcat\", \"the cat\")))", why: "Without the <code>r</code>, <code>\\b</code> is a backspace character, not a word boundary — so this searches for something that is not there and returns False. Make the pattern raw.", fix: "import re\nprint(bool(re.search(r\"\\bcat\", \"the cat\")))" },
+    { bad: "import re\nprint(bool(re.match(r\"cat\", \"the cat\")))", why: "<code>re.match</code> only checks the <b>start</b> of the string, and \"the cat\" begins with \"the\" — so this is False even though \"cat\" is present. Use <code>re.search</code> to look anywhere.", fix: "import re\nprint(bool(re.search(r\"cat\", \"the cat\")))" },
+    { bad: "import re\nm = re.search(r\"\\d+\", \"no digits here\")\nprint(m.group())", why: "When nothing matches, <code>re.search</code> returns <code>None</code>, and <code>None.group()</code> raises <code>AttributeError</code>. Check the match before using it.", fix: "import re\nm = re.search(r\"\\d+\", \"no digits here\")\nprint(m.group() if m else \"no match\")" },
+    { bad: "import re\nprint(re.findall(r\"\\d\", \"12 34\"))", why: "Not an error, but a surprise: <code>\\d</code> without <code>+</code> matches <b>single</b> digits, giving ['1','2','3','4'] — not the numbers 12 and 34. Add <code>+</code> to grab whole runs.", fix: "import re\nprint(re.findall(r\"\\d+\", \"12 34\"))" },
+  ]},
+
+  { t: "debug", intro: "A function scans support tickets for the word 'urgent' anywhere in the message. It keeps reporting False on tickets that clearly contain the word. It runs without error. Read it before opening the fix.", code: "import re\n\ndef is_urgent(msg):\n    return bool(re.match(r\"urgent\", msg))\n\nprint(is_urgent(\"urgent: server down\"))\nprint(is_urgent(\"the issue is urgent\"))", symptom: "prints True then False, though both messages contain 'urgent'", q: "The second message clearly contains 'urgent'. So why does the check say False?", fix: "import re\n\ndef is_urgent(msg):\n    return bool(re.search(r\"urgent\", msg))\n\nprint(is_urgent(\"urgent: server down\"))\nprint(is_urgent(\"the issue is urgent\"))", why: "<code>re.match</code> only anchors at the <b>start</b> of the string. The first message begins with \"urgent\", so it matches; the second begins with \"the\", so <code>match</code> gives up immediately even though \"urgent\" appears later. The function meant to look <b>anywhere</b> in the message, which is exactly what <code>re.search</code> does.<br/><br/>This is the most common regex mix-up: <code>match</code> is start-anchored, <code>search</code> is not. A quick way to remember it — <code>re.match(p, s)</code> behaves like <code>re.search(\"^\" + p, s)</code>. Use <code>search</code> for \"is this pattern present\", <code>match</code> only when it truly must be at the beginning, and <code>^…$</code> when it must span the whole string." },
+
+  { t: "recap", items: [
+    "<code>import re</code> · <code>findall</code> = all matches (list) · <code>search</code> = first match or None · <code>sub</code> = replace",
+    "Always make patterns <b>raw</b>: <code>r\"\\d+\"</code>, or <code>\\b</code> and friends misbehave",
+    "<code>\\d</code> digit · <code>\\w</code> word char · <code>+</code> one-or-more · <code>{n}</code> exactly n · <code>[…]</code> any listed",
+    "Parentheses <b>capture</b> groups, read with <code>.group(n)</code>",
+    "<code>re.match</code> checks the <b>start</b> only; <code>re.search</code> looks <b>anywhere</b>",
+    "<code>^</code> and <code>$</code> anchor to start and end — validate a whole string with <code>^…$</code>",
+    "A failed <code>search</code> returns <code>None</code> — check before calling <code>.group()</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between <code>re.findall</code> and <code>re.search</code>?", a: "<code>findall</code> returns a list of every non-overlapping match as strings, which is what you use to extract all occurrences. <code>search</code> scans for the first match and returns a match object, or <code>None</code> if there is none — so it is what you use to test existence, usually as <code>bool(re.search(...))</code>, or to grab one match and read its groups with <code>.group()</code>." },
+    { level: "beginner", q: "Why should regex patterns be raw strings?", a: "Because regex uses backslash sequences like <code>\\d</code>, <code>\\w</code> and <code>\\b</code>, and Python's normal strings also treat the backslash as an escape character. In a normal string, <code>\\b</code> becomes a backspace and <code>\\d</code> triggers an invalid-escape warning, so the pattern the regex engine receives is not what you typed. A raw string, <code>r\"…\"</code>, disables string escaping so the backslashes reach the regex engine intact." },
+    { level: "intermediate", q: "What is the difference between <code>re.match</code> and <code>re.search</code>?", a: "<code>re.match</code> only succeeds if the pattern matches at the <b>beginning</b> of the string; <code>re.search</code> looks for a match anywhere in it. So <code>re.match(r\"cat\", \"the cat\")</code> is None while <code>re.search</code> finds it. <code>match</code> is effectively <code>search</code> with an implicit <code>^</code> anchor. Most \"does this contain\" checks should use <code>search</code>; reserve <code>match</code> for genuinely start-anchored logic." },
+    { level: "intermediate", q: "What do capturing groups do?", a: "Parentheses in a pattern capture the part of the match they enclose, so you can pull out sub-parts. After <code>m = re.search(r\"(\\w+)@(\\w+)\", s)</code>, <code>m.group(1)</code> and <code>m.group(2)</code> are the pieces before and after the @, and <code>m.group(0)</code> is the whole match. Groups are also how <code>re.sub</code> can reference matched text in its replacement, and how <code>findall</code> returns tuples when a pattern has several groups." },
+    { level: "intermediate", q: "How do <code>^</code> and <code>$</code> help validate input?", a: "They anchor the pattern to the start and end of the string, so <code>^…$</code> forces the <b>whole</b> string to match rather than just a part of it. For example <code>re.match(r\"^\\d+$\", s)</code> is True only if <code>s</code> is entirely digits; without the anchors, a pattern could match a substring and wrongly accept \"12a45\". Anchoring is essential when checking that an input has exactly the expected format." },
+  ]},
 ];
 
 const L30 = [
@@ -3669,6 +3739,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "regex": [
+    // Easy
+    { level: "easy", q: "What does <code>re.findall(r\"\\d+\", text)</code> return?", options: ["A list of every run of digits", "The first number", "True or False", "A single string"], correct: 0, why: "<code>findall</code> returns all matches as a list of strings; <code>\\d+</code> is one-or-more digits." },
+    { level: "easy", q: "Why write regex patterns as raw strings <code>r\"...\"</code>?", options: ["It's faster", "It's required by import re", "So backslash sequences reach the regex engine intact", "To make them uppercase"], correct: 2, why: "Normal strings treat \\ as an escape (\\b becomes backspace), so raw strings keep the backslashes literal for regex." },
+    { level: "easy", q: "What does <code>\\d</code> match?", options: ["Any letter", "A digit", "A space", "A word"], correct: 1, why: "<code>\\d</code> is a single digit 0-9; <code>\\w</code> is a letter/digit/underscore, <code>\\s</code> is whitespace." },
+    // Medium
+    { level: "medium", q: "What is the difference between <code>re.match</code> and <code>re.search</code>?", options: ["match is faster", "search only finds numbers", "They are identical", "match checks the START only; search looks anywhere"], correct: 3, why: "<code>re.match</code> anchors at the start of the string; <code>re.search</code> scans the whole thing." },
+    { level: "medium", q: "<code>re.findall(r\"\\d\", \"12 34\")</code> returns what?", options: ["['12', '34']", "['1234']", "['1','2','3','4']", "4"], correct: 2, why: "Without <code>+</code>, <code>\\d</code> matches single digits — add <code>+</code> to grab whole runs like 12 and 34." },
+    { level: "medium", q: "What does <code>re.sub(r\"\\d\", \"#\", \"a1b2\")</code> give?", options: ["a#b#", "####", "a1b2", "ab"], correct: 0, why: "<code>sub</code> replaces every match; each digit becomes #, so a1b2 → a#b#." },
+    { level: "medium", q: "What does a failed <code>re.search</code> return?", options: ["An empty string", "None", "False", "An error"], correct: 1, why: "It returns None, so calling <code>.group()</code> on it raises AttributeError — check the match first." },
+    // Hard
+    { level: "hard", q: "<code>re.search(\"\\bcat\", \"the cat\")</code> (no r) returns no match. Why?", options: ["Without r, \\b is a backspace char, not a word boundary", "cat isn't there", "search is broken", "You need findall"], correct: 0, why: "In a normal string \\b is backspace; only r\"\\bcat\" reads \\b as a regex word boundary. Always use raw strings." },
+    { level: "hard", q: "How do you validate that a whole string is only digits?", options: ["re.search(r\"\\d\", s)", "re.findall(r\"\\d\", s)", "re.match(r\"^\\d+$\", s)", "re.sub(r\"\\d\", s)"], correct: 2, why: "The <code>^</code> and <code>$</code> anchors force the entire string to be digits; without them a substring could match." },
+    { level: "hard", q: "After <code>m = re.search(r\"(\\w+)@(\\w+)\", \"om@mail\")</code>, what is <code>m.group(2)</code>?", options: ["om", "om@mail", "@", "mail"], correct: 3, why: "Parentheses capture groups; group(1) is before the @ (om), group(2) is after it (mail), group(0) is the whole match." },
   ],
 
   "decorators": [
