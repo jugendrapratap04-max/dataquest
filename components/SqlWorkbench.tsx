@@ -65,6 +65,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   // Shown when the server's re-check disagrees with the browser, or the submit
   // didn't save — so a rejected solve never reads as a silent 0 XP.
   const [submitNote, setSubmitNote] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   const schema = readSchema(p.sqlSetup);
 
@@ -89,17 +90,21 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
     setResult(null);
     setResTab("out");
     setSubmitNote(null);
+    setNeedsLogin(false);
     try {
       const r = await runSql(sql, p.sqlSetup, p.solutionCode);
       setResult(r);
       if (submit) {
-        const res = await fetch("/api/submit", {
+        const resp = await fetch("/api/submit", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ problemId: p.id, code: sql, passed: r.pass }),
-        }).then((x) => x.json()).catch(() => null);
+        }).catch(() => null);
+        const res = resp ? await resp.json().catch(() => null) : null;
         // Celebrate only when the server confirms — it re-runs the query itself.
         if (!r.pass) {
           // the output/expected panels already show the mismatch
+        } else if (resp?.status === 401) {
+          setNeedsLogin(true);
         } else if (!res?.ok) {
           setSubmitNote("Submission did not save — check your connection and press Submit again.");
         } else if (res.verifyNote) {
@@ -202,6 +207,11 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               <button className={`res-tab${resTab === "expected" ? " active" : ""}`} onClick={() => setResTab("expected")}>Expected</button>
             </div>
             <div className="res-body">
+              {needsLogin && (
+                <div className="submit-note login">
+                  ✅ Solved! <Link href="/signup">Create a free account</Link> or <Link href="/login">log in</Link> to save your progress and earn XP.
+                </div>
+              )}
               {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "out" && (
                 !result ? (

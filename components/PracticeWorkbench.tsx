@@ -41,6 +41,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
   // Shown when the server's re-check disagrees with the browser, or the submit
   // didn't save. Without it, a rejected solve looked like a silent 0 XP.
   const [submitNote, setSubmitNote] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
 
   function flashNoPaste() {
     setNoPaste(true);
@@ -63,19 +64,25 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     setResult(null);
     setResTab("tests");
     setSubmitNote(null);
+    setNeedsLogin(false);
     try {
       const r = await runTests(code, p.functionName, p.tests);
       setResult(r);
       if (submit) {
         const passed = r.compiled && r.passed === r.total && r.total > 0;
-        const res = await fetch("/api/submit", {
+        const resp = await fetch("/api/submit", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ problemId: p.id, code, passed }),
-        }).then((x) => x.json()).catch(() => null);
+        }).catch(() => null);
+        const res = resp ? await resp.json().catch(() => null) : null;
         // Celebrate only when the server confirms. It re-runs the solution before
         // paying XP, so the browser's verdict alone isn't enough.
         if (!passed) {
           // the test panel already shows which cases failed
+        } else if (resp?.status === 401) {
+          // Not logged in — a "connection" message would send them into a retry
+          // loop. Tell them plainly what to do.
+          setNeedsLogin(true);
         } else if (!res?.ok) {
           setSubmitNote("Submission did not save — check your connection and press Submit again.");
         } else if (res.verifyNote) {
@@ -167,6 +174,11 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               <button className={`res-tab${resTab === "console" ? " active" : ""}`} onClick={() => setResTab("console")}>Console</button>
             </div>
             <div className="res-body">
+              {needsLogin && (
+                <div className="submit-note login">
+                  ✅ Solved! <Link href="/signup">Create a free account</Link> or <Link href="/login">log in</Link> to save your progress and earn XP.
+                </div>
+              )}
               {submitNote && <div className="submit-note">⚠ {submitNote}</div>}
               {resTab === "tests" && (
                 !result ? (

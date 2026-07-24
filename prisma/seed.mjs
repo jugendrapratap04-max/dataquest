@@ -2527,7 +2527,8 @@ const L36 = [
   { t: "p", html: "Jab code galat chale, <b>debugging</b> se problem dhoondhte hain. Simple: <code>print()</code> laga ke values dekho. VS Code me 'breakpoints' se line-by-line bhi chala sakte ho." },
   { t: "h2", n: "2", text: "Logging — print se behtar" },
   { t: "p", html: "Bade programs me print ki jagah <code>logging</code> — levels (info, warning, error) ke saath messages, aur production me on/off ho sakta hai." },
-  { t: "code", file: "log.py", code: "import logging\nlogging.basicConfig(level=logging.INFO)\nlogging.info(\"Data load ho gaya\")\nlogging.warning(\"Kuch values missing hain\")", output: "INFO:root:Data load ho gaya\nWARNING:root:Kuch values missing hain" },
+  { t: "code", file: "log.py", code: "import logging, sys\nlogging.basicConfig(level=logging.INFO, stream=sys.stdout,\n                    format=\"%(levelname)s: %(message)s\")\nlogging.info(\"Data loaded\")\nlogging.warning(\"Some values are missing\")", output: "INFO: Data loaded\nWARNING: Some values are missing" },
+  { t: "note", variant: "warn", html: "<b>By default logging goes to <i>stderr</i>, not stdout</b> — so you still see it in the console, but it won't show up if you only capture stdout. Pass <code>stream=sys.stdout</code> (as above) when you want it on stdout." },
   { t: "note", variant: "tip", html: "<b>Sabse kaam ki tip:</b> error traceback ki <b>last line</b> asli problem batati hai — usse Google karo, 90% jawaab mil jaata hai." },
   { t: "recap", items: ["Debugging = problem dhoondhna","print() sabse simple","logging = levels, production-ready","Error ki last line padho"] },
 ];
@@ -2547,7 +2548,7 @@ const L38 = [
   { t: "p", html: "Bade project ko folders me organize karo: code alag, data alag, <code>requirements.txt</code> me packages. Saaf structure se doosre (aur future tum) code samajh paate hain." },
   { t: "h2", n: "2", text: "Git aur GitHub" },
   { t: "p", html: "<b>Git</b> code ke versions save karta hai — kuch toota to peeche ja sakte ho. <b>GitHub</b> pe code online rakhte hain — ye tumhara <b>portfolio</b> ban jaata hai jo recruiters dekhte hain." },
-  { t: "code", file: "git.sh", code: "git init                       # git shuru\ngit add .                      # files add\ngit commit -m \"first version\"  # save\ngit push                       # GitHub pe bhejo", output: "# code GitHub pe live" },
+  { t: "note", variant: "tip", html: "<b>Git ke 4 basic commands</b> (ye terminal me chalte hain, Python me nahi):<pre>git init                       # git shuru\ngit add .                      # files add\ngit commit -m \"first version\"  # save\ngit push                       # GitHub pe bhejo</pre>" },
   { t: "note", variant: "tip", html: "<b>Sabse zaroori job-tip:</b> apne DS projects GitHub pe daalo. 'GitHub link' resume ka sabse strong part hai — ye tumhara asli proof hai." },
   { t: "recap", items: ["Project = organized folders","requirements.txt = packages list","Git = version control (undo)","GitHub = online code + portfolio"] },
 ];

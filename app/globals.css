@@ -732,6 +732,8 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .res-body { padding:12px 14px 16px; min-height:90px; } .res-empty { color:#6B7688; font-family:var(--mono); font-size:12.5px; padding:16px 4px; text-align:center; }
 .submit-note { margin:0 0 10px; padding:9px 12px; border-radius:9px; font-size:12.5px; line-height:1.45;
   background:var(--bad-soft); color:var(--bad); border:1px solid color-mix(in srgb,var(--bad) 35%,transparent); }
+.submit-note.login { background:var(--good-soft); color:var(--good); border-color:color-mix(in srgb,var(--good) 35%,transparent); }
+.submit-note.login a { color:var(--accent-2); font-weight:700; text-decoration:underline; }
 .verdict { display:flex; align-items:center; gap:9px; font-weight:700; font-size:14px; margin-bottom:12px; } .verdict.ok { color:var(--good); } .verdict.no { color:var(--bad); } .verdict svg { width:18px; height:18px; }
 .tcase { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(255,255,255,.04); margin-bottom:7px; font-family:var(--mono); font-size:12px; color:#C6CDDA; } .tcase .st { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px; flex:none; } .tcase.ok .st { background:var(--good); color:#04240F; } .tcase.no .st { background:var(--bad); color:#fff; } .tcase .io b { color:#C6CDDA; } .tcase .ms { margin-left:auto; color:#6B7688; }
 .console-out { font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; word-break:break-word; } .console-out b { color:var(--code-str); }
