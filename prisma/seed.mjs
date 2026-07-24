@@ -2350,15 +2350,85 @@ const L32 = [
   ]},
 ];
 const L33 = [
-  { t: "objectives", items: ["os module — files/folders","pathlib se safe paths","sys module basics"] },
-  { t: "h2", n: "1", text: "os aur pathlib" },
-  { t: "p", html: "<code>os</code> aur <code>pathlib</code> se files/folders ke saath kaam: list karna, check karna, paths banana. DS me datasets load karne me kaam aata hai." },
-  { t: "code", file: "os1.py", code: "import os\nfrom pathlib import Path\nprint(os.path.exists(\"data.csv\"))     # True/False\nprint(Path(\"data\") / \"file.csv\")      # data/file.csv", output: "False\ndata/file.csv" },
-  { t: "h2", n: "2", text: "sys module" },
-  { t: "p", html: "<code>sys</code> Python aur system ki info deta hai — command-line arguments, version, exit karna." },
-  { t: "note", variant: "tip", html: "<b>Kahan atkoge iske bina:</b> 'file not found' errors, ya Windows/Mac me paths tootna. <code>pathlib</code> se paths dono pe chalte hain." },
-  { t: "note", variant: "warn", html: "<b>Note:</b> file system wala kaam VS Code me practice karo." },
-  { t: "recap", items: ["os = files/folders operations","pathlib = safe cross-platform paths","sys = system/Python info","Path() / se paths jodo"] },
+  { t: "objectives", items: [
+    "Pull a filename, stem and extension apart with <code>pathlib</code>",
+    "Build paths that work on Windows, Mac and Linux",
+    "Check whether a file exists before you open it",
+    "Read environment variables safely with <code>os.environ.get</code>",
+    "Know what <code>sys</code> gives you: version, arguments, exit",
+  ]},
+  { t: "hook", q: "You build a file path by hand — <code>folder + \"\\\\\" + name</code> — and it works perfectly on your Windows laptop. You deploy to a Linux server and every file is suddenly \"not found\". What broke?", why: "The separator. Windows uses <code>\\</code> between folders, but Mac and Linux use <code>/</code> — so a path you glued together with a hardcoded backslash is meaningless on the server. This is exactly what <code>pathlib</code> exists to fix: <code>Path(folder) / name</code> uses the right separator for whatever machine it runs on. You never type a slash again, and the same code works everywhere." },
+  { t: "think", q: "To get a file's extension, why not just do <code>filename.split(\".\")[-1]</code>?", a: "Because it breaks on the edge cases. For <code>\"data.csv\"</code> it returns <code>\"csv\"</code> — fine. But for <code>\"README\"</code> with no extension it returns the <b>whole name</b>, <code>\"README\"</code>, because there is no dot to split on. And it drops the dot you often want.<br/><br/><code>Path(\"README\").suffix</code> returns <code>\"\"</code> — correctly, no extension — and <code>Path(\"data.csv\").suffix</code> returns <code>\".csv\"</code> with the dot. pathlib knows what a path actually <i>is</i>, so it handles the cases your <code>split</code> forgets." },
+
+  { t: "h2", n: "1", text: "pathlib: reading a path apart" },
+  { t: "def", term: "pathlib", en: "pathlib is the modern standard-library module for filesystem paths; a Path object exposes a path's parts — name, stem, suffix, parent — and joins paths with the / operator using the correct OS separator.", hi: "In plain words: <code>pathlib</code> paths ke saath kaam ka aadhunik tareeka hai — filename, extension, parent sab seedha nikaal deta hai, aur Windows/Mac dono pe sahi separator use karta hai." },
+  { t: "p", html: "A <code>Path</code> exposes the pieces of a path as properties, so you never split strings by hand. <code>.name</code>, <code>.stem</code>, <code>.suffix</code> and <code>.parent</code> cover most needs." },
+  { t: "code", file: "parts.py", code: "from pathlib import Path\n\np = Path(\"reports/2024/sales.csv\")\nprint(p.name)      # file plus extension\nprint(p.stem)      # name without the suffix\nprint(p.suffix)    # the extension, with the dot\nprint(p.parent.name)  # the folder above the file", output: "sales.csv\nsales\n.csv\n2024" },
+  { t: "viz", name: "path-lab" },
+  { t: "p", html: "Click the paths in that panel. The same string is a name, a stem, a suffix, a parent and a tuple of parts all at once — pathlib reads each out for you, correctly, including the awkward cases like a file with no extension." },
+
+  { t: "h2", n: "2", text: "Joining paths that work everywhere" },
+  { t: "p", html: "The <code>/</code> operator joins path pieces with the correct separator for the current OS. To print a path with forward slashes on <b>any</b> machine, use <code>.as_posix()</code>." },
+  { t: "code", file: "join.py", code: "from pathlib import Path\n\nfull = Path(\"data\") / \"2024\" / \"sales.csv\"\nprint(full.as_posix())      # forward slashes on every OS\nprint(full.name)\nprint(full.suffix)", output: "data/2024/sales.csv\nsales.csv\n.csv" },
+  { t: "note", variant: "warn", html: "<b>Printing a joined path is the one thing that differs by OS.</b> <code>str(Path(\"a\") / \"b\")</code> is <code>a\\b</code> on Windows and <code>a/b</code> on Mac/Linux — so never compare or hardcode a path's string form. Use <code>.as_posix()</code> for a consistent display, and the pieces (<code>.name</code>, <code>.suffix</code>) for logic." },
+
+  { t: "h2", n: "3", text: "os: existence, and the environment" },
+  { t: "p", html: "<code>os.path.exists</code> checks whether a path is there before you open it. <code>os.environ.get(name, default)</code> reads an environment variable without crashing when it is unset." },
+  { t: "code", file: "os.py", code: "import os\n\nprint(os.path.exists(\"definitely_not_here.txt\"))   # False\nprint(os.path.basename(\"reports/data.csv\"))         # just the file\nprint(os.path.splitext(\"data.csv\"))                 # name and ext\n\n# a missing variable returns the default, not a KeyError\nprint(os.environ.get(\"NOT_A_REAL_VAR\", \"fallback\"))", output: "False\ndata.csv\n('data', '.csv')\nfallback" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> real programs read configuration and secrets from <b>environment variables</b> — database URLs, API keys — never hardcoded. <code>os.environ.get(\"DATABASE_URL\")</code> is how a deployed app finds its database, and <code>os.path.exists</code> guards a data-loading step so a missing file gives a clear message instead of a crash. pathlib then keeps those paths portable across your laptop and the server, which almost never run the same OS." },
+
+  { t: "h2", n: "4", text: "sys: Python and the runtime" },
+  { t: "p", html: "<code>sys</code> exposes the interpreter and how it was launched: the version, the command-line arguments (<code>sys.argv</code>), and <code>sys.exit</code> to stop with a status code." },
+  { t: "code", file: "sys.py", code: "import sys\n\nprint(sys.version_info.major)   # 3 on any Python 3\nprint(sys.maxsize > 0)          # a huge platform-dependent int\nprint(type(sys.argv).__name__)  # the command-line args, a list", output: "3\nTrue\nlist" },
+  { t: "analogy", concept: "os / sys / pathlib", real: "Tools for the building your program lives in", html: "Your program runs inside a building — the operating system. <code>pathlib</code> is the <b>floor plan</b>: it names rooms and hallways (paths) correctly no matter which building you are in. <code>os</code> is the <b>facilities desk</b>: it tells you whether a room exists and reads the building's settings (environment variables). <code>sys</code> is information about the <b>building itself and how you entered</b> — which version, which door (arguments), and the exit. You reach for each depending on whether you are asking about a path, the surroundings, or the runtime." },
+
+  { t: "trace", intro: "pathlib properties and os helpers. All outputs are deterministic. Work out each value.", code: "from pathlib import Path\nimport os\n\np = Path(\"docs/notes/todo.md\")\n\na = p.name\nb = p.suffix\nc = p.stem\nd = (Path(\"a\") / \"b\" / \"c.txt\").as_posix()\ne = os.path.splitext(\"photo.jpg\")[1]", steps: [
+    { q: "After line 6, <code>a</code> is", answer: "todo.md", why: "<code>.name</code> is the final component of the path, file plus extension." },
+    { q: "After line 7, <code>b</code> is", answer: ".md", why: "<code>.suffix</code> is the extension including the dot." },
+    { q: "After line 8, <code>c</code> is", answer: "todo", why: "<code>.stem</code> is the name without its suffix." },
+    { q: "After line 9, <code>d</code> is", answer: "a/b/c.txt", why: "The <code>/</code> operator joins the pieces, and <code>.as_posix()</code> prints them with forward slashes on any OS." },
+    { q: "After line 10, <code>e</code> is", answer: ".jpg", why: "<code>os.path.splitext</code> returns (name, ext); index [1] is the extension, <code>.jpg</code>." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Get the filename from a path.", code: "from pathlib import Path\n\nprint(Path(\"reports/2024/data.csv\").name)", out: "data.csv" },
+    { task: "Get the extension of a file.", code: "from pathlib import Path\n\nprint(Path(\"photo.jpg\").suffix)", out: ".jpg" },
+    { task: "Get the name without its extension.", code: "from pathlib import Path\n\nprint(Path(\"archive.zip\").stem)", out: "archive" },
+    { task: "Show a file with no extension has an empty suffix.", code: "from pathlib import Path\n\nprint(repr(Path(\"README\").suffix))", out: "''" },
+    { task: "Join folders into a path, printed with forward slashes.", code: "from pathlib import Path\n\nprint((Path(\"data\") / \"raw\" / \"a.csv\").as_posix())", out: "data/raw/a.csv" },
+    { task: "Get the parent folder's name.", code: "from pathlib import Path\n\nprint(Path(\"a/b/c.txt\").parent.name)", out: "b" },
+    { task: "Check whether a missing file exists.", code: "import os\n\nprint(os.path.exists(\"no_such_file_xyz.txt\"))", out: "False" },
+    { task: "Split a filename into name and extension.", code: "import os\n\nprint(os.path.splitext(\"report.pdf\"))", out: "('report', '.pdf')" },
+    { task: "Read an environment variable with a default.", code: "import os\n\nprint(os.environ.get(\"UNSET_VARIABLE_XYZ\", \"default\"))", out: "default" },
+    { task: "Get the Python major version from sys.", code: "import sys\n\nprint(sys.version_info.major)", out: "3" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "path = folder + \"\\\\\" + filename", why: "A hardcoded <code>\\</code> only works on Windows — on Mac and Linux it becomes part of the filename and the path is wrong. Join with pathlib's <code>/</code>, which uses the right separator everywhere.", fix: "from pathlib import Path\npath = Path(folder) / filename" },
+    { bad: "ext = filename.split(\".\")[-1]", why: "For <code>\"README\"</code> with no dot this returns the whole name, and it drops the leading dot you usually want. <code>Path.suffix</code> handles both correctly.", fix: "from pathlib import Path\next = Path(filename).suffix" },
+    { bad: "import os\nkey = os.environ[\"API_KEY\"]", why: "Indexing <code>os.environ</code> for a variable that is not set raises <code>KeyError</code> and crashes the program. Use <code>.get</code> with a default, or handle the missing case.", fix: "import os\nkey = os.environ.get(\"API_KEY\", \"\")" },
+    { bad: "with open(\"data.csv\") as f:\n    rows = f.read()", why: "If the file is not there this raises <code>FileNotFoundError</code>. When a path might be missing, check first (or catch), so you can give a clear message instead of a crash.", fix: "import os\nif os.path.exists(\"data.csv\"):\n    with open(\"data.csv\") as f:\n        rows = f.read()" },
+  ]},
+
+  { t: "debug", intro: "A function pulls the extension off a filename to route files by type. It works for normal files, but a file with no extension gets routed completely wrong. Read it before opening the fix.", code: "def extension(filename):\n    return filename.split(\".\")[-1]\n\nprint(extension(\"data.csv\"))\nprint(extension(\"README\"))", symptom: "prints csv, then README (a file with no extension reports its whole name as the extension)", q: "For data.csv it returns csv, which looks right. So why does README come back as its own extension?", fix: "from pathlib import Path\n\ndef extension(filename):\n    return Path(filename).suffix\n\nprint(extension(\"data.csv\"))\nprint(extension(\"README\"))", why: "<code>filename.split(\".\")[-1]</code> takes the last piece after splitting on dots. When there is <b>no</b> dot, <code>split</code> returns a single-element list — the whole string — so <code>[-1]</code> is the entire filename. <code>\"README\"</code> has no extension, but the code confidently reports its extension as <code>\"README\"</code>, and any routing that switches on the result sends it to the wrong place.<br/><br/><code>Path(filename).suffix</code> understands paths: it returns <code>\".csv\"</code> for a real extension (with the dot) and <code>\"\"</code> for a file with none. pathlib also gets the other tricky cases right — a leading-dot dotfile like <code>\".bashrc\"</code> has no suffix, and <code>\"archive.tar.gz\"</code> gives <code>\".gz\"</code>. Whenever you are picking a path apart, reach for pathlib rather than string splitting." },
+
+  { t: "recap", items: [
+    "<code>Path(...).name</code> file · <code>.stem</code> name-without-ext · <code>.suffix</code> ext-with-dot · <code>.parent</code> folder",
+    "A file with no extension has <code>.suffix == \"\"</code> — string splitting gets this wrong",
+    "Join paths with <code>/</code>; it uses the right separator for the OS — never hardcode <code>\\</code> or <code>/</code>",
+    "Only <b>displaying</b> a joined path differs by OS — use <code>.as_posix()</code> for consistent forward slashes",
+    "<code>os.path.exists(path)</code> checks a file before you open it",
+    "<code>os.environ.get(name, default)</code> reads config safely — indexing raises KeyError when unset",
+    "<code>sys</code> gives the version (<code>sys.version_info</code>), arguments (<code>sys.argv</code>) and <code>sys.exit</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Why use pathlib instead of building path strings by hand?", a: "Because pathlib is portable and structured. The <code>/</code> operator joins path pieces with the correct separator for the operating system, so the same code runs on Windows and Linux, and properties like <code>.name</code>, <code>.stem</code>, <code>.suffix</code> and <code>.parent</code> extract parts correctly, including edge cases that string splitting gets wrong. Hand-built paths with a hardcoded separator break the moment the code moves to a different OS." },
+    { level: "beginner", q: "How do you safely read an environment variable?", a: "With <code>os.environ.get(name, default)</code>, which returns the default (or None) when the variable is not set, rather than raising. Indexing directly with <code>os.environ[name]</code> raises <code>KeyError</code> if it is missing, which crashes the program. Environment variables are how deployed apps receive configuration and secrets like database URLs and API keys, so reading them defensively matters." },
+    { level: "intermediate", q: "Why can <code>str(Path(\"a\") / \"b\")</code> differ between machines, and how do you avoid surprises?", a: "Because pathlib renders a path using the running OS's separator — a backslash on Windows, a forward slash on Mac and Linux — so the string form is platform-dependent. You avoid trouble by never comparing or hardcoding a path's string form: use the structured properties for logic, and call <code>.as_posix()</code> when you specifically need forward slashes, for example in a URL or a cross-platform config file." },
+    { level: "intermediate", q: "What is the difference between <code>os</code>, <code>sys</code> and <code>pathlib</code>?", a: "<code>pathlib</code> is about filesystem paths — constructing, joining and dissecting them portably. <code>os</code> is a broader interface to the operating system: checking whether files exist, listing directories, reading environment variables, and lower-level path helpers in <code>os.path</code>. <code>sys</code> is about the Python runtime itself — the interpreter version, the command-line arguments in <code>sys.argv</code>, the module search path, and <code>sys.exit</code>. You pick based on whether the question is about a path, the surrounding system, or the interpreter." },
+    { level: "intermediate", q: "How would you make a script's file handling work on both Windows and Linux?", a: "Use pathlib for every path: build them with <code>Path</code> and the <code>/</code> operator so separators are handled automatically, extract parts with the properties rather than string operations, and avoid embedding literal separators. Read any machine-specific locations from environment variables through <code>os.environ.get</code> instead of hardcoding them, and when you must serialise a path to text, normalise it with <code>.as_posix()</code>. That keeps the logic identical across operating systems." },
+  ]},
 ];
 const L34 = [
   { t: "objectives", items: ["CSV files (Excel jaisa data)","pickle se objects save","sqlite3 — built-in database"] },
@@ -3948,6 +4018,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "system-modules": [
+    // Easy
+    { level: "easy", q: "What does <code>Path(\"data/sales.csv\").name</code> return?", options: ["sales.csv", "data", ".csv", "sales"], correct: 0, why: "<code>.name</code> is the final component — the file plus its extension." },
+    { level: "easy", q: "What does <code>Path(\"photo.jpg\").suffix</code> return?", options: ["jpg", "photo", ".jpg", "photo.jpg"], correct: 2, why: "<code>.suffix</code> is the extension WITH the dot. <code>.stem</code> would give the name without it." },
+    { level: "easy", q: "How do you join path pieces portably across OSes?", options: ["Path(folder) / name", "folder + \"/\" + name", "folder + name", "os.sep.join manually"], correct: 0, why: "The <code>/</code> operator uses the correct separator for the current OS — the whole reason pathlib exists." },
+    // Medium
+    { level: "medium", q: "What is <code>Path(\"README\").suffix</code> for a file with no extension?", options: ["\"README\"", "\"\" (empty string)", "\".README\"", "None"], correct: 1, why: "pathlib correctly returns an empty suffix. <code>\"README\".split(\".\")[-1]</code> would wrongly return 'README'." },
+    { level: "medium", q: "Why can <code>str(Path(\"a\") / \"b\")</code> differ between machines?", options: ["It uses the OS's separator — backslash on Windows, slash elsewhere", "It's random", "pathlib is buggy", "It depends on Python version"], correct: 0, why: "The string form is platform-dependent. Use <code>.as_posix()</code> for consistent forward slashes." },
+    { level: "medium", q: "How do you read an environment variable safely?", options: ["os.environ[name]", "sys.argv[name]", "os.environ.get(name, default)", "os.getenv only"], correct: 2, why: "<code>.get</code> returns the default when the variable is unset; indexing raises KeyError and crashes." },
+    { level: "medium", q: "What does <code>os.path.exists(path)</code> do?", options: ["Creates the file", "Deletes it", "Opens it", "Returns True/False for whether it's there"], correct: 3, why: "It checks whether a path exists — useful to guard a file read before opening it." },
+    // Hard
+    { level: "hard", q: "Why is <code>filename.split(\".\")[-1]</code> a bad way to get an extension?", options: ["It's slow", "For a name with no dot it returns the whole name", "It only works on Windows", "It needs import re"], correct: 1, why: "With no dot, split returns a one-element list, so [-1] is the entire filename. Use <code>Path.suffix</code>." },
+    { level: "hard", q: "What does <code>.as_posix()</code> give you?", options: ["The file size", "The parent folder", "The absolute path", "The path with forward slashes on any OS"], correct: 3, why: "It renders the path with forward slashes regardless of OS — useful for URLs, configs, and consistent display." },
+    { level: "hard", q: "Which module gives you the command-line arguments and Python version?", options: ["os", "pathlib", "collections", "sys"], correct: 3, why: "<code>sys.argv</code> holds the command-line args and <code>sys.version_info</code> the version — sys is about the runtime." },
   ],
 
   "collections-itertools": [

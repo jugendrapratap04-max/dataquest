@@ -24,6 +24,7 @@ import { RegexLab } from "./RegexLab";
 import { ConcurrencyLab } from "./ConcurrencyLab";
 import { AsyncLab } from "./AsyncLab";
 import { CounterLab } from "./CounterLab";
+import { PathLab } from "./PathLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -64,6 +65,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "concurrency-lab": ConcurrencyLab,
   "async-lab": AsyncLab,
   "counter-lab": CounterLab,
+  "path-lab": PathLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,

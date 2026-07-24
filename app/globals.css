@@ -660,6 +660,15 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .ct-row.top .ct-bar { background:var(--teal); }
 .ct-most { font-family:var(--mono); font-size:9.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--teal); font-weight:700; white-space:nowrap; }
 @keyframes cc-grow { from { transform:scaleX(.2); transform-origin:left; opacity:.4; } to { transform:scaleX(1); opacity:1; } }
+
+/* Path Lab — a path string dissected into its pathlib properties. */
+.pl-path { font-family:var(--mono); font-size:14px; color:var(--accent-2); font-weight:700; margin-bottom:12px; word-break:break-all; }
+.pl-rows { display:flex; flex-direction:column; gap:7px; }
+.pl-row { display:grid; grid-template-columns:70px minmax(0,1fr); gap:10px 12px; align-items:baseline;
+          background:var(--panel-2); border:1px solid var(--line); border-radius:8px; padding:8px 12px; animation:viz-land .22s ease-out; }
+.pl-attr { font-family:var(--mono); font-size:12.5px; color:var(--teal); font-weight:700; }
+.pl-val { font-family:var(--mono); font-size:12.5px; color:var(--ink); word-break:break-all; }
+.pl-note { grid-column:2; font-size:11px; color:var(--ink-faint); margin-top:-2px; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
