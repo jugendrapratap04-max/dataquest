@@ -669,6 +669,20 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .pl-attr { font-family:var(--mono); font-size:12.5px; color:var(--teal); font-weight:700; }
 .pl-val { font-family:var(--mono); font-size:12.5px; color:var(--ink); word-break:break-all; }
 .pl-note { grid-column:2; font-size:11px; color:var(--ink-faint); margin-top:-2px; }
+
+/* Storage Lab — the same data as CSV / pickle / SQLite, with trade-off flags. */
+.st-render { min-height:96px; }
+.st-code { font-family:var(--mono); font-size:13px; line-height:1.6; background:var(--panel-2); border:1px solid var(--line);
+           border-radius:9px; padding:12px 14px; margin:0; white-space:pre; overflow-x:auto; color:var(--ink); }
+.st-code.st-bin { color:var(--ink-faint); }
+.st-table { background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:10px 12px; }
+.st-tr { display:grid; grid-template-columns:1fr 1fr; gap:10px; font-family:var(--mono); font-size:13px; padding:4px 0; }
+.st-tr.st-head { color:var(--teal); font-weight:700; border-bottom:1px solid var(--line); margin-bottom:2px; }
+.st-q { font-family:var(--mono); font-size:11.5px; color:var(--accent-2); margin-top:8px; padding-top:8px; border-top:1px dashed var(--line); }
+.st-flags { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.st-flag { font-family:var(--mono); font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; }
+.st-flag.yes { color:var(--good); background:color-mix(in srgb,var(--good) 13%,transparent); }
+.st-flag.no { color:var(--ink-faint); background:var(--panel-2); border:1px solid var(--line); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

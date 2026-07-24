@@ -2431,15 +2431,85 @@ const L33 = [
   ]},
 ];
 const L34 = [
-  { t: "objectives", items: ["CSV files (Excel jaisa data)","pickle se objects save","sqlite3 — built-in database"] },
-  { t: "h2", n: "1", text: "CSV — sabse common data format" },
-  { t: "p", html: "CSV (comma-separated) files me tabular data hota hai — Excel jaisa. DS me 90% datasets CSV me hi aate hain." },
-  { t: "code", file: "csv1.py", code: "import csv\nwith open(\"data.csv\", \"w\", newline=\"\") as f:\n    w = csv.writer(f)\n    w.writerow([\"name\", \"age\"])\n    w.writerow([\"Freya\", 21])", output: "# data.csv ban gayi" },
-  { t: "h2", n: "2", text: "pickle aur sqlite3" },
-  { t: "p", html: "<code>pickle</code> Python objects ko file me save/load karta hai. <code>sqlite3</code> ek chhota built-in database — bina server ke SQL chalta hai." },
-  { t: "note", variant: "tip", html: "<b>Aage:</b> CSV padhne ka aasaan tarika Pandas hai (<code>pd.read_csv</code>) — tumhare Pandas track me. Ye base samajh lo." },
-  { t: "note", variant: "warn", html: "<b>Note:</b> file/database wala kaam VS Code me practice karo." },
-  { t: "recap", items: ["CSV = tabular data (Excel jaisa)","csv.writer / csv.reader","pickle = Python object save","sqlite3 = built-in local DB"] },
+  { t: "objectives", items: [
+    "Read and write <b>CSV</b> — and know every value comes back a <b>string</b>",
+    "Read named columns cleanly with <code>csv.DictReader</code>",
+    "Save any Python object with <b>pickle</b> — and why you must not trust one",
+    "Store and query data with the built-in <b>sqlite3</b> database",
+    "Use <code>?</code> placeholders to avoid SQL injection",
+  ]},
+  { t: "hook", q: "You read a CSV of prices and add them up — <code>total += row[\"price\"]</code> — and it crashes with <code>unsupported operand: 'int' and 'str'</code>. The file plainly contains numbers. Why are they strings?", why: "Because CSV is <b>text</b>. There are no types in a CSV file — <code>21</code> and <code>\"21\"</code> look identical on disk, so <code>csv.reader</code> hands everything back as a <code>str</code>. It cannot know you meant a number. You convert the columns you need: <code>int(row[\"price\"])</code>. This single fact — CSV loses all types — is behind most CSV bugs, and it is exactly why <code>pandas.read_csv</code> later spends effort <i>inferring</i> types for you." },
+  { t: "think", q: "CSV, pickle and SQLite all save data. When would you pick each?", a: "It depends on who reads it back and what you need to do with it.<br/><br/><b>CSV</b> when a human or another program (Excel, R, anything) must open it — readable text, but flat and untyped. <b>Pickle</b> when you want to save an <b>arbitrary Python object</b> — a nested dict, a trained model — and only Python will read it back. <b>SQLite</b> when you need to <b>query, filter and update</b> data — a real database in one file, no server. Reach for the one whose trade-off matches the job, not whichever you used last." },
+
+  { t: "h2", n: "1", text: "CSV: the everyday format" },
+  { t: "def", term: "CSV", en: "CSV (comma-separated values) is a plain-text table format where each line is a row and commas separate the columns; because it is text, it carries no type information — every field reads back as a string.", hi: "In plain words: CSV ek text table hai — har line ek row, comma se columns alag. Sab kuch string ban ke aata hai, kyunki text me types hote hi nahi." },
+  { t: "p", html: "<code>csv.reader</code> gives you each row as a list of strings; <code>csv.DictReader</code> uses the header row to give you a dict per row, keyed by column name — much easier to read." },
+  { t: "code", file: "csv_read.py", code: "import csv, io\n\ntext = \"name,age\\nFreya,21\\nOm,25\"\n\nrows = list(csv.reader(io.StringIO(text)))\nprint(rows)                         # lists of strings\nprint(type(rows[1][1]).__name__)    # 'str' - not int!\n\nfor r in csv.DictReader(io.StringIO(text)):\n    print(r[\"name\"], r[\"age\"])", output: "[['name', 'age'], ['Freya', '21'], ['Om', '25']]\nstr\nFreya 21\nOm 25" },
+  { t: "note", variant: "warn", html: "<b>Every CSV value is a string.</b> To do maths you must convert: <code>int(row[\"age\"])</code> or <code>float(row[\"price\"])</code>. And when <b>writing</b> a CSV to a real file, open it with <code>newline=\"\"</code> — otherwise Windows inserts a blank line between every row." },
+
+  { t: "h2", n: "2", text: "pickle: save any Python object" },
+  { t: "p", html: "<code>pickle</code> serialises almost any Python object — nested dicts, lists, custom classes — to bytes, and loads it straight back, types intact. <code>dumps</code>/<code>loads</code> work in memory; <code>dump</code>/<code>load</code> use a file." },
+  { t: "code", file: "pickle.py", code: "import pickle\n\ndata = {\"scores\": [90, 85], \"name\": \"Freya\"}\n\nblob = pickle.dumps(data)       # object -> bytes\nback = pickle.loads(blob)       # bytes -> object\n\nprint(back)\nprint(back == data)             # a faithful copy\nprint(type(blob).__name__)      # bytes", output: "{'scores': [90, 85], 'name': 'Freya'}\nTrue\nbytes" },
+  { t: "note", variant: "warn", html: "<b>Never unpickle data you did not create.</b> Loading a pickle can execute <b>arbitrary code</b> hidden inside it, so a malicious pickle can take over your program. Pickle is for your own trusted data only — for anything crossing a trust boundary, use JSON or CSV. Pickle is also Python-only: other languages cannot read it." },
+
+  { t: "h2", n: "3", text: "sqlite3: a real database, no server" },
+  { t: "p", html: "<code>sqlite3</code> is a full SQL database built into Python, stored in a single file (or in memory). You <code>connect</code>, get a <code>cursor</code>, <code>execute</code> SQL, and <code>fetchall</code> the results." },
+  { t: "code", file: "sqlite.py", code: "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")   # in-memory DB\ncur = conn.cursor()\ncur.execute(\"CREATE TABLE users (name TEXT, age INTEGER)\")\ncur.execute(\"INSERT INTO users VALUES (?, ?)\", (\"Freya\", 21))\ncur.execute(\"INSERT INTO users VALUES (?, ?)\", (\"Om\", 25))\n\ncur.execute(\"SELECT name FROM users WHERE age > ?\", (22,))\nprint(cur.fetchall())\nconn.close()", output: "[('Om',)]" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> these are the persistence layers under real work. Datasets arrive as CSV — you will read thousands of them, and <code>pandas.read_csv</code> builds on exactly this. SQLite backs local apps, test databases, and analytics prototypes because it needs no server. Pickle caches expensive results — a fitted model, a parsed dataset — so you compute once and load instantly next run. Knowing which to reach for, and CSV's string trap, saves hours of confusing type bugs." },
+  { t: "viz", name: "storage-lab" },
+  { t: "p", html: "Flip between the three in that panel. The same two rows are readable text in CSV, opaque bytes in pickle, and a queryable table in SQLite — and the flags show what each keeps and gives up. Match the format to the job, not to habit." },
+
+  { t: "h2", n: "4", text: "Placeholders, not string-building" },
+  { t: "p", html: "Always pass values with <code>?</code> placeholders, never by formatting them into the SQL string. Placeholders are safe from <b>SQL injection</b> and handle quoting and types for you." },
+  { t: "code", file: "safe.py", code: "import sqlite3\n\nconn = sqlite3.connect(\":memory:\")\ncur = conn.cursor()\ncur.execute(\"CREATE TABLE t (name TEXT)\")\ncur.execute(\"INSERT INTO t VALUES (?)\", (\"O'Brien\",))   # quote handled safely\n\ncur.execute(\"SELECT COUNT(*) FROM t WHERE name = ?\", (\"O'Brien\",))\nprint(cur.fetchone()[0])\nconn.close()", output: "1" },
+  { t: "analogy", concept: "? placeholders vs f-string SQL", real: "A fill-in form vs letting a stranger write the sentence", html: "A <code>?</code> placeholder is a <b>form with a labelled blank</b>: the database treats whatever you put in the blank strictly as a <b>value</b>, never as commands. Building SQL with an f-string is like letting the input <b>write part of the sentence</b> — if someone types <code>'; DROP TABLE users; --</code>, that becomes SQL and runs. The placeholder keeps data as data. It is not just safety: it also handles quotes (like the apostrophe in O'Brien) and types correctly, so it is less code too." },
+
+  { t: "trace", intro: "CSV strings, pickle round-trip, and a SQLite query. All deterministic. Work out each value.", code: "import csv, io, pickle, sqlite3\n\nrows = list(csv.reader(io.StringIO(\"a,b\\n1,2\\n3,4\")))\nx = rows[1][0]\ny = type(x).__name__\n\nz = pickle.loads(pickle.dumps([10, 20]))\n\nconn = sqlite3.connect(\":memory:\")\nc = conn.cursor()\nc.execute(\"CREATE TABLE n (v INTEGER)\")\nc.executemany(\"INSERT INTO n VALUES (?)\", [(5,), (10,), (15,)])\nc.execute(\"SELECT SUM(v) FROM n\")\nw = c.fetchone()[0]", steps: [
+    { q: "After line 4, <code>x</code> is", answer: "1", why: "The first data row is <code>['1','2']</code>, and <code>rows[1][0]</code> is the string '1'." },
+    { q: "After line 5, <code>y</code> is", answer: "str", why: "CSV values are always strings — the number in the file comes back as <code>str</code>, not int." },
+    { q: "After line 7, <code>z</code> is", answer: "[10, 20]", why: "<code>pickle.dumps</code> then <code>loads</code> round-trips the list back to an identical list." },
+    { q: "After line 14, <code>w</code> is", answer: "30", why: "The table holds 5, 10, 15, and <code>SUM(v)</code> adds them to 30." },
+  ]},
+
+  { t: "drills", intro: "One per idea. All in-memory and deterministic. Write each before opening the answer.", items: [
+    { task: "Read a CSV string into rows.", code: "import csv, io\n\nprint(list(csv.reader(io.StringIO(\"x,y\\n1,2\"))))", out: "[['x', 'y'], ['1', '2']]" },
+    { task: "Show a CSV number comes back as a string.", code: "import csv, io\n\nrows = list(csv.reader(io.StringIO(\"n\\n42\")))\nprint(type(rows[1][0]).__name__)", out: "str" },
+    { task: "Read named columns with DictReader.", code: "import csv, io\n\nfor r in csv.DictReader(io.StringIO(\"name,age\\nOm,25\")):\n    print(r[\"name\"], r[\"age\"])", out: "Om 25" },
+    { task: "Sum a CSV column, converting to int.", code: "import csv, io\n\nrows = csv.DictReader(io.StringIO(\"v\\n10\\n20\\n30\"))\nprint(sum(int(r[\"v\"]) for r in rows))", out: "60" },
+    { task: "Round-trip a dict through pickle.", code: "import pickle\n\nd = {\"a\": 1, \"b\": [2, 3]}\nprint(pickle.loads(pickle.dumps(d)) == d)", out: "True" },
+    { task: "Confirm pickle produces bytes.", code: "import pickle\n\nprint(type(pickle.dumps([1, 2, 3])).__name__)", out: "bytes" },
+    { task: "Create a SQLite table and count rows.", code: "import sqlite3\n\nc = sqlite3.connect(\":memory:\").cursor()\nc.execute(\"CREATE TABLE t (x INTEGER)\")\nc.execute(\"INSERT INTO t VALUES (1)\")\nc.execute(\"INSERT INTO t VALUES (2)\")\nc.execute(\"SELECT COUNT(*) FROM t\")\nprint(c.fetchone()[0])", out: "2" },
+    { task: "Query with a ? placeholder.", code: "import sqlite3\n\nc = sqlite3.connect(\":memory:\").cursor()\nc.execute(\"CREATE TABLE p (age INTEGER)\")\nc.executemany(\"INSERT INTO p VALUES (?)\", [(20,), (30,)])\nc.execute(\"SELECT COUNT(*) FROM p WHERE age > ?\", (25,))\nprint(c.fetchone()[0])", out: "1" },
+    { task: "Insert many rows with executemany.", code: "import sqlite3\n\nc = sqlite3.connect(\":memory:\").cursor()\nc.execute(\"CREATE TABLE t (v INTEGER)\")\nc.executemany(\"INSERT INTO t VALUES (?)\", [(1,), (2,), (3,)])\nc.execute(\"SELECT SUM(v) FROM t\")\nprint(c.fetchone()[0])", out: "6" },
+    { task: "Fetch all rows from a query.", code: "import sqlite3\n\nc = sqlite3.connect(\":memory:\").cursor()\nc.execute(\"CREATE TABLE t (name TEXT)\")\nc.executemany(\"INSERT INTO t VALUES (?)\", [(\"a\",), (\"b\",)])\nc.execute(\"SELECT name FROM t ORDER BY name\")\nprint(c.fetchall())", out: "[('a',), ('b',)]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "import csv, io\ntotal = 0\nfor row in csv.reader(io.StringIO(\"5\\n10\")):\n    total += row[0]", why: "CSV values are strings, so <code>total += row[0]</code> tries to add an int and a str — <code>TypeError</code>. Convert first with <code>int(row[0])</code>.", fix: "for row in csv.reader(io.StringIO(\"5\\n10\")):\n    total += int(row[0])" },
+    { bad: "import sqlite3\nname = user_input\ncur.execute(f\"SELECT * FROM users WHERE name = '{name}'\")", why: "Formatting input into the SQL string is a <b>SQL injection</b> hole — input like <code>'; DROP TABLE users; --</code> becomes runnable SQL. Use a <code>?</code> placeholder.", fix: "cur.execute(\"SELECT * FROM users WHERE name = ?\", (name,))" },
+    { bad: "import pickle\ndata = pickle.loads(bytes_from_the_internet)", why: "Unpickling untrusted bytes can execute arbitrary code and compromise your machine. Only unpickle data you produced; for external data use JSON.", fix: "import json\ndata = json.loads(text_from_the_internet)" },
+    { bad: "import csv\nwith open(\"out.csv\", \"w\") as f:\n    csv.writer(f).writerow([\"a\", \"b\"])", why: "Without <code>newline=\"\"</code>, the csv module and Windows both add line endings, so you get a blank row between each line. Always open CSV files with <code>newline=\"\"</code>.", fix: "with open(\"out.csv\", \"w\", newline=\"\") as f:\n    csv.writer(f).writerow([\"a\", \"b\"])" },
+  ]},
+
+  { t: "debug", intro: "A function totals the prices in a small CSV of purchases. It crashes on the first row instead of returning a total. Read it before opening the fix.", code: "import csv, io\n\ndef total_price(text):\n    total = 0\n    for row in csv.DictReader(io.StringIO(text)):\n        total += row[\"price\"]\n    return total\n\nprint(total_price(\"item,price\\napple,10\\nmilk,20\"))", symptom: "TypeError: unsupported operand type(s) for +=: 'int' and 'str'", q: "The prices in the CSV are clearly 10 and 20. So why can't they be added to the total?", fix: "import csv, io\n\ndef total_price(text):\n    total = 0\n    for row in csv.DictReader(io.StringIO(text)):\n        total += int(row[\"price\"])\n    return total\n\nprint(total_price(\"item,price\\napple,10\\nmilk,20\"))", why: "A CSV file is plain text with no type information, so <code>csv.DictReader</code> returns every field as a <b>string</b> — <code>row[\"price\"]</code> is <code>\"10\"</code>, not <code>10</code>. Adding a string to the integer <code>total</code> raises <code>TypeError</code> on the very first row.<br/><br/>The fix is to convert each value as you read it: <code>int(row[\"price\"])</code> (or <code>float</code> for decimals). This is the defining gotcha of raw CSV work — the numbers <i>look</i> like numbers but are text until you cast them. It is also exactly the problem <code>pandas.read_csv</code> solves by inferring column types automatically, which is why data scientists reach for pandas the moment a CSV has more than a few columns." },
+
+  { t: "recap", items: [
+    "<b>CSV</b> is text: <code>csv.reader</code> gives lists, <code>DictReader</code> gives named dicts — every value a <b>string</b>",
+    "Convert CSV numbers with <code>int()</code>/<code>float()</code>; write files with <code>newline=\"\"</code>",
+    "<b>pickle</b> saves any Python object (<code>dumps</code>/<code>loads</code>) — binary, Python-only",
+    "<b>Never</b> unpickle untrusted data — it can run arbitrary code",
+    "<b>sqlite3</b> is a real SQL database in one file: <code>connect</code> → <code>cursor</code> → <code>execute</code> → <code>fetchall</code>",
+    "Always use <code>?</code> placeholders, never f-strings, in SQL — safe from injection",
+    "Choose by need: CSV to share, pickle to snapshot Python objects, SQLite to query",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Why do numbers read from a CSV come back as strings?", a: "Because CSV is a plain-text format with no type information — on disk, <code>21</code> and <code>\"21\"</code> are identical characters. The <code>csv</code> module therefore returns every field as a <code>str</code>, and it is up to you to convert the columns you need with <code>int</code> or <code>float</code>. Forgetting this conversion is the most common CSV bug, and it is one reason libraries like pandas add automatic type inference on top of CSV." },
+    { level: "beginner", q: "What is pickle for, and what is its main danger?", a: "Pickle serialises almost any Python object — nested structures, custom class instances — into bytes and reconstructs it exactly, which is ideal for caching computed results or saving Python-specific state. Its main danger is security: unpickling data can execute arbitrary code embedded in it, so you must never load a pickle from an untrusted source. It is also Python-only, so it is unsuitable for sharing data with other languages, where JSON or CSV fit better." },
+    { level: "intermediate", q: "Why should you use parameterised queries instead of formatting values into SQL?", a: "To prevent SQL injection. When you build a query with an f-string, any special characters in the input are interpreted as SQL, so a crafted value like <code>'; DROP TABLE users; --</code> can run destructive commands. A parameterised query with <code>?</code> placeholders sends the values separately from the SQL text, so the database always treats them as data, never as code. It also handles quoting and type conversion for you, so it is safer and simpler." },
+    { level: "intermediate", q: "When would you choose CSV, pickle, or SQLite?", a: "CSV when the data is tabular and must be readable by humans or other tools — it is universal but flat and untyped. Pickle when you need to persist an arbitrary Python object exactly and only Python will read it back, such as caching a model or a parsed structure — but never for untrusted or cross-language data. SQLite when you need to query, filter, join or update data efficiently and want a real database without running a server. The decision is about readability, type fidelity, and whether you need to query." },
+    { level: "intermediate", q: "What is the role of a cursor in sqlite3?", a: "A cursor is the object you use to execute SQL statements and step through their results. You get one from a connection with <code>conn.cursor()</code>, call <code>execute</code> (or <code>executemany</code>) on it, then retrieve rows with <code>fetchone</code>, <code>fetchmany</code> or <code>fetchall</code>. The connection represents the database session and handles transactions — you call <code>conn.commit()</code> to persist changes — while the cursor is the handle for running queries and reading their output." },
+  ]},
 ];
 const L35 = [
   { t: "objectives", items: ["Testing kyun zaroori","assert se basic test","unittest / pytest ka idea"] },
@@ -4018,6 +4088,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "data-persistence": [
+    // Easy
+    { level: "easy", q: "When you read a number from a CSV, what type is it?", options: ["str — CSV has no types", "int", "float", "It depends"], correct: 0, why: "CSV is plain text with no type info, so every value comes back a string. Convert with int()/float()." },
+    { level: "easy", q: "What does <code>csv.DictReader</code> give you per row?", options: ["A list", "A dict keyed by column name", "A tuple", "A string"], correct: 1, why: "DictReader uses the header row to return a dict per row, so you access fields by name like row['age']." },
+    { level: "easy", q: "What does <code>pickle.dumps(obj)</code> return?", options: ["A string", "A file", "bytes", "A dict"], correct: 2, why: "pickle serialises an object to bytes; pickle.loads reconstructs it. dump/load use a file instead." },
+    // Medium
+    { level: "medium", q: "Why must you never unpickle untrusted data?", options: ["It's slow", "Loading a pickle can execute arbitrary code", "It corrupts the file", "It needs a password"], correct: 1, why: "A malicious pickle can run arbitrary code on load and compromise your machine. Use JSON for external data." },
+    { level: "medium", q: "What does <code>sqlite3.connect(\":memory:\")</code> create?", options: ["A file on disk", "A remote database", "An in-memory database, no file", "A CSV"], correct: 2, why: "<code>:memory:</code> makes a temporary in-memory database — deterministic and leaving no file behind." },
+    { level: "medium", q: "Why use <code>?</code> placeholders in a SQL query?", options: ["They're faster", "They're required syntax", "They prevent SQL injection and handle quoting", "They sort results"], correct: 2, why: "Placeholders send values separately from the SQL, so input can't become code — safe from injection." },
+    { level: "medium", q: "When writing a CSV to a file, why open it with <code>newline=\"\"</code>?", options: ["To compress it", "To avoid blank rows between lines on Windows", "To make it faster", "It's optional"], correct: 1, why: "Without it, the csv module and the OS both add line endings, producing a blank row between each line." },
+    // Hard
+    { level: "hard", q: "<code>total += row[\"price\"]</code> on CSV data raises what?", options: ["Nothing", "KeyError", "IndexError", "TypeError — price is a string"], correct: 3, why: "CSV values are strings, so adding one to an int total raises TypeError. Convert with int(row['price'])." },
+    { level: "hard", q: "Which format lets you QUERY and filter data efficiently?", options: ["CSV", "Pickle", "Plain text", "SQLite"], correct: 3, why: "SQLite is a real SQL database in one file — you can query, filter, join and update. CSV and pickle can't." },
+    { level: "hard", q: "You need to cache a nested Python dict and only Python will read it. Best choice?", options: ["Pickle", "CSV", "A .txt file", "SQL"], correct: 0, why: "Pickle preserves any Python object exactly. CSV is flat and untyped; use pickle for trusted Python-only snapshots." },
   ],
 
   "system-modules": [
