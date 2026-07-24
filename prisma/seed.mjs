@@ -2268,15 +2268,86 @@ const L31 = [
   ]},
 ];
 const L32 = [
-  { t: "objectives", items: ["Counter se frequency","itertools se smart looping","functools.reduce"] },
-  { t: "h2", n: "1", text: "collections — Counter" },
-  { t: "p", html: "<code>Counter</code> list me har item kitni baar aaya turant gin deta hai — data analysis me bahut kaam ka (jaise sabse common value dhoondhna)." },
-  { t: "code", file: "counter.py", code: "from collections import Counter\nvotes = [\"a\", \"b\", \"a\", \"c\", \"a\"]\nc = Counter(votes)\nprint(c[\"a\"])            # 3\nprint(c.most_common(1))  # [('a', 3)]", output: "3\n[('a', 3)]" },
-  { t: "h2", n: "2", text: "itertools aur functools" },
-  { t: "p", html: "<code>itertools.accumulate</code> running total deta hai. <code>functools.reduce</code> poori list ko ek value me samet deta hai." },
-  { t: "code", file: "tools.py", code: "from itertools import accumulate\nfrom functools import reduce\nprint(list(accumulate([1, 2, 3, 4])))        # [1, 3, 6, 10]\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))  # 24", output: "[1, 3, 6, 10]\n24" },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> Counter (frequency), accumulate (cumulative sum), reduce (aggregate) — real data tasks me roz use hote hain." },
-  { t: "recap", items: ["Counter = frequency count","most_common(n) = top n","accumulate = running total","reduce = list -> ek value"] },
+  { t: "objectives", items: [
+    "Count frequencies in one line with <code>Counter</code>",
+    "Group items without a KeyError using <code>defaultdict</code>",
+    "Make readable records with <code>namedtuple</code>",
+    "Chain, accumulate and combine with <code>itertools</code>",
+    "Fold a whole list into one value with <code>functools.reduce</code>",
+  ]},
+  { t: "hook", q: "You count how often each letter appears by looping and writing <code>counts[ch] += 1</code>. It crashes on the very first letter with <code>KeyError</code>, before it has counted anything. Why?", why: "Because <code>counts[ch] += 1</code> means <b>read</b> <code>counts[ch]</code>, add one, write it back — and on the first letter that key does not exist yet, so the <b>read</b> fails. A plain dict has no notion of a default. This is the exact problem <code>collections</code> was built to remove: <code>Counter</code> counts for you in one line, and <code>defaultdict(int)</code> starts every missing key at 0. You almost never need to hand-roll a counting loop again." },
+  { t: "think", q: "When would you reach for <code>Counter</code> instead of a plain dictionary?", a: "Any time you are tallying — counting words, votes, dice rolls, error codes, anything. <code>Counter(items)</code> does the whole loop for you, a missing key returns <code>0</code> instead of raising, and <code>.most_common(n)</code> hands back the top n already sorted.<br/><br/>A plain dict makes you initialise every key, guard every lookup, and sort by value yourself. <code>Counter</code> is a dict subclass built exactly for frequencies, so it is both shorter and harder to get wrong. Frequency counting is one of the most common things you do with data, which is why it earns a dedicated tool." },
+
+  { t: "h2", n: "1", text: "Counter: frequencies in one line" },
+  { t: "def", term: "collections", en: "collections is a standard-library module of specialised container types — Counter, defaultdict, namedtuple, deque — that solve common data-shaping tasks more directly than a plain dict or list.", hi: "In plain words: <code>collections</code> me ready-made containers hain jo roz ke kaam (ginti, grouping, records) aasaan kar dete hain." },
+  { t: "p", html: "<code>Counter(iterable)</code> tallies every item. Index it like a dict — but a missing key is <code>0</code>, not an error — and <code>.most_common(n)</code> returns the top n by count." },
+  { t: "code", file: "counter.py", code: "from collections import Counter\n\nvotes = [\"a\", \"b\", \"a\", \"c\", \"a\", \"b\"]\nc = Counter(votes)\n\nprint(c[\"a\"])              # 3\nprint(c[\"z\"])              # 0, not a KeyError\nprint(c.most_common(2))    # top two", output: "3\n0\n[('a', 3), ('b', 2)]" },
+  { t: "viz", name: "counter-lab" },
+  { t: "p", html: "Try the inputs in that panel — the counts appear as sorted bars, most common on top, which is exactly what <code>most_common</code> returns. One call replaces the whole count-and-sort loop." },
+
+  { t: "h2", n: "2", text: "defaultdict and namedtuple" },
+  { t: "p", html: "<code>defaultdict(factory)</code> gives every missing key a fresh default — <code>int</code> for counting, <code>list</code> for grouping. <code>namedtuple</code> makes a lightweight record with named fields." },
+  { t: "code", file: "defaultdict.py", code: "from collections import defaultdict\n\ngroups = defaultdict(list)      # missing key -> a new []\nfor n in [1, 2, 3, 4, 5]:\n    key = \"even\" if n % 2 == 0 else \"odd\"\n    groups[key].append(n)\n\nprint(dict(groups))", output: "{'odd': [1, 3, 5], 'even': [2, 4]}" },
+  { t: "code", file: "namedtuple.py", code: "from collections import namedtuple\n\nPoint = namedtuple(\"Point\", [\"x\", \"y\"])\np = Point(3, 4)\n\nprint(p.x, p.y)       # named access, not p[0], p[1]\nprint(tuple(p))       # still a real tuple", output: "3 4\n(3, 4)" },
+  { t: "note", variant: "tip", html: "<b>Reach for the right one:</b> <code>defaultdict(int)</code> to count, <code>defaultdict(list)</code> to group items under keys, <code>namedtuple</code> when a tuple's positions need names so <code>p.x</code> reads better than <code>p[0]</code>. There is also <code>deque</code> for fast adds and pops at <b>both</b> ends." },
+
+  { t: "h2", n: "3", text: "itertools: smart looping" },
+  { t: "p", html: "<code>itertools</code> builds efficient iterators. <code>accumulate</code> gives a running total, <code>chain</code> joins iterables end to end, <code>combinations</code> lists every pairing." },
+  { t: "code", file: "itertools.py", code: "from itertools import accumulate, chain, combinations\n\nprint(list(accumulate([1, 2, 3, 4])))       # running total\nprint(list(chain([1, 2], [3, 4])))          # joined\nprint(list(combinations([1, 2, 3], 2)))     # every pair", output: "[1, 3, 6, 10]\n[1, 2, 3, 4]\n[(1, 2), (1, 3), (2, 3)]" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> these are everyday data moves. <code>Counter</code> for frequency tables and top-N (most common word, busiest hour, top error). <code>defaultdict(list)</code> to group rows under a key before aggregating — the same shape as a SQL <code>GROUP BY</code>. <code>accumulate</code> for cumulative sums in a time series. They are also lazy where it counts, so they scale, and they read clearly — which matters more than a clever one-liner when a teammate reads your code next week." },
+
+  { t: "h2", n: "4", text: "functools.reduce: fold to one value" },
+  { t: "p", html: "<code>reduce</code> combines a whole list into a single value by applying a function pairwise, left to right. It is how you express \"multiply everything\" or \"combine all\" when there is no built-in like <code>sum</code>." },
+  { t: "code", file: "reduce.py", code: "from functools import reduce\n\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))     # 1*2*3*4\nprint(reduce(lambda a, b: a + b, [1, 2, 3], 100))  # start from 100", output: "24\n106" },
+  { t: "analogy", concept: "reduce", real: "Folding a strip of paper", html: "<code>reduce</code> is folding a long strip of paper down to one square. You fold the first two sections together, then fold that result into the third, then into the fourth — each fold combines \"everything so far\" with the next piece, until one square remains. The function you pass is the fold; the optional starting value is the square you begin with. <code>sum</code> and <code>max</code> are just named folds you use so often they got their own name." },
+
+  { t: "trace", intro: "Counter, defaultdict, itertools and reduce. Work out each value.", code: "from collections import Counter\nfrom itertools import accumulate\nfrom functools import reduce\n\nc = Counter([\"x\", \"y\", \"x\", \"x\", \"z\"])\na = c[\"x\"]\nb = c[\"q\"]\nd = c.most_common(1)\ne = list(accumulate([2, 2, 2]))\nf = reduce(lambda p, n: p + n, [10, 20, 30])", steps: [
+    { q: "After line 6, <code>a</code> is", answer: "3", why: "x appears three times in the list, and <code>c[\"x\"]</code> reads its count." },
+    { q: "After line 7, <code>b</code> is", answer: "0", why: "q is not in the list, and a Counter returns 0 for a missing key rather than raising KeyError." },
+    { q: "After line 8, <code>d</code> is", answer: "[('x', 3)]", why: "<code>most_common(1)</code> returns the single most frequent item as a (item, count) pair in a list." },
+    { q: "After line 9, <code>e</code> is", answer: "[2, 4, 6]", why: "<code>accumulate</code> gives the running total: 2, then 2+2, then 2+2+2." },
+    { q: "After line 10, <code>f</code> is", answer: "60", why: "<code>reduce</code> adds left to right: (10+20)=30, then 30+30 = 60." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Write each yourself before opening the answer.", items: [
+    { task: "Count the items in a list with Counter.", code: "from collections import Counter\n\nprint(dict(Counter([\"a\", \"b\", \"a\"])))", out: "{'a': 2, 'b': 1}" },
+    { task: "Find the single most common item.", code: "from collections import Counter\n\nprint(Counter([1, 2, 2, 3, 2]).most_common(1))", out: "[(2, 3)]" },
+    { task: "Show a missing key returns 0, not an error.", code: "from collections import Counter\n\nprint(Counter(\"aab\")[\"z\"])", out: "0" },
+    { task: "Group numbers into odd and even with defaultdict.", code: "from collections import defaultdict\n\ng = defaultdict(list)\nfor n in [1, 2, 3, 4]:\n    g[n % 2].append(n)\nprint(dict(g))", out: "{1: [1, 3], 0: [2, 4]}" },
+    { task: "Count letters with defaultdict(int).", code: "from collections import defaultdict\n\nd = defaultdict(int)\nfor ch in \"banana\":\n    d[ch] += 1\nprint(dict(d))", out: "{'b': 1, 'a': 3, 'n': 2}" },
+    { task: "Make a namedtuple and read a field by name.", code: "from collections import namedtuple\n\nCar = namedtuple(\"Car\", [\"make\", \"year\"])\nc = Car(\"Tata\", 2024)\nprint(c.make, c.year)", out: "Tata 2024" },
+    { task: "Get the running total of a list.", code: "from itertools import accumulate\n\nprint(list(accumulate([5, 5, 5, 5])))", out: "[5, 10, 15, 20]" },
+    { task: "Join two lists into one iterator with chain.", code: "from itertools import chain\n\nprint(list(chain([1, 2], [3, 4], [5])))", out: "[1, 2, 3, 4, 5]" },
+    { task: "Multiply every number in a list with reduce.", code: "from functools import reduce\n\nprint(reduce(lambda a, b: a * b, [2, 3, 4]))", out: "24" },
+    { task: "Sum a list with reduce and a starting value.", code: "from functools import reduce\n\nprint(reduce(lambda a, b: a + b, [1, 2, 3], 10))", out: "16" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "counts = {}\nfor ch in \"hello\":\n    counts[ch] += 1", why: "On the first sight of a letter, <code>counts[ch]</code> does not exist, so the read half of <code>+= 1</code> raises <code>KeyError</code>. Use <code>Counter</code> or <code>defaultdict(int)</code>.", fix: "from collections import Counter\ncounts = Counter(\"hello\")" },
+    { bad: "from collections import Counter\ntop = Counter(votes).most_common(1)\nwinner = top", why: "<code>most_common(1)</code> returns a <b>list of one (item, count) pair</b>, like <code>[('a', 3)]</code> — not the item. Index into it: <code>[0][0]</code> for the item.", fix: "top = Counter(votes).most_common(1)\nwinner = top[0][0]" },
+    { bad: "from collections import namedtuple\nPoint = namedtuple(\"Point\", [\"x\", \"y\"])\np = Point(3)", why: "A namedtuple needs a value for <b>every</b> field, so <code>Point(3)</code> raises <code>TypeError</code> — <code>y</code> is missing. Pass all fields, or give some a default.", fix: "p = Point(3, 4)" },
+    { bad: "from functools import reduce\ntotal = reduce(lambda a, b: a + b, [])", why: "<code>reduce</code> on an <b>empty</b> list with no starting value raises <code>TypeError</code> — there is nothing to fold. Pass an initial value to make it safe.", fix: "total = reduce(lambda a, b: a + b, [], 0)" },
+  ]},
+
+  { t: "debug", intro: "A function counts how many times each word appears in a list. It crashes with a KeyError on the first word, before counting anything. Read it before opening the fix.", code: "def word_counts(words):\n    counts = {}\n    for w in words:\n        counts[w] += 1\n    return counts\n\nprint(word_counts([\"a\", \"b\", \"a\"]))", symptom: "KeyError: 'a'", q: "The loop clearly adds 1 for each word. So why does it fail on the very first word, 'a'?", fix: "from collections import Counter\n\ndef word_counts(words):\n    return dict(Counter(words))\n\nprint(word_counts([\"a\", \"b\", \"a\"]))", why: "<code>counts[w] += 1</code> expands to <code>counts[w] = counts[w] + 1</code>, which must first <b>read</b> <code>counts[w]</code>. On the first word that key is not in the dict yet, so the read raises <code>KeyError</code> — the increment never even happens. A plain dict has no default for a missing key.<br/><br/><code>Counter</code> is built for exactly this: <code>Counter(words)</code> tallies the whole list in one call, treating any unseen key as 0. If you want to keep the loop, <code>defaultdict(int)</code> also works — it creates a missing key as 0 on first access. Either way you stop hand-writing the initialise-then-increment dance, which is where this bug always comes from." },
+
+  { t: "recap", items: [
+    "<code>Counter(iterable)</code> tallies frequencies; a missing key is <b>0</b>, and <code>.most_common(n)</code> gives the top n",
+    "<code>defaultdict(int)</code> to count, <code>defaultdict(list)</code> to group — no KeyError on missing keys",
+    "<code>namedtuple</code> makes a tuple with named fields: <code>p.x</code> instead of <code>p[0]</code>",
+    "<code>itertools.accumulate</code> running total · <code>chain</code> join · <code>combinations</code> pairings",
+    "<code>functools.reduce(fn, seq)</code> folds a list into one value; give it an initial value for safety",
+    "<code>most_common(1)</code> returns <code>[(item, count)]</code> — index <code>[0][0]</code> for just the item",
+    "These are the everyday tools of frequency, grouping and aggregation in data work",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does <code>collections.Counter</code> do?", a: "It is a dict subclass built for counting: <code>Counter(iterable)</code> tallies how many times each element appears, indexing a missing key returns 0 instead of raising, and <code>.most_common(n)</code> returns the n highest-count items already sorted. It replaces the common initialise-and-increment loop, and is the go-to for frequency tables and top-N questions." },
+    { level: "beginner", q: "What problem does <code>defaultdict</code> solve?", a: "It removes the KeyError you get when updating a key that does not exist yet. You pass a factory — <code>int</code>, <code>list</code>, <code>set</code> — and any missing key is created with that default on first access. <code>defaultdict(int)</code> is ideal for counting and <code>defaultdict(list)</code> for grouping items under keys, so you can write <code>d[key].append(x)</code> without checking whether <code>key</code> is present." },
+    { level: "intermediate", q: "When would you use a namedtuple?", a: "When you have a small, fixed record and want named, self-documenting fields without the weight of a class. <code>namedtuple(\"Point\", [\"x\", \"y\"])</code> gives you <code>p.x</code> and <code>p.y</code> while remaining a real, immutable tuple — it unpacks, compares and indexes like one. It is clearer than positional tuple access for things like coordinates, database rows, or return values with several parts. For mutable or behaviour-rich records, a dataclass or class is the next step up." },
+    { level: "intermediate", q: "What does <code>functools.reduce</code> do, and when is it appropriate?", a: "It folds an iterable into a single value by applying a two-argument function cumulatively from left to right — <code>reduce(mul, [1,2,3,4])</code> gives 24. It is appropriate when you are aggregating to one result and there is no dedicated built-in; for sums and maxes you should prefer <code>sum</code> and <code>max</code>, which are clearer and faster. Always pass an initial value if the iterable might be empty, or reduce raises a TypeError." },
+    { level: "intermediate", q: "Why use <code>itertools</code> functions instead of writing the loops yourself?", a: "They are lazy iterators implemented in C, so they are memory-efficient and fast, and they express intent clearly — <code>accumulate</code>, <code>chain</code>, <code>groupby</code>, <code>combinations</code> each name a common pattern. Using them avoids off-by-one bugs and materialising large intermediate lists, and a reader instantly recognises the operation. They compose well too, letting you build a pipeline of transformations that streams data rather than building it all in memory." },
+  ]},
 ];
 const L33 = [
   { t: "objectives", items: ["os module — files/folders","pathlib se safe paths","sys module basics"] },
@@ -3877,6 +3948,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "collections-itertools": [
+    // Easy
+    { level: "easy", q: "What does <code>Counter(items)</code> do?", options: ["Tallies how often each item appears", "Sorts the list", "Removes duplicates", "Reverses the list"], correct: 0, why: "<code>Counter</code> counts frequencies in one call; index it like a dict, and a missing key returns 0." },
+    { level: "easy", q: "What does <code>Counter(items)[missing_key]</code> return?", options: ["A KeyError", "None", "0", "An empty list"], correct: 2, why: "A Counter returns 0 for a key it hasn't seen — no KeyError, unlike a plain dict." },
+    { level: "easy", q: "What does <code>most_common(1)</code> return?", options: ["The count only", "A list with the top (item, count) pair", "The item only", "All items"], correct: 1, why: "It returns <code>[(item, count)]</code> — a list of one pair. Index <code>[0][0]</code> for just the item." },
+    // Medium
+    { level: "medium", q: "Why use <code>defaultdict(int)</code> for counting?", options: ["It's faster to type", "It sorts keys", "Missing keys start at 0, so += never KeyErrors", "It removes duplicates"], correct: 2, why: "A defaultdict creates a missing key with its factory's default (0 for int), so <code>d[k] += 1</code> just works." },
+    { level: "medium", q: "What does <code>itertools.accumulate([1,2,3,4])</code> give?", options: ["[10]", "[1, 2, 3, 4]", "24", "[1, 3, 6, 10]"], correct: 3, why: "<code>accumulate</code> returns the running total: 1, 1+2, 1+2+3, 1+2+3+4." },
+    { level: "medium", q: "What is a <code>namedtuple</code> good for?", options: ["Counting", "A tuple with named fields (p.x not p[0])", "A mutable list", "Sorting"], correct: 1, why: "It gives a lightweight immutable record with named, self-documenting fields, while still being a real tuple." },
+    { level: "medium", q: "<code>defaultdict(list)</code> is typically used to…", options: ["count items", "group items under keys", "sort a list", "reverse a dict"], correct: 1, why: "With a list default you can <code>d[key].append(x)</code> without checking the key — the GROUP BY pattern." },
+    // Hard
+    { level: "hard", q: "<code>counts = {}; counts[ch] += 1</code> on a new key raises what?", options: ["Nothing", "TypeError", "IndexError", "KeyError (the read half fails)"], correct: 3, why: "<code>+= 1</code> reads then writes; the read of a missing key raises KeyError. Use Counter or defaultdict(int)." },
+    { level: "hard", q: "What does <code>functools.reduce(lambda a,b: a*b, [1,2,3,4])</code> return?", options: ["24", "10", "[1,2,6,24]", "4"], correct: 0, why: "<code>reduce</code> folds left to right: ((1*2)*3)*4 = 24. It combines a list into one value." },
+    { level: "hard", q: "<code>reduce</code> on an EMPTY list with no initial value does what?", options: ["Returns 0", "Returns None", "Returns an empty list", "Raises TypeError"], correct: 3, why: "There's nothing to fold, so it raises TypeError. Pass an initial value to make it safe on empty input." },
   ],
 
   "async": [

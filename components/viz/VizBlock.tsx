@@ -23,6 +23,7 @@ import { DecoratorLab } from "./DecoratorLab";
 import { RegexLab } from "./RegexLab";
 import { ConcurrencyLab } from "./ConcurrencyLab";
 import { AsyncLab } from "./AsyncLab";
+import { CounterLab } from "./CounterLab";
 import { VariablesPlayground } from "./VariablesPlayground";
 import { CastingLab } from "./CastingLab";
 import { OperatorLab } from "./OperatorLab";
@@ -62,6 +63,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "regex-lab": RegexLab,
   "concurrency-lab": ConcurrencyLab,
   "async-lab": AsyncLab,
+  "counter-lab": CounterLab,
   "variables-playground": VariablesPlayground,
   "casting-lab": CastingLab,
   "operator-lab": OperatorLab,
