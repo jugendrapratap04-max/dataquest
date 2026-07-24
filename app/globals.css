@@ -625,6 +625,26 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .cc-tval { font-family:var(--mono); font-size:14px; font-weight:700; color:var(--accent-2); }
 .cc-total.good .cc-tval { color:var(--good); }
 .cc-vs { font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-left:auto; }
+
+/* Async Lab — two coroutine lanes and the event loop stepping between them. */
+.as-caption { font-size:12.5px; color:var(--ink); background:var(--panel-2); border:1px solid var(--line); border-radius:9px;
+              padding:10px 12px; margin-bottom:12px; min-height:40px; }
+.as-stepno { font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-right:8px; }
+.as-lanes { display:flex; flex-direction:column; gap:8px; }
+.as-lane { display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:11px 13px; border-radius:9px; border:1px solid var(--line); background:var(--panel-2); transition:border-color .2s, background .2s; }
+.as-lane.active { border-color:color-mix(in srgb,var(--accent) 50%,transparent); background:color-mix(in srgb,var(--accent) 8%,transparent); animation:viz-land .22s ease-out; }
+.as-lane.wait { border-left:3px solid var(--teal); }
+.as-lane.run { border-left:3px solid var(--accent); }
+.as-lane.done { border-left:3px solid var(--good); }
+.as-lane.q { border-left:3px solid var(--ink-faint); opacity:.7; }
+.as-coro { font-family:var(--mono); font-size:13px; font-weight:700; color:var(--ink); }
+.as-status { font-family:var(--mono); font-size:11.5px; }
+.as-status.run { color:var(--accent-2); }
+.as-status.wait { color:var(--teal); }
+.as-status.done { color:var(--good); }
+.as-status.q { color:var(--ink-faint); }
+.as-thread { font-family:var(--mono); font-size:10.5px; color:var(--accent-2); font-weight:700; margin-left:auto; }
+.as-loop { font-size:11.5px; color:var(--ink-soft); text-align:center; padding:8px 0 0; }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }

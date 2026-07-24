@@ -2188,14 +2188,84 @@ const L30 = [
   ]},
 ];
 const L31 = [
-  { t: "objectives", items: ["async / await samajhna","Coroutine kya hai","Kab async use karein"] },
-  { t: "h2", n: "1", text: "async aur await" },
-  { t: "p", html: "<code>async def</code> se ek 'coroutine' banta hai — ye kaam ke beech me ruk ke doosra kaam kar sakta hai (jaise network response ka wait karte hue). <code>await</code> ruk ke result leta hai." },
-  { t: "code", file: "async.py", code: "import asyncio\n\nasync def greet():\n    await asyncio.sleep(1)\n    return \"done\"\n\nprint(asyncio.run(greet()))   # done", output: "done" },
-  { t: "h2", n: "2", text: "Kyun useful hai" },
-  { t: "p", html: "Jab program zyaadatar 'wait' karta hai (API, database), async us wait ke time me doosre kaam karwa leta hai — bina extra threads ke. Modern web (FastAPI) me bahut use hota hai." },
-  { t: "note", variant: "tip", html: "<b>Simple rule:</b> bahut I/O (network/DB) wait ho to async; bahut calculation ho to multiprocessing." },
-  { t: "recap", items: ["async def = coroutine","await = result ka wait","I/O-heavy kaam ke liye best","FastAPI/modern web me common"] },
+  { t: "objectives", items: [
+    "Write a coroutine with <code>async def</code> and run it with <code>asyncio.run</code>",
+    "Use <code>await</code> to pause for a result without blocking the thread",
+    "Run coroutines concurrently with <code>asyncio.gather</code>",
+    "See that async is <b>one thread</b> switching at each <code>await</code>",
+    "Avoid the top bug: forgetting <code>await</code> leaves you a coroutine, not a value",
+  ]},
+  { t: "hook", q: "You call an <code>async def</code> function like a normal one — <code>price = get_price()</code> — and then use <code>price</code> in a sum. It fails with <code>unsupported operand type: 'coroutine' and 'int'</code>. You never made a coroutine on purpose. Where did it come from?", why: "Calling an <code>async def</code> does <b>not</b> run it — it hands you a <b>coroutine object</b>, a paused plan of the work, and runs nothing until you <code>await</code> it (or pass it to <code>asyncio.run</code>/<code>gather</code>). So <code>get_price()</code> without <code>await</code> is not the number 100, it is the recipe for getting 100. Add <code>await</code> — <code>price = await get_price()</code> — and it actually runs and gives you the value. Forgetting <code>await</code> is the single most common async mistake." },
+  { t: "think", q: "If async runs on a single thread, how can it do many things \"at once\"?", a: "It does not run them at once — it <b>interleaves</b> them. A coroutine runs until it hits an <code>await</code> on something slow (a network call), and at that point it <b>pauses and hands control back</b> to the event loop, which starts or resumes another coroutine.<br/><br/>So while one coroutine is waiting for a response, the single thread is busy making progress on another. Nothing runs in parallel — but the <b>waiting</b> overlaps, which is exactly what I/O-bound work needs. It is cooperative: each coroutine voluntarily yields at every <code>await</code>." },
+
+  { t: "h2", n: "1", text: "async, await, and asyncio.run" },
+  { t: "def", term: "Coroutine", en: "A coroutine is a function defined with async def; calling it returns a coroutine object that does nothing until it is awaited or run by the event loop, at which point it executes and can pause at each await.", hi: "In plain words: <code>async def</code> wali function ko call karne se kaam <b>chalta nahi</b> — ek coroutine object milta hai. Use <code>await</code> ya <code>asyncio.run</code> se chalao." },
+  { t: "p", html: "<code>async def</code> makes a coroutine. Inside it, <code>await</code> pauses until the awaited thing is ready. At the top level, <code>asyncio.run(coro())</code> starts the event loop and runs it to completion." },
+  { t: "code", file: "basic.py", code: "import asyncio\n\nasync def get_value():\n    await asyncio.sleep(0)   # yield to the loop, then continue\n    return 42\n\nasync def main():\n    v = await get_value()    # wait for the coroutine's result\n    return v + 1\n\nprint(asyncio.run(main()))", output: "43" },
+  { t: "note", variant: "warn", html: "<b><code>await</code> only works inside an <code>async def</code>.</b> At the top level of a script you cannot <code>await</code> directly — you use <code>asyncio.run(coro())</code> to start the loop. And <code>await</code> works on coroutines and other awaitables, not on ordinary values." },
+
+  { t: "h2", n: "2", text: "gather: running coroutines concurrently" },
+  { t: "p", html: "Awaiting coroutines one after another runs them in sequence. <code>asyncio.gather</code> schedules them together so their waits overlap, and returns the results <b>in order</b>." },
+  { t: "code", file: "gather.py", code: "import asyncio\n\nasync def square(n):\n    await asyncio.sleep(0)\n    return n * n\n\nasync def main():\n    results = await asyncio.gather(square(1), square(2), square(3))\n    return results\n\nprint(asyncio.run(main()))     # in input order, waits overlapped", output: "[1, 4, 9]" },
+  { t: "viz", name: "async-lab" },
+  { t: "p", html: "Step through that panel. Each coroutine runs until its <code>await</code>, then hands the single thread back to the loop — so at one point <b>both are waiting at once</b>, even though only one ever runs. That overlap of waits, with no threads, is what <code>gather</code> buys you." },
+
+  { t: "h2", n: "3", text: "Why async: overlapping the waiting" },
+  { t: "p", html: "The win is the same as threads for I/O — overlap the waiting — but on one thread with explicit pause points, so there is no GIL contention and no locks for shared state within a task." },
+  { t: "analogy", concept: "The event loop", real: "One waiter, many tables", html: "A single waiter (the thread) serves many tables. They take table 1's order and, instead of standing at the kitchen waiting for the food, they go take table 2's order, then table 3's — that is <code>await</code>, handing control to the next job while the kitchen (the network) works. When a dish is ready, they deliver it. One waiter, but almost no time spent standing still. Add a second waiter (a thread) and you could carry two plates at once — but for taking-orders-and-waiting, one well-organised waiter is plenty." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> async powers modern Python web servers. FastAPI route handlers are <code>async def</code>, so a single worker can handle thousands of concurrent requests by overlapping their database and API waits — no thread per request. The same pattern fits any I/O-heavy service: scraping, chat, streaming. Reach for async when the bottleneck is waiting on the network, and reach for multiprocessing when it is CPU. Mixing blocking calls into async code is the classic trap — one blocking call stalls the whole loop." },
+
+  { t: "h2", n: "4", text: "The forgotten await" },
+  { t: "p", html: "Calling a coroutine without <code>await</code> is the mistake everyone makes. You get a coroutine object, not the value, and the work never runs." },
+  { t: "code", file: "forgot.py", code: "import asyncio\n\nasync def get_price():\n    return 100\n\nasync def main():\n    a = get_price()          # forgot await -> a coroutine\n    b = await get_price()    # correct -> the value 100\n    return type(a).__name__, type(b).__name__\n\nprint(asyncio.run(main()))", output: "('coroutine', 'int')" },
+  { t: "note", variant: "warn", html: "If you ever see <code>&lt;coroutine object …&gt;</code> in your output, or a <code>RuntimeWarning: coroutine '…' was never awaited</code>, you forgot an <code>await</code>. The value you wanted is still locked inside the unrun coroutine." },
+
+  { t: "trace", intro: "Coroutines, await, and gather. All outputs are deterministic. Work out each value.", code: "import asyncio\n\nasync def double(n):\n    await asyncio.sleep(0)\n    return n * 2\n\na = asyncio.run(double(5))\n\nasync def three():\n    return await asyncio.gather(double(1), double(2), double(3))\n\nb = asyncio.run(three())\nc = len(b)\nd = type(double(9)).__name__", steps: [
+    { q: "After line 7, <code>a</code> is", answer: "10", why: "<code>asyncio.run(double(5))</code> runs the coroutine and returns 5 × 2 = 10." },
+    { q: "After line 12, <code>b</code> is", answer: "[2, 4, 6]", why: "<code>gather</code> runs the three coroutines and returns their results in input order: 1×2, 2×2, 3×2." },
+    { q: "After line 13, <code>c</code> is", answer: "3", why: "<code>b</code> has three results, so its length is 3." },
+    { q: "After line 14, <code>d</code> is", answer: "coroutine", why: "<code>double(9)</code> without <code>await</code> or <code>run</code> is a coroutine object — calling an async function does not run it." },
+  ]},
+
+  { t: "drills", intro: "One per idea. Outputs are deterministic. Write each yourself before opening the answer.", items: [
+    { task: "Run a simple coroutine with asyncio.run.", code: "import asyncio\n\nasync def hello():\n    return \"hi\"\n\nprint(asyncio.run(hello()))", out: "hi" },
+    { task: "Await a coroutine inside another.", code: "import asyncio\n\nasync def inner():\n    return 5\n\nasync def outer():\n    return await inner() + 1\n\nprint(asyncio.run(outer()))", out: "6" },
+    { task: "Use await with asyncio.sleep(0), then return.", code: "import asyncio\n\nasync def task():\n    await asyncio.sleep(0)\n    return \"done\"\n\nprint(asyncio.run(task()))", out: "done" },
+    { task: "Gather three coroutines and get results in order.", code: "import asyncio\n\nasync def sq(n):\n    return n * n\n\nasync def main():\n    return await asyncio.gather(sq(2), sq(3), sq(4))\n\nprint(asyncio.run(main()))", out: "[4, 9, 16]" },
+    { task: "Gather over a list comprehension.", code: "import asyncio\n\nasync def dbl(n):\n    return n * 2\n\nasync def main():\n    return await asyncio.gather(*[dbl(i) for i in range(4)])\n\nprint(asyncio.run(main()))", out: "[0, 2, 4, 6]" },
+    { task: "Show a called coroutine is a coroutine object.", code: "import asyncio\n\nasync def f():\n    return 1\n\nasync def main():\n    return type(f()).__name__\n\nprint(asyncio.run(main()))", out: "coroutine" },
+    { task: "Sum the results of a gather.", code: "import asyncio\n\nasync def n(x):\n    return x\n\nasync def main():\n    return sum(await asyncio.gather(*[n(i) for i in range(5)]))\n\nprint(asyncio.run(main()))", out: "10" },
+    { task: "Return a value from main and print it.", code: "import asyncio\n\nasync def main():\n    total = 0\n    for i in range(4):\n        total += i\n    return total\n\nprint(asyncio.run(main()))", out: "6" },
+    { task: "Await two coroutines sequentially and combine.", code: "import asyncio\n\nasync def a():\n    return 10\nasync def b():\n    return 20\n\nasync def main():\n    return await a() + await b()\n\nprint(asyncio.run(main()))", out: "30" },
+    { task: "Gather and check the length of the results.", code: "import asyncio\n\nasync def one():\n    return 1\n\nasync def main():\n    return len(await asyncio.gather(one(), one(), one()))\n\nprint(asyncio.run(main()))", out: "3" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "import asyncio\n\nasync def get_data():\n    return 100\n\nasync def main():\n    data = get_data()      # forgot await\n    return data + 1\n\nasyncio.run(main())", why: "<code>get_data()</code> without <code>await</code> is a coroutine, not 100 — so <code>data + 1</code> raises TypeError. Add <code>await</code>.", fix: "async def main():\n    data = await get_data()\n    return data + 1" },
+    { bad: "import asyncio\n\nasync def get():\n    return 1\n\ndata = await get()", why: "<code>await</code> only works <b>inside</b> an <code>async def</code>. At the top level you must start the loop with <code>asyncio.run</code>.", fix: "import asyncio\n\nasync def get():\n    return 1\n\ndata = asyncio.run(get())" },
+    { bad: "import asyncio\n\nasync def a():\n    return 1\nasync def b():\n    return 2\n\nasync def main():\n    x = await a()\n    y = await b()\n    return x + y", why: "Not wrong, but if <code>a</code> and <code>b</code> each waited on I/O, awaiting them one after another runs them in sequence — no overlap. Use <code>gather</code> to run them concurrently.", fix: "async def main():\n    x, y = await asyncio.gather(a(), b())\n    return x + y" },
+    { bad: "import time\n\nasync def slow():\n    time.sleep(2)     # blocking!\n    return \"done\"", why: "<code>time.sleep</code> blocks the whole event loop, freezing every other coroutine. In async code you must use the awaitable version, <code>await asyncio.sleep</code>, which yields control.", fix: "import asyncio\n\nasync def slow():\n    await asyncio.sleep(2)\n    return \"done\"" },
+  ]},
+
+  { t: "debug", intro: "A checkout coroutine fetches a price and reports it. It runs without crashing, but the report says the price is a 'coroutine' instead of a number. Read it before opening the fix.", code: "import asyncio\n\nasync def get_price():\n    return 100\n\nasync def checkout():\n    price = get_price()\n    return f\"got a {type(price).__name__}\"\n\nprint(asyncio.run(checkout()))", symptom: "prints got a coroutine, not got a int", q: "get_price clearly returns 100. So why is price a coroutine instead of the number?", fix: "import asyncio\n\nasync def get_price():\n    return 100\n\nasync def checkout():\n    price = await get_price()\n    return f\"got a {type(price).__name__}\"\n\nprint(asyncio.run(checkout()))", why: "Calling an <code>async def</code> function does not run it — it builds and returns a <b>coroutine object</b>, a paused plan of the work. Nothing inside <code>get_price</code> executes until that coroutine is awaited. So <code>price = get_price()</code> binds <code>price</code> to the coroutine itself, not to 100, and its type is 'coroutine'.<br/><br/>Adding <code>await</code> — <code>price = await get_price()</code> — tells the event loop to actually run the coroutine and give you back its return value. This is the defining difference between a normal function (calling it runs it) and a coroutine (calling it only prepares it; awaiting runs it). The tell-tale signs are a <code>&lt;coroutine object&gt;</code> in your output or a <code>RuntimeWarning: coroutine '…' was never awaited</code> — both mean a missing <code>await</code>." },
+
+  { t: "recap", items: [
+    "<code>async def</code> makes a <b>coroutine</b>; calling it returns a coroutine object that runs nothing yet",
+    "<code>await coro()</code> runs it and gives the result; <code>asyncio.run(coro())</code> starts the loop at the top level",
+    "<code>await</code> only works inside an <code>async def</code>",
+    "<code>asyncio.gather(*coros)</code> runs them concurrently and returns results <b>in order</b>",
+    "Async is <b>one thread</b> that switches at each <code>await</code> — waits overlap, nothing runs in parallel",
+    "Use async for <b>I/O-bound</b> work (network, DB); it powers FastAPI and modern web servers",
+    "Forgetting <code>await</code> leaves you a coroutine, not a value — the top async bug",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is a coroutine, and what does calling one return?", a: "A coroutine is a function defined with <code>async def</code>. Calling it does not execute the body — it returns a coroutine object, which is a paused representation of the work. Nothing runs until you await that object or hand it to the event loop with <code>asyncio.run</code> or <code>gather</code>. This is the key difference from a normal function, where calling it runs it immediately." },
+    { level: "beginner", q: "What does <code>await</code> do?", a: "<code>await</code> runs an awaitable — usually a coroutine — and pauses the current coroutine until it produces a result, without blocking the thread. At that pause point, control returns to the event loop, which can run other coroutines. So <code>await</code> both retrieves the result and marks a place where the coroutine is willing to yield. It can only be used inside an <code>async def</code>." },
+    { level: "intermediate", q: "How does single-threaded async achieve concurrency?", a: "Through cooperative scheduling on an event loop. A coroutine runs until it reaches an <code>await</code> on something slow, then yields control back to the loop, which resumes or starts another coroutine. Nothing runs in parallel — only one coroutine executes at a time — but their <b>waiting</b> overlaps, so many I/O-bound tasks make progress together on one thread. The programmer marks the yield points explicitly with <code>await</code>, unlike threads, which the OS can preempt anywhere." },
+    { level: "intermediate", q: "When would you choose async over threads?", a: "For high-concurrency I/O-bound work where you want many tasks in flight cheaply — thousands of network connections, a web server handling many requests. Async avoids the overhead and locking complexity of threads and sidesteps the GIL contention, since it is one thread with explicit yield points. Threads still suit simpler I/O concurrency or when integrating blocking libraries, and CPU-bound work needs multiprocessing regardless. A major caveat: any blocking call inside async code stalls the whole loop, so the ecosystem has to be async-aware." },
+    { level: "intermediate", q: "What is the most common async bug?", a: "Forgetting <code>await</code>. Calling a coroutine without awaiting it returns a coroutine object that never runs, so you end up with the wrong type — often surfacing as a <code>TypeError</code> when you use it, or a <code>RuntimeWarning: coroutine was never awaited</code>. The fix is to await the call, or schedule it with <code>asyncio.gather</code> or <code>create_task</code>. Related mistakes are trying to <code>await</code> at the top level instead of using <code>asyncio.run</code>, and calling a blocking function like <code>time.sleep</code> instead of <code>await asyncio.sleep</code>." },
+  ]},
 ];
 const L32 = [
   { t: "objectives", items: ["Counter se frequency","itertools se smart looping","functools.reduce"] },
@@ -3807,6 +3877,22 @@ export const QUIZZES = {
     { level: "hard", q: "What is <code>-7 // 2</code>?", options: ["-3", "-4", "-3.5", "3"], correct: 1, why: "Floor means <b>down the number line</b>, not towards zero — so -3.5 floors to -4. If you want to chop towards zero, use <code>int(-7 / 2)</code>, which gives -3." },
     { level: "hard", q: "What does <code>round(2.5)</code> return?", options: ["3", "2.5", "2", "an error"], correct: 2, why: "Python rounds a value sitting exactly halfway to the nearest <b>even</b> number, so 2.5 goes to 2 while 3.5 goes to 4. It is deliberate: always rounding halves up would bias a long column of numbers upward." },
     { level: "hard", q: "A bill prints <code>Total: 99.95</code> and then <code>total == 99.95</code> is False. Why?", options: ["Python is buggy", "== does not work on floats at all", "The total is a string", "The printed value was rounded; the stored one has drifted"], correct: 3, why: "Rounding for display makes a tidied copy — the stored value is <code>99.94999999999999</code> after five additions of 19.99. The screen and the comparison are looking at two different numbers, which is why the bug seems impossible. For money, keep whole paise as integers or use <code>Decimal</code>." },
+  ],
+
+  "async": [
+    // Easy
+    { level: "easy", q: "What does calling an <code>async def</code> function return?", options: ["A coroutine object that runs nothing yet", "The result immediately", "A thread", "None"], correct: 0, why: "Calling a coroutine builds a paused coroutine object — it runs only when awaited or passed to asyncio.run/gather." },
+    { level: "easy", q: "How do you run a coroutine at the top level of a script?", options: ["Just call it", "await coro()", "asyncio.run(coro())", "coro().start()"], correct: 2, why: "<code>asyncio.run</code> starts the event loop and runs the coroutine to completion. <code>await</code> only works inside an async def." },
+    { level: "easy", q: "What does <code>await</code> do?", options: ["Blocks the whole program", "Creates a thread", "Runs an awaitable and pauses until it's ready", "Nothing"], correct: 2, why: "<code>await</code> runs the awaitable, pauses the coroutine until the result is ready, and yields control to the loop meanwhile." },
+    // Medium
+    { level: "medium", q: "What does <code>asyncio.gather</code> return?", options: ["The first result", "A set", "Nothing", "Results in input order"], correct: 3, why: "<code>gather</code> runs the coroutines concurrently and returns their results in the same order as the inputs." },
+    { level: "medium", q: "How does single-threaded async run many tasks 'at once'?", options: ["It uses many CPUs", "It spawns threads", "It interleaves them, overlapping their waits at await points", "It doesn't"], correct: 2, why: "One thread runs a coroutine until an await, then switches to another — nothing runs in parallel, but the waiting overlaps." },
+    { level: "medium", q: "Where can you use the <code>await</code> keyword?", options: ["Only inside an async def", "Anywhere", "Only at the top level", "Only in loops"], correct: 0, why: "<code>await</code> is only valid inside an <code>async def</code>. At the top level you start the loop with asyncio.run." },
+    { level: "medium", q: "Async is the right tool for which kind of work?", options: ["CPU-heavy computation", "I/O-bound work like network and DB calls", "Sorting", "Nothing"], correct: 1, why: "Async overlaps waiting on I/O. For CPU-bound work you need multiprocessing, since one thread can't compute in parallel." },
+    // Hard
+    { level: "hard", q: "<code>price = get_price()</code> (an async def, no await). What is <code>price</code>?", options: ["The return value", "None", "An error", "A coroutine object, not the value"], correct: 3, why: "Without await, you get the coroutine object — the work never ran. This is the most common async bug." },
+    { level: "hard", q: "What does <code>time.sleep(2)</code> inside a coroutine do?", options: ["Blocks the entire event loop", "Yields to other coroutines", "Raises an error", "Nothing"], correct: 0, why: "<code>time.sleep</code> is blocking and freezes the whole loop. Use <code>await asyncio.sleep</code>, which yields control." },
+    { level: "hard", q: "You see <code>RuntimeWarning: coroutine was never awaited</code>. What did you forget?", options: ["import asyncio", "An await (or run/gather) on a coroutine", "A return", "A lock"], correct: 1, why: "The warning means a coroutine was created but never run — you forgot to await it or schedule it." },
   ],
 
   "concurrency": [
