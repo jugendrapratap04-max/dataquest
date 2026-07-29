@@ -4,20 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
+import { subjectStyle } from "@/lib/subjects";
 
-// Accent for a subject's tile.
-//
-// This used to be a chain of `slug === "python" ? … : slug === "sql" ? …`, so
-// every subject beyond the four it named silently borrowed the statistics
-// colour — and a tenth subject would have too. DataMarg is meant to take many
-// subjects (docs/ARCHITECTURE.md), so unknown slugs now get a stable accent of
-// their own, picked from the slug itself. Adding a subject needs no code change.
-const ACCENTS = ["py", "sql", "pd", "st"];
-const PINNED: Record<string, string> = { python: "py", sql: "sql", pandas: "pd", statistics: "st" };
-
-const iconClass = (slug: string) =>
-  PINNED[slug] ??
-  ACCENTS[[...slug].reduce((sum, c) => sum + c.charCodeAt(0), 0) % ACCENTS.length];
+// Subject tiles are coloured from lib/subjects.ts, the same hue as the lesson
+// header and the roadmap card, so a subject looks like itself everywhere. The
+// local accent map that used to live here is gone with it — one source, and a
+// new subject needs no code change anywhere.
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -85,7 +77,7 @@ export default async function DashboardPage() {
           <div className="trackrow">
             {p.tracks.map((t) => (
               <Link key={t.id} href="/roadmap" className={`node ${t.status}`}>
-                <div className={`ic ${iconClass(t.slug)}`}>{t.icon}</div>
+                <div className={`ic tinted subject-tint`} style={subjectStyle(t.slug)}>{t.icon}</div>
                 <div className="t">{t.shortTitle}</div>
                 <div className="m">{t.status === "done" ? "✓ done" : `${t.pct}%`}</div>
                 <span className="badge">{t.status === "done" ? "✓" : t.status === "locked" ? "🔒" : ""}</span>

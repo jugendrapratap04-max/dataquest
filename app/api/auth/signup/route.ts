@@ -35,6 +35,6 @@ export async function POST(req: Request) {
     data: { name, email: mail, passwordHash: hashPassword(password), role: "Aspiring Data Analyst" },
   });
   const store = await cookies();
-  store.set(SESSION_COOKIE, signSession(user.id), SESSION_COOKIE_OPTIONS);
+  store.set(SESSION_COOKIE, signSession(user.id, user.sessionVersion), SESSION_COOKIE_OPTIONS);
   return NextResponse.json({ ok: true });
 }

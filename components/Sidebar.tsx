@@ -19,7 +19,9 @@ const RoomIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColo
 
 // `member: true` = needs an account. Visitors still see these, with a lock, so
 // it's obvious what signing up gets you — hiding them would hide the reason.
-type Item = { href: string; label: string; icon: React.ReactNode; count?: string; member?: boolean };
+// `soon` marks a page that exists but is not built yet. Saying so in the nav is
+// the honest alternative to letting it sit unlabelled beside working features.
+type Item = { href: string; label: string; icon: React.ReactNode; count?: string; member?: boolean; soon?: boolean };
 
 const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Learn", items: [
@@ -31,7 +33,7 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   ]},
   { label: "Practice", items: [
     { href: "/practice", label: "Compiler", icon: <CodeIcon /> },
-    { href: "/projects", label: "Projects", icon: <BoxIcon /> },
+    { href: "/projects", label: "Projects", icon: <BoxIcon />, soon: true },
   ]},
   { label: "Study", items: [
     { href: "/focus", label: "Focus Mode", icon: <TimerIcon />, member: true },
@@ -96,7 +98,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
               >
                 {it.icon}
                 {it.label}
-                {locked ? <span className="nav-lock"><LockIcon /></span> : it.count && <span className="count">{it.count}</span>}
+                {locked ? <span className="nav-lock"><LockIcon /></span> : it.soon ? <span className="nav-soon">soon</span> : it.count && <span className="count">{it.count}</span>}
               </Link>
             );
           })}

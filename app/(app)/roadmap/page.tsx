@@ -11,7 +11,7 @@ export default async function RoadmapPage() {
   const { tracks } = await getProgress(user?.id ?? "__guest__");
 
   const phases: Phase[] = tracks.map((t) => ({
-    id: t.id, order: t.order, title: t.title, subtitle: t.subtitle, status: t.status,
+    id: t.id, slug: t.slug, order: t.order, title: t.title, subtitle: t.subtitle, status: t.status,
     weeks: t.weeks, level: t.level, whyText: t.whyText, milestone: t.milestone,
     toolsCsv: t.toolsCsv, skills: t.skills,
     firstLesson: t.firstLesson,

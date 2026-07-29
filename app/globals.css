@@ -1893,3 +1893,9 @@ select.inp { cursor:pointer; }
 .ob-cta { padding:11px 20px; }
 @keyframes ob-pop { from { transform:scale(.6) translateY(10px); opacity:0; } to { transform:scale(1) translateY(0); opacity:1; } }
 @media (max-width:560px){ .ob-form h1, .ob-welcome h1 { font-size:22px; } .ob-art { font-size:60px; } }
+.nav-soon { font-size:10px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-faint); border:1px solid var(--line); border-radius:20px; padding:1px 7px; }
+/* Subject colour on the roadmap and dashboard, from the same hue as the lesson
+   header — so a subject looks like itself everywhere, and a new subject needs
+   no new rule here either. */
+.phase.subject-tint { border-left:3px solid var(--sub-fg); }
+.ic.tinted { background:var(--sub-bg); color:var(--sub-fg); }

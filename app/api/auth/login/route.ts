@@ -38,6 +38,6 @@ export async function POST(req: Request) {
 
   recordLoginSuccess(key);
   const store = await cookies();
-  store.set(SESSION_COOKIE, signSession(user.id), SESSION_COOKIE_OPTIONS);
+  store.set(SESSION_COOKIE, signSession(user.id, user.sessionVersion), SESSION_COOKIE_OPTIONS);
   return NextResponse.json({ ok: true });
 }

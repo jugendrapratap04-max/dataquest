@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { subjectStyle } from "@/lib/subjects";
 
 export type Phase = {
-  id: string; order: number; title: string; subtitle: string; status: string;
+  id: string; slug: string; order: number; title: string; subtitle: string; status: string;
   weeks: string; level: string; whyText: string; milestone: string;
   toolsCsv: string; skills: [name: string, done: boolean][]; firstLesson?: string;
 };
@@ -20,7 +21,7 @@ function PhaseCard({ p }: { p: Phase }) {
   const tools = p.toolsCsv ? p.toolsCsv.split(",") : [];
 
   return (
-    <section className={`card phase ${p.status}${open ? " open" : ""}`}>
+    <section className={`card phase subject-tint ${p.status}${open ? " open" : ""}`} style={subjectStyle(p.slug)}>
       {/* Keyboard-operable disclosure. This was a plain <div onClick>, and since
           .pbody is display:none until .phase.open, a keyboard user couldn't open a
           phase at all — the skills and the "Start lessons →" link were unreachable. */}

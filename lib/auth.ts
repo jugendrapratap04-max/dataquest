@@ -46,19 +46,27 @@ function sessionSecret(): string {
   return cachedSecret;
 }
 
-export function signSession(uid: string): string {
-  // The uid is a cuid (no dots) and iat is an integer, so "<uid>.<iat>" splits
-  // back apart unambiguously in verifySession.
-  const payload = `${uid}.${Date.now()}`;
+export type SessionClaims = { uid: string; version: number };
+
+// The token carries the account's session version as well as its id and issue
+// time, which is what makes logging out mean something. Logout increments the
+// number on the account; every cookie ever issued then fails the comparison in
+// getCurrentUser at once. Before this, "log out" deleted the cookie in your
+// browser and a copy taken beforehand stayed valid for its full 30 days.
+//
+// The uid is a cuid and the other two are integers, so a plain "." split gives
+// back exactly three fields.
+export function signSession(uid: string, version = 0): string {
+  const payload = `${uid}.${version}.${Date.now()}`;
   const sig = createHmac("sha256", sessionSecret()).update(payload).digest("hex");
   return `${payload}.${sig}`;
 }
 
-export function verifySession(token?: string): string | null {
+export function verifySession(token?: string): SessionClaims | null {
   if (!token) return null;
   const i = token.lastIndexOf(".");
   if (i < 0) return null;
-  const payload = token.slice(0, i); // "<uid>.<iat>"
+  const payload = token.slice(0, i); // "<uid>.<version>.<iat>"
   const sig = token.slice(i + 1);
 
   const expected = createHmac("sha256", sessionSecret()).update(payload).digest("hex");
@@ -66,17 +74,18 @@ export function verifySession(token?: string): string | null {
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
 
-  // Split the verified payload into uid + issued-at. Tokens from the old
-  // uid-only format have no "." here and are rejected — those users just log in
-  // again once, which is the correct outcome for tightening session security.
-  const j = payload.lastIndexOf(".");
-  if (j < 0) return null;
-  const uid = payload.slice(0, j);
-  const iat = Number(payload.slice(j + 1));
-  if (!uid || !Number.isFinite(iat)) return null;
+  // Older two-field tokens are rejected rather than guessed at. Those users log
+  // in once more, which is the correct outcome for tightening session security —
+  // the same call that was made when the issue time was introduced.
+  const parts = payload.split(".");
+  if (parts.length !== 3) return null;
+  const [uid, versionText, iatText] = parts;
+  const version = Number(versionText);
+  const iat = Number(iatText);
+  if (!uid || !Number.isFinite(version) || !Number.isFinite(iat)) return null;
   if (Date.now() - iat > SESSION_MAX_AGE_MS) return null; // expired
 
-  return uid;
+  return { uid, version };
 }
 
 export const SESSION_COOKIE = "dq_session";
