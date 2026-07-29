@@ -448,32 +448,87 @@ const L3 = [
 ];
 
 const L4 = [
-  { t: "objectives", items: ["for loop se list / range pe chalna","while loop condition tak chalana","break aur continue use karna"] },
-  { t: "hook", q: "10 lakh users ki salary ka total nikalna hai. Kya tum 10 lakh baar <code>+</code> likhoge?", why: "Obviously nahi. Par phir computer kaise karta hai? Wo bhi ek-ek karke hi jodta hai — bas <b>likhne</b> ka kaam ek baar hota hai, <b>chalne</b> ka 10 lakh baar. Wahi loop hai." },
-  { t: "think", q: "<code>range(5)</code> kya deta hai? Dhyan se socho — kitne numbers, aur kaunse se kaunse tak?", a: "<b>5 numbers: 0, 1, 2, 3, 4</b> — <code>5</code> khud shaamil <b>nahi</b> hai.<br/><br/>Ye \"start included, stop excluded\" rule Python me har jagah hai — <code>range()</code>, slicing <code>[1:3]</code>, sab me. Ek baar dimaag me baith gaya to aadhi off-by-one galtiyan khatam." },
-  { t: "h2", n: "1", text: "for loop" },
-  { t: "def", term: "Loop", en: "A loop repeatedly executes a block of code while a condition holds or for each item in a sequence.", hi: "Ek chakkar ko <b>iteration</b> kehte hain. <code>for</code> ek collection ke <b>har item</b> pe chalta hai; <code>while</code> tab tak chalta hai jab tak condition sach hai." },
-  { t: "p", html: "Ek hi kaam har item pe dohrane ke liye <code>for</code> loop. <code>range(5)</code> deta hai 0,1,2,3,4." },
-  { t: "code", file: "forloop.py", code: "total = 0\nfor n in [2, 4, 6, 8, 10]:\n    total += n\nprint(total)   # 30", output: "30" },
-  { t: "viz", name: "loop-visualizer" },
-  { t: "h2", n: "2", text: "while loop" },
-  { t: "p", html: "Jab tak condition True hai, <code>while</code> chalta rehta hai. Dhyaan — condition kabhi False honi chahiye warna infinite loop!" },
-  { t: "code", file: "while.py", code: "count = 3\nwhile count > 0:\n    print(count)\n    count -= 1", output: "3\n2\n1" },
-  { t: "h2", n: "3", text: "break aur continue" },
-  { t: "p", html: "<code>break</code> loop turant rok deta hai. <code>continue</code> current chakkar chhod ke agle pe chala jaata hai." },
-  { t: "note", variant: "warn", html: "<b>Infinite loop se bacho:</b> while me kuch aisa zaroor badlo jisse condition ek din False ho." },
-  { t: "analogy", concept: "for vs while", real: "Guest list vs Darwaza", html: "<b>for</b> = guest list haath me hai — tumhe pata hai kitne log aane hain, ek-ek ka naam pukaro, list khatam, kaam khatam. <b>while</b> = darwaaze pe khade ho — nahi pata kitne aayenge, bas \"jab tak koi aata rahe\" tab tak khade raho. Isiliye <code>while</code> me infinite loop ho sakta hai, <code>for</code> me nahi." },
-  { t: "mistakes", items: [
-    { bad: "for i in range(1, 5):\n    print(i)  # 5 chahiye tha", why: "<code>range(1, 5)</code> deta hai 1,2,3,4 — <b>5 nahi</b>. Stop hamesha <b>excluded</b> hota hai. Ye \"off-by-one\" galti programming ki sabse purani aur sabse aam galti hai.", fix: "for i in range(1, 6):\n    print(i)" },
-    { bad: "while count > 0:\n    print(count)", why: "<code>count</code> kabhi badla hi nahi — condition hamesha True rahegi. <b>Infinite loop.</b> Program hang ho jayega. <code>while</code> likhte hi khud se poochho: \"ye False kab hoga?\"", fix: "while count > 0:\n    print(count)\n    count -= 1" },
-    { bad: "for f in fruits:\n    fruits.remove(f)", why: "Jis list pe loop chal raha hai usi ko badal rahe ho. Har remove pe baaki items khisak jaate hain, aur loop <b>items skip kar deta hai</b>. Error nahi milega — bas chup-chaap galat jawab. Ye sabse khatarnaak kism ka bug hai.", fix: "for f in fruits[:]:\n    fruits.remove(f)" },
+  { t: "objectives", items: [
+    "Repeat work with a <code>for</code> loop, over a list, a string or a <code>range</code>",
+    "Use <code>while</code> when you know the stopping condition but not the count",
+    "Control a loop from inside with <code>break</code> and <code>continue</code>",
+    "Read <code>range()</code> correctly — including why the stop value is never reached",
   ]},
-  { t: "recap", items: ["for → known items / range pe chalo","while → condition tak chalo","break → loop rok do","continue → agla chakkar"] },
+  { t: "hook", q: "You need the total salary of ten lakh users. Are you going to write <code>+</code> ten lakh times?", why: "Of course not. But the computer still adds them one at a time — the difference is that <b>writing</b> it happens once and <b>running</b> it happens ten lakh times. That gap is the whole idea of a loop, and it is the first moment programming stops being a calculator." },
+  { t: "think", q: "What does <code>range(5)</code> give you? Think carefully — how many numbers, and which ones?", a: "<b>Five numbers: 0, 1, 2, 3, 4.</b> The <code>5</code> itself is <b>not</b> included.<br/><br/>Python uses this \"start included, stop excluded\" rule everywhere — <code>range()</code>, slicing like <code>[1:3]</code>, all of it. Once that is settled in your head, half of all off-by-one bugs simply stop happening." },
+
+  { t: "h2", n: "1", text: "The for loop" },
+  { t: "def", term: "Loop", en: "A loop repeatedly executes a block of code, either for each item in a sequence or while a condition holds.", hi: "One pass through the block is called an <b>iteration</b>. A <code>for</code> loop runs once per item in a collection; a <code>while</code> loop runs as long as its condition stays true." },
+  { t: "p", html: "A <code>for</code> loop takes a collection and hands you one item at a time. The indented block runs once per item, and the loop variable holds whichever item you are on." },
+  { t: "code", file: "forloop.py", code: "total = 0\nfor n in [2, 4, 6, 8, 10]:\n    total += n\nprint(total)", output: "30" },
+  { t: "viz", name: "loop-visualizer" },
+  { t: "p", html: "Step through that panel and watch the loop variable change on each pass while the total carries forward. The variable is not one value — it is a new value every iteration." },
+
+  { t: "h2", n: "2", text: "range() — counting without a list" },
+  { t: "p", html: "You do not always have a list to loop over. <code>range()</code> produces the numbers for you: <code>range(stop)</code>, <code>range(start, stop)</code>, or <code>range(start, stop, step)</code>." },
+  { t: "code", file: "range.py", code: "print(list(range(5)))\nprint(list(range(1, 5)))\nprint(list(range(1, 10, 2)))", output: "[0, 1, 2, 3, 4]\n[1, 2, 3, 4]\n[1, 3, 5, 7, 9]" },
+  { t: "note", variant: "warn", html: "<b>The stop value is never produced.</b> <code>range(1, 5)</code> stops at 4. If you want 1 to 5, you must write <code>range(1, 6)</code>. This one rule is behind more beginner bugs than any other single thing in Python." },
+
+  { t: "h2", n: "3", text: "The while loop" },
+  { t: "p", html: "Use <code>while</code> when you cannot say in advance how many times it should run — only what would make it stop." },
+  { t: "code", file: "while.py", code: "count = 3\nwhile count > 0:\n    print(count)\n    count -= 1\nprint(\"Lift off\")", output: "3\n2\n1\nLift off" },
+  { t: "note", variant: "tip", html: "Notice <code>count -= 1</code>. Every <code>while</code> loop needs something inside it that moves the condition towards false. The moment you write <code>while</code>, ask yourself: <b>what will make this stop?</b> If you cannot answer, you have written an infinite loop." },
+  { t: "analogy", concept: "for vs while", real: "A guest list, or a doorway", html: "<b>for</b> is a guest list in your hand — you know exactly who is coming, you call each name, the list ends and you are done. <b>while</b> is standing at the door: you have no idea how many will arrive, you only know you stay \"as long as people keep coming\". That is why a <code>while</code> can run forever and a <code>for</code> cannot." },
+
+  { t: "h2", n: "4", text: "break and continue" },
+  { t: "p", html: "<code>break</code> leaves the loop immediately. <code>continue</code> abandons the current pass and jumps to the next one." },
+  { t: "code", file: "breakcontinue.py", code: "for n in [4, 7, 10, 13, 16]:\n    if n % 2 != 0:\n        continue\n    if n > 10:\n        break\n    print(n)", output: "4\n10" },
+  { t: "p", html: "Follow it: 4 is even and not above 10, so it prints. 7 is odd, so <code>continue</code> skips it. 10 prints. 13 is skipped. 16 is even but above 10, so <code>break</code> ends the loop — and nothing after it runs." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> nearly all real data work is a loop over rows — cleaning each record, checking each file, calling an API once per user. <code>continue</code> is how you skip a bad row instead of crashing the whole job, and <code>break</code> is how you stop early once you have found what you came for. A pipeline that dies on row 40,000 because of one missing value is a pipeline whose author had not met <code>continue</code>." },
+
+  { t: "h2", n: "5", text: "The else nobody expects" },
+  { t: "p", html: "A loop can carry an <code>else</code>. It runs when the loop finished <b>without</b> hitting <code>break</code> — which makes it exactly right for searching." },
+  { t: "code", file: "forelse.py", code: "names = [\"asha\", \"vikram\", \"priya\"]\n\nfor name in names:\n    if name == \"rahul\":\n        print(\"found\")\n        break\nelse:\n    print(\"not found\")", output: "not found" },
+  { t: "note", variant: "tip", html: "The name is genuinely misleading — it is not \"or else\". Read it as <b>nobreak</b>: run this if the loop was never interrupted." },
+
+  { t: "trace", intro: "A running total over a list. Work out what each name holds once the line has run.", code: "items = [3, 5, 8]\ntotal = 0\nfor n in items:\n    total += n\ncount = len(items)", steps: [
+    { q: "After line 2, <code>total</code> is", answer: "0", why: "The loop has not started yet. Line 2 only sets up the box the total will accumulate into." },
+    { q: "After line 4 has finished running, <code>total</code> is", answer: "16", why: "The loop ran three times: 0+3, then +5, then +8. <code>total</code> is not reassigned each pass, it is added to — which is what makes it carry across iterations." },
+    { q: "After line 5, <code>count</code> is", answer: "3", why: "<code>len()</code> counts the items in the list. Note it is 3 and not 16 — the number of items and the sum of them are different questions." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the numbers 0 to 4, one per line.", code: "for i in range(5):\n    print(i)", out: "0\n1\n2\n3\n4" },
+    { task: "Add up a list and print the total.", code: "nums = [2, 4, 6]\ntotal = 0\nfor n in nums:\n    total += n\nprint(total)", out: "12" },
+    { task: "Count the letters in <code>hello</code> using a loop, without <code>len()</code>.", code: "count = 0\nfor c in \"hello\":\n    count += 1\nprint(count)", out: "5" },
+    { task: "Print the numbers from 2 up to and including 5, as a list.", code: "print(list(range(2, 6)))", out: "[2, 3, 4, 5]" },
+    { task: "Print every third number from 0 to under 10.", code: "print(list(range(0, 10, 3)))", out: "[0, 3, 6, 9]" },
+    { task: "Count down from 3 with a <code>while</code> loop.", code: "n = 3\nwhile n > 0:\n    print(n)\n    n -= 1", out: "3\n2\n1" },
+    { task: "Stop the loop as soon as you reach 3.", code: "for n in [1, 2, 3, 4]:\n    if n == 3:\n        break\n    print(n)", out: "1\n2" },
+    { task: "Print every number except 2.", code: "for n in [1, 2, 3, 4]:\n    if n == 2:\n        continue\n    print(n)", out: "1\n3\n4" },
+    { task: "Print each character of <code>abc</code> on its own line.", code: "for ch in \"abc\":\n    print(ch)", out: "a\nb\nc" },
+    { task: "Print each item with its position, using <code>enumerate</code>.", code: "for i, name in enumerate([\"asha\", \"vikram\"]):\n    print(i, name)", out: "0 asha\n1 vikram" },
+    { task: "Print every pair from two nested loops over <code>range(2)</code>.", code: "for i in range(2):\n    for j in range(2):\n        print(i, j)", out: "0 0\n0 1\n1 0\n1 1" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "for i in range(1, 5):\n    print(i)   # wanted 1 to 5", why: "<code>range(1, 5)</code> gives 1, 2, 3, 4 — <b>not 5</b>. The stop value is always excluded. This is the off-by-one error, the oldest and most common mistake in programming.", fix: "for i in range(1, 6):\n    print(i)" },
+    { bad: "while count > 0:\n    print(count)", why: "Nothing ever changes <code>count</code>, so the condition stays true forever and the program hangs. A <code>while</code> loop with no change inside it is not a loop, it is a freeze.", fix: "while count > 0:\n    print(count)\n    count -= 1" },
+    { bad: "for f in fruits:\n    fruits.remove(f)", why: "You are changing the list you are looping over. Each removal shifts the remaining items back while the loop's position moves forward, so items get <b>silently skipped</b>. No error appears — just a wrong answer, which is the most dangerous kind of bug.", fix: "for f in fruits[:]:\n    fruits.remove(f)" },
+    { bad: "for i in range(len(names)):\n    print(names[i])", why: "This works, but it is the long way round and it comes from other languages. Python hands you the items directly, and when you need the position too, <code>enumerate</code> gives you both.", fix: "for name in names:\n    print(name)" },
+  ]},
+
+  { t: "debug", intro: "This should add up all four numbers and print 50. It prints 20 instead. Nothing crashes, and every line looks reasonable. Read it before opening the fix.", code: "nums = [5, 10, 15, 20]\n\nfor n in nums:\n    total = 0\n    total += n\n\nprint(total)", symptom: "prints 20, but the four numbers add up to 50", q: "The addition is correct and the loop visits every number. So why does only the last one survive?", fix: "nums = [5, 10, 15, 20]\n\ntotal = 0\nfor n in nums:\n    total += n\n\nprint(total)", why: "<code>total = 0</code> is <b>inside</b> the loop, so it is reset at the start of every pass. Each iteration wipes out everything counted so far and adds one number to zero — which is why the answer is the last number, not the sum. Setting up before the loop and accumulating inside it is the pattern behind every running total you will ever write. Indentation alone decided this, and Python had no way to warn you: both versions are perfectly valid code." },
+
+  { t: "recap", items: [
+    "<code>for</code> runs once per item — use it when you know what you are looping over",
+    "<code>while</code> runs until its condition turns false — use it when you only know the stopping rule",
+    "<code>range(a, b)</code> <b>excludes</b> <code>b</code>; <code>range(a, b, step)</code> counts in jumps",
+    "<code>break</code> ends the loop; <code>continue</code> skips just this pass",
+    "Set your accumulator up <b>before</b> the loop, never inside it",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>for</code> aur <code>while</code> kab use karoge?", a: "<code>for</code> jab pata ho <b>kis-kis pe</b> chalna hai — list, string, range. <code>while</code> jab pata na ho kitni baar chalega, sirf <b>rukne ki condition</b> pata ho — jaise \"jab tak user quit na likhe\"." },
-    { level: "beginner", q: "<code>break</code> aur <code>continue</code> me kya farak hai?", a: "<code>break</code> loop <b>poora</b> tod deta hai — bahar nikal jaata hai. <code>continue</code> sirf <b>current chakkar</b> chhodta hai aur agle pe chala jaata hai. <code>break</code> = \"bas, khatam\"; <code>continue</code> = \"isko chhodo, agla dikhao\"." },
-    { level: "intermediate", q: "Loop pe <code>else</code> laga sakte ho? Wo kab chalega?", a: "Haan — Python ki khaas cheez hai. <code>for...else</code> me <code>else</code> tab chalta hai jab loop <b>bina break ke</b> poora ho jaye. Search me kaam aata hai: item mila to <code>break</code>, nahi mila to <code>else</code> me \"not found\". Naam confusing hai — ise <code>nobreak</code> samajhna behtar hai." },
-    { level: "intermediate", q: "Jis list pe loop chal raha ho usko modify karne me kya problem hai?", a: "Loop internally <b>index</b> se chalta hai. Item hataoge to baaki peeche khisak jaayenge, par index aage badh chuka hoga — matlab kuch items <b>skip</b> ho jayenge. Error nahi aayega, jawaab galat aayega. Hal: copy pe loop karo (<code>for x in items[:]</code>) ya nayi list banao (list comprehension)." },
+    { level: "beginner", q: "When would you use <code>for</code> and when <code>while</code>?", a: "<code>for</code> when you know <b>what</b> you are iterating over — a list, a string, a range. <code>while</code> when you do not know how many passes there will be and only know the stopping condition, such as \"until the user types quit\"." },
+    { level: "beginner", q: "What is the difference between <code>break</code> and <code>continue</code>?", a: "<code>break</code> ends the <b>whole loop</b> and moves past it. <code>continue</code> abandons only the <b>current pass</b> and starts the next one. Think of <code>break</code> as \"stop, we are done\" and <code>continue</code> as \"skip this one, next please\"." },
+    { level: "intermediate", q: "Can a loop have an <code>else</code>? When does it run?", a: "Yes, and it is unusual to Python. The <code>else</code> runs when the loop completes <b>without hitting <code>break</code></b>. It is built for searching: <code>break</code> when you find the item, and the <code>else</code> handles \"not found\" without needing a flag variable. The keyword is badly named — read it as <code>nobreak</code>." },
+    { level: "intermediate", q: "What goes wrong if you modify a list while looping over it?", a: "The loop tracks its position by <b>index</b>. Removing an item shifts everything after it back by one, while the index still moves forward — so items get skipped. Nothing raises an error; the result is just quietly wrong. Loop over a copy (<code>items[:]</code>) or build a new list instead." },
+    { level: "advanced", q: "What does <code>enumerate</code> give you, and why prefer it to <code>range(len(x))</code>?", a: "<code>enumerate</code> yields <code>(index, item)</code> pairs, so you get the position and the value together. <code>range(len(x))</code> gives you only the index and then makes you look the item up yourself — more code, an extra chance to index wrongly, and it fails on anything that is not indexable. <code>enumerate</code> also takes a <code>start</code>, so <code>enumerate(x, 1)</code> counts from one." },
   ]},
 ];
 
@@ -4083,10 +4138,19 @@ export const QUIZZES = {
     { level: "hard", q: "<code>count = 0</code>. Why can <code>if count:</code> be a bug where <code>if count is not None:</code> is not?", options: ["They are identical", "if count: raises an error", "is not None is slower", "0 is falsy, so a real value of zero is treated as missing"], correct: 3, why: "Truthiness collapses \"empty\" and \"zero\" into the same answer. If <b>0</b> is a legitimate value — zero sales, zero errors — the truthy shortcut silently skips it. Check against <code>None</code> when zero means something." },
   ],
   "loops": [
-    { q: "<code>for i in range(1, 4): print(i)</code> — kya chhapega?", options: ["1 2 3 4", "0 1 2 3", "1 2 3", "1 2"], correct: 2, why: "<code>range(1, 4)</code> = 1, 2, 3 — <b>stop (4) excluded</b>." },
-    { q: "<code>continue</code> loop me kya karta hai?", options: ["poora loop rok deta", "current chakkar chhod ke agle pe", "program band", "kuch nahi"], correct: 1, why: "<code>continue</code> = current iteration <b>skip</b>, agla chalu. <code>break</code> poora loop rokta hai." },
-    { q: "<code>while count > 0:</code> me <code>count</code> kabhi na badle to?", options: ["infinite loop", "ek baar chalega", "error", "kabhi nahi chalega"], correct: 0, why: "Condition kabhi False nahi hogi → <b>infinite loop</b>. <code>while</code> me kuch aisa badlo jisse condition ek din False ho." },
-    { q: "<code>range(5)</code> kitne aur kaunse numbers deta hai?", options: ["5 numbers: 1-5", "6 numbers: 0-5", "4 numbers: 0-3", "5 numbers: 0-4"], correct: 3, why: "<code>range(5)</code> = 0, 1, 2, 3, 4 — <b>0 se shuru, 5 excluded</b>." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>print(list(range(5)))</code> — what appears?", options: ["[0, 1, 2, 3, 4]", "[1, 2, 3, 4, 5]", "[0, 1, 2, 3, 4, 5]", "[1, 2, 3, 4]"], correct: 0, why: "<code>range</code> starts at 0 by default and stops <b>before</b> the number you give it, so you get five values ending at 4." },
+    { level: "easy", q: "You have a list of names and want to greet each one. Which loop fits?", options: ["while", "for", "if", "break"], correct: 1, why: "You know exactly what you are looping over, so <code>for</code> is the natural choice. <code>while</code> is for when you only know the stopping condition." },
+    { level: "easy", q: "What does <code>break</code> do inside a loop?", options: ["Skips the current pass and continues", "Restarts the loop from the beginning", "Ends the loop completely", "Pauses until the next input"], correct: 2, why: "<code>break</code> leaves the loop entirely. Skipping just one pass is <code>continue</code>." },
+    // Medium — apply it
+    { level: "medium", q: "<code>for n in [1, 2, 3, 4]:</code> then <code>if n == 2: continue</code>, then <code>print(n)</code>. What is printed?", options: ["1 2 3 4", "1 3 4", "1", "2"], correct: 1, why: "<code>continue</code> skips only the pass where <code>n</code> is 2. The loop carries on with 3 and 4." },
+    { level: "medium", q: "<code>print(list(range(1, 10, 3)))</code> — what appears?", options: ["[1, 4, 7]", "[1, 3, 6, 9]", "[1, 4, 7, 10]", "[3, 6, 9]"], correct: 0, why: "Start at 1, step by 3, stop before 10: 1, 4, 7. The next would be 10, which is excluded." },
+    { level: "medium", q: "A <code>while</code> loop's condition uses a variable that is never changed inside the loop. What happens?", options: ["It runs exactly once", "It never runs at all", "It runs forever", "Python raises a SyntaxError"], correct: 2, why: "Nothing moves the condition towards false, so it stays true and the program hangs. Every <code>while</code> needs something inside it that changes the outcome." },
+    { level: "medium", q: "<code>total = 0</code> is written <b>inside</b> a loop that adds each of [5, 10, 15, 20]. What does it print at the end?", options: ["50", "20", "0", "5"], correct: 1, why: "The total is reset at the start of every pass, so only the last number survives. The accumulator has to be set up <b>before</b> the loop." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "A <code>for</code> loop has an <code>else</code>. When does the <code>else</code> block run?", options: ["Always, once the loop ends", "Only if the loop finished without hitting break", "Only if the loop body never ran", "Only if break was used"], correct: 1, why: "It is really a \"nobreak\" clause. It runs when the loop completed normally, which is what makes it useful for handling the not-found case in a search." },
+    { level: "hard", q: "You remove items from a list while looping over that same list. What happens?", options: ["Python raises an error immediately", "It works correctly", "Some items get silently skipped", "The loop never ends"], correct: 2, why: "The loop tracks position by index. Each removal shifts the rest back while the index moves forward, so items are stepped over. No error appears - just a quietly wrong answer." },
+    { level: "hard", q: "<code>for i, c in enumerate(\"ab\"): print(i, c)</code> — what is printed?", options: ["a 0 then b 1", "0 then 1", "a then b", "0 a then 1 b"], correct: 3, why: "<code>enumerate</code> yields the index first and the item second, so each line is the position followed by the character." },
   ],
   "lists-tuples": [
     { q: "<code>nums = [1, 2, 3]; print(nums[3])</code> — kya hoga?", options: ["3", "None", "IndexError", "0"], correct: 2, why: "Index 0, 1, 2 hi valid hain (3 items). <code>nums[3]</code> range ke bahar — <b>IndexError</b>." },
