@@ -13,7 +13,7 @@ either in this file or in the repo.
 >
 > **Job:** rebuild the remaining stub lessons to the full standard, one at a
 > time, in the order listed in `docs/HANDOFF.md` §3. Python is finished (39/39).
-> Statistics is 3 of 11 done.
+> Statistics is finished (11/11), including its practice problems.
 >
 > Work autonomously and do not stop to ask which lesson is next — the order is
 > written down. For each lesson: write it, verify it, commit it, deploy it, then
@@ -62,22 +62,13 @@ same command works for a subject that has never had quizzes.
 
 ## 3. What is left, in order
 
-### Statistics — 8 of 11 remaining
+### Statistics — done ✅
 
-| Array | Slug | Existing visual |
-|---|---|---|
-| `S4` | normal-distribution | `bell-curve` ✅ |
-| `S5` | percentiles-iqr | **needs a new one** |
-| `S6` | correlation | `scatter-correlation` ✅ |
-| `S7` | bayes | **needs a new one** |
-| `S8` | distributions | **needs a new one** |
-| `S9` | sampling-clt | **needs a new one** |
-| `S10` | hypothesis-testing | **needs a new one** |
-| `S11` | ab-testing | **needs a new one** |
-
-Then: **problems**. Statistics has 19 across 11 topics; the unlock gate wants two
-per topic, so top it up in `prisma/topic-problems.mjs` the same way Python's gap
-was closed.
+All 11 topics are at the full standard and all 11 have two or more practice
+problems (23 across the track). Six new visuals were built for it: `box-plot`,
+`bayes-grid`, `distribution-lab`, `sampling-lab`, `p-value-lab`, `ab-test-lab`.
+`scatter-correlation` and `bell-curve` were corrected rather than replaced —
+the scatter panel had been reporting r values that did not match its own points.
 
 ### After Statistics
 
@@ -121,7 +112,26 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 - **No em-dashes inside Python string literals.** The verifier runs on a Windows
   console that cannot encode them.
 - **Everything ships in English.** The platform was converted; do not
-  reintroduce Hinglish. Chat with Jugendra in Hinglish.
+  reintroduce Hinglish. Chat with Jugendra in Hinglish. Two Hinglish strings
+  were still hiding in **visual components** rather than lessons (`BellCurve`,
+  `ScatterCorrelation`) — grep the components too, and grep for whole phrases,
+  not just common words like "hai", which both of those slipped past.
+- **`verify:lesson` never checks your prose.** It runs the code and confirms the
+  code misbehaves; it does not read the sentences around it. Three lessons in
+  this batch shipped a draft whose text quoted a number the code does not
+  produce (claimed 30.5, real 8.25; claimed "about 22", real 9632.91; claimed
+  12.4, real 7.25). **Every number you write in prose has to be run separately.**
+- **A trace step cannot be hypothetical.** "If line 3 had been 0.99, `p_pos`
+  would be…" gets parsed for `line (\d+)` and the first `<code>word</code>`,
+  then evaluated against the *real* code — so it checks a question you never
+  asked. Every step must be a genuine "after line N, `var` is". Cost time twice.
+- **The `debug` symptom must not contain the word "error".** verify-lesson.mjs
+  decides whether to expect an exception by testing the symptom against
+  `/error|exception|traceback/i`. A lesson about the *standard error* therefore
+  cannot use the term there, or the silent-bug check flips to demanding a crash.
+- **New visuals need a `const` sweep.** `prefer-const` is an error, not a
+  warning, and a `let` copied from an existing component will fail lint after
+  the build has already passed.
 
 ---
 
