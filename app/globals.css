@@ -1849,3 +1849,13 @@ select.inp { cursor:pointer; }
 .subject-bar { height:4px; max-width:320px; margin-top:11px; border-radius:20px; background:var(--sub-bg); overflow:hidden; }
 .subject-bar span { display:block; height:100%; border-radius:20px; background:var(--sub-fg); transition:width .4s ease; }
 @media (max-width:640px){ .lesson-head.subject-tint { padding-left:12px; } .subject-bar { max-width:100%; } }
+
+/* ---- Locked topic ---------------------------------------------------------
+   Shown in place of a topic's content when the one before it is unfinished
+   (docs/LEARNING-SPEC.md §3). Deliberately not a dead end: it names what is
+   missing and links straight to it. */
+.topic-lock { border-left:3px solid var(--accent); }
+.topic-lock h3 { margin:6px 0 8px; }
+.topic-lock p { color:var(--ink-soft); font-size:13.5px; margin:0 0 12px; }
+.lock-needs { margin:0 0 16px; padding-left:20px; }
+.lock-needs li { font-size:13.5px; color:var(--ink); margin-bottom:6px; }

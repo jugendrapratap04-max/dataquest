@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL, clamp } from "@/lib/seo";
 import { subjectStyle, subjectName } from "@/lib/subjects";
+import { lockStateFor } from "@/lib/unlock";
 import { getCurrentUser } from "@/lib/session";
 import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
@@ -319,6 +320,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
     ? await prisma.lessonProgress.findMany({ where: { userId: user.id, status: "done" } })
     : [];
   const doneIds = new Set(doneRows.map((d) => d.lessonId));
+  const lock = await lockStateFor(lesson.id, user?.id ?? null);
 
   const blocks: any[] = JSON.parse(lesson.contentJson || "[]");
   const objectives = blocks.find((b) => b.t === "objectives");
@@ -372,6 +374,38 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           </div>
         </div>
 
+        {/* Topic-by-topic progression (docs/LEARNING-SPEC.md §3). A signed-in
+            student reaches a topic only after reading the previous one and
+            solving its practice problems. Signed-out readers are never gated —
+            the lessons are the try-before-signup path and the only thing search
+            can index, and a lock a reader escapes by logging out is worse than
+            no lock at all. */}
+        {lock.locked ? (
+          <div className="card pad topic-lock">
+            <div className="eyebrow">Locked topic</div>
+            <h3>Finish the topic before this one first</h3>
+            <p>
+              This is how the course is meant to work: read, practise, then move on. You are one
+              step away.
+            </p>
+            <ul className="lock-needs">
+              {lock.needs.readNeeded && (
+                <li>Read <b>{lock.needs.title}</b> and mark it complete</li>
+              )}
+              {lock.needs.problemsNeeded > 0 && (
+                <li>
+                  Solve <b>{lock.needs.problemsNeeded}</b> more practice{" "}
+                  {lock.needs.problemsNeeded === 1 ? "problem" : "problems"} from{" "}
+                  <b>{lock.needs.title}</b>
+                </li>
+              )}
+            </ul>
+            <Link className="btn btn-primary" href={`/learn/${lock.needs.slug}`}>
+              Go to {lock.needs.title} →
+            </Link>
+          </div>
+        ) : (
+          <>
         {objectives && <Block b={objectives} />}
         {showToc && <LessonToc outline={outline} />}
         <div className="prose">
@@ -427,6 +461,8 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
             )}
           </div>
         </div>
+          </>
+        )}
 
         <nav className="lnav">
           {prev
