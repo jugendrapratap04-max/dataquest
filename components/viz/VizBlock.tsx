@@ -56,6 +56,8 @@ import { MissingDataLab } from "./MissingDataLab";
 import { GroupByLab } from "./GroupByLab";
 import { CleaningLab } from "./CleaningLab";
 import { SelectLab } from "./SelectLab";
+import { WhereLab } from "./WhereLab";
+import { OrderLimitLab } from "./OrderLimitLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -110,6 +112,8 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "groupby-lab": GroupByLab,
   "cleaning-lab": CleaningLab,
   "select-lab": SelectLab,
+  "where-lab": WhereLab,
+  "order-limit-lab": OrderLimitLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
