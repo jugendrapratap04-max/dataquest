@@ -3,10 +3,19 @@
 import { useState } from "react";
 
 type Mode = "positive" | "negative" | "none";
+// Every r here was computed from the points beside it with Python's
+// statistics.correlation, not estimated. The panel used to claim +0.96, -0.97
+// and "~0.0" against true values of 0.9754, -0.9815 and -0.0352 — small gaps,
+// but a student reading r off this panel and then computing it in the lesson
+// would have found two different numbers for the same seven points.
+//
+// The third one is left at its real -0.04 rather than rounded to a tidy zero,
+// because "no relationship" almost never lands exactly on zero in real data,
+// and pretending otherwise sets up the wrong expectation.
 const SETS: Record<Mode, { pts: [number, number][]; r: string; label: string }> = {
-  positive: { pts: [[1,2],[2,3],[3,3],[4,5],[5,5],[6,7],[7,8]], r: "+0.96", label: "as one rises, so does the other" },
-  negative: { pts: [[1,8],[2,7],[3,7],[4,5],[5,4],[6,2],[7,1]], r: "−0.97", label: "ek badhe to doosra ghate" },
-  none: { pts: [[1,4],[2,8],[3,2],[4,6],[5,3],[6,7],[7,4]], r: "~0.0", label: "no pattern" },
+  positive: { pts: [[1,2],[2,3],[3,3],[4,5],[5,5],[6,7],[7,8]], r: "+0.98", label: "as one rises, so does the other" },
+  negative: { pts: [[1,8],[2,7],[3,7],[4,5],[5,4],[6,2],[7,1]], r: "−0.98", label: "as one rises, the other falls" },
+  none: { pts: [[1,4],[2,8],[3,2],[4,6],[5,3],[6,7],[7,4]], r: "−0.04", label: "no pattern — and note that this is not exactly zero" },
 };
 const W = 300, H = 160;
 
