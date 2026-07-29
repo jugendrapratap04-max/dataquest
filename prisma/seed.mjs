@@ -5336,18 +5336,92 @@ const vizLessons = [
 
 /* ===================== SQL ===================== */
 const sqlNote = { t: "note", variant: "tip", html: "<b>SQL playground ab live hai!</b> Is lesson ke problems me asli SQLite database chalta hai — query likho, rows turant dikhengi. Padhne se zyada likhne se aata hai." };
-const sqlLessons = [
-  { slug: "sql-intro", order: 1, title: "SQL & SELECT", minutes: 11, problems: [], content: [
-    { t: "objectives", items: ["SQL kya hai","SELECT statement","Columns choose karna"] },
-    { t: "h2", n: "1", text: "SQL — database se baat karna" },
-    { t: "p", html: "SQL (Structured Query Language) databases se data nikaalne ki language hai. Har DS job me zaroori — ek pura interview round sirf SQL ka hota hai." },
-    { t: "code", file: "select.sql", code: "-- saare columns\nSELECT * FROM employees;\n\n-- sirf kuch columns\nSELECT name, salary FROM employees;", output: "-- rows return hongi" },
-    { t: "h2", n: "2", text: "Basic structure" },
-    { t: "p", html: "<code>SELECT</code> (kaunse columns) <code>FROM</code> (kaunsi table). Ye har query ki neev hai." },
-    sqlNote,
-    { t: "recap", items: ["SQL = database ki language","SELECT columns FROM table","* = saare columns","Har DS job me zaroori"] },
+const SQ1 = [
+  { t: "objectives", items: [
+    "Write a <code>SELECT ... FROM</code> and read what comes back",
+    "Choose columns instead of taking everything with <code>*</code>",
+    "Rename and compute columns with <code>AS</code>",
+    "Know the order the database actually reads a query in — it is not top to bottom",
   ]},
-  { slug: "sql-where", order: 2, title: "WHERE & Filtering", minutes: 11, problems: [], content: [
+  { t: "hook", q: "Ten employees, and you want the ones earning over 90,000. In a spreadsheet you would scroll and squint. What do you do with ten million?", why: "You stop looking and start <b>describing</b>.<br/><br/>That is the whole shift SQL asks you to make. Python and pandas are <i>imperative</i> — you say how to get the answer, step by step. SQL is <b>declarative</b>: you describe the answer you want and the database works out how to fetch it. You never write the loop, never open the file, never decide which index to use. You say what, and it decides how.<br/><br/>It is also why SQL survives. The language is older than most of the people writing it and it is still in every data job advert, because \"describe what you want\" turned out to be a much better idea than \"describe how to get it\" once the data stopped fitting on one screen." },
+  { t: "def", term: "SELECT", en: "The statement that asks a database for data — SELECT which columns, FROM which table. Everything else in SQL is a clause bolted onto that spine.", hi: "A SELECT never changes anything. You can run one on a production database and the worst that happens is you wait, which is why it is the safe half of SQL to learn first." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> almost every data role has a SQL round, and it is usually the round people fail. Not because the questions are hard, but because SQL is the one skill you cannot fake by reading — an interviewer puts a schema in front of you and asks for a query, and either it runs or it does not. The good news is that the whole language is a small number of clauses, and this track is those clauses in the order they compose." },
+
+  { t: "h2", n: "1", text: "SELECT and FROM" },
+  { t: "p", html: "Two words and you have a query. <code>*</code> means every column." },
+  { t: "sqlsetup", sql: "CREATE TABLE departments (\n  id INTEGER PRIMARY KEY,\n  name TEXT,\n  city TEXT\n);\nINSERT INTO departments (id, name, city) VALUES\n  (1, 'Engineering', 'Bengaluru'),\n  (2, 'Sales', 'Mumbai'),\n  (3, 'Marketing', 'Delhi'),\n  (4, 'HR', 'Pune');\n\nCREATE TABLE employees (\n  id INTEGER PRIMARY KEY,\n  name TEXT,\n  dept_id INTEGER,\n  salary INTEGER,\n  hire_date TEXT\n);\nINSERT INTO employees (id, name, dept_id, salary, hire_date) VALUES\n  (1,  'Aarav Sharma', 1, 95000,  '2021-03-15'),\n  (2,  'Diya Patel',   1, 88000,  '2022-01-10'),\n  (3,  'Rohan Mehta',  1, 120000, '2020-07-01'),\n  (4,  'Ananya Iyer',  2, 67000,  '2022-05-20'),\n  (5,  'Vihaan Nair',  2, 72000,  '2021-11-05'),\n  (6,  'Ishita Rao',   2, 59000,  '2023-02-14'),\n  (7,  'Kabir Singh',  3, 81000,  '2022-08-30'),\n  (8,  'Meera Joshi',  3, 76000,  '2023-06-12'),\n  (9,  'Arjun Reddy',  1, 105000, '2023-09-01'),\n  (10, 'Saanvi Gupta', 2, 91000,  '2020-12-25');" },
+  { t: "p", html: "Those are the tables every example and every practice problem in this whole track runs against — four departments and ten employees. Learning one schema properly beats meeting a new one every lesson, and you can paste that setup into the compiler and try anything you like against it." },
+  { t: "code", file: "select-all.sql", code: "SELECT * FROM departments", output: "id | name | city\n1 | Engineering | Bengaluru\n2 | Sales | Mumbai\n3 | Marketing | Delhi\n4 | HR | Pune" },
+  { t: "p", html: "Four rows back, three columns wide. Note there is no loop, no file handle and no <code>open()</code> — you named a table and asked for everything in it." },
+
+  { t: "h2", n: "2", text: "Choosing columns" },
+  { t: "p", html: "Name the columns you want instead of taking all of them." },
+  { t: "code", file: "columns.sql", code: "SELECT name, city FROM departments", output: "name | city\nEngineering | Bengaluru\nSales | Mumbai\nMarketing | Delhi\nHR | Pune" },
+  { t: "viz", name: "select-lab" },
+  { t: "p", html: "Tap the column names and watch two numbers under the table. The <b>columns</b> figure follows what you picked; the <b>rows</b> figure does not move at all.<br/><br/>That is the sentence to take out of this lesson: <b>SELECT decides the width of the answer, never the height.</b> Narrowing the rows is a different clause entirely, and it is the whole of the next lesson. Turn every column on and watch the query collapse to <code>SELECT *</code> — the same result, and the habit the warning below is about." },
+  { t: "note", variant: "warn", html: "<b><code>SELECT *</code> is fine while you are exploring and a bad habit in code you keep.</b> It moves every column across the network whether you need them or not, and — worse — it silently changes what your query returns the day somebody adds a column to the table. Code that reads <code>row[2]</code> starts reading a different field and nothing errors. Name your columns and that whole class of breakage disappears." },
+
+  { t: "h2", n: "3", text: "Renaming and computing" },
+  { t: "p", html: "<code>AS</code> gives a column a different name in the output. It also names columns you <b>invent</b>." },
+  { t: "code", file: "as.sql", code: "SELECT name AS department, city AS located_in FROM departments", output: "department | located_in\nEngineering | Bengaluru\nSales | Mumbai\nMarketing | Delhi\nHR | Pune" },
+  { t: "p", html: "The table did not change — only the labels on the result. That matters more than it looks, because the name a column comes back with is the name everything downstream will use." },
+  { t: "code", file: "computed.sql", code: "SELECT name, salary, salary / 100000.0 AS lakhs FROM employees", output: "name | salary | lakhs\nAarav Sharma | 95000 | 0.95\nDiya Patel | 88000 | 0.88\nRohan Mehta | 120000 | 1.2\nAnanya Iyer | 67000 | 0.67\nVihaan Nair | 72000 | 0.72\nIshita Rao | 59000 | 0.59\nKabir Singh | 81000 | 0.81\nMeera Joshi | 76000 | 0.76\nArjun Reddy | 105000 | 1.05\nSaanvi Gupta | 91000 | 0.91" },
+  { t: "p", html: "The third column exists nowhere in the table — the database computed it per row and named it because you said <code>AS lakhs</code>. Look closely at that <code>100000.0</code>, though. The decimal point is doing real work, and §Find the bug is what happens without it." },
+
+  { t: "h2", n: "4", text: "The order it is actually read in" },
+  { t: "p", html: "You write <code>SELECT</code> first. The database does it almost last." },
+  { t: "p", html: "The real order is roughly: <b>FROM</b> (which table) → <b>WHERE</b> (which rows) → <b>GROUP BY</b> → <b>HAVING</b> → <b>SELECT</b> (which columns) → <b>ORDER BY</b> → <b>LIMIT</b>. Every one of those after FROM is a lesson in this track, and they run in that sequence whatever order you typed them in." },
+  { t: "note", variant: "tip", html: "<b>Why this is worth knowing on day one:</b> it explains the error messages you are about to meet. An alias you invent in <code>SELECT</code> cannot be used in <code>WHERE</code>, because WHERE has already finished by the time SELECT runs — and the message you get is a baffling \"no such column\" for a name that is plainly right there in your query. Once you know the order, that error explains itself." },
+
+  { t: "think", q: "Why is a SELECT safe to run on a live production database when almost nothing else is?", a: "Because it does not write anything.<br/><br/>SQL splits into two halves. <b>SELECT</b> reads: it takes the data as it finds it and returns a copy. <b>INSERT, UPDATE and DELETE</b> write: they change what is stored, and a mistake in one is permanent in a way that a mistake in a SELECT never is.<br/><br/>That asymmetry is why this track spends five and a half lessons on reading. In a data role you will write thousands of SELECTs and possibly never a DELETE — the writing is usually somebody else's job, done by an application, and the analyst's job is asking questions of what is already there.<br/><br/>The one caveat worth carrying: a SELECT cannot corrupt data but it can absolutely bring a database to its knees. A query that scans a billion rows during business hours is not safe just because it is read-only, which is why <code>LIMIT</code> exists and why people put one on anything exploratory." },
+  { t: "analogy", concept: "Declarative querying", real: "Ordering food, not cooking it", html: "In a kitchen you follow steps: heat the pan, add the oil, wait. Get an order wrong and you get something inedible. That is imperative — you own the how.<br/><br/>In a restaurant you say \"the dal, no chilli\". You do not specify which pan or which burner or what order things go in. The kitchen decides all of that, and it will decide differently on a busy night than a quiet one.<br/><br/>SQL is the second one. You describe the dish; the database plans the cooking, and it re-plans as the data grows — the same query that scanned a small table happily will quietly start using an index once the table is large. You did not change your order. The kitchen got smarter." },
+
+  { t: "trace", intro: "Three queries against the same tables. Work out what comes back — the shape of the answer, not the values.", code: "SELECT * FROM departments", steps: [
+    { q: "How many <b>columns</b> does <code>SELECT * FROM departments</code> return?", sql: "SELECT * FROM departments", answer: "3", why: "id, name and city. <code>*</code> means \"every column this table has\" — and that is exactly why it is fragile: add a column to the table tomorrow and this same query returns four." },
+    { q: "How many <b>columns</b> does <code>SELECT name, city FROM departments</code> return?", sql: "SELECT name, city FROM departments", answer: "2", why: "You asked for two, so two came back. Naming columns is what makes a query's output stable against changes to the table." },
+    { q: "How many <b>rows</b> does <code>SELECT name FROM employees</code> return?", sql: "SELECT name FROM employees", answer: "10", why: "Choosing fewer columns never changes the row count — SELECT decides the <i>width</i> of the answer. Narrowing the rows is WHERE, which is the next lesson." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Everything in the departments table.", code: "SELECT * FROM departments", out: "id | name | city\n1 | Engineering | Bengaluru\n2 | Sales | Mumbai\n3 | Marketing | Delhi\n4 | HR | Pune" },
+    { task: "Just the department names.", code: "SELECT name FROM departments", out: "name\nEngineering\nSales\nMarketing\nHR" },
+    { task: "Names and cities together.", code: "SELECT name, city FROM departments", out: "name | city\nEngineering | Bengaluru\nSales | Mumbai\nMarketing | Delhi\nHR | Pune" },
+    { task: "Rename a column in the output.", code: "SELECT city AS located_in FROM departments", out: "located_in\nBengaluru\nMumbai\nDelhi\nPune" },
+    { task: "How many employees are there?", code: "SELECT COUNT(*) AS total FROM employees", out: "total\n10" },
+    { task: "Every employee's name and salary.", code: "SELECT name, salary FROM employees", out: "name | salary\nAarav Sharma | 95000\nDiya Patel | 88000\nRohan Mehta | 120000\nAnanya Iyer | 67000\nVihaan Nair | 72000\nIshita Rao | 59000\nKabir Singh | 81000\nMeera Joshi | 76000\nArjun Reddy | 105000\nSaanvi Gupta | 91000" },
+    { task: "A computed column — salary in lakhs, with the decimal point.", code: "SELECT name, salary / 100000.0 AS lakhs FROM employees", out: "name | lakhs\nAarav Sharma | 0.95\nDiya Patel | 0.88\nRohan Mehta | 1.2\nAnanya Iyer | 0.67\nVihaan Nair | 0.72\nIshita Rao | 0.59\nKabir Singh | 0.81\nMeera Joshi | 0.76\nArjun Reddy | 1.05\nSaanvi Gupta | 0.91" },
+    { task: "The same without the decimal point — see what integer division does.", code: "SELECT name, salary / 100000 AS lakhs FROM employees", out: "name | lakhs\nAarav Sharma | 0\nDiya Patel | 0\nRohan Mehta | 1\nAnanya Iyer | 0\nVihaan Nair | 0\nIshita Rao | 0\nKabir Singh | 0\nMeera Joshi | 0\nArjun Reddy | 1\nSaanvi Gupta | 0" },
+    { task: "How many departments?", code: "SELECT COUNT(*) AS total FROM departments", out: "total\n4" },
+    { task: "A monthly figure, computed per row.", code: "SELECT name, salary / 12 AS monthly FROM employees", out: "name | monthly\nAarav Sharma | 7916\nDiya Patel | 7333\nRohan Mehta | 10000\nAnanya Iyer | 5583\nVihaan Nair | 6000\nIshita Rao | 4916\nKabir Singh | 6750\nMeera Joshi | 6333\nArjun Reddy | 8750\nSaanvi Gupta | 7583" },
+    { task: "Two computed columns at once.", code: "SELECT name, salary AS annual, salary / 12 AS monthly FROM employees", out: "name | annual | monthly\nAarav Sharma | 95000 | 7916\nDiya Patel | 88000 | 7333\nRohan Mehta | 120000 | 10000\nAnanya Iyer | 67000 | 5583\nVihaan Nair | 72000 | 6000\nIshita Rao | 59000 | 4916\nKabir Singh | 81000 | 6750\nMeera Joshi | 76000 | 6333\nArjun Reddy | 105000 | 8750\nSaanvi Gupta | 91000 | 7583" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "SELECT * FROM employees   -- in code you are keeping", why: "It moves every column whether you need it or not, and it silently changes what your query returns the day somebody adds a column. Fine while exploring; a liability in anything scheduled.", fix: "SELECT name, salary FROM employees" },
+    { bad: "SELECT salary / 100000 AS lakhs FROM employees", why: "Both sides are integers, so SQLite does <b>integer</b> division and throws the remainder away. Every salary under a lakh becomes 0 and nothing warns you.", fix: "SELECT salary / 100000.0 AS lakhs FROM employees" },
+    { bad: "SELECT name AS n FROM employees WHERE n = 'Diya Patel'", why: "WHERE runs <b>before</b> SELECT, so the alias does not exist yet. The error says \"no such column: n\" about a name that is visibly right there in the query.", fix: "SELECT name AS n FROM employees WHERE name = 'Diya Patel'" },
+    { bad: "SELECT name FROM employees WHERE name = \"Diya Patel\"", why: "SQL uses single quotes for text. Double quotes mean an <i>identifier</i> — a column or table name — so this asks for a column called Diya Patel and fails confusingly.", fix: "SELECT name FROM employees WHERE name = 'Diya Patel'" },
+  ]},
+
+  { t: "debug", intro: "This is meant to show each salary in lakhs. It runs cleanly and returns a column of 0s and 1s. Rohan earns 1.2 lakh and Aarav 0.95 — neither of those is a whole number. Read it before opening the fix.", code: "SELECT name, salary, salary / 100000 AS lakhs\nFROM employees", symptom: "every value in the lakhs column is 0 or 1, when the real figures run from 0.59 to 1.2 - eight of the ten have been flattened to zero", q: "The division is right and the column names are right. So what happened to everything after the decimal point?", fix: "SELECT name, salary, salary / 100000.0 AS lakhs\nFROM employees", why: "<code>salary</code> is an INTEGER column and <code>100000</code> is an integer literal, so SQLite does <b>integer division</b>: it divides and throws the remainder away. 95000 / 100000 is 0.95, which becomes <b>0</b>.<br/><br/>Writing <code>100000.0</code> makes one side a floating-point number, which is enough to make the whole expression floating-point, and the answer comes back as 0.95.<br/><br/>What makes this genuinely nasty is that <b>0 and 1 look like data</b>. A column of zeros and ones reads as a flag, or a rounded figure, or a category — nothing about it says \"a calculation went wrong\". Compare it with a crash, which you would fix in thirty seconds.<br/><br/>It is also not a SQLite quirk. Postgres does the same, and so does Python 2, and so does C, and so does Java. Any time you divide two integers and expect a fraction, in almost any language, this is waiting for you. The habit is small and permanent: <b>when you want a fraction, put a decimal point on one side of the division.</b>" },
+
+  { t: "recap", items: [
+    "<code>SELECT</code> columns <code>FROM</code> table — the spine every other clause bolts onto",
+    "<code>*</code> takes everything; naming columns keeps your output stable when the table changes",
+    "<code>AS</code> renames a column, and names one you computed",
+    "The read order is <b>FROM → WHERE → GROUP BY → SELECT → ORDER BY → LIMIT</b>, not the order you type",
+    "Integer ÷ integer throws away the remainder — write <code>100000.0</code> when you want a fraction",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does SELECT * do, and when should you avoid it?", a: "It returns every column of the table. It is convenient while exploring and a liability in code you keep: it moves data you do not need, and it silently changes what the query returns when somebody adds a column — so anything reading by position starts reading a different field with no error." },
+    { level: "beginner", q: "What is AS for?", a: "It renames a column in the output. It is required rather than cosmetic when you compute a column, because an expression like salary / 12 has no name of its own, and whatever name it comes back with is what everything downstream will refer to." },
+    { level: "intermediate", q: "In what order does a database actually process a SELECT?", a: "Roughly FROM, then WHERE, then GROUP BY, then HAVING, then SELECT, then ORDER BY, then LIMIT — not the order you write them. The practical consequence is that an alias created in SELECT cannot be used in WHERE, because WHERE has already run; it can be used in ORDER BY, which runs after. That single fact explains most of the confusing 'no such column' errors beginners hit." },
+    { level: "intermediate", q: "Why is a SELECT considered safe on a production database?", a: "Because it does not write. INSERT, UPDATE and DELETE change stored data and a mistake in one is permanent; a SELECT returns a copy and the worst outcome is a wrong answer. The caveat is performance rather than correctness — a read-only query that scans a billion rows can still take a database down, which is why anything exploratory gets a LIMIT." },
+    { level: "advanced", q: "A report shows a ratio column that is all zeros, and nobody can find the bug. Where do you look?", a: "At the types on either side of the division. Integer divided by integer discards the remainder in SQLite, Postgres, C, Java and Python 2 alike, so any ratio smaller than one collapses to zero — and a column of zeros reads as a flag or a rounded value rather than as a fault. The fix is to make one side floating point, either with a decimal literal or an explicit CAST. I would also treat it as a review lesson rather than a one-off: the same shape appears in percentages, rates and averages, and it never announces itself, so the place to catch it is a test that asserts a known ratio rather than an eye on the output." },
+  ]},
+];
+const SQ2 = [
     { t: "objectives", items: ["WHERE se filter","Comparison & logical operators","IN, BETWEEN, LIKE"] },
     { t: "h2", n: "1", text: "WHERE — conditions" },
     { t: "p", html: "<code>WHERE</code> se sirf wo rows aati hain jo condition poori karti hain — jaise Python ka filter." },
@@ -5356,8 +5430,8 @@ const sqlLessons = [
     { t: "p", html: "<code>IN (a, b)</code> list me se, <code>BETWEEN x AND y</code> range, <code>LIKE 'A%'</code> pattern match (A se shuru)." },
     sqlNote,
     { t: "recap", items: ["WHERE = row filter","AND / OR / NOT","IN, BETWEEN, LIKE","= '' me strings"] },
-  ]},
-  { slug: "sql-order", order: 3, title: "ORDER BY, LIMIT & DISTINCT", minutes: 10, problems: [], content: [
+];
+const SQ3 = [
     { t: "objectives", items: ["Sorting (ORDER BY)","Top-N (LIMIT)","Unique values (DISTINCT)"] },
     { t: "h2", n: "1", text: "Sort aur limit" },
     { t: "p", html: "<code>ORDER BY col DESC</code> se sort (DESC = bada se chhota). <code>LIMIT 5</code> se sirf pehli 5 rows — 'top 5' queries ke liye." },
@@ -5366,8 +5440,8 @@ const sqlLessons = [
     { t: "p", html: "<code>SELECT DISTINCT dept FROM employees</code> — duplicate hata ke sirf alag values." },
     sqlNote,
     { t: "recap", items: ["ORDER BY = sorting","DESC bada→chhota, ASC ulta","LIMIT n = top n","DISTINCT = unique values"] },
-  ]},
-  { slug: "sql-groupby", order: 4, title: "Aggregations & GROUP BY", minutes: 13, problems: [], content: [
+];
+const SQ4 = [
     { t: "objectives", items: ["COUNT, SUM, AVG, MAX","GROUP BY","HAVING"] },
     { t: "h2", n: "1", text: "Aggregate functions" },
     { t: "p", html: "<code>COUNT()</code>, <code>SUM()</code>, <code>AVG()</code>, <code>MAX()</code>, <code>MIN()</code> — poore column pe summary." },
@@ -5376,8 +5450,8 @@ const sqlLessons = [
     { t: "p", html: "<code>GROUP BY</code> rows ko categories me baant ke har group pe aggregate karta hai (Pandas groupby jaisa). <code>HAVING</code> groups pe filter (WHERE rows pe)." },
     sqlNote,
     { t: "recap", items: ["COUNT/SUM/AVG/MAX summary","GROUP BY = per category","HAVING = groups pe filter","WHERE rows pe, HAVING groups pe"] },
-  ]},
-  { slug: "sql-joins", order: 5, title: "JOINs", minutes: 14, problems: [], content: [
+];
+const SQ5 = [
     { t: "objectives", items: ["Tables ko jodna","INNER vs LEFT JOIN","Foreign keys"] },
     { t: "h2", n: "1", text: "JOIN — do tables jodna" },
     { t: "p", html: "Real data kai tables me hota hai (employees, departments). <code>JOIN</code> unhe ek common column pe jodta hai." },
@@ -5386,8 +5460,8 @@ const sqlLessons = [
     { t: "p", html: "<b>INNER JOIN</b> — sirf matching rows. <b>LEFT JOIN</b> — left table ki saari rows + jahan match ho wo (warna NULL). Venn diagram socho." },
     sqlNote,
     { t: "recap", items: ["JOIN = tables jodo common column pe","INNER = sirf match","LEFT = left ka sab + match","ON se join condition"] },
-  ]},
-  { slug: "sql-advanced", order: 6, title: "Subqueries & Window Functions", minutes: 14, problems: [], content: [
+];
+const SQ6 = [
     { t: "objectives", items: ["Subquery (query ke andar query)","Window functions","RANK, ROW_NUMBER"] },
     { t: "h2", n: "1", text: "Subqueries" },
     { t: "p", html: "Ek query ke result ko doosri query me use karo. Jaise 'average se zyada salary wale' nikaalna." },
@@ -5396,7 +5470,15 @@ const sqlLessons = [
     { t: "p", html: "<code>RANK()</code>, <code>ROW_NUMBER()</code>, <code>LEAD/LAG</code> rows ke beech calculation karte hain bina group collapse kiye — advanced analytics ka powerful tool." },
     sqlNote,
     { t: "recap", items: ["Subquery = query ke andar query","Window fn = row-wise advanced calc","RANK, ROW_NUMBER, LEAD/LAG","Interview me advanced SQL zaroori"] },
-  ]},
+];
+
+const sqlLessons = [
+  { slug: "sql-intro", order: 1, title: "SQL & SELECT", minutes: 11, problems: [], content: SQ1 },
+  { slug: "sql-where", order: 2, title: "WHERE & Filtering", minutes: 11, problems: [], content: SQ2 },
+  { slug: "sql-order", order: 3, title: "ORDER BY, LIMIT & DISTINCT", minutes: 10, problems: [], content: SQ3 },
+  { slug: "sql-groupby", order: 4, title: "Aggregations & GROUP BY", minutes: 13, problems: [], content: SQ4 },
+  { slug: "sql-joins", order: 5, title: "JOINs", minutes: 14, problems: [], content: SQ5 },
+  { slug: "sql-advanced", order: 6, title: "Subqueries & Window Functions", minutes: 14, problems: [], content: SQ6 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -5872,6 +5954,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "sql-intro": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does SELECT * FROM departments return?", options: ["Every column of every row in departments", "Only the first column", "The number of rows", "Nothing until you add a WHERE"], correct: 0, why: "The star means every column. It is convenient while exploring and a liability in code you keep." },
+    { level: "easy", q: "What does AS do?", options: ["Sorts the results", "Renames a column in the output", "Filters rows", "Joins two tables"], correct: 1, why: "It is required rather than cosmetic on a computed column, because an expression like salary / 12 has no name of its own." },
+    { level: "easy", q: "Does running a SELECT change the data in the table?", options: ["Yes, it locks the rows", "Yes, it updates a timestamp", "No — SELECT only reads", "Only if you use *"], correct: 2, why: "That is why it is the safe half of SQL. The writing half is INSERT, UPDATE and DELETE, where a mistake is permanent." },
+    // Medium — apply it
+    { level: "medium", q: "Why is SELECT * a bad habit in code you keep?", options: ["It is slower to type", "It only works on small tables", "It cannot be used with AS", "It silently returns different columns the day somebody adds one to the table"], correct: 3, why: "Anything reading by position starts reading a different field, and nothing errors. It also moves data you did not ask for across the network." },
+    { level: "medium", q: "salary is an INTEGER. Why does salary / 100000 return 0 for a salary of 95000?", options: ["Integer divided by integer discards the remainder", "The column is too large", "SQLite cannot divide", "100000 must be quoted"], correct: 0, why: "Writing 100000.0 makes the expression floating point and returns 0.95. The same trap exists in Postgres, C, Java and Python 2." },
+    { level: "medium", q: "SELECT name AS n FROM employees WHERE n = 'Diya Patel' fails. Why?", options: ["Aliases must be uppercase", "WHERE runs before SELECT, so the alias does not exist yet", "You cannot alias a text column", "n is a reserved word"], correct: 1, why: "The error reads 'no such column: n' about a name that is visibly in the query — which is exactly why knowing the execution order pays off early. The alias does work in ORDER BY, which runs after SELECT." },
+    { level: "medium", q: "A table has 10 rows. How many rows does SELECT name, salary FROM it return?", options: ["2", "1", "10", "It depends on the column types"], correct: 2, why: "SELECT decides the width of the answer, never the height. Narrowing the rows is WHERE, which is the next lesson." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "In what order does the database actually process a SELECT?", options: ["Exactly the order you typed it", "SELECT, then FROM, then WHERE", "Alphabetically by clause", "FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY, LIMIT"], correct: 3, why: "Not the order you write. It is what explains why a SELECT alias is unavailable in WHERE but available in ORDER BY." },
+    { level: "hard", q: "What does WHERE name = \"Diya Patel\" do, with double quotes?", options: ["SQL reads double quotes as an identifier, so it looks for a column with that name and fails", "It works identically to single quotes", "It performs a case-insensitive match", "It is a syntax error in every database"], correct: 0, why: "Single quotes are for text, double quotes for column and table names. The error message talks about a missing column, which sends people looking in the wrong place." },
+    { level: "hard", q: "A report's ratio column is entirely zeros and nobody can find the bug. Where do you look first?", options: ["The WHERE clause", "The types on either side of the division", "The table's indexes", "The ORDER BY"], correct: 1, why: "Integer ÷ integer discards the remainder, so any ratio below one collapses to zero — and a column of zeros reads as a flag or a rounded value rather than as a fault. One decimal literal or a CAST fixes it." },
+  ],
   "sorting-unique": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which method shows you every value in a column and how often each appears?", options: ["value_counts()", "describe()", "unique()", "info()"], correct: 0, why: "It is the first thing to run on a new text column. A real category has a few values with large counts; a long tail of ones is somebody's typing." },

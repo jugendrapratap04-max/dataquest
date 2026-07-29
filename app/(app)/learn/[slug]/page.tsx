@@ -129,6 +129,25 @@ function Block({ b }: { b: any }) {
           {b.output && <div className="out">Output:<br /><b>{b.output}</b></div>}
         </div>
       );
+    // The tables a SQL lesson's examples run against.
+    //
+    // It is shown rather than hidden for two reasons: the student cannot check
+    // a query's result without knowing what is in the table, and having the
+    // setup on the page means they can paste it into the compiler and try their
+    // own queries. verify:lesson runs every snippet in this lesson against
+    // exactly this SQL, so what the page claims is what sql.js actually returns.
+    case "sqlsetup":
+      return (
+        <div className="code">
+          <div className="bar">
+            <span className="dot" style={{ background: "#FF5F57" }} />
+            <span className="dot" style={{ background: "#FEBC2E" }} />
+            <span className="dot" style={{ background: "#28C840" }} />
+            <span className="fn">the table these examples use</span>
+          </div>
+          <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.sql) }} />
+        </div>
+      );
     case "note":
       return (
         <div className={`note ${b.variant}`}>

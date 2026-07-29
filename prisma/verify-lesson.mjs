@@ -18,8 +18,49 @@ const [track, slug] = process.argv.slice(2);
 const lesson = (trackLessons[track] ?? []).find((l) => l.slug === slug);
 if (!lesson) { console.error(`no lesson ${track}/${slug}`); process.exit(1); }
 
+// A SQL lesson is one carrying a `sqlsetup` block: the CREATE TABLE + INSERT
+// its examples run against. Its snippets are queries, not Python, so they go to
+// sql.js — the same engine the student's browser uses, so a claimed result here
+// is a result they can reproduce.
+//
+// Without this the verifier fed "SELECT * FROM employees" to python and reported
+// a SyntaxError, which meant the SQL track had no verification at all and its
+// claimed outputs were nobody's word but the author's.
+const sqlSetupBlock = lesson.content.find((b) => b.t === "sqlsetup");
+let runSql = null;
+if (sqlSetupBlock) {
+  const initSqlJs = (await import("sql.js")).default;
+  const { readFile } = await import("node:fs/promises");
+  const path = await import("node:path");
+  const SQL = await initSqlJs({
+    wasmBinary: await readFile(path.join(process.cwd(), "public", "sqljs", "sql-wasm.wasm")),
+  });
+  // Rows as "a | b", header first. Deterministic and readable, so a lesson can
+  // claim it verbatim — and NULL is spelled out rather than shown as a blank,
+  // because a blank cell and an empty string are different answers.
+  const fmt = (res) =>
+    res
+      .map((r) =>
+        [r.columns.join(" | "), ...r.values.map((v) => v.map((x) => (x === null ? "NULL" : String(x))).join(" | "))].join("\n")
+      )
+      .join("\n\n");
+  runSql = (code) => {
+    // A fresh database per snippet. Examples must not depend on the order the
+    // lesson happens to run them in.
+    const db = new SQL.Database();
+    try {
+      db.run(sqlSetupBlock.sql);
+      return { ok: true, out: fmt(db.exec(code)).trimEnd() };
+    } catch (e) {
+      return { ok: false, out: String(e.message ?? e).split("\n").pop() };
+    } finally {
+      db.close();
+    }
+  };
+}
+
 const dir = mkdtempSync(join(tmpdir(), "lesson-"));
-const run = (code) => {
+const runPy = (code) => {
   const f = join(dir, "s.py");
   writeFileSync(f, code, "utf8");
   try {
@@ -31,6 +72,9 @@ const run = (code) => {
     return { ok: false, out: err.split("\n").filter(Boolean).pop() ?? "" };
   }
 };
+
+/** Whichever engine this lesson is written in. */
+const run = runSql ?? runPy;
 
 const cases = [];
 for (const b of lesson.content) {
@@ -46,7 +90,36 @@ for (const b of lesson.content) {
     if (i !== b.blanks.length) cases.push({ what: "faded blank count", code: "raise SystemExit('blank/answer count mismatch')", claim: "" });
     cases.push({ what: "faded (answers filled in)", code: filled, claim: b.output ?? null });
   }
-  if (b.t === "trace") {
+  if (b.t === "trace" && runSql) {
+    // A SQL trace reads a query one clause at a time, which is how you actually
+    // debug one: run the first N lines and see what is still standing.
+    //
+    // Two things are worth counting and the question says which. **rows** is the
+    // one that moves as WHERE, GROUP BY and JOIN are added. **columns** is the
+    // one that moves in a SELECT lesson, where the row count never changes — and
+    // without it lesson 1 could not have a trace at all, because `SELECT name`
+    // on its own is not a query and no prefix shorter than the whole thing runs.
+    // A step may carry its own `sql`. It usually has to: unlike Python, a SQL
+    // statement does not build up a line at a time — `SELECT name` on its own is
+    // not a query, so for most lessons there is no valid prefix shorter than the
+    // whole thing. Where prefixes ARE valid (adding WHERE, then ORDER BY) the
+    // line form still works and reads better.
+    b.steps.forEach((s, i) => {
+      const m = s.q.match(/line (\d+)/i);
+      if (!m && !s.sql) { cases.push({ what: `trace step ${i + 1} (needs a line number or its own sql)`, code: "SELECT bad syntax", claim: "" }); return; }
+      const upto = s.sql
+        ? s.sql.replace(/;\s*$/, "")
+        : b.code.split("\n").slice(0, Number(m[1])).join("\n").replace(/;\s*$/, "");
+      const wantsCols = /column/i.test(s.q);
+      cases.push({
+        what: `trace step ${i + 1}: ${wantsCols ? "columns" : "rows"}`,
+        code: wantsCols ? `${upto} LIMIT 1` : `SELECT COUNT(*) AS n FROM (${upto})`,
+        claim: wantsCols ? `__COLS__${s.answer}` : `n\n${s.answer}`,
+        accept: wantsCols ? [] : (s.accept ?? []).map((a) => `n\n${a}`),
+      });
+    });
+  }
+  if (b.t === "trace" && !runSql) {
     b.steps.forEach((s, i) => {
       const m = s.q.match(/line (\d+)/i);
       const v = s.q.match(/<code>(\w+)<\/code>/);
@@ -89,6 +162,12 @@ for (const c of cases) {
     else if (!fixedRun.ok) fail(c, `the fix crashed: ${fixedRun.out}`);
     else if (r.out === fixedRun.out) fail(c, `broken and fixed print the same thing (${JSON.stringify(r.out)}) — then there is no bug to find`);
     else console.log(`  ok   ${c.what}  (broken ${JSON.stringify(r.out)} vs fixed ${JSON.stringify(fixedRun.out)})`);
+  } else if (String(c.claim).startsWith("__COLS__")) {  // how many columns came back
+    const want = c.claim.slice("__COLS__".length);
+    const got = r.ok ? String(r.out.split("\n")[0].split(" | ").length) : "";
+    if (!r.ok) fail(c, `crashed: ${r.out}`);
+    else if (got !== want) fail(c, `claimed ${want} columns, got ${got} (${JSON.stringify(r.out.split("\n")[0])})`);
+    else console.log(`  ok   ${c.what}`);
   } else if (String(c.claim).startsWith("__ERR__")) {   // must fail with this error
     const want = c.claim.slice(7);
     if (r.ok) fail(c, `expected an error, but it ran and printed ${JSON.stringify(r.out)}`);
