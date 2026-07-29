@@ -14,7 +14,7 @@ export default async function RoadmapPage() {
     id: t.id, slug: t.slug, order: t.order, title: t.title, subtitle: t.subtitle, status: t.status,
     weeks: t.weeks, level: t.level, whyText: t.whyText, milestone: t.milestone,
     toolsCsv: t.toolsCsv, skills: t.skills,
-    firstLesson: t.firstLesson,
+    firstLesson: t.firstLesson, pct: t.pct,
   }));
 
   const projects = tracks.filter((t) => t.milestone).length;

@@ -8,6 +8,7 @@ export type Phase = {
   id: string; slug: string; order: number; title: string; subtitle: string; status: string;
   weeks: string; level: string; whyText: string; milestone: string;
   toolsCsv: string; skills: [name: string, done: boolean][]; firstLesson?: string;
+  pct: number;
 };
 
 function BoxIcon() {
@@ -17,7 +18,13 @@ function BoxIcon() {
 function PhaseCard({ p }: { p: Phase }) {
   const [open, setOpen] = useState(p.status === "now");
   const st = p.status === "done" ? "st-done" : p.status === "now" ? "st-now" : "st-locked";
-  const stTxt = p.status === "done" ? "✓ Done" : p.status === "now" ? "● In progress" : "🔒 Locked";
+  // "Locked" was the wrong word twice over. An open subject you have not started
+  // is Available, not "In progress" — that claimed work the student had not done.
+  // And a closed one is waiting on us to write it, not on them to earn it.
+  const stTxt =
+    p.status === "done" ? "✓ Done"
+    : p.status === "now" ? (p.pct > 0 ? "● In progress" : "○ Available")
+    : "🔒 Coming soon";
   const tools = p.toolsCsv ? p.toolsCsv.split(",") : [];
 
   return (

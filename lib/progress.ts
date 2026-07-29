@@ -12,6 +12,25 @@ import { prisma } from "./prisma";
 export type SkillState = [name: string, done: boolean];
 export type TrackStatus = "done" | "now" | "locked";
 
+/**
+ * Has this lesson actually been written, or is it still a stub?
+ *
+ * The five blocks below are the ones `prisma/check-syllabus.mjs` grades a lesson
+ * on, and only a rebuilt lesson carries all of them — a stub has objectives, a
+ * heading, a paragraph and a recap. Checked against the database when this
+ * shipped: exactly 50 of 83 lessons pass, which is the same 50 the syllabus
+ * report calls "at the FULL standard". One definition of finished, two readers.
+ *
+ * It tests the serialised string rather than parsing it. contentJson runs to
+ * ~15KB per lesson and this is on the dashboard's path, so JSON.parse across 83
+ * of them on every render would be real work to answer a yes/no question.
+ */
+function isTaught(contentJson: string | null): boolean {
+  const s = contentJson ?? "";
+  return TEACHING_BLOCKS.every((b) => s.includes(`"t":"${b}"`));
+}
+const TEACHING_BLOCKS = ["hook", "def", "analogy", "mistakes", "interview"];
+
 export type TrackProgress = {
   id: string; slug: string; order: number;
   title: string; shortTitle: string; subtitle: string; icon: string;
@@ -72,16 +91,30 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     );
     const total = totalLessons + totalProblems;
     const pct = total ? Math.round(((lessonsDone + problemsDone) / total) * 100) : 0;
-    return { t, totalLessons, totalProblems, lessonsDone, problemsDone, pct };
+    const ready = totalLessons > 0 && t.lessons.every((l) => isTaught(l.contentJson));
+    return { t, totalLessons, totalProblems, lessonsDone, problemsDone, pct, ready };
   });
 
-  // The track you're on is the first unfinished one; everything past it is locked
-  // until you actually get there.
-  const firstUnfinished = raw.findIndex((r) => r.pct < 100);
-
-  const out: TrackProgress[] = raw.map((r, i) => {
-    const status: TrackStatus =
-      r.pct === 100 ? "done" : r.pct > 0 || i === firstUnfinished ? "now" : "locked";
+  const out: TrackProgress[] = raw.map((r) => {
+    // A locked subject is one we have not written yet — not one the student has
+    // failed to earn.
+    //
+    // This used to lock everything past the first unfinished track, so a student
+    // on lesson 2 of Python saw a padlock on Statistics. Statistics is finished:
+    // eleven topics at the full standard, twenty-three practice problems, six
+    // interactive panels. Hiding it behind 39 Python lessons meant the best
+    // finished work on the platform was unreachable for months, and the padlock
+    // told the student it was their fault.
+    //
+    // It also flattered the seven subjects that really are 48-129 word stubs.
+    // They looked like a reward waiting to be unlocked rather than a page nobody
+    // has written, which is the same dishonesty as the seeded streak and the
+    // fake leaderboard, both already removed for exactly this reason.
+    //
+    // So the lock now reports content readiness, and it updates itself: finish a
+    // subject to the standard and it opens on the next page load, with no flag
+    // to remember to flip.
+    const status: TrackStatus = !r.ready ? "locked" : r.pct === 100 ? "done" : "now";
 
     // Nothing in the data maps a skill to the lessons that teach it, so a skill counts
     // as mastered once the matching share of the track's lessons is done. Lessons are

@@ -79,7 +79,11 @@ export default async function DashboardPage() {
               <Link key={t.id} href="/roadmap" className={`node ${t.status}`}>
                 <div className={`ic tinted subject-tint`} style={subjectStyle(t.slug)}>{t.icon}</div>
                 <div className="t">{t.shortTitle}</div>
-                <div className="m">{t.status === "done" ? "✓ done" : `${t.pct}%`}</div>
+                {/* "0%" on a locked subject reads as progress you have not made
+                    yet. These are subjects nobody has written, so they say so —
+                    a percentage would be inviting the student to go and earn
+                    something that does not exist. */}
+                <div className="m">{t.status === "done" ? "✓ done" : t.status === "locked" ? "coming soon" : `${t.pct}%`}</div>
                 <span className="badge">{t.status === "done" ? "✓" : t.status === "locked" ? "🔒" : ""}</span>
               </Link>
             ))}
