@@ -82,16 +82,41 @@ this machine's Python (pandas 3.0.3 / numpy 2.5.1) while the student runs
 Pyodide (pandas 3.0.2 / numpy 2.4.3). Same print formatting at that distance,
 but do not claim an output that depends on a repr you have not checked in both.
 
+### SQL — done ✅
+
+All 6 topics at the full standard, 18 practice problems. Five new visuals:
+`select-lab`, `where-lab`, `order-limit-lab`, `join-lab`, `window-lab`, plus a
+SQL dialect on the existing `groupby-lab` (`groupby-lab-sql`).
+
+**verify-lesson.mjs now runs SQL lessons through sql.js**, so the track is
+verified for the first time. A lesson counts as SQL if it carries a `sqlsetup`
+block — the CREATE TABLE + INSERT its examples run against, rendered on the page
+so the student can see the data and paste it into the compiler. Two SQL-only
+differences from the Python trace:
+
+- **a step may carry its own `sql`**, and usually must. A statement does not
+  build up a line at a time — `SELECT name` alone is not a query — so for most
+  lessons no prefix shorter than the whole thing runs.
+- **`rows` or `columns`**, chosen by whether the question says "column". In a
+  SELECT lesson the row count never moves; the width does.
+
+Every lesson uses the shared schema from `prisma/sql-problems.mjs` (four
+departments, ten employees, eight sales), so lessons and practice query the same
+tables. **SQLite drops trailing zeros** — `ROUND(x, 2)` prints `12.3`, not
+`12.30`, and a claimed output has to match.
+
 ### What is left
 
 `npm run syllabus` prints the honest state of every subject. The remaining stub
-subjects are viz (5), sql (6), bi (3), ml (6), dl (3), deploy (4).
+subjects are viz (5), bi (3), ml (6), dl (3), deploy (4).
 `docs/IMPROVEMENTS.md` §H has the recommended order and the reasoning.
 
-**SQL is the obvious next one**: it already has 18 practice problems, it runs
-in the browser today on sql.js, and it is the subject interviews ask about most
-after Python. Note it needs `kind: "sql"` problems and the SqlWorkbench rather
-than Pyodide, so the lesson recipe is the same but the problems are not.
+None of them can be practised in the browser today: viz needs matplotlib, ml
+needs scikit-learn (both are wheel-download work like pandas was), and bi, dl
+and deploy are content-and-quiz subjects with no runtime at all. So the next
+one is a judgement call about what to teach rather than what is cheapest to
+verify — and all five currently have **zero practice problems**, which the
+unlock gate needs before any of them can be finished.
 
 Confirm an array name before editing it — **the number does not match the lesson
 order** (`L3` is *conditionals*, not lesson 3):
