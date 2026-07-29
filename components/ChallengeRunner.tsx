@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { formatDuration } from "@/components/PracticeWorkbench";
+import { formatDuration } from "@/lib/duration";
 
 export type RunnerQuestion = { q: string; options: string[]; from: string; fromSlug: string };
 

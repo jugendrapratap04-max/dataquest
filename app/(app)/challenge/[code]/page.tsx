@@ -2,10 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { beats, type ChallengeQuestion } from "@/lib/challenge";
+import { type ChallengeQuestion } from "@/lib/challenge";
 import { ChallengeRunner } from "@/components/ChallengeRunner";
 import { GuestBanner } from "@/components/GuestBanner";
-import { formatDuration } from "@/components/PracticeWorkbench";
+import { formatDuration } from "@/lib/duration";
 import { ShareLink } from "@/components/ShareLink";
 
 export async function generateMetadata({ params }: { params: Promise<{ code: string }> }) {

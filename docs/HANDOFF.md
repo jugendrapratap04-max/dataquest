@@ -191,6 +191,20 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 - **`npx prisma migrate dev` sometimes fails with P1017 "server has closed the
   connection"** against Neon. It is a dropped idle connection, not a schema
   problem — run the same command again and it applies.
+- **Never import a plain function from a `"use client"` file into a server
+  component.** You get a client reference, not the function, and calling it
+  during a server render throws — the page shows `error.tsx` with a digest and
+  no other clue. `formatDuration` lived in `PracticeWorkbench.tsx` and was
+  called by the challenge pages; it is in `lib/duration.ts` now. Shared helpers
+  belong in `lib/`, and the rule is worth applying before it bites, because
+  **this class of bug needs data to appear**: the scoreboard only formats a
+  duration once somebody has recorded one, so every signed-out check passed and
+  it broke the first time a real student finished a challenge.
+- **A guest check is not a logged-in check.** Several features render different
+  branches for a signed-in user, and those branches are the ones carrying real
+  data. When you cannot log in, find a path that exercises the same branch —
+  the challenge scoreboard renders for guests too, so loading a challenge that
+  already has an attempt reproduces it exactly.
 
 ---
 

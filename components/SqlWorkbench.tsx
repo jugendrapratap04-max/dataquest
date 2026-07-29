@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
-import { formatDuration } from "@/components/PracticeWorkbench";
+import { formatDuration } from "@/lib/duration";
 import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";

@@ -6,6 +6,7 @@ import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { runTests, type RunResult, type TestCase } from "@/lib/pyodide-runner";
+import { formatDuration } from "@/lib/duration";
 import { Celebrate } from "@/components/Celebrate";
 
 export type ProblemData = {
@@ -27,11 +28,6 @@ export type ProblemData = {
   bestSeconds?: number | null;
 };
 
-export function formatDuration(total: number): string {
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
-}
 
 function mdLite(md: string) {
   return md

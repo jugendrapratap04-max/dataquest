@@ -4,7 +4,7 @@ import { getCurrentUser } from "@/lib/session";
 import { challengeableSubjects } from "@/lib/challenge";
 import { ChallengeCreator } from "@/components/ChallengeCreator";
 import { GuestBanner } from "@/components/GuestBanner";
-import { formatDuration } from "@/components/PracticeWorkbench";
+import { formatDuration } from "@/lib/duration";
 
 export const metadata = {
   title: "Challenges — DataMarg",
