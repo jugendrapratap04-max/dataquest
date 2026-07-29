@@ -47,6 +47,7 @@ import { BellCurve } from "./BellCurve";
 import { BoxPlot } from "./BoxPlot";
 import { BayesGrid } from "./BayesGrid";
 import { DistributionLab } from "./DistributionLab";
+import { SamplingLab } from "./SamplingLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -92,6 +93,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "box-plot": BoxPlot,
   "bayes-grid": BayesGrid,
   "distribution-lab": DistributionLab,
+  "sampling-lab": SamplingLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
