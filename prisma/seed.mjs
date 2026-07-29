@@ -291,32 +291,86 @@ const L1 = [
 ];
 
 const L2 = [
-  { t: "objectives", items: ["Arithmetic operators (+ - * / // % **) use karna","Comparison operators se True/False nikaalna","Logical and / or / not samajhna"] },
-  { t: "hook", q: "17 chocolates, 5 bachche. Har bachche ko barabar do — kitni bachengi?", why: "Jawaab hai 3 har ek ko, aur 2 bachi. Ye do alag sawaal hain, aur Python ke paas dono ke liye <b>alag operator</b> hai. Zyadatar log sirf ek jaante hain — aur wahi interview me phans jaate hain." },
-  { t: "think", q: "Python me <code>17 / 5</code> ka jawaab <code>3.4</code> aata hai. Par tumhe sirf <b>3</b> chahiye (poora bhaag), ya sirf <b>2</b> chahiye (jo bacha). Kya karoge?", a: "<code>17 // 5</code> → <b>3</b> (floor division — decimal phenk deta hai)<br/><code>17 % 5</code> → <b>2</b> (modulo — remainder deta hai)<br/><br/>Ye do operators har jagah aate hain: even/odd check (<code>n % 2</code>), pages banana, cheezein groups me baantna." },
-  { t: "h2", n: "1", text: "Arithmetic operators" },
-  { t: "def", term: "Operator", en: "An operator is a symbol that performs an operation on one or more values.", hi: "Jis value pe operator kaam karta hai use <b>operand</b> kehte hain. <code>17 + 5</code> me <code>+</code> operator hai, aur <code>17</code> aur <code>5</code> operands." },
-  { t: "p", html: "Numbers pe hisaab ke liye: <code>+</code> jodna, <code>-</code> ghatana, <code>*</code> guna, <code>/</code> bhaag, <code>//</code> poora bhaag, <code>%</code> remainder, <code>**</code> power." },
-  { t: "code", file: "arithmetic.py", code: "print(17 + 5)   # 22\nprint(17 // 5)  # 3  (poora bhaag)\nprint(17 % 5)   # 2  (bacha hua)\nprint(2 ** 3)   # 8  (2 ki power 3)", output: "22\n3\n2\n8" },
-  { t: "viz", name: "operator-lab" },
-  { t: "h2", n: "2", text: "Comparison operators" },
-  { t: "p", html: "Do cheezein compare karo — jawaab hamesha <code>True</code> ya <code>False</code>: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>." },
-  { t: "code", file: "compare.py", code: "print(10 == 10)  # True\nprint(5 > 8)     # False\nprint(3 != 4)    # True", output: "True\nFalse\nTrue" },
-  { t: "note", variant: "warn", html: "<b>Yaad rakho:</b> <code>=</code> value dene ke liye, <code>==</code> compare karne ke liye. Sabse common galti!" },
-  { t: "h2", n: "3", text: "Logical operators" },
-  { t: "p", html: "Conditions jodne ke liye: <code>and</code> (dono sach), <code>or</code> (koi ek sach), <code>not</code> (ulta)." },
-  { t: "code", file: "logical.py", code: "age = 20\nprint(age > 18 and age < 60)  # True\nprint(age < 13 or age > 60)   # False", output: "True\nFalse" },
-  { t: "mistakes", items: [
-    { bad: "if age = 18:", why: "<code>=</code> value <b>deta</b> hai, <code>==</code> <b>compare</b> karta hai. Ye sabse aam galti hai — aur Python isme meherbaan hai, seedha <code>SyntaxError</code> de deta hai. C me ye chup-chaap chal jaata aur ghanton bug dhoondhte.", fix: "if age == 18:" },
-    { bad: "10 / 2  # soch rahe ho 5 milega", why: "<code>/</code> Python me <b>hamesha float</b> deta hai — jawaab <code>5.0</code> hai, <code>5</code> nahi. Poora number chahiye to <code>//</code> use karo. Interview me ye chhota sa sawaal aksar aata hai.", fix: "10 // 2  # 5" },
-    { bad: "if 13 < age < 60 and name:", why: "Ye galat nahi hai — par samajhna zaroori hai. Python me <code>and</code>/<code>or</code> True/False nahi, <b>value</b> lautate hain, aur khaali string <code>\"\"</code> falsy hoti hai. Isliye <code>name</code> khaali hone par poori condition False ho jayegi.", fix: "if 13 < age < 60 and name != \"\":" },
+  { t: "objectives", items: [
+    "Use every arithmetic operator, and know when <code>//</code> beats <code>/</code>",
+    "Read a comparison as the <code>True</code>/<code>False</code> value it produces",
+    "Combine conditions with <code>and</code> / <code>or</code> / <code>not</code> — and know what they really return",
+    "Work out what an expression evaluates to, in the order Python actually uses",
   ]},
-  { t: "recap", items: ["Arithmetic: + - * / // % **","Comparison hamesha True/False deta hai","= assign karta hai, == compare karta hai","and / or / not se conditions jodo"] },
+  { t: "hook", q: "17 chocolates, 5 children, everyone gets the same. How many each, and how many are left?", why: "Three each, two left over. Those are <b>two different questions</b>, and Python has a separate operator for each. Most people only ever learn one of them — and the other is what an interviewer asks about." },
+  { t: "think", q: "In Python, <code>17 / 5</code> gives <code>3.4</code>. But you need only the <b>3</b> (whole boxes filled), or only the <b>2</b> (what is left). What do you use?", a: "<code>17 // 5</code> → <b>3</b> — floor division, the decimal part is dropped.<br/><code>17 % 5</code> → <b>2</b> — modulo, what remains.<br/><br/>These two show up everywhere: checking even or odd with <code>n % 2</code>, splitting rows into pages, sharing something out equally, wrapping an index back to the start of a list." },
+
+  { t: "h2", n: "1", text: "Arithmetic operators" },
+  { t: "def", term: "Operator", en: "An operator is a symbol that performs an operation on one or more values.", hi: "The values an operator works on are called its <b>operands</b>. In <code>17 + 5</code>, <code>+</code> is the operator and <code>17</code> and <code>5</code> are the operands." },
+  { t: "p", html: "Seven of them do arithmetic: <code>+</code> add, <code>-</code> subtract, <code>*</code> multiply, <code>/</code> divide, <code>//</code> floor divide, <code>%</code> remainder, and <code>**</code> power." },
+  { t: "code", file: "arithmetic.py", code: "print(17 + 5)\nprint(17 - 5)\nprint(17 * 5)\nprint(17 / 5)\nprint(17 // 5)\nprint(17 % 5)\nprint(2 ** 3)", output: "22\n12\n85\n3.4\n3\n2\n8" },
+  { t: "note", variant: "warn", html: "<b>Look at the fourth line.</b> <code>17 / 5</code> gave <code>3.4</code>, and <code>10 / 2</code> would give <code>5.0</code> — not <code>5</code>. In Python 3, <code>/</code> <b>always</b> produces a float, even when the division is exact. When you want a whole number, you have to ask for one with <code>//</code>." },
+  { t: "viz", name: "operator-lab" },
+  { t: "p", html: "Change the two numbers in that panel and watch <code>/</code>, <code>//</code> and <code>%</code> answer the same division three different ways. The relationship between them is worth remembering: <code>a</code> is always <code>(a // b) * b + (a % b)</code>." },
+  { t: "analogy", concept: "// and %", real: "Paying with notes", html: "You owe ₹1730 and you only have ₹500 notes. <code>1730 // 500</code> is <b>3</b> — the notes you can hand over. <code>1730 % 500</code> is <b>230</b> — what you still owe after them. Same division, two answers, and which one you need depends entirely on the question." },
+
+  { t: "h2", n: "2", text: "Comparison operators" },
+  { t: "p", html: "These compare two values, and the answer is always <code>True</code> or <code>False</code> — never anything else: <code>==</code> equal, <code>!=</code> not equal, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>." },
+  { t: "code", file: "compare.py", code: "print(10 == 10)\nprint(5 > 8)\nprint(3 != 4)\nprint(7 >= 7)", output: "True\nFalse\nTrue\nTrue" },
+  { t: "note", variant: "tip", html: "<b>One equals sign stores, two compare.</b> <code>age = 18</code> puts 18 into <code>age</code>. <code>age == 18</code> asks whether it is already 18. Writing <code>=</code> where you meant <code>==</code> is the single most common beginner mistake in every language that has both." },
+  { t: "p", html: "Python also lets you chain them the way mathematics does. <code>13 &lt; age &lt; 60</code> is legal, and it means exactly <code>13 &lt; age and age &lt; 60</code> — with <code>age</code> worked out only once. Most other languages cannot do this." },
+
+  { t: "h2", n: "3", text: "Logical operators — and what they actually return" },
+  { t: "p", html: "<code>and</code> needs both sides true, <code>or</code> needs either side, <code>not</code> flips the answer." },
+  { t: "code", file: "logical.py", code: "age = 20\nprint(age > 18 and age < 60)\nprint(age < 13 or age > 60)\nprint(not age > 18)", output: "True\nFalse\nFalse" },
+  { t: "p", html: "Now the part that surprises people. <code>and</code> and <code>or</code> do <b>not</b> hand back <code>True</code> or <code>False</code> — they hand back <b>one of the operands</b>. They stop as soon as the answer is settled, which is called <b>short-circuiting</b>." },
+  { t: "code", file: "shortcircuit.py", code: "print(0 and 5)\nprint(2 and 5)\nprint(0 or \"fallback\")\nprint(\"\" or \"default\")", output: "0\n5\nfallback\ndefault" },
+  { t: "p", html: "Read it as: <code>and</code> returns the first <b>falsy</b> value it meets, otherwise the last one. <code>or</code> returns the first <b>truthy</b> value, otherwise the last. That last line is a real idiom — <code>name or \"Guest\"</code> is how you supply a default." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> <code>%</code> is how rows get bucketed and how a sample of every tenth record is taken; <code>//</code> is how a result set is cut into pages. And the <code>/</code> float rule bites for real — a total built with <code>/</code> comes out as <code>1250.0000000000002</code> in a report, and someone has to explain the number to a client. Knowing which operator returns which <i>type</i> is not trivia." },
+
+  { t: "h2", n: "4", text: "Order of operations" },
+  { t: "p", html: "An expression is not read strictly left to right. Python applies <code>**</code> first, then <code>*</code> <code>/</code> <code>//</code> <code>%</code>, then <code>+</code> <code>-</code>, then comparisons, and <code>and</code> / <code>or</code> last of all." },
+  { t: "code", file: "precedence.py", code: "print(2 + 3 * 2)\nprint((2 + 3) * 2)\nprint(2 ** 3 ** 2)\nprint(-7 // 2)", output: "8\n10\n512\n-4" },
+  { t: "note", variant: "warn", html: "Two traps in there. <code>2 ** 3 ** 2</code> is <b>512</b>, not 64 — power groups from the <b>right</b>, so it is <code>2 ** 9</code>. And <code>-7 // 2</code> is <b>-4</b>, not -3, because floor division always rounds <b>downward</b>, and -4 is below -3.5. When in doubt, put in the brackets; nobody has ever complained that an expression was too clear." },
+
+  { t: "trace", intro: "An order total with a flat 10% discount. Work out what each name holds after the line runs — the interesting one is line 4.", code: "price = 249\nqty = 3\ntotal = price * qty\ndiscount = total // 10\nfinal = total - discount", steps: [
+    { q: "After line 3, <code>total</code> is", answer: "747", why: "<code>249 * 3</code>. Multiplication happens before the name <code>total</code> is given anything." },
+    { q: "After line 4, <code>discount</code> is", answer: "74", why: "A tenth of 747 is 74.7, but <code>//</code> throws the decimal away and gives <b>74</b>. That is the whole point of using it here — you cannot discount 74.7 rupees." },
+    { q: "After line 5, <code>final</code> is", answer: "673", why: "<code>747 - 74</code>. Note it is 673, not 672.3 — every value in this chain stayed a whole number because <code>//</code> was used instead of <code>/</code>." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the sum of 12 and 8.", code: "print(12 + 8)", out: "20" },
+    { task: "Print how many whole times 5 goes into 17.", code: "print(17 // 5)", out: "3" },
+    { task: "Print what is left over when 17 is divided by 5.", code: "print(17 % 5)", out: "2" },
+    { task: "Print 3 raised to the power 4.", code: "print(3 ** 4)", out: "81" },
+    { task: "Print whether 10 is even, using <code>%</code>.", code: "print(10 % 2 == 0)", out: "True" },
+    { task: "Print the last digit of 4729.", code: "print(4729 % 10)", out: "9" },
+    { task: "Print whether an age of 25 is between 18 and 60 inclusive.", code: "age = 25\nprint(age >= 18 and age <= 60)", out: "True" },
+    { task: "Write the same check as a chained comparison.", code: "age = 25\nprint(18 <= age <= 60)", out: "True" },
+    { task: "Print whether the day is a weekend, using <code>or</code>.", code: "day = \"Sunday\"\nprint(day == \"Saturday\" or day == \"Sunday\")", out: "True" },
+    { task: "Use <code>or</code> to fall back to <code>Guest</code> when the name is empty.", code: "name = \"\"\nprint(name or \"Guest\")", out: "Guest" },
+    { task: "Print 17 divided by 5 as a plain division, and notice the type.", code: "print(17 / 5)", out: "3.4" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "if age = 18:", why: "<code>=</code> <b>stores</b>, <code>==</code> <b>compares</b>. Python is kind here and refuses with a <code>SyntaxError</code>. In C the same line quietly assigns and the condition is always true, which is a bug people have lost days to.", fix: "if age == 18:" },
+    { bad: "total = 10 / 2   # expecting 5", why: "<code>/</code> always returns a float, so this is <code>5.0</code>. It looks harmless until the value is used as a list index or printed in a report, where <code>5.0</code> and <code>5</code> are visibly different.", fix: "total = 10 // 2   # 5" },
+    { bad: "print(2 + 3 * 2)   # expecting 10", why: "Multiplication runs before addition, so this is <code>8</code>. Python is not reading left to right; it is applying precedence, exactly like ordinary arithmetic.", fix: "print((2 + 3) * 2)   # 10" },
+    { bad: "print(-7 // 2)   # expecting -3", why: "Floor division rounds <b>down</b>, not toward zero. -3.5 rounded down is <b>-4</b>. For positive numbers the two ideas agree, which is why this only ever surprises you the first time a negative appears.", fix: "print(int(-7 / 2))   # -3, if truncation is what you meant" },
+  ]},
+
+  { t: "debug", intro: "Ninety rupees is to be split equally between four friends, each getting a whole number of rupees, and whatever cannot be split is left over. It reports nothing left over, which cannot be right. Read it before opening the fix.", code: "total = 90\nfriends = 4\n\neach = total / friends\nleft = total - each * friends\n\nprint(each, left)", symptom: "prints 22.5 0.0, but each share must be a whole number and 2 should be left over", q: "Nothing crashes and the arithmetic is correct. So which operator is answering the wrong question?", fix: "total = 90\nfriends = 4\n\neach = total // friends\nleft = total % friends\n\nprint(each, left)", why: "<code>/</code> answered \"how much is 90 divided by 4\" — 22.5, perfectly true and completely useless, because you cannot hand someone half a rupee. Multiplying that back gives 90 again, so <code>left</code> is 0. <code>//</code> asks \"how many whole rupees each\" and <code>%</code> asks \"what could not be shared\", which is what the problem was actually about. The lesson is that the bug was never in the maths — it was in choosing an operator that answers a different question." },
+
+  { t: "recap", items: [
+    "<code>/</code> always gives a float; <code>//</code> gives the whole part, <code>%</code> gives the remainder",
+    "<code>//</code> rounds <b>down</b>, so <code>-7 // 2</code> is <code>-4</code>",
+    "Comparisons always produce <code>True</code> or <code>False</code>, and can be chained: <code>13 &lt; age &lt; 60</code>",
+    "<code>and</code> / <code>or</code> return an <b>operand</b>, not a boolean — which is what makes <code>name or \"Guest\"</code> work",
+    "<code>**</code> groups from the right, and <code>*</code> beats <code>+</code> — bracket anything you would have to think twice about",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>/</code> aur <code>//</code> me kya farak hai?", a: "<code>/</code> <b>true division</b> hai — hamesha float deta hai (<code>10/2</code> → <code>5.0</code>). <code>//</code> <b>floor division</b> hai — neeche wale poore number pe le jaata hai (<code>10//3</code> → <code>3</code>). Dhyan do: negative me <code>-7//2</code> ka jawaab <code>-4</code> hai, <code>-3</code> nahi — floor hamesha <b>neeche</b> jaata hai." },
-    { level: "beginner", q: "<code>%</code> operator kis kaam aata hai?", a: "Remainder deta hai. Sabse common use: <code>n % 2 == 0</code> se even check karna, kisi cheez ko groups me baantna, ya circular index banana (<code>i % len(arr)</code>)." },
-    { level: "intermediate", q: "Python me <code>and</code> kya return karta hai — True/False ya kuch aur?", a: "<b>Value</b> return karta hai, boolean nahi. <code>a and b</code> me agar <code>a</code> falsy hai to <code>a</code> lautata hai, warna <code>b</code>. Isliye <code>0 and 5</code> → <code>0</code>, aur <code>2 and 5</code> → <code>5</code>. Isse <b>short-circuit</b> kehte hain — <code>b</code> evaluate hi nahi hota agar zaroorat na ho." },
-    { level: "intermediate", q: "<code>13 < age < 60</code> Python me chalta hai. Ye kaise?", a: "Ise <b>chained comparison</b> kehte hain — Python ise <code>13 < age and age < 60</code> me todta hai, aur <code>age</code> ko <b>sirf ek baar</b> evaluate karta hai. Zyadatar dusri languages me ye nahi chalta (wahan <code>13 &lt; age</code> pehle True/False banta, phir usse 60 se compare hota)." },
+    { level: "beginner", q: "What is the difference between <code>/</code> and <code>//</code>?", a: "<code>/</code> is <b>true division</b> and always returns a float, so <code>10 / 2</code> is <code>5.0</code>. <code>//</code> is <b>floor division</b> and returns the value rounded down, so <code>10 // 3</code> is <code>3</code>. Add that floor means <i>downward</i>, not <i>toward zero</i>: <code>-7 // 2</code> is <code>-4</code>." },
+    { level: "beginner", q: "What is <code>%</code> used for?", a: "It gives the remainder. The everyday uses are checking even or odd with <code>n % 2 == 0</code>, taking every nth item, splitting things into fixed-size groups, and wrapping an index around with <code>i % len(items)</code> so it never runs off the end." },
+    { level: "intermediate", q: "Does <code>and</code> return <code>True</code>/<code>False</code>?", a: "No — it returns one of the <b>operands</b>. <code>a and b</code> gives <code>a</code> when <code>a</code> is falsy, otherwise <code>b</code>. So <code>0 and 5</code> is <code>0</code> and <code>2 and 5</code> is <code>5</code>. It also <b>short-circuits</b>: if <code>a</code> settles the answer, <code>b</code> is never evaluated, which is why <code>x != 0 and total / x</code> is safe." },
+    { level: "intermediate", q: "Why does <code>13 &lt; age &lt; 60</code> work in Python?", a: "It is a <b>chained comparison</b>. Python expands it to <code>13 &lt; age and age &lt; 60</code> and evaluates <code>age</code> only once — which matters if that middle term is an expensive function call. In most other languages the first comparison would produce a boolean and then be compared against 60, giving nonsense." },
+    { level: "advanced", q: "What is <code>2 ** 3 ** 2</code>, and why?", a: "<b>512</b>. Almost every operator in Python is left-associative, but <code>**</code> is <b>right</b>-associative, so it groups as <code>2 ** (3 ** 2)</code> = <code>2 ** 9</code>. Reading it left to right gives 64, which is the wrong answer for the right-looking reason." },
   ]},
 ];
 
@@ -3999,10 +4053,19 @@ export const QUIZZES = {
     { level: "hard", q: "What does <code>print(bool(\"False\"))</code> show?", options: ["False", "TypeError", "None", "True"], correct: 3, why: "The <b>text</b> \"False\" is not the value <code>False</code>. For strings, <code>bool()</code> only asks one thing: is it empty? It has five characters, so it is <code>True</code>. Only <code>\"\"</code> would be False." },
   ],
   "operators": [
-    { q: "<code>print(7 % 3)</code> ka output?", options: ["2", "2.33", "1", "0"], correct: 2, why: "<code>%</code> = <b>remainder</b>. 7 ÷ 3 = 2, bacha <b>1</b>." },
-    { q: "<code>print(2 + 3 * 2)</code> — kya aayega?", options: ["10", "8", "12", "7"], correct: 1, why: "<code>*</code> pehle chalta hai (precedence): 3*2 = 6, phir 2 + 6 = <b>8</b>." },
-    { q: "<code>print(5 > 3 and 2 > 4)</code> ka result?", options: ["False", "True", "error", "None"], correct: 0, why: "<code>and</code> me dono sach hone chahiye. <code>2 > 4</code> False hai, to poora <b>False</b>." },
-    { q: "<code>print(\"ha\" * 3)</code> kya dega?", options: ["9", "ha ha ha", "TypeError", "hahaha"], correct: 3, why: "<code>*</code> string aur int pe <b>repeat</b> karta hai — <code>\"ha\"</code> teen baar = <code>hahaha</code>." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>print(7 % 3)</code> — what appears?", options: ["1", "2", "3", "2.33"], correct: 0, why: "<code>%</code> gives the <b>remainder</b>, not the number of times it divides. 3 goes into 7 twice, using up 6, and <code>1</code> is what is left. The 2 is the answer to <code>7 // 3</code>." },
+    { level: "easy", q: "Which operator divides and keeps only the whole part?", options: ["/", "%", "//", "**"], correct: 2, why: "<code>//</code> is floor division. <code>/</code> would give a float, <code>%</code> gives what is left over, and <code>**</code> is power." },
+    { level: "easy", q: "<code>print(10 == 10)</code> prints what?", options: ["True", "False", "10", "SyntaxError"], correct: 0, why: "A comparison always produces <code>True</code> or <code>False</code>, and 10 does equal 10." },
+    // Medium — apply it
+    { level: "medium", q: "<code>print(2 + 3 * 2)</code> — what appears?", options: ["10", "8", "12", "7"], correct: 1, why: "Multiplication runs before addition, so it is <code>2 + 6</code>. Python is not reading left to right." },
+    { level: "medium", q: "<code>print(10 / 2)</code> — what exactly appears?", options: ["5.0", "5", "5.5", "TypeError"], correct: 0, why: "In Python 3 <code>/</code> <b>always</b> returns a float, even when the division comes out exact. For <code>5</code> you would need <code>10 // 2</code>." },
+    { level: "medium", q: "<code>print(0 and 5)</code> — what appears?", options: ["False", "0", "5", "True"], correct: 1, why: "<code>and</code> hands back an <b>operand</b>, not a boolean. <code>0</code> is falsy, so it settles the answer immediately and is returned as-is." },
+    { level: "medium", q: "<code>name = \"\"</code>, then <code>print(name or \"default\")</code>. What appears?", options: ["an empty string", "True", "default", "TypeError"], correct: 2, why: "An empty string is falsy, so <code>or</code> moves on and returns the second operand. This is the standard way to supply a fallback value." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "<code>print(-7 // 2)</code> — what appears?", options: ["-3", "-3.5", "-4", "3"], correct: 2, why: "Floor division rounds <b>down</b>, not toward zero. -7/2 is -3.5, and the value below that is <b>-4</b>. With positive numbers the two ideas agree, which is why this only ever catches you once." },
+    { level: "hard", q: "<code>print(2 ** 3 ** 2)</code> — what appears?", options: ["512", "64", "36", "81"], correct: 0, why: "<code>**</code> is <b>right</b>-associative, unlike almost every other operator, so it groups as <code>2 ** (3 ** 2)</code> = <code>2 ** 9</code>. Reading left to right gives 64 — the wrong answer for a very reasonable reason." },
+    { level: "hard", q: "What does Python do with <code>13 &lt; age &lt; 60</code>?", options: ["Compares 13 with age, then compares that True/False with 60", "Raises a SyntaxError, since it is not valid Python", "Checks only the first comparison and ignores the rest", "Expands it to 13 < age and age < 60, evaluating age once"], correct: 3, why: "It is a <b>chained comparison</b>. Python expands it and evaluates the middle term only once — which matters when that term is an expensive call. Most other languages do the first option and produce nonsense." },
   ],
   "conditionals": [
     // Easy
