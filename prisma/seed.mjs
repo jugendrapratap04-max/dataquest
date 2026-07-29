@@ -3694,26 +3694,163 @@ const pythonLessons = [
 
 /* ===================== STATISTICS lessons ===================== */
 const S1 = [
-  { t: "objectives", items: ["Mean, median, mode nikaalna","Range samajhna","Kab kaunsa use karna"] },
-  { t: "h2", n: "1", text: "Mean, Median, Mode" },
-  { t: "p", html: "<b>Mean</b> = average (sab jodo ÷ ginti). <b>Median</b> = sort karke beech wala. <b>Mode</b> = sabse zyada baar aane wala." },
-  { t: "code", file: "central.py", code: "nums = [4, 8, 6, 8, 10]\nprint(sum(nums) / len(nums))        # mean = 7.2\nprint(sorted(nums)[len(nums) // 2])  # median = 8", output: "7.2\n8" },
+  { t: "objectives", items: [
+    "Work out the <b>mean</b>, <b>median</b> and <b>mode</b> of a set of numbers",
+    "Say which of them to trust when the data has an outlier",
+    "Measure spread at its simplest, with the <b>range</b>",
+    "Use the <code>statistics</code> module instead of writing it yourself",
+  ]},
+  { t: "hook", q: "Ten people in a room earn about ₹30,000 a month. Mukesh Ambani walks in. What is the average salary now?", why: "Somewhere in the crores — and not one person in that room earns it. The average is arithmetically perfect and completely useless, and this is not a trick question: it is what happens to every salary report, every house-price average and every \"average order value\" in a real dataset. Knowing which number to reach for is the whole skill." },
+  { t: "def", term: "Descriptive statistics", en: "Descriptive statistics are the summary numbers that describe a dataset — where its values sit and how spread out they are.", hi: "They do not predict anything or prove anything. They answer one question: if you could only say a couple of numbers about this data, which ones?" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the first thing anyone does with a new dataset is describe it — mean, median, min, max, count of missing values. Not because it is interesting, but because it is how you catch that a column of ages contains a 500, or that half the rows are empty, <i>before</i> you build anything on top of it. In pandas this is one call, <code>df.describe()</code>, and every number it prints is on this page." },
+
+  { t: "h2", n: "1", text: "The three middles" },
+  { t: "p", html: "<b>Mean</b> is the average: add everything, divide by how many. <b>Median</b> is the middle value once the numbers are in order. <b>Mode</b> is the value that appears most often." },
+  { t: "code", file: "central.py", code: "nums = [4, 8, 6, 8, 10]\n\nprint(sum(nums) / len(nums))\nprint(sorted(nums)[len(nums) // 2])", output: "7.2\n8" },
   { t: "viz", name: "central-tendency" },
-  { t: "h2", n: "2", text: "Mean vs Median — kab kya" },
-  { t: "p", html: "Agar data me <b>outlier</b> (bahut bada/chhota value) ho to mean galat picture deta hai — median tab behtar. Jaise salaries me ek CEO poore average ko upar kheench deta hai." },
-  { t: "note", variant: "tip", html: "<b>Range</b> = max − min. Data kitna faila hua hai iska sabse simple maap." },
-  { t: "recap", items: ["Mean = average","Median = beech wala (sort ke baad)","Mode = sabse zyada baar","Outlier ho to median behtar"] },
+  { t: "p", html: "Drag a value in that panel and watch the two numbers move apart. Pull one point far away and the mean chases it while the median barely notices — that difference is the entire reason both exist." },
+
+  { t: "h2", n: "2", text: "Let the library do it" },
+  { t: "p", html: "You should be able to write these by hand once. After that, use <code>statistics</code> — it ships with Python and it handles the awkward cases for you." },
+  { t: "code", file: "stats_module.py", code: "import statistics\n\nnums = [4, 8, 6, 8, 10]\n\nprint(statistics.mean(nums))\nprint(statistics.median(nums))\nprint(statistics.mode(nums))", output: "7.2\n8\n8" },
+  { t: "note", variant: "tip", html: "An <b>even</b> number of values has no single middle, so the median is the average of the two in the centre. <code>statistics.median</code> already does this; by hand it is <code>(ordered[mid - 1] + ordered[mid]) / 2</code>." },
+  { t: "code", file: "even_median.py", code: "nums = [4, 6, 8, 10]\nordered = sorted(nums)\nmid = len(ordered) // 2\n\nprint((ordered[mid - 1] + ordered[mid]) / 2)", output: "7.0" },
+
+  { t: "h2", n: "3", text: "When the mean lies" },
+  { t: "p", html: "Here is the room from the hook, in numbers. Four ordinary salaries and one that is not." },
+  { t: "code", file: "outlier.py", code: "salaries = [30000, 32000, 35000, 31000, 2000000]\n\nprint(sum(salaries) / len(salaries))\nprint(sorted(salaries)[2])", output: "425600.0\n32000" },
+  { t: "p", html: "The mean says <b>425,600</b>. Nobody in that list earns anything close. The median says <b>32,000</b>, which describes four of the five people accurately. Neither number is wrong — but only one of them is <i>useful</i>." },
+  { t: "think", q: "So should you always use the median?", a: "No — and this is where people over-correct.<br/><br/>The mean uses <b>every</b> value, so it is the right choice when the data is reasonably even and when totals matter: revenue, hours worked, marks out of 100.<br/><br/>The median ignores how extreme the extremes are, which is exactly what you want for <b>skewed</b> data — salaries, house prices, response times. The rule of thumb: if a single value can drag the answer somewhere no real data point lives, use the median." },
+  { t: "analogy", concept: "Mean versus median", real: "A seesaw and a queue", html: "The <b>mean</b> is the balance point of a seesaw: put a very heavy person on one end and the balance point slides right across, even though nobody is standing there. The <b>median</b> is the person standing in the middle of a queue: someone at the back being enormously rich does not move who is standing in the middle. Same crowd, two honest answers to two different questions." },
+
+  { t: "h2", n: "4", text: "Mode, and the simplest spread" },
+  { t: "p", html: "Mode is the only one of the three that works on text — the most common category, not the average of one. And the <b>range</b>, <code>max - min</code>, is the crudest measure of spread there is." },
+  { t: "code", file: "mode_range.py", code: "from collections import Counter\n\ngrades = [\"A\", \"B\", \"A\", \"C\", \"A\"]\nprint(Counter(grades).most_common(1)[0][0])\nprint(Counter(grades)[\"A\"])\n\nmarks = [45, 78, 91, 40]\nprint(max(marks) - min(marks))", output: "A\n3\n51" },
+  { t: "note", variant: "warn", html: "The range is built from the two most extreme values in the data, which makes it the measure an outlier damages most. It is useful for a quick look and almost never the number you report. The next lesson replaces it with something that uses every value." },
+
+  { t: "trace", intro: "The mean and median of one small list. Work out what each name holds once the line has run.", code: "nums = [4, 8, 6, 8, 10]\ntotal = sum(nums)\nmean = total / len(nums)\nordered = sorted(nums)\nmedian = ordered[2]", steps: [
+    { q: "After line 2, <code>total</code> is", answer: "36", why: "4 + 8 + 6 + 8 + 10. The mean is nothing more than this divided by how many there were." },
+    { q: "After line 3, <code>mean</code> is", answer: "7.2", why: "36 divided by 5. Note it is a float — <code>/</code> always is, and a mean that came out as a whole number would still be one." },
+    { q: "After line 5, <code>median</code> is", answer: "8", why: "<code>sorted</code> gives [4, 6, 8, 8, 10] and index 2 is the middle of five. Sorting first is not optional — that is the debug task below." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the mean of the three numbers.", code: "nums = [2, 4, 6]\nprint(sum(nums) / len(nums))", out: "4.0" },
+    { task: "Print the median of an odd-length list.", code: "print(sorted([5, 1, 3])[1])", out: "3" },
+    { task: "Print the median of an even-length list.", code: "ordered = sorted([4, 6, 8, 10])\nprint((ordered[1] + ordered[2]) / 2)", out: "7.0" },
+    { task: "Print the range of the marks.", code: "marks = [3, 9, 1]\nprint(max(marks) - min(marks))", out: "8" },
+    { task: "Use the <code>statistics</code> module for the mean.", code: "import statistics\nprint(statistics.mean([2, 4, 6]))", out: "4" },
+    { task: "Use it for the median too.", code: "import statistics\nprint(statistics.median([5, 1, 3]))", out: "3" },
+    { task: "Find the most common grade.", code: "from collections import Counter\nprint(Counter([\"A\", \"B\", \"A\"]).most_common(1)[0][0])", out: "A" },
+    { task: "Count how many times a value appears.", code: "from collections import Counter\nprint(Counter([1, 2, 2, 3])[2])", out: "2" },
+    { task: "Print the mean rounded to 2 decimals.", code: "nums = [1, 2, 4]\nprint(round(sum(nums) / len(nums), 2))", out: "2.33" },
+    { task: "Show what one outlier does to the mean.", code: "print(sum([10, 12, 500]) / 3)", out: "174.0" },
+    { task: "Show that the median barely moves.", code: "print(sorted([10, 12, 500])[1])", out: "12" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "median = nums[len(nums) // 2]", why: "The middle <b>position</b> of an unsorted list is not the middle <b>value</b>. This returns whatever happened to be sitting there, and it looks right often enough to survive testing.", fix: "ordered = sorted(nums)\nmedian = ordered[len(ordered) // 2]" },
+    { bad: "mean = sum(nums) // len(nums)", why: "Floor division throws away the decimal, so a mean of 7.2 is reported as 7. On marks or money that is a real error hiding behind a number that looks fine.", fix: "mean = sum(nums) / len(nums)" },
+    { bad: "average_salary = sum(salaries) / len(salaries)", why: "Not wrong, but it is the wrong summary for skewed data. Report the mean of a salary column and you describe a person who does not exist. Say which one you used and why.", fix: "typical_salary = statistics.median(salaries)" },
+    { bad: "statistics.mode([1, 1, 2, 2])", why: "Two values tie. Older Python raised <code>StatisticsError</code> here, and newer versions quietly return the first one — either way you were not told about the tie.", fix: "Counter([1, 1, 2, 2]).most_common()   # see every count" },
+  ]},
+
+  { t: "debug", intro: "This should return the middle value of the list. Given 10, 2 and 8 it returns 2, which is the smallest of the three. Nothing crashes. Read it before opening the fix.", code: "def median(nums):\n    return nums[len(nums) // 2]\n\nprint(median([10, 2, 8]))", symptom: "prints 2, but the middle value of 10, 2 and 8 is 8", q: "The index is right for a three-item list. So why is the answer the smallest number?", fix: "def median(nums):\n    ordered = sorted(nums)\n    return ordered[len(ordered) // 2]\n\nprint(median([10, 2, 8]))", why: "It took the middle <b>position</b> without putting the numbers in order first, so it returned whatever happened to be sitting in the middle of the list as given — here, the 2.<br/><br/>What makes this dangerous is that it is right by accident quite often. Test it on <code>[1, 2, 3]</code> and it passes; on data that arrives roughly sorted it passes for months. The median is defined by <b>order</b>, and the sort is not a tidying step you can skip — it is the definition." },
+
+  { t: "recap", items: [
+    "<b>Mean</b> = total ÷ count · <b>median</b> = middle after sorting · <b>mode</b> = most frequent",
+    "An even-length median is the average of the middle two",
+    "One extreme value drags the mean and barely moves the median",
+    "Use the mean for even data and totals, the median for skewed data",
+    "<code>range = max - min</code> is the crudest spread, and the easiest to distort",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between mean and median?", a: "The mean is the total divided by the count and uses every value. The median is the middle value after sorting and cares only about order. They agree on even data and separate as soon as it is skewed." },
+    { level: "beginner", q: "When would you report the median instead of the mean?", a: "When the data is skewed or has outliers — salaries, house prices, response times. The classic answer: report the median income, because a handful of very large incomes pull the mean somewhere nobody actually is." },
+    { level: "intermediate", q: "How do you find the median of an even number of values?", a: "Sort, then average the two middle values. With six items that is the third and fourth. <code>statistics.median</code> does it for you, and it is the one place a hand-written median usually goes wrong." },
+    { level: "intermediate", q: "What is the mode useful for that the mean is not?", a: "Categories. The mean of \"A, B, A, C\" is meaningless, but the mode says A — the most common size, the most common city, the busiest hour. It is also the only one of the three that can have no single answer, when two values tie." },
+    { level: "advanced", q: "Why is the range a poor measure of spread?", a: "Because it is built from exactly two values — the largest and the smallest — so it ignores everything in between and moves the moment either extreme is unusual. Two datasets with the same range can be shaped completely differently. Variance and standard deviation use every value, which is why they replace it." },
+  ]},
 ];
 const S2 = [
-  { t: "objectives", items: ["Variance samajhna","Standard deviation nikaalna","Spread kyun matter karta hai"] },
-  { t: "h2", n: "1", text: "Data kitna faila hai?" },
-  { t: "p", html: "Do classes ka average same ho sakta hai par ek me sab paas-paas, doosri me bikhre. Ye bikhraav <b>variance</b> aur <b>standard deviation</b> batate hain." },
-  { t: "code", file: "spread.py", code: "nums = [2, 4, 6, 8]\nm = sum(nums) / len(nums)                 # mean = 5\nvar = sum((x - m) ** 2 for x in nums) / len(nums)\nprint(var)   # 5.0", output: "5.0" },
-  { t: "h2", n: "2", text: "Standard deviation" },
-  { t: "p", html: "Standard deviation = variance ka <b>square root</b>. Original unit me hota hai isliye samajhna aasaan." },
-  { t: "code", file: "std.py", code: "import math\nprint(round(math.sqrt(5), 2))   # 2.24 (std dev)", output: "2.24" },
-  { t: "note", variant: "tip", html: "<b>Low std</b> = data consistent (paas-paas). <b>High std</b> = bikhra hua. ML me bahut use hota hai." },
-  { t: "recap", items: ["Variance = average squared distance from mean","Std dev = sqrt(variance)","Low std = consistent","High std = bikhra data"] },
+  { t: "objectives", items: [
+    "Explain what <b>variance</b> measures, and why every distance gets squared",
+    "Work out variance and <b>standard deviation</b> by hand, then with <code>statistics</code>",
+    "Say why the standard deviation is the number you report, not the variance",
+    "Tell <b>population</b> from <b>sample</b>, and know which one your data is",
+  ]},
+  { t: "hook", q: "Two classes both average 50 out of 100. In one, everybody scored between 48 and 52. In the other, half scored 10 and half scored 90. Same average — is it the same class?", why: "Obviously not, and the average cannot tell them apart. The centre of a dataset is only half of what describes it; the other half is how far the values sit from that centre. Report a mean without a spread and you have described two completely different classes with one identical sentence." },
+  { t: "def", term: "Standard deviation", en: "The standard deviation is the typical distance between a value and the mean of its dataset.", hi: "Read it as: on average, how far off is a value? A small one means the data is huddled around the mean; a large one means it is scattered." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> spread is what turns a number into a decision. A delivery time averaging 30 minutes with a standard deviation of 2 is a business you can promise on; the same average with a deviation of 25 is one that keeps apologising. It is also how outliers get found in practice — anything more than about three standard deviations from the mean is worth a second look before you trust it." },
+
+  { t: "h2", n: "1", text: "Building it by hand, once" },
+  { t: "p", html: "Take each value's distance from the mean, <b>square</b> it, and average those squares. That average is the <b>variance</b>. Its square root is the <b>standard deviation</b>." },
+  { t: "code", file: "byhand.py", code: "nums = [2, 4, 4, 4, 5, 5, 7, 9]\n\nmean = sum(nums) / len(nums)\nsquared = [(n - mean) ** 2 for n in nums]\nvariance = sum(squared) / len(nums)\n\nprint(mean)\nprint(variance)\nprint(round(variance ** 0.5, 2))", output: "5.0\n4.0\n2.0" },
+  { t: "viz", name: "spread-lab" },
+  { t: "p", html: "Switch to the outlier set in that panel and look at the squared column. One value contributes more than all the others put together — that is not a flaw in the formula, it is the formula doing its job." },
+  { t: "think", q: "Why square the distances? Why not just average them as they are?", a: "Because they would cancel out. Distances above the mean are positive and below it negative, and by the definition of the mean they always sum to exactly <b>zero</b> — for every dataset, always. An average of zero would tell you nothing.<br/><br/>Squaring removes the sign, and it does something else on purpose: it makes far-away values count far more than near ones. A point twice as far contributes four times as much. That is why variance is sensitive to outliers, and why that sensitivity is a feature." },
+
+  { t: "h2", n: "2", text: "Let the library do it" },
+  { t: "p", html: "<code>pvariance</code> and <code>pstdev</code> are the population versions; <code>variance</code> and <code>stdev</code> are the sample ones. The difference is in section 4." },
+  { t: "code", file: "module.py", code: "import statistics\n\nnums = [2, 4, 4, 4, 5, 5, 7, 9]\n\nprint(float(statistics.pvariance(nums)))\nprint(float(statistics.pstdev(nums)))\nprint(round(statistics.variance(nums), 4))", output: "4.0\n2.0\n4.5714" },
+
+  { t: "h2", n: "3", text: "Same mean, different world" },
+  { t: "p", html: "Here are the two classes from the hook, shortened. The mean cannot separate them; the standard deviation separates them instantly." },
+  { t: "code", file: "same_mean.py", code: "import statistics\n\ntight = [49, 50, 51]\nwide = [10, 50, 90]\n\nprint(sum(tight) / len(tight), sum(wide) / len(wide))\nprint(round(statistics.pstdev(tight), 2), round(statistics.pstdev(wide), 2))", output: "50.0 50.0\n0.82 32.66" },
+  { t: "note", variant: "tip", html: "This is why a mean should almost never travel alone. <b>50 ± 0.82</b> and <b>50 ± 32.66</b> are two different findings, and only one of them is worth acting on." },
+
+  { t: "h2", n: "4", text: "Why report the deviation, not the variance" },
+  { t: "p", html: "Squaring the distances also squares the <b>units</b>. Variance on a list of heights in centimetres comes out in centimetres <i>squared</i>, which is not a thing anybody can picture. Taking the square root puts it back into centimetres." },
+  { t: "code", file: "units.py", code: "import statistics\n\nheights = [160, 170, 180]\n\nprint(round(float(statistics.pvariance(heights)), 2))\nprint(round(statistics.pstdev(heights), 2))", output: "66.67\n8.16" },
+  { t: "p", html: "\"Heights vary by about 8 cm\" is a sentence. \"Heights vary by 66.67 square centimetres\" is not. Variance is the number the maths runs on; the standard deviation is the number you say out loud." },
+  { t: "note", variant: "warn", html: "<b>Population or sample?</b> Dividing by <code>n</code> assumes you measured <b>everyone</b>. If your data is a sample standing in for a larger group — which it nearly always is — divide by <code>n - 1</code> instead, because a sample under-estimates the true spread. That is the difference between <code>pstdev</code> and <code>stdev</code>, and picking the wrong one on a small sample is a real error." },
+  { t: "analogy", concept: "Mean and standard deviation", real: "A dartboard", html: "The <b>mean</b> is where your darts land on average — the centre of the cluster. The <b>standard deviation</b> is how tight the cluster is. Two players can have the same average position, one with every dart in a fist-sized group and the other with darts all over the wall. Only the second number tells you which is which, and only the second number tells you who to bet on." },
+
+  { t: "trace", intro: "Variance built up one step at a time. Work out what each name holds once the line has run.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nsquares = [(n - mean) ** 2 for n in nums]\nvariance = round(sum(squares) / len(nums), 2)", steps: [
+    { q: "After line 2, <code>mean</code> is", answer: "4.0", why: "12 divided by 3. A float, because <code>/</code> always is." },
+    { q: "After line 3, <code>squares</code> is", answer: "[4.0, 0.0, 4.0]", accept: ["[4.0,0.0,4.0]", "[4, 0, 4]", "[4,0,4]"], why: "Distances of -2, 0 and 2, each squared. The two signs disappeared, which is the point - unsquared they would have summed to zero." },
+    { q: "After line 4, <code>variance</code> is", answer: "2.67", why: "8 divided by 3, rounded. Its square root, about 1.63, is the standard deviation - the number you would actually report." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the mean of the list.", code: "nums = [2, 4, 6]\nprint(sum(nums) / len(nums))", out: "4.0" },
+    { task: "Print each value's distance from the mean.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nprint([n - mean for n in nums])", out: "[-2.0, 0.0, 2.0]" },
+    { task: "Show that those distances always add up to zero.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nprint(sum(n - mean for n in nums))", out: "0.0" },
+    { task: "Square them instead, and print the total.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nprint(sum((n - mean) ** 2 for n in nums))", out: "8.0" },
+    { task: "Print the population variance, rounded to 2 decimals.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nprint(round(sum((n - mean) ** 2 for n in nums) / len(nums), 2))", out: "2.67" },
+    { task: "Print the standard deviation, rounded to 2 decimals.", code: "nums = [2, 4, 6]\nmean = sum(nums) / len(nums)\nvar = sum((n - mean) ** 2 for n in nums) / len(nums)\nprint(round(var ** 0.5, 2))", out: "1.63" },
+    { task: "Use the <code>statistics</code> module for the population deviation.", code: "import statistics\nprint(round(statistics.pstdev([2, 4, 6]), 2))", out: "1.63" },
+    { task: "Use it for the <b>sample</b> deviation and see the difference.", code: "import statistics\nprint(round(statistics.stdev([2, 4, 6]), 2))", out: "2.0" },
+    { task: "Compare the spread of two lists with the same mean.", code: "import statistics\nprint(round(statistics.pstdev([49, 50, 51]), 2), round(statistics.pstdev([10, 50, 90]), 2))", out: "0.82 32.66" },
+    { task: "Print the variance of a list where every value is the same.", code: "import statistics\nprint(float(statistics.pvariance([7, 7, 7])))", out: "0.0" },
+    { task: "Flag anything more than 2 standard deviations from the mean.", code: "import statistics\nnums = [10, 11, 9, 60]\nmean = statistics.mean(nums)\nsd = statistics.pstdev(nums)\nprint([n for n in nums if abs(n - mean) > 2 * sd])", out: "[]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "spread = sum(n - mean for n in nums) / len(nums)", why: "The distances cancel out and this is <b>always zero</b>, for every dataset that has ever existed. It runs, it returns a number, and the number means nothing. Square the distances first.", fix: "spread = sum((n - mean) ** 2 for n in nums) / len(nums)" },
+    { bad: "print(\"variance:\", variance, \"cm\")", why: "Variance is in <b>squared</b> units. Whatever your data was measured in, the variance is not in that unit and cannot be compared to it. Report the standard deviation when a human is reading.", fix: "print(\"std dev:\", variance ** 0.5, \"cm\")" },
+    { bad: "statistics.pstdev(sample_of_100_customers)", why: "<code>pstdev</code> divides by <code>n</code>, which assumes you measured every customer there is. On a sample it under-estimates the real spread, and the smaller the sample the worse it gets.", fix: "statistics.stdev(sample_of_100_customers)   # divides by n - 1" },
+    { bad: "if value > mean + 3 * variance:", why: "Mixing units again. The rule of thumb is three <b>standard deviations</b>, not three variances - and on this data those two thresholds are nowhere near each other.", fix: "if value > mean + 3 * stdev:" },
+  ]},
+
+  { t: "debug", intro: "This is meant to measure how spread out the numbers are. It returns 0 for every list it is given, including one that is obviously spread out. Nothing crashes. Read it before opening the fix.", code: "def spread(nums):\n    mean = sum(nums) / len(nums)\n    return round(sum(n - mean for n in nums) / len(nums), 4)\n\nprint(spread([2, 4, 6]))", symptom: "prints 0.0, but 2, 4 and 6 are clearly not all the same number", q: "The mean is right and every value is visited. So why is the answer zero - and why would it be zero for any list at all?", fix: "def spread(nums):\n    mean = sum(nums) / len(nums)\n    return round(sum((n - mean) ** 2 for n in nums) / len(nums), 4)\n\nprint(spread([2, 4, 6]))", why: "The distances were never squared. Values above the mean give positive distances and values below give negative ones, and by the <b>definition</b> of the mean those cancel exactly — the sum is zero for every dataset, always.<br/><br/>So this function does not fail on unusual input; it fails identically on all input, and returns a plausible-looking 0.0 while doing it. That is the tell: a statistic that comes out the same for every dataset is not measuring anything. Squaring is not a tidying detail in the formula, it is the only reason the formula works at all." },
+
+  { t: "recap", items: [
+    "<b>Variance</b> = average of the squared distances from the mean",
+    "<b>Standard deviation</b> = square root of the variance, and back in the original units",
+    "Distances are squared because unsquared they always sum to zero",
+    "Report the standard deviation; keep the variance for the maths",
+    "Divide by <code>n</code> for a population, <code>n - 1</code> for a sample",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does the standard deviation tell you?", a: "How far a typical value sits from the mean, in the same units as the data. Small means the values are huddled around the mean; large means they are scattered. It is the second number that should always travel with an average." },
+    { level: "beginner", q: "Why are the distances squared?", a: "Because unsquared they cancel — positives and negatives around the mean always sum to exactly zero. Squaring removes the sign, and it also makes distant values count much more, which is what makes variance sensitive to outliers." },
+    { level: "intermediate", q: "Why report the standard deviation rather than the variance?", a: "Units. Squaring the distances squares the units, so variance on centimetres is in square centimetres, which nobody can picture. The square root brings it back to centimetres, where it can be compared to the data and to the mean." },
+    { level: "intermediate", q: "What is the difference between population and sample standard deviation?", a: "The divisor. Population divides by <code>n</code> and assumes you measured everyone; sample divides by <code>n - 1</code> because a sample systematically under-estimates the spread of the group it came from. The correction matters most when the sample is small." },
+    { level: "advanced", q: "Two datasets have the same mean and the same standard deviation. Are they the same shape?", a: "No. Mean and standard deviation fix the centre and the spread, and nothing else — a symmetric bell and a heavily skewed distribution can match on both. That is what skewness and kurtosis describe, and it is why plotting the data is not an optional extra: Anscombe's quartet is four datasets that agree on almost every summary statistic and look nothing alike." },
+  ]},
 ];
 const S3 = [
   { t: "objectives", items: ["Probability ka basic formula","0 se 1 ke beech samajhna","Complement nikaalna"] },
@@ -4669,6 +4806,36 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "spread": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does the standard deviation measure?", options: ["How far a typical value is from the mean", "The middle value", "The largest value", "How many values there are"], correct: 0, why: "It is the second number an average should always travel with - the centre alone describes two very different datasets identically." },
+    { level: "easy", q: "How do you get the standard deviation from the variance?", options: ["Square it", "Take its square root", "Divide it by the mean", "Multiply by the count"], correct: 1, why: "The square root also puts the answer back into the data's own units." },
+    { level: "easy", q: "Every value in a list is exactly 7. What is the variance?", options: ["7", "1", "0", "49"], correct: 2, why: "No value is any distance from the mean, so every squared distance is zero." },
+    // Medium — apply it
+    { level: "medium", q: "Why are the distances from the mean squared before averaging?", options: ["To make the numbers larger", "To convert them to integers", "Because Python cannot add negatives", "Because unsquared they always sum to exactly zero"], correct: 3, why: "Positives and negatives around the mean cancel by definition. Squaring removes the sign, and makes distant values count much more." },
+    { level: "medium", q: "Two classes both average 50. One has a standard deviation of 1, the other 30. What does that tell you?", options: ["The first class is better", "They are the same class described twice", "The first is tightly grouped, the second is scattered", "The second has more students"], correct: 2, why: "Same centre, completely different shape. This is exactly why a mean should not be reported alone." },
+    { level: "medium", q: "Your data is a sample of 100 customers, not every customer. Which do you use?", options: ["pstdev, dividing by n", "stdev, dividing by n - 1", "Either, they are identical", "Neither, use the range"], correct: 1, why: "A sample under-estimates the spread of the group it came from, and dividing by n - 1 corrects for that. The smaller the sample, the more it matters." },
+    { level: "medium", q: "Heights are in centimetres. What unit is the variance in?", options: ["Square centimetres", "Centimetres", "No units", "Metres"], correct: 0, why: "Squaring the distances squares the units, which is why the variance is not a number to report to a human." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "A function averages the distances from the mean without squaring them. What does it return?", options: ["The standard deviation", "The range", "An error", "0.0 for every dataset"], correct: 3, why: "It fails identically on all input rather than on unusual input - and returns a plausible-looking 0.0 while doing it. A statistic that is the same for every dataset is measuring nothing." },
+    { level: "hard", q: "Which threshold is normally used to flag an outlier?", options: ["More than 3 variances from the mean", "More than 3 standard deviations from the mean", "More than the range", "More than twice the median"], correct: 1, why: "Standard deviations, because they are in the data's own units. Three variances is a unit mismatch and lands nowhere near the intended threshold." },
+    { level: "hard", q: "Two datasets share the same mean AND the same standard deviation. Are they the same shape?", options: ["No - they fix the centre and the spread, and nothing else", "Yes, those two numbers fix the shape", "Only if both are sorted", "Only if they have the same count"], correct: 0, why: "A symmetric bell and a heavily skewed distribution can agree on both. It is why plotting the data is not optional - see Anscombe's quartet." },
+  ],
+  "descriptive-stats": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is the mean of 2, 4 and 6?", options: ["4", "6", "12", "3"], correct: 0, why: "Add them to get 12, divide by the three values." },
+    { level: "easy", q: "What must you do before taking the median?", options: ["Add the values up", "Sort them", "Remove the largest", "Count how many are even"], correct: 1, why: "The median is defined by order. Taking the middle position of an unsorted list gives whatever happened to be sitting there." },
+    { level: "easy", q: "Which measure works on categories like A, B and C?", options: ["Mean", "Range", "Mode", "Median"], correct: 2, why: "You cannot average a letter, but you can count which appears most often." },
+    // Medium — apply it
+    { level: "medium", q: "Salaries are 30k, 32k, 35k, 31k and 20 lakh. Which summary describes the group better?", options: ["The mean, because it uses every value", "The median, because one extreme value drags the mean somewhere nobody is", "Both are equally good", "The range"], correct: 1, why: "The mean here is over 4 lakh and not one person earns close to it. The median, 32k, describes four of the five accurately." },
+    { level: "medium", q: "What is the median of 4, 6, 8 and 10?", options: ["6", "8", "7", "9"], correct: 2, why: "An even count has no single middle, so it is the average of the middle two: (6 + 8) / 2." },
+    { level: "medium", q: "<code>sum(nums) // len(nums)</code> is used for the mean. What goes wrong?", options: ["It raises an error", "Floor division drops the decimal, so 7.2 is reported as 7", "It sorts the list first", "Nothing, it is the same"], correct: 1, why: "The number still looks reasonable, which is what makes it dangerous on marks or money." },
+    { level: "medium", q: "What is the range of 45, 78, 91 and 40?", options: ["51", "46", "91", "13"], correct: 0, why: "Largest minus smallest: 91 - 40." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "A median function takes <code>nums[len(nums) // 2]</code> without sorting. Why does the bug survive so long?", options: ["It raises an error only on large lists", "It is right by accident whenever the data happens to be in order", "Python caches the result", "It only fails on even-length lists"], correct: 1, why: "It passes on [1, 2, 3] and on any data that arrives roughly sorted, so tests go green for months before a shuffled list exposes it." },
+    { level: "hard", q: "<code>statistics.mode([1, 1, 2, 2])</code> — what is the problem?", options: ["It is always 1", "It raises TypeError", "Two values tie, and you are not told about it", "Mode does not work on numbers"], correct: 2, why: "Older Python raised StatisticsError and newer versions return the first. Either way the tie is invisible - Counter.most_common() shows you every count." },
+    { level: "hard", q: "Why is the range considered a weak measure of spread?", options: ["It is slow to compute", "It only works on sorted data", "It cannot handle negative numbers", "It uses only the two most extreme values and ignores everything between them"], correct: 3, why: "Two datasets with the same range can be shaped completely differently, and a single unusual value moves it entirely. Variance uses every value instead." },
+  ],
   "project-git": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is <code>__name__</code> when a file is run directly?", options: ["the file name", "__main__", "None", "the folder name"], correct: 1, why: "When the same file is imported instead, __name__ is the module's own name. The guard uses exactly that difference." },

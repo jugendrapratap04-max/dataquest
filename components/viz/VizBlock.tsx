@@ -2,6 +2,7 @@
 
 import { CodeRunner } from "./CodeRunner";
 import { TestLab } from "./TestLab";
+import { SpreadLab } from "./SpreadLab";
 import { LogLevels } from "./LogLevels";
 import { StyleLab } from "./StyleLab";
 import { GitFlow } from "./GitFlow";
@@ -87,6 +88,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
+  "spread-lab": SpreadLab,
   "log-levels": LogLevels,
   "style-lab": StyleLab,
   "git-flow": GitFlow,
