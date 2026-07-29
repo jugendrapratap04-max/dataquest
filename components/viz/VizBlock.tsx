@@ -45,6 +45,7 @@ import { TruthinessTester } from "./TruthinessTester";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
 import { BoxPlot } from "./BoxPlot";
+import { BayesGrid } from "./BayesGrid";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -88,6 +89,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
   "box-plot": BoxPlot,
+  "bayes-grid": BayesGrid,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
