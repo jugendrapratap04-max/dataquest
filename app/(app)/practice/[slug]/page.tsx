@@ -114,6 +114,22 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
   const user = await getCurrentUser();
   const nextSlug = user ? await nextUnsolvedSlug(slug, user.id) : null;
 
+  // Two things a returning student was never told: that they had already solved
+  // this, and what they had written. Submission knew the first and nothing read
+  // it; the second was only ever in React state and died with the tab.
+  const [solvedBefore, attempt] = user
+    ? await Promise.all([
+        prisma.submission.findFirst({
+          where: { userId: user.id, problemId: problem.id, passed: true },
+          select: { id: true },
+        }),
+        prisma.problemAttempt.findUnique({
+          where: { userId_problemId: { userId: user.id, problemId: problem.id } },
+          select: { draftCode: true, solvedSeconds: true },
+        }),
+      ])
+    : [null, null];
+
   const common = {
     id: problem.id,
     title: problem.title,
@@ -129,6 +145,9 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
     // Read from the problem, never assumed. See lib/languages.ts.
     language: languageOf(problem.kind).monaco,
     languageLabel: languageOf(problem.kind).label,
+    alreadySolved: !!solvedBefore,
+    savedCode: attempt?.draftCode ?? null,
+    bestSeconds: attempt?.solvedSeconds ?? null,
   };
 
   if (problem.kind === "sql") {

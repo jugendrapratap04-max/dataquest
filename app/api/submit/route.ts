@@ -73,26 +73,51 @@ export async function POST(req: Request) {
         await tx.submission.create({
           data: { userId: user.id, problemId, code: submittedCode, passed: verified },
         });
-        if (!verified || alreadySolved) return 0;
+        if (!verified || alreadySolved) return { xp: 0, seconds: null as number | null };
+
+        // Stop the clock, once. ProblemAttempt.startedAt was stamped the first
+        // time the editor autosaved, so this is genuinely "from when you opened
+        // it to when you solved it" — and it is written only on the first pass,
+        // because re-solving a problem you already know is not a faster time.
+        //
+        // No attempt row means the student never typed a character we saw —
+        // pasted from elsewhere, or autosave was unavailable. There is no honest
+        // number to report then, so none is stored.
+        const attempt = await tx.problemAttempt.findUnique({
+          where: { userId_problemId: { userId: user.id, problemId } },
+          select: { startedAt: true, solvedSeconds: true },
+        });
+        let seconds: number | null = null;
+        if (attempt && attempt.solvedSeconds === null) {
+          seconds = Math.max(1, Math.round((Date.now() - attempt.startedAt.getTime()) / 1000));
+          await tx.problemAttempt.update({
+            where: { userId_problemId: { userId: user.id, problemId } },
+            data: { solvedSeconds: seconds },
+          });
+        } else if (attempt) {
+          seconds = attempt.solvedSeconds;
+        }
+
         await tx.user.update({
           where: { id: user.id },
           data: { xp: { increment: problem.xp } },
         });
-        return problem.xp;
+        return { xp: problem.xp, seconds };
       },
       { isolationLevel: "Serializable" }
     );
 
-  let awardedXp = 0;
+  let settled: { xp: number; seconds: number | null } = { xp: 0, seconds: null };
   try {
-    awardedXp = await settle();
+    settled = await settle();
   } catch (e: unknown) {
     if ((e as { code?: string })?.code === "P2034") {
-      awardedXp = await settle();
+      settled = await settle();
     } else {
       throw e;
     }
   }
+  const awardedXp = settled.xp;
 
   const updated = await prisma.user.findUnique({ where: { id: user.id } });
   const { streak } = await getStreak(user.id);
@@ -101,6 +126,9 @@ export async function POST(req: Request) {
     ok: true,
     awardedXp,
     firstSolve: awardedXp > 0,
+    // How long this took, from opening the problem to solving it. Null when we
+    // have no honest start time — see the note in the transaction.
+    solvedSeconds: settled.seconds,
     xp: updated?.xp ?? user.xp,
     streak,
     // Set only when the client said "passed" and the server disagreed. The UI can

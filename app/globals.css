@@ -702,6 +702,13 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .recap { padding:20px; margin:30px 0; } .recap h3 { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
 .cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:8px 0 26px; background:var(--feat-teal-bg); }
 .cta .pad { padding:24px; } .cta .eyebrow { color:var(--teal); } .cta h3 { font-size:20px; color:var(--feat-ink); margin:8px 0 6px; } .cta p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; }
+/* Practice status pills — "you have been here before" and "this is how long it
+   took". Both sit beside the difficulty chip and reuse its shape. */
+.solved-pill, .time-pill { display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid var(--line); }
+.solved-pill { color:var(--good); border-color:color-mix(in srgb,var(--good) 45%,transparent); background:color-mix(in srgb,var(--good) 12%,transparent); }
+.time-pill { color:var(--ink-soft); background:var(--panel-2); }
+.time-pill.live { color:var(--teal); border-color:color-mix(in srgb,var(--teal) 40%,transparent); }
+
 /* Guest banner — the "look around, sign in to keep it" card at the top of the
    pages a signed-out visitor is allowed to explore. Reuses the same teal
    feature tokens as .cta so it reads as an invitation rather than a warning,

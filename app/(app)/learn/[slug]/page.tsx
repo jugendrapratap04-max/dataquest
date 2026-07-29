@@ -331,7 +331,30 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
   const showToc = outline.length >= 4;
   const concepts = (blocks.find((b) => b.t === "recap")?.items ?? []).length;
 
-  const practiceHref = lesson.problems[0] ? `/practice/${lesson.problems[0].slug}` : "/practice";
+  // Send them to the first problem they have NOT solved, not to problem 1.
+  //
+  // This was the bug behind "I solved one, came back, and it gave me the same
+  // one again". The button always pointed at problems[0], so a student who
+  // solved it, left, and returned was handed it a second time — and since the
+  // editor also reopened on the starter template, there was nothing on screen
+  // to suggest they had ever been there. Two separate omissions producing one
+  // very convincing illusion of repetition.
+  //
+  // If every problem in the topic is solved, fall back to the first: the button
+  // still works, and the practice page now says "✓ Solved" on arrival.
+  const solvedHere = user
+    ? new Set(
+        (
+          await prisma.submission.findMany({
+            where: { userId: user.id, passed: true, problemId: { in: lesson.problems.map((q) => q.id) } },
+            distinct: ["problemId"],
+            select: { problemId: true },
+          })
+        ).map((s) => s.problemId)
+      )
+    : new Set<string>();
+  const firstOpen = lesson.problems.find((q) => !solvedHere.has(q.id)) ?? lesson.problems[0];
+  const practiceHref = firstOpen ? `/practice/${firstOpen.slug}` : "/practice";
   const idx = siblings.findIndex((s) => s.id === lesson.id);
   const prev = siblings[idx - 1];
   const next = siblings[idx + 1];
@@ -368,7 +391,10 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
                 people off a lesson that is only ~10 minutes of text. */}
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> ~{readMinutes} min read{workMinutes > 1 ? ` · ~${workMinutes} min practice` : ""}</span>
             {lesson.problems.length > 0 && (
-              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg> {lesson.problems.length} practice questions</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg>
+                {" "}{user && solvedHere.size > 0
+                  ? `${solvedHere.size} of ${lesson.problems.length} practice questions solved`
+                  : `${lesson.problems.length} practice questions`}</span>
             )}
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2 4 6v6c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6z"/></svg> {lesson.level}</span>
           </div>
@@ -426,7 +452,14 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           <div className="lsum-stats">
             <div><b>{concepts}</b><span>key ideas</span></div>
             <div><b>~{total}</b><span>minutes</span></div>
-            {lesson.problems.length > 0 && <div><b>{lesson.problems.length}</b><span>problems waiting</span></div>}
+            {/* "problems waiting" was true on the first visit and wrong on every
+                one after it — a student who had solved both was still told two
+                were waiting. It counts what is actually left now. */}
+            {lesson.problems.length > 0 && (
+              user
+                ? <div><b>{solvedHere.size}/{lesson.problems.length}</b><span>problems solved</span></div>
+                : <div><b>{lesson.problems.length}</b><span>problems waiting</span></div>
+            )}
             {user && <div><b>{doneIds.size}/{siblings.length}</b><span>lessons done</span></div>}
           </div>
           {next && <p className="lsum-next">Up next: <b>{next.title}</b></p>}

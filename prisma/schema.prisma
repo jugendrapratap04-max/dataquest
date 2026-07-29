@@ -35,6 +35,7 @@ model User {
 
   lessonProgress LessonProgress[]
   submissions    Submission[]
+  attempts       ProblemAttempt[]
   notes          Note[]
   sessions       StudySession[]
   notebook       NotebookEntry[]
@@ -136,6 +137,7 @@ model Problem {
   lesson   Lesson? @relation(fields: [lessonId], references: [id])
 
   submissions Submission[]
+  attempts    ProblemAttempt[]
 }
 
 model LessonProgress {
@@ -166,6 +168,38 @@ model Submission {
   // /api/submit; the second serves the activity and streak scans.
   @@index([userId, problemId, passed])
   @@index([userId, createdAt])
+}
+
+// The work in progress on one problem — as opposed to Submission, which is the
+// history of what was handed in.
+//
+// Three things a student loses today and should not:
+//   1. their code. Close the tab mid-problem and the editor reopens on the
+//      starter template, so the only way to keep work was to finish in one go.
+//   2. the fact that they already solved it. Submission knows, but nothing on
+//      the practice page reads it, so a returning student is shown a solved
+//      problem with an empty editor and no reason to think they have been here.
+//   3. how long it took. Every competitor shows this and it is the thing that
+//      makes a second attempt feel like progress rather than repetition.
+//
+// One row per (student, problem), updated in place. It is deliberately not a
+// log: the history lives in Submission and this is only "where was I".
+model ProblemAttempt {
+  id            String   @id @default(cuid())
+  userId        String
+  problemId     String
+  draftCode     String
+  // Set when the problem is first opened, so elapsed time survives a reload.
+  startedAt     DateTime @default(now())
+  // Seconds from first open to first pass. Null until solved, and never
+  // overwritten afterwards — it is a personal best, not a running total.
+  solvedSeconds Int?
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id])
+  problem       Problem  @relation(fields: [problemId], references: [id])
+
+  @@unique([userId, problemId])
+  @@index([userId, updatedAt])
 }
 
 model Note {

@@ -1,7 +1,8 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { formatDuration } from "@/components/PracticeWorkbench";
 import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,12 @@ export type SqlProblemData = {
   descriptionMd: string; examples: { input: string; output: string }[];
   starterCode: string; solutionCode: string; sqlSetup: string;
   hints: string[]; xp: number; recap: string; lessonSlug?: string; nextSlug?: string | null;
+  // Same three as the Python workbench — a SQL problem is a problem, and a
+  // student who solved one and came back deserves the same answer to "have I
+  // done this?" that a Python one gives them.
+  alreadySolved?: boolean;
+  savedCode?: string | null;
+  bestSeconds?: number | null;
 };
 
 function mdLite(md: string) {
@@ -56,7 +63,9 @@ function Grid({ rs, cap }: { rs: ResultSet; cap?: string }) {
 export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   const router = useRouter();
   const [tab, setTab] = useState<"desc" | "hint" | "recap">("desc");
-  const [sql, setSql] = useState(p.starterCode);
+  const [sql, setSql] = useState(p.savedCode || p.starterCode);
+  const [elapsed, setElapsed] = useState(0);
+  const [bestSeconds, setBestSeconds] = useState<number | null>(p.bestSeconds ?? null);
   const [result, setResult] = useState<SqlRunResult | null>(null);
   const [resTab, setResTab] = useState<"out" | "expected">("out");
   const [busy, setBusy] = useState<null | "run" | "submit">(null);
@@ -68,6 +77,27 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
   const [needsLogin, setNeedsLogin] = useState(false);
 
   const schema = readSchema(p.sqlSetup);
+
+  // Clock and autosave — see the longer notes on the same pair in
+  // PracticeWorkbench. Identical behaviour on purpose: the student should not
+  // have to learn which subjects remember their work.
+  useEffect(() => {
+    if (p.alreadySolved) return;
+    const id = setInterval(() => setElapsed((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [p.alreadySolved]);
+
+  useEffect(() => {
+    if (sql === p.starterCode && !p.savedCode) return;
+    const id = setTimeout(() => {
+      void fetch("/api/attempt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemId: p.id, code: sql }),
+      }).catch(() => {});
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [sql, p.id, p.starterCode, p.savedCode]);
 
   function flashNoPaste() {
     setNoPaste(true);
@@ -110,6 +140,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
         } else if (res.verifyNote) {
           setSubmitNote(`The server could not verify this: ${res.verifyNote}`);
         } else {
+          if (typeof res.solvedSeconds === "number") setBestSeconds(res.solvedSeconds);
           setCelebrate(res.awardedXp ?? 0);
         }
       }
@@ -139,10 +170,20 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
           {tab === "desc" && (
             <div>
               <h1 style={{ fontSize: 20, marginBottom: 10 }}>{p.title}</h1>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16, alignItems: "center" }}>
                 <span className={`diff ${p.difficulty === "Medium" ? "medium" : p.difficulty === "Hard" ? "hard" : p.difficulty === "Super Hard" ? "superhard" : ""}`}>{p.difficulty}</span>
                 {p.tags.map((t) => <span key={t} className="tag">{t}</span>)}
+                {p.alreadySolved && <span className="solved-pill">✓ Solved</span>}
+                {bestSeconds !== null && <span className="time-pill">⏱ {formatDuration(bestSeconds)}</span>}
+                {!p.alreadySolved && elapsed > 0 && <span className="time-pill live">⏱ {formatDuration(elapsed)}</span>}
               </div>
+              {p.alreadySolved && (
+                <div className="note tip" style={{ marginBottom: 14 }}><span className="i">✓</span><div>
+                  You already solved this{bestSeconds !== null ? <> in <b>{formatDuration(bestSeconds)}</b></> : null}, and your last
+                  query is loaded below. Solving it again earns no further XP — it is here to practise on.
+                  {p.nextSlug && <> Ready to move on? <Link href={`/practice/${p.nextSlug}`} style={{ color: "var(--teal)" }}>Next unsolved problem →</Link></>}
+                </div></div>
+              )}
               <div dangerouslySetInnerHTML={{ __html: mdLite(p.descriptionMd) }} />
               {p.examples.map((ex, i) => (
                 <div className="ex-box" key={i}>

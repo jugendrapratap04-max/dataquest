@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,7 +19,19 @@ export type ProblemData = {
   language?: string;
   /** What the editor bar calls it. Same reason as `language`. */
   languageLabel?: string;
+  /** Has this student passed this problem before? Read from Submission. */
+  alreadySolved?: boolean;
+  /** Their autosaved editor content, or null if they have never typed here. */
+  savedCode?: string | null;
+  /** Seconds taken on the first successful solve, if we recorded one. */
+  bestSeconds?: number | null;
 };
+
+export function formatDuration(total: number): string {
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
+}
 
 function mdLite(md: string) {
   return md
@@ -38,7 +50,12 @@ const fmt = (v: unknown) => (v === undefined || v === null ? "None" : JSON.strin
 export function PracticeWorkbench({ p }: { p: ProblemData }) {
   const router = useRouter();
   const [tab, setTab] = useState<"desc" | "hint" | "recap">("desc");
-  const [code, setCode] = useState(p.starterCode);
+  // Reopen on what they last wrote, not on the starter template. The `||` rather
+  // than `??` is deliberate: an empty saved draft means they cleared the editor,
+  // and handing them a blank screen would be worse than handing back the starter.
+  const [code, setCode] = useState(p.savedCode || p.starterCode);
+  const [elapsed, setElapsed] = useState(0);
+  const [bestSeconds, setBestSeconds] = useState<number | null>(p.bestSeconds ?? null);
   const [result, setResult] = useState<RunResult | null>(null);
   const [resTab, setResTab] = useState<"tests" | "console">("tests");
   const [busy, setBusy] = useState<null | "run" | "submit">(null);
@@ -48,6 +65,34 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
   // didn't save. Without it, a rejected solve looked like a silent 0 XP.
   const [submitNote, setSubmitNote] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
+
+  // The clock. It counts this sitting, not the stored total — the authoritative
+  // time is stamped server-side from ProblemAttempt.startedAt, and this is only
+  // so the student can see it moving.
+  useEffect(() => {
+    if (p.alreadySolved) return;
+    const id = setInterval(() => setElapsed((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [p.alreadySolved]);
+
+  // Autosave, debounced. Runs a second after typing stops rather than on every
+  // keystroke, so a fast typist writes one row per pause instead of forty.
+  //
+  // The first save is also what stamps startedAt server-side, which is why the
+  // timer above and the recorded time can differ slightly — the recorded one
+  // starts at the first character typed, not at page load. That is the more
+  // honest of the two: it does not charge you for reading the question.
+  useEffect(() => {
+    if (code === p.starterCode && !p.savedCode) return;   // nothing written yet
+    const id = setTimeout(() => {
+      void fetch("/api/attempt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemId: p.id, code }),
+      }).catch(() => {});   // a lost draft save is not worth interrupting anyone
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [code, p.id, p.starterCode, p.savedCode]);
 
   function flashNoPaste() {
     setNoPaste(true);
@@ -94,6 +139,10 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
         } else if (res.verifyNote) {
           setSubmitNote(`The server could not verify this: ${res.verifyNote}`);
         } else {
+          // The server's time, not the browser's — it is measured from the
+          // first character typed and survives a reload, which the local
+          // counter does not.
+          if (typeof res.solvedSeconds === "number") setBestSeconds(res.solvedSeconds);
           setCelebrate(res.awardedXp ?? 0);
         }
       }
@@ -125,10 +174,27 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
           {tab === "desc" && (
             <div>
               <h1 style={{ fontSize: 20, marginBottom: 10 }}>{p.title}</h1>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16, alignItems: "center" }}>
                 <span className={`diff ${p.difficulty === "Medium" ? "medium" : p.difficulty === "Hard" ? "hard" : p.difficulty === "Super Hard" ? "superhard" : ""}`}>{p.difficulty}</span>
                 {p.tags.map((t) => <span key={t} className="tag">{t}</span>)}
+                {/* Everything needed to answer "have I done this, and how did it
+                    go?" — the question a returning student was left to guess at,
+                    which is what made a solved problem feel like a repeat. */}
+                {p.alreadySolved && <span className="solved-pill">✓ Solved</span>}
+                {bestSeconds !== null && (
+                  <span className="time-pill">⏱ {formatDuration(bestSeconds)}</span>
+                )}
+                {!p.alreadySolved && elapsed > 0 && (
+                  <span className="time-pill live">⏱ {formatDuration(elapsed)}</span>
+                )}
               </div>
+              {p.alreadySolved && (
+                <div className="note tip" style={{ marginBottom: 14 }}><span className="i">✓</span><div>
+                  You already solved this{bestSeconds !== null ? <> in <b>{formatDuration(bestSeconds)}</b></> : null}, and your last
+                  version of the code is loaded below. Solving it again earns no further XP — it is here to practise on.
+                  {p.nextSlug && <> Ready to move on? <Link href={`/practice/${p.nextSlug}`} style={{ color: "var(--teal)" }}>Next unsolved problem →</Link></>}
+                </div></div>
+              )}
               <div dangerouslySetInnerHTML={{ __html: mdLite(p.descriptionMd) }} />
               {p.examples.map((ex, i) => (
                 <div className="ex-box" key={i}>
