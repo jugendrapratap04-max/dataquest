@@ -702,6 +702,54 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .recap { padding:20px; margin:30px 0; } .recap h3 { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
 .cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:8px 0 26px; background:var(--feat-teal-bg); }
 .cta .pad { padding:24px; } .cta .eyebrow { color:var(--teal); } .cta h3 { font-size:20px; color:var(--feat-ink); margin:8px 0 6px; } .cta p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; }
+/* Challenges — the async half of the battle arena. Built on the existing card,
+   btn and note primitives; the only new shapes are the option buttons, the
+   scoreboard rows and the review cards. */
+.ch-field { margin-bottom: 18px; }
+.ch-label { font-size: 12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin-bottom: 8px; }
+.ch-hint { font-size: 12.5px; color: var(--ink-soft); margin: 8px 0 0; }
+
+.ch-run-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.ch-step { font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+.ch-bar { height:5px; border-radius:999px; background:var(--panel-2); overflow:hidden; margin-bottom:18px; }
+.ch-bar-fill { height:100%; background:var(--teal); border-radius:999px; transition:width .25s ease; }
+.ch-q { font-size:17px; line-height:1.5; margin:0 0 16px; }
+
+.ch-options { display:flex; flex-direction:column; gap:8px; }
+.ch-opt { display:flex; align-items:flex-start; gap:10px; width:100%; text-align:left; padding:12px 14px; border-radius:11px;
+  border:1.5px solid var(--line); background:var(--panel); color:var(--ink); font-size:14px; line-height:1.45; cursor:pointer; }
+.ch-opt:hover { border-color:color-mix(in srgb,var(--teal) 40%,transparent); }
+.ch-opt.on { border-color:var(--teal); background:color-mix(in srgb,var(--teal) 12%,transparent); }
+.ch-opt-k { flex:none; width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-family:var(--mono);
+  font-size:11.5px; font-weight:700; background:var(--panel-2); color:var(--ink-faint); }
+.ch-opt.on .ch-opt-k { background:var(--teal); color:#08211E; }
+.ch-nav { display:flex; justify-content:space-between; gap:10px; margin-top:18px; flex-wrap:wrap; }
+
+.ch-board { display:flex; flex-direction:column; gap:5px; }
+.ch-board-row { display:grid; grid-template-columns:28px 1fr auto auto; gap:12px; align-items:center; padding:9px 12px;
+  border-radius:9px; border:1px solid var(--line); font-family:var(--mono); font-size:13px; }
+.ch-board-row.you { border-color:color-mix(in srgb,var(--teal) 50%,transparent); background:color-mix(in srgb,var(--teal) 10%,transparent); }
+.ch-pos { color:var(--ink-faint); } .ch-who { font-family:var(--sans); } .ch-score { font-weight:700; } .ch-time { color:var(--ink-faint); }
+
+.ch-share { display:flex; gap:10px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+.ch-share-url { font-family:var(--mono); font-size:12.5px; padding:8px 12px; border-radius:9px; border:1px solid var(--line); background:var(--panel-2); }
+
+.ch-list { display:flex; flex-direction:column; gap:7px; }
+.ch-row { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 14px; border-radius:11px;
+  border:1px solid var(--line); background:var(--panel); }
+.ch-row:hover { border-color:color-mix(in srgb,var(--teal) 40%,transparent); }
+.ch-row-t { font-weight:600; font-size:14px; } .ch-row-s { font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+.ch-code { font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
+
+.ch-review { display:flex; flex-direction:column; gap:12px; }
+.ch-rev { padding:14px; border-radius:12px; border:1px solid var(--line); background:var(--panel); }
+.ch-rev-q { font-weight:600; font-size:14px; margin-bottom:10px; line-height:1.45; }
+.ch-rev-a { font-size:13px; font-family:var(--mono); padding:6px 10px; border-radius:7px; margin-bottom:5px; }
+.ch-rev-a.bad { background:color-mix(in srgb,var(--bad) 12%,transparent); color:var(--bad); }
+.ch-rev-a.good { background:color-mix(in srgb,var(--good) 12%,transparent); color:var(--good); }
+.ch-rev-why { font-size:13px; color:var(--ink-soft); line-height:1.55; margin-top:8px; }
+.ch-rev-link { display:inline-block; margin-top:10px; font-size:12.5px; color:var(--teal); }
+
 /* Practice status pills — "you have been here before" and "this is how long it
    took". Both sit beside the difficulty chip and reuse its shape. */
 .solved-pill, .time-pill { display:inline-flex; align-items:center; gap:5px; font-family:var(--mono); font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:999px; border:1px solid var(--line); }

@@ -9,6 +9,7 @@ const titles: Record<string, [string, string]> = {
   "/roadmap": ["Skill Sheet", "Nine subjects in the order that works — learn it, practise it, build with it."],
   "/learn": ["Lessons", "Understand it first, then move on — one topic at a time."],
   "/practice": ["Practice Arena", "Write code for what you just read — that is what makes it stick."],
+  "/challenge": ["Challenges", "Same questions, sent to a friend — compare scores and see what you both missed."],
   "/projects": ["Projects", "Put your skills into real projects — this is where a portfolio comes from."],
   "/notes": ["My Notes", "Your personal cheat-sheet — the best friend revision has."],
   "/progress": ["Your Analytics", "Track your growth — both your strengths and your gaps."],

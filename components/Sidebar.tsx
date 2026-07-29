@@ -43,6 +43,7 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   ]},
   { label: "Practice", items: [
     { href: "/practice", label: "Compiler", icon: <CodeIcon /> },
+    { href: "/challenge", label: "Challenges", icon: <TrophyIcon /> },
     { href: "/projects", label: "Projects", icon: <BoxIcon />, soon: true },
   ]},
   { label: "Study", items: [

@@ -36,6 +36,8 @@ model User {
   lessonProgress LessonProgress[]
   submissions    Submission[]
   attempts       ProblemAttempt[]
+  challenges     Challenge[]
+  challengeRuns  ChallengeAttempt[]
   notes          Note[]
   sessions       StudySession[]
   notebook       NotebookEntry[]
@@ -200,6 +202,53 @@ model ProblemAttempt {
 
   @@unique([userId, problemId])
   @@index([userId, updatedAt])
+}
+
+// A challenge: a fixed set of quiz questions, taken by two or more people and
+// compared.
+//
+// This is the async half of the Battle Arena in docs/PRD chapter 5. The
+// competitive part of that chapter — matchmaking, live rooms, spectators —
+// needs concurrent players, and the platform has two students who have ever
+// opened a lesson. Simultaneity is what makes a battle hard to build; it is not
+// what makes it worth building. Take the same questions, compare the scores,
+// see where you went wrong: that is the whole learning value, and it works with
+// nobody else online.
+//
+// `questions` is a **snapshot**, not a set of references. Lessons get edited —
+// this file has rewritten sixty of them — and a challenge whose questions
+// changed underneath it would no longer be the same test for both players.
+// Fairness here means the bytes are frozen at creation.
+model Challenge {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  creatorId String
+  title     String
+  questions String
+  createdAt DateTime @default(now())
+  creator   User     @relation(fields: [creatorId], references: [id])
+  attempts  ChallengeAttempt[]
+
+  @@index([creatorId, createdAt])
+}
+
+// One scored run. The unique constraint is the anti-cheat: without it the
+// second player retries until they win, and the comparison means nothing.
+// Practising the questions again is what the lessons are for.
+model ChallengeAttempt {
+  id          String   @id @default(cuid())
+  challengeId String
+  userId      String
+  correct     Int
+  total       Int
+  seconds     Int
+  answersJson String
+  createdAt   DateTime @default(now())
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([challengeId, userId])
+  @@index([userId, createdAt])
 }
 
 model Note {
