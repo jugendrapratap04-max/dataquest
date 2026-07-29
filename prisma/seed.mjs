@@ -4729,14 +4729,85 @@ const statsLessons = [
 
 /* ===================== PANDAS lessons ===================== */
 const PD1 = [
-  { t: "objectives", items: ["NumPy array kya hai","Vectorization (fast operations)","Array pe math"] },
-  { t: "h2", n: "1", text: "NumPy arrays" },
-  { t: "p", html: "NumPy Python me fast numerical computing deta hai. <b>Array</b> list jaisa hai par bahut tez — poore array pe ek saath operation chalta hai (vectorization)." },
-  { t: "code", file: "numpy.py", code: "import numpy as np\narr = np.array([1, 2, 3, 4])\nprint(arr * 2)       # [2 4 6 8]\nprint(arr.mean())    # 2.5", output: "[2 4 6 8]\n2.5" },
-  { t: "h2", n: "2", text: "Kyun fast hai" },
-  { t: "p", html: "Normal Python loop se lakhon numbers pe operation slow hota hai. NumPy C me likha hai — 10-100x fast. Pandas bhi andar NumPy use karta hai." },
-  { t: "note", variant: "tip", html: "<b>Vectorization:</b> loop likhne ki jagah poore array pe seedha operation — DS ka golden rule 'loop mat likho, vectorize karo'." },
-  { t: "recap", items: ["NumPy = fast numerical arrays","arr * 2 poore array pe","mean/sum/max built-in","Pandas ki neev NumPy hai"] },
+  { t: "objectives", items: [
+    "Say what a <b>NumPy array</b> gives you that a Python list does not",
+    "Apply one operation to a whole array — <b>vectorization</b>",
+    "Use <b>broadcasting</b>, and recognise when it has quietly done the wrong thing",
+    "Filter with a <b>boolean mask</b>, which is the door into pandas",
+  ]},
+  { t: "hook", q: "A Python loop and one line of NumPy both multiply a million numbers by two. Why is the NumPy line the one people reach for?", why: "Not because it is shorter, though it is. Because the loop asks Python to do a million separate things, and each one carries the cost of being a Python object: check the type, look up the method, box the result. NumPy stores those million numbers as one block of raw memory of a single type, and hands the whole block to code compiled in C.<br/><br/>That is the difference between a queue of a million people each buying one ticket, and one person buying a million tickets. Same tickets. Completely different afternoon.<br/><br/>It matters here because <b>pandas is built on NumPy</b>. Every DataFrame you meet in the next five lessons is NumPy arrays wearing labels, and the habits you build now are the ones that make pandas fast or slow later." },
+  { t: "def", term: "Vectorization", en: "Applying an operation to an entire array at once, instead of writing a loop that visits one element at a time — the loop still happens, but inside compiled C rather than in Python.", hi: "The rule of thumb in data work is short: if you are writing a <code>for</code> loop over a column, there is almost always a vectorized version that is both faster and shorter." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is the single most common performance mistake in real data code — a loop over DataFrame rows where a vectorized expression would do. On a hundred thousand rows the loop takes minutes and the vectorized line takes milliseconds, and the difference is not clever optimisation, it is knowing that the second one exists. Interviewers ask about it precisely because it separates people who have used pandas from people who have read about it." },
+
+  { t: "h2", n: "1", text: "An array is not a list" },
+  { t: "p", html: "A list holds anything and knows nothing about it. An array holds <b>one type</b>, in one contiguous block, and that restriction is what buys the speed." },
+  { t: "code", file: "arr.py", code: "import numpy as np\n\nnums = [1, 2, 3, 4]\nprint([n * 2 for n in nums])\n\narr = np.array(nums)\nprint(arr * 2)", output: "[2, 4, 6, 8]\n[2 4 6 8]" },
+  { t: "p", html: "Same answer, two different objects — and look at the printing. The list shows commas; the array does not. That is a small tell worth learning early, because when you are three levels into a pipeline wondering what you are holding, the commas answer it before <code>type()</code> does." },
+
+  { t: "h2", n: "2", text: "One operation, the whole array" },
+  { t: "p", html: "Arithmetic on an array applies to every element. No loop appears anywhere." },
+  { t: "code", file: "vector.py", code: "import numpy as np\n\na = np.array([10, 20, 30, 40])\n\nprint(a + 5)\nprint(a / 10)\nprint(a.sum(), a.mean(), a.max())", output: "[15 25 35 45]\n[1. 2. 3. 4.]\n100 25.0 40" },
+  { t: "p", html: "Notice the second line prints <code>[1. 2. 3. 4.]</code> with trailing dots. Dividing integers produced floats, and NumPy changed the array's type to hold them — an array has one type for everything in it, so one division converts the lot." },
+  { t: "viz", name: "vectorize-lab" },
+  { t: "p", html: "Press through the four operations. The top row never changes; the bottom row is what one written instruction did to all six values. The two counters are the whole idea — <b>one line, six elements</b> — and on real data that second number is in the millions.<br/><br/>The last button is the one to sit with. <code>arr &gt; 4</code> does not return the values above 4; it returns <b>True or False for every position</b>. That looks like a detour and it is actually the destination — §4." },
+
+  { t: "h2", n: "3", text: "Broadcasting" },
+  { t: "p", html: "Two arrays of the same shape combine element by element. An array and a single number combine too — the number is stretched to fit. That stretching is called <b>broadcasting</b>." },
+  { t: "code", file: "broadcast.py", code: "import numpy as np\n\nprices = np.array([100, 250, 80])\nqty = np.array([2, 1, 5])\n\nprint(prices * qty)\nprint((prices * qty).sum())\nprint(prices * 2)", output: "[200 250 400]\n850\n[200 500 160]" },
+  { t: "p", html: "Line one pairs them up: 100×2, 250×1, 80×5. Line two totals the bill in one expression. Line three broadcasts a single 2 across all three prices.<br/><br/>Broadcasting is enormously convenient and it is also the quietest source of wrong answers in NumPy, because it will happily combine shapes you did not mean to combine and give you a result that looks fine. That is §Find the bug." },
+
+  { t: "h2", n: "4", text: "Boolean masks" },
+  { t: "p", html: "Comparing an array gives an array of True and False, and <b>that array can be used as an index</b>. This is how every filter you will write in pandas actually works." },
+  { t: "code", file: "mask.py", code: "import numpy as np\n\nscores = np.array([45, 72, 88, 31, 65])\n\nprint(scores > 60)\nprint(scores[scores > 60])\nprint(len(scores[scores > 60]))", output: "[False  True  True False  True]\n[72 88 65]\n3" },
+  { t: "p", html: "Read the middle line twice, because the shape of it comes back in every lesson after this one: <code>scores[scores &gt; 60]</code>. The inner part builds a True/False array; the outer part keeps only the positions that said True.<br/><br/>Swap <code>scores</code> for a DataFrame and you have <code>df[df[\"sales\"] &gt; 60]</code>, which is the single most-typed line in pandas." },
+
+  { t: "think", q: "Why is a NumPy array faster than a list when both hold the same numbers?", a: "Because of what each one is allowed to contain.<br/><br/>A Python list is an array of <b>pointers</b>. Each element can be anything — an int, a string, another list — so every element is a separate object somewhere else in memory with its own type tag. Multiplying it by two means, for each element: follow the pointer, check the type, find the right multiply, build a brand-new object for the result.<br/><br/>A NumPy array is one contiguous block of raw values, all the same type. There is nothing to look up. The multiply is a single loop in compiled C over memory that sits together, which also means the CPU's cache is working with you rather than against you.<br/><br/>So the speed does not come from a cleverer algorithm — both do the same million multiplications. It comes from removing a million type checks and a million object allocations. That is also why the gain disappears if you loop over a NumPy array in Python: you have put all the overhead back." },
+  { t: "analogy", concept: "Vectorization", real: "Telling a class, not each student", html: "You want thirty students to turn to page forty. You can walk to each desk and say it thirty times, or you can say it once to the room.<br/><br/>The instruction is identical and the outcome is identical. What changed is how many times you had to open your mouth — and with thirty it barely matters, while with a million it is the whole day.<br/><br/>The analogy carries the catch too. Speaking to the room only works because everyone is doing the same thing. The moment one student needs different instructions, you are back to walking the desks — which is exactly why NumPy is fast for uniform operations and no help at all when each row needs its own decision." },
+
+  { t: "trace", intro: "Three summaries of one small array. Work out what each name holds once the line has run.", code: "import numpy as np\nv = np.array([2, 4, 6])\ntotal = int(v.sum())\navg = float(v.mean())\nbig = int((v > 3).sum())", steps: [
+    { q: "After line 3, <code>total</code> is", answer: "12", why: "2 + 4 + 6. The <code>int()</code> is there on purpose — <code>v.sum()</code> returns a NumPy integer, not a Python one, and the difference matters the moment you try to put it in JSON." },
+    { q: "After line 4, <code>avg</code> is", answer: "4.0", why: "12 divided by 3. The mean of an integer array is a float, because averages generally are — NumPy does not round it back to keep the type tidy." },
+    { q: "After line 5, <code>big</code> is", answer: "2", why: "<code>v &gt; 3</code> is <code>[False, True, True]</code>, and summing booleans counts the Trues — True is 1 and False is 0. Counting a condition by summing its mask is an idiom worth keeping." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Multiply a whole array by 3.", code: "import numpy as np\nprint(np.array([1, 2, 3]) * 3)", out: "[3 6 9]" },
+    { task: "Add two arrays element by element.", code: "import numpy as np\nprint(np.array([1, 2, 3]) + np.array([10, 20, 30]))", out: "[11 22 33]" },
+    { task: "Total an array.", code: "import numpy as np\nprint(np.array([5, 10, 15]).sum())", out: "30" },
+    { task: "Its average.", code: "import numpy as np\nprint(np.array([5, 10, 15]).mean())", out: "10.0" },
+    { task: "The shape of a 2-by-2 array.", code: "import numpy as np\nprint(np.array([[1, 2], [3, 4]]).shape)", out: "(2, 2)" },
+    { task: "Build 0 to 4 without typing them.", code: "import numpy as np\nprint(np.arange(5))", out: "[0 1 2 3 4]" },
+    { task: "Three zeros — note the type it chose.", code: "import numpy as np\nprint(np.zeros(3))", out: "[0. 0. 0.]" },
+    { task: "Keep only the values above 4.", code: "import numpy as np\narr = np.array([3, 8, 1, 9])\nprint(arr[arr > 4])", out: "[8 9]" },
+    { task: "Reshape four values into two rows.", code: "import numpy as np\nprint(np.array([1, 2, 3, 4]).reshape(2, 2))", out: "[[1 2]\n [3 4]]" },
+    { task: "The standard deviation — the same data as the statistics track.", code: "import numpy as np\nprint(round(float(np.array([2, 4, 4, 4, 5, 5, 7, 9]).std()), 4))", out: "2.0" },
+    { task: "What type is the array actually storing?", code: "import numpy as np\nprint(np.array([1, 2, 3]).dtype)", out: "int64" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "for i in range(len(arr)):\n    arr[i] = arr[i] * 2", why: "This puts every Python-level cost back: a type check and an object allocation per element. On a large array it is orders of magnitude slower than the one-line version, and it is longer to read.", fix: "arr = arr * 2" },
+    { bad: "arr = np.array([1, 2, \"three\"])", why: "An array holds one type. NumPy will not error — it will quietly convert <b>everything</b> to a string, and your arithmetic starts failing several lines later with a message about the wrong operand type.", fix: "arr = np.array([1, 2, 3])   # keep one type per array" },
+    { bad: "if arr > 5:", why: "<code>arr &gt; 5</code> is an array of booleans, not one boolean, so Python cannot decide what the <code>if</code> means and raises ValueError about an ambiguous truth value. This one at least fails loudly.", fix: "if (arr > 5).any():      # or .all(), and say which you meant" },
+    { bad: "big = arr[arr > 5]\nbig[0] = 999   # arr is unchanged... or is it?", why: "Mask indexing returns a <b>copy</b>, but plain slicing like <code>arr[1:3]</code> returns a <b>view</b> that shares memory. Two similar-looking lines, and only one of them writes through to the original.", fix: "big = arr[arr > 5].copy()   # be explicit when it matters" },
+  ]},
+
+  { t: "debug", intro: "This totals a bill: three prices, three quantities. It runs cleanly and returns 360.0. Add it up by hand — 10×1 plus 20×2 plus 30×3 — and the answer is 140. Read it before opening the fix.", code: "import numpy as np\n\ndef total_bill(prices, quantities):\n    p = np.array(prices).reshape(-1, 1)\n    q = np.array(quantities)\n    return float((p * q).sum())\n\nprint(total_bill([10, 20, 30], [1, 2, 3]))", symptom: "returns 360.0 when the three line items add up to 140 - and 360 is exactly the sum of every price times every quantity, not each price times its own", q: "Both arrays hold three numbers. So why does multiplying them produce more than three results?", fix: "import numpy as np\n\ndef total_bill(prices, quantities):\n    p = np.array(prices)\n    q = np.array(quantities)\n    return float((p * q).sum())\n\nprint(total_bill([10, 20, 30], [1, 2, 3]))", why: "The <code>reshape(-1, 1)</code> turns the prices into shape <b>(3, 1)</b> — a column — while the quantities stay <b>(3,)</b>, a row. Broadcasting sees a column and a row and does the thing it was designed to do: it produces the full <b>(3, 3)</b> grid of every combination.<br/><br/>So instead of three products it computes nine, and summing them gives (10+20+30) × (1+2+3) = 60 × 6 = 360. The number is not random — it is a completely correct answer to a question nobody asked.<br/><br/>Nothing warns you, because this is broadcasting working exactly as documented. Combining a column with a row to build a grid is a genuinely useful operation; it is only a bug here because the shapes were an accident of that <code>reshape</code>.<br/><br/>The habit that catches it: when a NumPy result is wrong, <b>print the shape before you print the values</b>. <code>(p * q).shape</code> says <code>(3, 3)</code> immediately, and a 3×3 where you expected 3 tells you what happened in one line." },
+
+  { t: "recap", items: [
+    "An <b>array</b> holds one type in one block — that restriction is what makes it fast",
+    "<b>Vectorization</b>: write the operation once, NumPy applies it to every element in C",
+    "<b>Broadcasting</b> stretches shapes to fit — convenient, and the quietest source of wrong answers",
+    "<code>arr[arr &gt; 4]</code> — a boolean mask used as an index, and the basis of every pandas filter",
+    "When a result is wrong, print <code>.shape</code> before you print the values",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between a Python list and a NumPy array?", a: "A list holds pointers to arbitrary objects of any type; an array holds raw values of one type in a contiguous block. That restriction is what allows arithmetic on the whole array to run as a single compiled loop rather than a million Python-level operations." },
+    { level: "beginner", q: "What does vectorization mean?", a: "Applying an operation to an entire array at once instead of looping element by element. The loop still happens — it happens inside compiled C, without the per-element type checks and object allocations that a Python loop pays for." },
+    { level: "intermediate", q: "What is broadcasting, and when does it bite you?", a: "It is NumPy stretching mismatched shapes so they can combine — a scalar across an array, or a column against a row. It bites when the shapes were not what you thought: a (3,1) times a (3,) silently gives a (3,3) grid instead of three products, and the result is a valid number that answers a different question. Checking .shape is the fastest way to find it." },
+    { level: "intermediate", q: "How do you filter a NumPy array, and what is actually happening?", a: "arr[arr > 5]. The inner comparison produces a boolean array of the same length, and indexing with a boolean array keeps the positions that are True. It is worth knowing this is the same mechanism behind df[df['col'] > 5] in pandas — the DataFrame version is the same idea with labels attached." },
+    { level: "advanced", q: "Your pandas code loops over rows and takes four minutes. Where do you start?", a: "By replacing the loop with a vectorized expression, because that is almost always the whole problem — iterrows costs a Python object per row, and column arithmetic on the same data is typically hundreds of times faster. If the logic genuinely varies per row I would look for a way to express it as a mask per branch, or np.where for a two-way choice, or a groupby if it is really an aggregation in disguise. Only if none of that fits would I reach for apply, which is still a Python-level loop and is a last resort rather than a solution." },
+  ]},
 ];
 const PD2 = [
   { t: "objectives", items: ["Series aur DataFrame","DataFrame banana","Basic info (shape, columns)"] },
@@ -5448,6 +5519,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "numpy-arrays": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does vectorization mean?", options: ["Applying an operation to a whole array at once instead of looping element by element", "Converting an array into a list", "Sorting an array before using it", "Splitting an array across several CPUs"], correct: 0, why: "The loop still happens — it happens inside compiled C, without a type check and an object allocation per element." },
+    { level: "easy", q: "What does np.array([1, 2, 3]) * 2 produce?", options: ["[1 2 3 1 2 3]", "[2 4 6]", "An error", "[1 2 3 2]"], correct: 1, why: "Arithmetic on an array applies to every element. A plain Python list would repeat itself instead, which is a genuinely different result from the same-looking code." },
+    { level: "easy", q: "What is the key difference between a NumPy array and a Python list?", options: ["Arrays can only hold whole numbers", "Lists are always faster", "An array holds one type in one contiguous block; a list holds pointers to anything", "There is no real difference"], correct: 2, why: "That restriction is exactly what buys the speed — there is nothing to look up per element." },
+    // Medium — apply it
+    { level: "medium", q: "What does arr > 4 return when arr is np.array([3, 7, 2])?", options: ["The number of values above 4", "[7]", "True", "An array of booleans: [False True False]"], correct: 3, why: "One True or False per position. That boolean array is what makes filtering possible in the next question." },
+    { level: "medium", q: "What is arr[arr > 4] actually doing?", options: ["Using the boolean array as an index, keeping only the positions that are True", "Comparing arr to itself", "Sorting arr and cutting at 4", "Replacing every value below 4 with zero"], correct: 0, why: "The same mechanism, with labels attached, is what df[df['sales'] > 4] does in pandas." },
+    { level: "medium", q: "Why is a NumPy array faster than a list for arithmetic?", options: ["It uses a better algorithm", "It skips a per-element type check and object allocation by running one compiled loop over one block of memory", "It runs on the GPU", "It caches previous results"], correct: 1, why: "Both do the same number of multiplications. What NumPy removes is the overhead around each one — which is also why looping over a NumPy array in Python throws the advantage away." },
+    { level: "medium", q: "What happens with np.array([1, 2, \"three\"])?", options: ["It raises a TypeError", "It keeps the numbers as ints and the text as a string", "Everything is silently converted to strings", "The string is dropped"], correct: 2, why: "An array holds one type, so NumPy picks one that fits everything. Nothing errors — your arithmetic just starts failing several lines later." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "You multiply a (3, 1) array by a (3,) array. What shape comes back?", options: ["(3,)", "(1, 3)", "It raises a shape error", "(3, 3)"], correct: 3, why: "Broadcasting sees a column and a row and builds the full grid of every combination. It is working as documented — the bug is that the shapes were an accident. Print .shape before the values." },
+    { level: "hard", q: "Why does `if arr > 5:` raise a ValueError?", options: ["arr > 5 is an array of booleans, and Python cannot reduce it to a single true or false", "Comparison operators do not work on arrays", "arr must be sorted first", "5 must be an array too"], correct: 0, why: "You have to say which you meant: (arr > 5).any() or (arr > 5).all(). This one at least fails loudly, unlike the broadcasting trap." },
+    { level: "hard", q: "Your pandas code loops over rows and takes four minutes. What is the first thing to try?", options: ["Add more RAM", "Replace the loop with a vectorized column expression", "Sort the DataFrame first", "Convert everything to Python lists"], correct: 1, why: "iterrows pays a Python object per row; column arithmetic on the same data is typically hundreds of times faster. np.where handles a two-way choice, and apply is a last resort because it is still a Python-level loop." },
+  ],
   "ab-testing": [
     // Easy — did the core idea land?
     { level: "easy", q: "Conversion rises from 10% to 12%. What is the lift in percentage points?", options: ["2 percentage points", "20 percentage points", "12 percentage points", "0.2 percentage points"], correct: 0, why: "The plain difference between the two rates. It is also a 20% relative lift, and saying which one you mean is the entire point of this section." },

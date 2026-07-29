@@ -50,6 +50,7 @@ import { DistributionLab } from "./DistributionLab";
 import { SamplingLab } from "./SamplingLab";
 import { PValueLab } from "./PValueLab";
 import { ABTestLab } from "./ABTestLab";
+import { VectorizeLab } from "./VectorizeLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -98,6 +99,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "sampling-lab": SamplingLab,
   "p-value-lab": PValueLab,
   "ab-test-lab": ABTestLab,
+  "vectorize-lab": VectorizeLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
