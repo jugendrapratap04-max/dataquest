@@ -53,11 +53,13 @@ import { ABTestLab } from "./ABTestLab";
 import { VectorizeLab } from "./VectorizeLab";
 import { FilterLab } from "./FilterLab";
 import { MissingDataLab } from "./MissingDataLab";
-import { GroupByLab } from "./GroupByLab";
+import { GroupByLab, GroupByLabSql } from "./GroupByLab";
 import { CleaningLab } from "./CleaningLab";
 import { SelectLab } from "./SelectLab";
 import { WhereLab } from "./WhereLab";
 import { OrderLimitLab } from "./OrderLimitLab";
+import { JoinLab } from "./JoinLab";
+import { WindowLab } from "./WindowLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -110,10 +112,13 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "filter-lab": FilterLab,
   "missing-data-lab": MissingDataLab,
   "groupby-lab": GroupByLab,
+  "groupby-lab-sql": GroupByLabSql,
   "cleaning-lab": CleaningLab,
   "select-lab": SelectLab,
   "where-lab": WhereLab,
   "order-limit-lab": OrderLimitLab,
+  "join-lab": JoinLab,
+  "window-lab": WindowLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,

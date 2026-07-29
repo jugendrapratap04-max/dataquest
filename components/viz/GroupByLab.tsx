@@ -17,7 +17,12 @@ const HUE: Record<string, string> = { Delhi: "var(--teal)", Mumbai: "var(--accen
 type Agg = "sum" | "mean" | "max" | "count";
 const AGG_LABEL: Record<Agg, string> = { sum: "sum()", mean: "mean()", max: "max()", count: "size()" };
 
-export function GroupByLab() {
+// The same split-apply-combine picture serves both subjects — only the line of
+// code underneath changes. Two components rather than a prop, because VizBlock
+// maps a name to a component and takes none.
+export function GroupByLabSql() { return <GroupByLab sql />; }
+
+export function GroupByLab({ sql }: { sql?: boolean } = {}) {
   const [agg, setAgg] = useState<Agg>("sum");
 
   const keys = [...new Set(ROWS.map((r) => r.city))].sort();
@@ -31,8 +36,10 @@ export function GroupByLab() {
     return { k, v, n: vals.length };
   });
 
-  const code =
-    agg === "count"
+  const SQL_AGG: Record<Agg, string> = { sum: "SUM(sales)", mean: "ROUND(AVG(sales), 2)", max: "MAX(sales)", count: "COUNT(*)" };
+  const code = sql
+    ? `SELECT city, ${SQL_AGG[agg]}\nFROM orders\nGROUP BY city`
+    : agg === "count"
       ? `df.groupby("city").size()`
       : `df.groupby("city")["sales"].${agg}()`;
 
@@ -56,7 +63,7 @@ export function GroupByLab() {
         ))}
       </div>
 
-      <div style={{ textAlign: "center", fontFamily: "var(--mono)", fontSize: 12.5, color: "var(--teal)", margin: "12px 0 10px" }}>
+      <div style={{ textAlign: "center", fontFamily: "var(--mono)", fontSize: 12.5, color: "var(--teal)", margin: "12px 0 10px", whiteSpace: "pre-line" }}>
         ↓ &nbsp;{code}
       </div>
 
