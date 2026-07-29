@@ -5,9 +5,11 @@
 // Python's 39 topics were below that bar — 13 with nothing at all — so the gate
 // existed but had nothing to gate on.
 //
-// Only Python. The other eight subjects are still 48-129 word stubs; asking a
-// student to practise a topic that has not been taught yet would be putting the
-// gate before the lesson.
+// Originally Python only, on the rule that asking a student to practise a topic
+// that has not been taught yet puts the gate before the lesson. Statistics now
+// meets that condition — all 11 of its topics are at the full standard — so the
+// four it was still short of two problems on are at the end of this file.
+// The remaining seven subjects are still 48-129 word stubs and stay excluded.
 //
 // House rules, learned the hard way and enforced by `npm run db:check`, which
 // runs every reference solution in Pyodide before anything ships:
@@ -331,6 +333,43 @@ const topicProblems = [
     [{ args: [[["rows", 100]], [["rows", 500]]], expected: [["rows", 500]] }, { args: [[["a", 1], ["b", 2]], []], expected: [["a", 1], ["b", 2]] }, { args: [[], [["x", 9]]], expected: [["x", 9]] }],
     ["`dict(pairs)` turns a list of pairs into a dict.", "`dict(DEFAULTS)` copies; `cfg = DEFAULTS` only renames.", "Return pairs sorted by key so the answer is stable."],
     ["project", "dicts"]),
+
+  /* ---------- statistics: the four topics still short of two ---------- */
+  PP("bayes", "Medium", 340, "positive-test-chance", "What a Positive Test Means", "posterior",
+    "A screening test is used on a whole population. Write `posterior(prev, sens, spec)` returning the probability that someone who tested **positive** is genuinely ill, rounded to 4 decimal places.\n\n- `prev` — the share of the population who are ill\n- `sens` — the share of ill people the test correctly flags\n- `spec` — the share of healthy people the test correctly clears\n\nRemember there are **two** roads to a positive result: an ill person correctly flagged, and a healthy person wrongly flagged.",
+    [{ input: "prev=0.01, sens=0.99, spec=0.95", output: "0.1667" }, { input: "prev=0.5, sens=0.99, spec=0.95", output: "0.9519" }],
+    "def posterior(prev, sens, spec):\n    pass\n",
+    "def posterior(prev, sens, spec):\n    p_pos = sens * prev + (1 - spec) * (1 - prev)\n    return round(sens * prev / p_pos, 4)\n",
+    [{ args: [0.01, 0.99, 0.95], expected: 0.1667 }, { args: [0.5, 0.99, 0.95], expected: 0.9519 }, { args: [0.02, 0.99, 0.95], expected: 0.2878 }],
+    ["The false-alarm road is (1 - spec) multiplied by the healthy share, which is (1 - prev).", "Denominator = sens * prev + (1 - spec) * (1 - prev).", "Then divide the true-positive road by that total."],
+    ["bayes", "stats"]),
+
+  PP("distributions", "Medium", 341, "binomial-exact", "Exactly k Successes", "exactly_k",
+    "Write `exactly_k(n, k, p)` returning the probability of getting **exactly** k successes in n independent tries, each succeeding with probability p. Round to 4 decimal places.\n\nUse `math.comb`, not `math.perm` — a binomial asks how many succeeded, never in which order.",
+    [{ input: "n=10, k=3, p=0.5", output: "0.1172" }, { input: "n=5, k=2, p=0.5", output: "0.3125" }],
+    "import math\n\ndef exactly_k(n, k, p):\n    pass\n",
+    "import math\n\ndef exactly_k(n, k, p):\n    return round(math.comb(n, k) * p**k * (1 - p)**(n - k), 4)\n",
+    [{ args: [10, 3, 0.5], expected: 0.1172 }, { args: [5, 2, 0.5], expected: 0.3125 }, { args: [10, 5, 0.5], expected: 0.2461 }],
+    ["The formula is C(n,k) * p**k * (1-p)**(n-k).", "math.comb(n, k) counts the ways to choose which k succeeded.", "The (n - k) failures each contribute (1 - p)."],
+    ["binomial", "stats"]),
+
+  PP("sampling-clt", "Medium", 342, "standard-error-of", "How Precise Is This Mean?", "standard_error",
+    "Write `standard_error(values)` returning the standard error of the mean, rounded to 4 decimal places.\n\nThat is the **sample** standard deviation (dividing by n-1) divided by the square root of n. It describes how far the sample mean would sit from the true mean across repeated samples — which is not the same as how spread out the values themselves are.",
+    [{ input: "values=[2, 4, 6, 8, 10]", output: "1.4142" }, { input: "values=[1, 2, 3]", output: "0.5774" }],
+    "import math\n\ndef standard_error(values):\n    pass\n",
+    "import math\n\ndef standard_error(values):\n    n = len(values)\n    mean = sum(values) / n\n    var = sum((v - mean) ** 2 for v in values) / (n - 1)\n    return round(math.sqrt(var) / math.sqrt(n), 4)\n",
+    [{ args: [[2, 4, 6, 8, 10]], expected: 1.4142 }, { args: [[1, 2, 3]], expected: 0.5774 }, { args: [[4, 8]], expected: 2.0 }],
+    ["Divide the squared deviations by n-1, not n — this is a sample.", "Take the square root of that to get the standard deviation.", "Then divide by math.sqrt(n). Forgetting this last step is the classic mistake."],
+    ["sampling", "stats"]),
+
+  PP("hypothesis-testing", "Medium", 343, "two-tailed-p", "The Two-Tailed p-value", "two_tailed_p",
+    "Write `two_tailed_p(z)` returning the two-tailed p-value for a z-score, rounded to 4 decimal places.\n\nUse `math.erf` for the normal CDF: the share of a standard normal below z is `0.5 * (1 + erf(z / sqrt(2)))`.\n\nTwo-tailed means a result this extreme **in either direction**, so a negative z must give the same answer as its positive twin.",
+    [{ input: "z=1.96", output: "0.05" }, { input: "z=2", output: "0.0455" }],
+    "import math\n\ndef two_tailed_p(z):\n    pass\n",
+    "import math\n\ndef two_tailed_p(z):\n    left = 0.5 * (1 + math.erf(abs(z) / math.sqrt(2)))\n    return round(2 * (1 - left), 4)\n",
+    [{ args: [1.96], expected: 0.05 }, { args: [2], expected: 0.0455 }, { args: [0], expected: 1.0 }, { args: [-2], expected: 0.0455 }],
+    ["Take abs(z) first, so the sign cannot change the answer.", "The area to the right of |z| is 1 minus the CDF.", "Double it, because the test counts both tails."],
+    ["hypothesis", "stats"]),
 ];
 
 export { topicProblems };
