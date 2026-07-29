@@ -851,30 +851,83 @@ const L8 = [
 ];
 
 const L9 = [
-  { t: "objectives", items: ["Loop ko ek line ki <b>comprehension</b> me badalna","<code>if</code> se filter karna","set/dict comprehension ka idea","Kab comprehension, kab normal loop"] },
-  { t: "hook", q: "Tumhare paas 10,000 prices hain, sabpe 18% GST lagana hai — ek nayi list chahiye. Poora <code>for</code> + <code>append</code> likhoge, ya ek line me?", why: "Python me ye ek line ka kaam hai — <b>list comprehension</b>. Loop + append ka chhota, tez aur saaf roop — aur data transform karne ka sabse aam tareeka." },
-  { t: "def", term: "List comprehension", en: "A concise expression that builds a new list by transforming and/or filtering the items of an iterable in a single line.", hi: "Ek line me nayi list banane ka tareeka — kisi list ke har item ko <b>transform</b> karo (expr), aur chaaho to <b>filter</b> karo (if). Formula: <code>[expr for x in list if cond]</code>." },
-  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> data transform rozana ka kaam hai — prices pe tax, naam clean karna, ek column se doosra banana, gande rows hatana. Comprehension yehi kaam chhote, padhne-layak code me karta hai. (Pandas me yehi soch <code>df</code> pe kaam aayegi.)" },
-  { t: "h2", n: "1", text: "Basic — transform" },
-  { t: "p", html: "<code>[expr for x in list]</code> — har item pe <code>expr</code> lagao, nayi list milegi." },
-  { t: "code", file: "comp.py", code: "nums = [1, 2, 3, 4]\nsquares = [n * n for n in nums]\nprint(squares)   # [1, 4, 9, 16]", output: "[1, 4, 9, 16]" },
-  { t: "h2", n: "2", text: "Filter — if ke saath" },
-  { t: "p", html: "Aakhir me <code>if</code> laga ke sirf kuch items rakho: <code>[x for x in list if cond]</code>. Pehle filter, phir transform." },
-  { t: "code", file: "compif.py", code: "nums = [1, 2, 3, 4, 5, 6]\nevens_sq = [x*x for x in nums if x % 2 == 0]\nprint(evens_sq)   # [4, 16, 36]", output: "[4, 16, 36]" },
+  { t: "objectives", items: [
+    "Turn a <code>for</code> + <code>append</code> loop into a single comprehension",
+    "Filter with <code>if</code> after the <code>for</code>, and transform with <code>if/else</code> before it",
+    "Build sets and dictionaries the same way",
+    "Judge when a comprehension helps and when a plain loop is the better answer",
+  ]},
+  { t: "hook", q: "You have 10,000 prices and every one needs 18% GST added, as a new list. Do you write the whole <code>for</code> and <code>append</code>, or one line?", why: "In Python this is one line. A comprehension is the same loop with the ceremony removed — and transforming one list into another is, more than anything else, what data work actually consists of." },
+  { t: "def", term: "List comprehension", en: "A concise expression that builds a new list by transforming and optionally filtering the items of an iterable, in a single line.", hi: "The shape is always the same: <code>[expr for x in items if condition]</code> — take each item, optionally keep it, and put the result of <code>expr</code> into a new list." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> transforming data is the daily work — adding tax to prices, cleaning a column of names, deriving one field from another, dropping the rows that are unusable. A comprehension is how that gets written in a line someone else can read. The same shape carries into pandas later, where you will be doing it to whole columns at once." },
+
+  { t: "h2", n: "1", text: "Transform every item" },
+  { t: "p", html: "<code>[expr for x in items]</code> runs <code>expr</code> on each item and collects the results into a <b>new</b> list. The original is never touched." },
+  { t: "code", file: "comp.py", code: "nums = [1, 2, 3, 4]\nsquares = [n * n for n in nums]\nprint(squares)\nprint(nums)", output: "[1, 4, 9, 16]\n[1, 2, 3, 4]" },
+  { t: "p", html: "It is worth seeing that it really is the same loop. These two build an identical list:" },
+  { t: "code", file: "sameloop.py", code: "words = [\"data\", \"science\"]\n\nout = []\nfor w in words:\n    out.append(w.upper())\n\nsame = [w.upper() for w in words]\n\nprint(out)\nprint(same)\nprint(out == same)", output: "['DATA', 'SCIENCE']\n['DATA', 'SCIENCE']\nTrue" },
+
+  { t: "h2", n: "2", text: "Filter with if" },
+  { t: "p", html: "An <code>if</code> placed <b>after</b> the <code>for</code> decides which items survive. Items that fail it never reach the expression at all." },
+  { t: "code", file: "compif.py", code: "nums = [1, 2, 3, 4, 5, 6]\nevens_sq = [x * x for x in nums if x % 2 == 0]\nprint(evens_sq)", output: "[4, 16, 36]" },
   { t: "viz", name: "comprehension-builder" },
-  { t: "think", q: "Har word ko UPPERCASE karke nayi list <code>out</code> banani hai (loop + append). Ek line ki comprehension me kaise?", a: "<code>out = [w.upper() for w in words]</code><br/><br/><code>append</code> waala expr aage, <code>for</code> waisa hi. Teen line ka kaam ek saaf line me." },
-  { t: "note", variant: "tip", html: "<b>Bonus:</b> yehi soch set aur dict pe bhi — <code>{x for x in nums}</code> (set), <code>{k: v for k, v in pairs}</code> (dict). Bracket badla, idea wahi." },
-  { t: "analogy", concept: "Comprehension", real: "Factory conveyor belt", html: "Socho ek conveyor belt 🏭: items ek taraf se aate hain. Pehle ek <b>gate (if)</b> — kuch nikal jaate hain. Jo bache, unpe ek <b>machine (expr)</b> kaam karti hai. Doosri taraf nayi list nikalti hai. <code>for</code> loop bhi yahi karta hai — comprehension bas usko ek line me likh deta hai." },
+  { t: "p", html: "Change the filter in that panel and watch how many items reach the expression. Reading order matters: the <code>for</code> runs first, the <code>if</code> decides, and only then does the expression on the left run." },
+
+  { t: "h2", n: "3", text: "if/else before the for — a different job" },
+  { t: "p", html: "There is a second place <code>if</code> can appear, and it means something else entirely. Before the <code>for</code>, an <code>if/else</code> chooses <b>what value</b> to produce — it keeps every item rather than removing any." },
+  { t: "code", file: "ternary.py", code: "nums = [1, 2, 3, 4]\nlabels = [\"even\" if n % 2 == 0 else \"odd\" for n in nums]\nprint(labels)\nprint(len(labels))", output: "['odd', 'even', 'odd', 'even']\n4" },
+  { t: "note", variant: "warn", html: "<b>Read the length: four items in, four out.</b> This is the single most confused point in the whole topic. <code>if</code> <b>after</b> the <code>for</code> <i>filters</i> — fewer items come out. <code>if/else</code> <b>before</b> the <code>for</code> <i>transforms</i> — the same number come out. And <code>[x for x in nums if x &gt; 0 else 0]</code> is not a thing: it is a <code>SyntaxError</code>, because a filter has no else." },
+
+  { t: "h2", n: "4", text: "Sets and dictionaries, same idea" },
+  { t: "p", html: "Change the brackets and the same shape builds a set or a dictionary." },
+  { t: "code", file: "setdict.py", code: "words = [\"data\", \"science\", \"data\"]\nprint(sorted({w for w in words}))\nprint({w: len(w) for w in words})", output: "['data', 'science']\n{'data': 4, 'science': 7}" },
+  { t: "analogy", concept: "A comprehension", real: "A conveyor belt", html: "Items come along a belt. First there is a <b>gate</b> — the <code>if</code> after the <code>for</code> — and whatever fails it drops off the line. Whatever survives passes through a <b>machine</b>, the expression on the left, and lands in a new crate at the far end. A <code>for</code> loop is the same factory; a comprehension is the same factory drawn on one line." },
+
+  { t: "trace", intro: "Two comprehensions over the same list. Work out what each name holds once the line has run.", code: "prices = [100, 250, 80]\ndoubled = [p * 2 for p in prices]\ncheap = [p for p in prices if p < 200]\ncount = len(cheap)", steps: [
+    { q: "After line 2, <code>doubled</code> is", answer: "[200, 500, 160]", accept: ["[200,500,160]", "200, 500, 160", "200,500,160"], why: "Every item is transformed and every item survives — there is no filter here, so three go in and three come out." },
+    { q: "After line 3, <code>cheap</code> is", answer: "[100, 80]", accept: ["[100,80]", "100, 80", "100,80"], why: "This one filters instead of transforming: the expression is just <code>p</code>, and the <code>if</code> drops 250. Note it read <code>prices</code>, not <code>doubled</code> — neither comprehension changed the original." },
+    { q: "After line 4, <code>count</code> is", answer: "2", why: "Two items survived the filter. If the <code>if</code> had been written as an <code>if/else</code> before the <code>for</code>, this would have been 3 — that is the whole difference between the two positions." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Square every number in the list.", code: "print([n * n for n in [1, 2, 3]])", out: "[1, 4, 9]" },
+    { task: "Double every number in the list.", code: "print([n * 2 for n in [1, 2, 3]])", out: "[2, 4, 6]" },
+    { task: "Keep only the even numbers.", code: "print([n for n in [1, 2, 3, 4] if n % 2 == 0])", out: "[2, 4]" },
+    { task: "Upper-case every word.", code: "print([w.upper() for w in [\"a\", \"b\"]])", out: "['A', 'B']" },
+    { task: "Get the length of every word.", code: "print([len(w) for w in [\"data\", \"ai\"]])", out: "[4, 2]" },
+    { task: "Square only the odd numbers below 6.", code: "print([n * n for n in range(6) if n % 2 == 1])", out: "[1, 9, 25]" },
+    { task: "Label each number <code>big</code> or <code>small</code> — every item must survive.", code: "print([\"big\" if n > 5 else \"small\" for n in [3, 9]])", out: "['small', 'big']" },
+    { task: "Build a list of the numbers 0 to 4 from a <code>range</code>.", code: "print([n for n in range(5)])", out: "[0, 1, 2, 3, 4]" },
+    { task: "Strip the spaces off every item.", code: "print([w.strip() for w in [\"  a  \", \" b\"]])", out: "['a', 'b']" },
+    { task: "Collect the distinct remainders with a set comprehension.", code: "print(sorted({n % 3 for n in range(6)}))", out: "[0, 1, 2]" },
+    { task: "Map each word to its length with a dict comprehension.", code: "print({w: len(w) for w in [\"ai\", \"data\"]})", out: "{'ai': 2, 'data': 4}" },
+    { task: "Add up the even numbers below 5, using a comprehension.", code: "print(sum([n for n in range(5) if n % 2 == 0]))", out: "6" },
+  ]},
+
   { t: "mistakes", items: [
-    { bad: "# 2 nested loop + 2 filter, sab ek line me\nres = [f(x) for x in a for y in b if p(x) if q(y)]", why: "Comprehension ka faayda <b>readability</b> hai. Itna thoos doge to woh khatam — koi (tum bhi) 2 mahine baad nahi samjhega. Complex ho to normal loop saaf hai.", fix: "res = []\nfor x in a:\n    for y in b:\n        if p(x) and q(y):\n            res.append(f(x))" },
-    { bad: "# sirf print ke liye comprehension\n[print(x) for x in nums]", why: "Comprehension ka kaam <b>nayi list banana</b> hai. Sirf side-effect (print) ke liye chalाओge to ek bekaar <code>[None, None, …]</code> list bhi banegi. Iske liye seedha <code>for</code> loop.", fix: "for x in nums:\n    print(x)" },
-  ] },
-  { t: "recap", items: ["<code>[expr for x in list]</code> — transform","<code>[x for x in list if cond]</code> — filter + transform","<code>{}</code> se set/dict comprehension","nayi list <b>return</b> hoti hai, purani nahi badalti","complex ya side-effect ho to normal loop"] },
+    { bad: "res = [f(x) for x in a for y in b if p(x) if q(y)]", why: "The entire point of a comprehension is that it reads in one glance. Two loops and two filters on one line destroys that — and the person who cannot follow it in two months is you. When it stops fitting in your head, a plain loop is the better code, not the weaker one.", fix: "res = []\nfor x in a:\n    for y in b:\n        if p(x) and q(y):\n            res.append(f(x))" },
+    { bad: "[print(x) for x in nums]", why: "A comprehension exists to <b>build a list</b>. Using it only for a side effect still builds one — a throwaway list of <code>None</code>, one per item — and quietly wastes the memory. It also tells the next reader you wanted a list, which you did not.", fix: "for x in nums:\n    print(x)" },
+    { bad: "[x for x in nums if x > 0 else 0]", why: "A filter has no <code>else</code> — there is nowhere for the rejected item to go. This is a <code>SyntaxError</code>. If you want a replacement value rather than removal, the <code>if/else</code> belongs <b>before</b> the <code>for</code>.", fix: "[x if x > 0 else 0 for x in nums]" },
+    { bad: "total = sum([x * x for x in big_list])", why: "This builds the entire list in memory purely to add it up and throw it away. On a large input that is real memory for no reason.", fix: "total = sum(x * x for x in big_list)" },
+  ]},
+
+  { t: "debug", intro: "This should keep only the positive numbers from the list. It returns four items instead of two, with zeros where the negatives were. Nothing crashes. Read it before opening the fix.", code: "nums = [5, -3, 8, -1]\n\npositives = [n if n > 0 else 0 for n in nums]\n\nprint(positives)", symptom: "prints [5, 0, 8, 0], but only the positive numbers were wanted", q: "The condition is right and the list is right. So why did nothing actually get removed?", fix: "nums = [5, -3, 8, -1]\n\npositives = [n for n in nums if n > 0]\n\nprint(positives)", why: "The <code>if</code> is in the <b>transforming</b> position, before the <code>for</code>, where its job is to choose a value — so every item survives and the negatives merely become 0. Filtering happens with an <code>if</code> <b>after</b> the <code>for</code>, where an item that fails is simply never produced.<br/><br/>Both spellings are valid Python and both look reasonable at a glance, which is why this one gets shipped. The tell is the <b>length</b>: a filter changes it, a transform does not. When a comprehension returns the wrong number of items, look at which side of the <code>for</code> your <code>if</code> is sitting on." },
+
+  { t: "recap", items: [
+    "<code>[expr for x in items]</code> transforms every item into a <b>new</b> list",
+    "<code>if</code> <b>after</b> the <code>for</code> filters — fewer items come out",
+    "<code>if/else</code> <b>before</b> the <code>for</code> transforms — the count stays the same",
+    "Change the brackets for a set <code>{x for x in …}</code> or a dict <code>{k: v for …}</code>",
+    "If it no longer reads in one glance, or you only want a side effect, write the loop",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "List comprehension kya hai, faayda kya?", a: "Ek line me list banane ka tareeka — <code>[expr for x in it if cond]</code>. Faayda: chhota, thoda tez (loop+append se), aur padhne me saaf — jab tak simple rahe." },
-    { level: "beginner", q: "<code>if</code> comprehension me kahan lagta hai?", a: "<code>for</code> ke <b>baad</b>, filter ke liye: <code>[x for x in xs if x > 0]</code>. (Ek alag roop me <code>if/else</code> <code>for</code> se <b>pehle</b> bhi aa sakta hai — wo transform ke liye, filter ke liye nahi.)" },
-    { level: "intermediate", q: "Comprehension kab NA use karein?", a: "Jab logic complex/nested ho (readability marr jaaye), ya sirf side-effect chahiye (print, DB write) — tab normal <code>for</code>. Rule: ek nazar me samajh na aaye to loop." },
-  ] },
+    { level: "beginner", q: "What is a list comprehension and why use one?", a: "A one-line way to build a list: <code>[expr for x in items if cond]</code>. It is shorter than <code>for</code> plus <code>append</code>, slightly faster because the append is not looked up each pass, and easier to read — as long as it stays simple." },
+    { level: "beginner", q: "Where does the <code>if</code> go?", a: "For <b>filtering</b>, after the <code>for</code>: <code>[x for x in xs if x &gt; 0]</code>. There is a second position — an <code>if/else</code> <b>before</b> the <code>for</code> — but that <b>transforms</b> rather than filters, and keeps every item." },
+    { level: "intermediate", q: "When should you not use a comprehension?", a: "When the logic is nested or complicated enough that it no longer reads in one glance, and when you only want a side effect such as printing or writing to a database — a comprehension would build a pointless list of <code>None</code>. The rule of thumb: if you have to decode it, write the loop." },
+    { level: "intermediate", q: "Does the loop variable leak out of a comprehension?", a: "Not in Python 3. A comprehension has its own scope, so <code>x</code> inside it does not overwrite an outer <code>x</code> and does not exist afterwards. In Python 2 it did leak, which is where the old warnings come from." },
+    { level: "advanced", q: "What is the difference between <code>sum([x*x for x in xs])</code> and <code>sum(x*x for x in xs)</code>?", a: "The first builds the whole list in memory and then adds it up. The second is a <b>generator expression</b> — it produces one value at a time and never holds them all, so memory stays flat however large the input is. When the result is consumed once and immediately, drop the brackets." },
+  ]},
 ];
 
 const L10 = [
@@ -4319,10 +4372,19 @@ export const QUIZZES = {
     { level: "hard", q: "Why is <code>\"\".join(parts)</code> preferred over building a string with <code>+=</code> inside a loop?", options: ["+= changes the string in place, which is unsafe", "+= returns None", "+= raises an error on long strings", "Strings are immutable, so += copies the whole string every pass, while join allocates once"], correct: 3, why: "Each <code>+=</code> builds an entirely new string and copies everything over, which becomes quadratic work. <code>join</code> looks at all the pieces once and copies once." },
   ],
   "comprehensions": [
-    { q: "<code>[x*x for x in [1, 2, 3]]</code> — result?", options: ["[1, 2, 3]", "[2, 4, 6]", "[1, 4, 9]", "[1, 8, 27]"], correct: 2, why: "Har item ka square: 1, 4, 9." },
-    { q: "<code>[x for x in range(5) if x % 2 == 0]</code> — kya aayega?", options: ["[1, 3]", "[0, 2, 4]", "[2, 4]", "[0, 1, 2, 3, 4]"], correct: 1, why: "range(5) = 0..4, sirf even rakhe: <b>0, 2, 4</b>." },
-    { q: "Comprehension me filter (<code>if</code>) kahan aata hai?", options: ["for ke baad", "for se pehle", "bracket ke bahar", "kahin bhi"], correct: 0, why: "<code>[x for x in xs <b>if cond</b>]</code> — filter <code>for</code> ke baad." },
-    { q: "<code>{x for x in [1, 1, 2, 2]}</code> kya dega?", options: ["[1, 1, 2, 2]", "{1, 1, 2, 2}", "TypeError", "{1, 2}"], correct: 3, why: "<code>{}</code> = set comprehension — <b>duplicates hata deta</b>: {1, 2}." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>print([n * 2 for n in [1, 2, 3]])</code> — what appears?", options: ["[2, 4, 6]", "[1, 2, 3]", "[6]", "an error"], correct: 0, why: "Each item is doubled and the results are collected into a new list." },
+    { level: "easy", q: "What does a list comprehension give you back?", options: ["Nothing, it works in place", "A new list", "The original list, modified", "A single number"], correct: 1, why: "It always builds a <b>new</b> list. The list you looped over is left exactly as it was." },
+    { level: "easy", q: "Where does the <code>if</code> go when you want to filter items out?", options: ["Comprehensions cannot filter", "Before the for", "After the for", "Outside the brackets"], correct: 2, why: "A filtering <code>if</code> comes after the <code>for</code>. An item that fails it is never produced at all." },
+    // Medium — apply it
+    { level: "medium", q: "<code>print([x * x for x in [1, 2, 3, 4] if x % 2 == 0])</code> — what appears?", options: ["[1, 4, 9, 16]", "[4, 16]", "[2, 4]", "[1, 9]"], correct: 1, why: "The filter keeps 2 and 4, and only those two reach the expression, giving 4 and 16." },
+    { level: "medium", q: "<code>print([\"even\" if n % 2 == 0 else \"odd\" for n in [1, 2]])</code> — what appears?", options: ["['odd', 'even']", "['even', 'odd']", "an error", "['odd']"], correct: 0, why: "1 is odd and 2 is even, in that order. This <code>if/else</code> chooses a value rather than removing anything, so both items survive." },
+    { level: "medium", q: "<code>[x for x in nums if x > 0 else 0]</code> — what happens?", options: ["It works and replaces negatives with 0", "SyntaxError", "It returns an empty list", "It filters out the negatives"], correct: 1, why: "A filtering <code>if</code> has no <code>else</code> - there is nowhere for a rejected item to go. To substitute a value instead, the <code>if/else</code> must move before the <code>for</code>." },
+    { level: "medium", q: "<code>print({w: len(w) for w in [\"ai\"]})</code> — what appears?", options: ["['ai']", "{'ai'}", "{'ai': 2}", "2"], correct: 2, why: "Curly brackets with a <code>key: value</code> expression build a dictionary, so the word maps to its length." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "You write <code>[print(x) for x in nums]</code> instead of a loop. What actually happens?", options: ["Nothing is printed", "It raises an error", "Each item prints twice", "Each item prints, and a throwaway list of None is built"], correct: 3, why: "<code>print</code> returns <code>None</code>, so the comprehension dutifully collects one <code>None</code> per item into a list nobody wanted. Use a plain loop for side effects." },
+    { level: "hard", q: "What is the difference between <code>sum([x*x for x in xs])</code> and <code>sum(x*x for x in xs)</code>?", options: ["Without the brackets it is a generator, so the whole list is never held in memory", "They are identical in every way", "The generator version is always slower", "The bracketed version cannot be summed"], correct: 0, why: "A generator expression produces one value at a time, so memory stays flat however large the input. When the result is consumed once, drop the brackets." },
+    { level: "hard", q: "In Python 3, what happens to the loop variable of a comprehension after it finishes?", options: ["It overwrites any outer variable of the same name", "It becomes a global variable", "Accessing it raises NameError inside the comprehension", "It stays inside the comprehension and does not leak out"], correct: 3, why: "A comprehension has its own scope in Python 3, so it cannot clobber an outer name. It did leak in Python 2, which is where the old warnings come from." },
   ],
   "oop": [
     { q: "Class ke method ka <b>pehla</b> parameter kya hona chahiye?", options: ["this", "obj", "self", "kuch bhi"], correct: 2, why: "<code>self</code> — \"yehi object\". Python use automatically bhejta hai, isiliye pehla parameter." },
