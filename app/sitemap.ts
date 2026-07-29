@@ -21,10 +21,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [lessons, problems, tracks] = await Promise.all([
+    const [lessons, problems, tracks, chapters] = await Promise.all([
       prisma.lesson.findMany({ select: { slug: true } }),
       prisma.problem.findMany({ select: { slug: true } }),
       prisma.track.findMany({ select: { slug: true } }),
+      // The notes moved from one page per subject to one page per chapter, so
+      // the chapter URLs are where that content now lives.
+      prisma.chapter.findMany({ select: { slug: true, track: { select: { slug: true } } } }),
     ]);
 
     return [
@@ -33,6 +36,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${SITE_URL}/book/${t.slug}`,
         changeFrequency: "weekly" as const,
         priority: 0.6,
+      })),
+      ...chapters.map((c) => ({
+        url: `${SITE_URL}/book/${c.track.slug}/${c.slug}`,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
       })),
       ...lessons.map((l) => ({
         url: `${SITE_URL}/learn/${l.slug}`,

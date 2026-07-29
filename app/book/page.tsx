@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 export default async function BookIndex() {
   const tracks = await prisma.track.findMany({
     orderBy: { order: "asc" },
-    include: { lessons: { orderBy: { order: "asc" }, select: { id: true, title: true, order: true } } },
+    include: {
+      lessons: { orderBy: { order: "asc" }, select: { id: true, title: true, order: true } },
+      chapters: { select: { id: true } },
+    },
   });
   const total = tracks.reduce((n, t) => n + t.lessons.length, 0);
 
@@ -21,8 +24,8 @@ export default async function BookIndex() {
         <h1>The DataMarg Book</h1>
         <p>
           Every lesson, written out as notes you can read straight through — definitions, worked
-          examples, common mistakes, exercises with answers, and interview questions. {total} chapters
-          across {tracks.length} tracks. Free, no account needed, and it prints to a clean PDF.
+          examples, common mistakes, exercises with answers, and interview questions. {total} topics
+          across {tracks.length} subjects. Free to read, no account needed.
         </p>
       </header>
 
@@ -34,7 +37,7 @@ export default async function BookIndex() {
               <h2>{t.title}</h2>
               <p>{t.subtitle}</p>
               <span className="bki-count">
-                {t.lessons.length ? `${t.lessons.length} chapter${t.lessons.length === 1 ? "" : "s"}` : "coming soon"}
+                {t.lessons.length ? `${t.chapters.length} chapter${t.chapters.length === 1 ? "" : "s"} · ${t.lessons.length} topic${t.lessons.length === 1 ? "" : "s"}` : "coming soon"}
               </span>
             </div>
             <span className="bki-go">Read →</span>
