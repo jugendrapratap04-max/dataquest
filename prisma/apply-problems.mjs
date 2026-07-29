@@ -9,6 +9,7 @@
 import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
+import { topicProblems } from "./topic-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
 const prisma = new PrismaClient();
@@ -16,6 +17,7 @@ const prisma = new PrismaClient();
 const SETS = [
   ["SQL", sqlProblems],
   ["pandas/numpy", pandasProblems],
+  ["topic gaps", topicProblems],
 ];
 
 // Push the seed's problem definitions onto rows that already exist in the
