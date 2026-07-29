@@ -15,6 +15,8 @@ Before you design a schema, a service, an AI workflow or a screen, read
 - **Do not hardcode anything to Python or Data Science.** Four places still do,
   and they are listed in the architecture doc — fix them when you touch them.
 
+What the learning experience is supposed to be: [`docs/LEARNING-SPEC.md`](docs/LEARNING-SPEC.md)
+— the two product documents merged, with the conflicts between them resolved.
 Current state and open work: [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
 Technical findings: [`docs/REVIEW-2026-07-29.md`](docs/REVIEW-2026-07-29.md).
 
