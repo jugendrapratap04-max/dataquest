@@ -49,6 +49,7 @@ import { BayesGrid } from "./BayesGrid";
 import { DistributionLab } from "./DistributionLab";
 import { SamplingLab } from "./SamplingLab";
 import { PValueLab } from "./PValueLab";
+import { ABTestLab } from "./ABTestLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -96,6 +97,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "distribution-lab": DistributionLab,
   "sampling-lab": SamplingLab,
   "p-value-lab": PValueLab,
+  "ab-test-lab": ABTestLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
