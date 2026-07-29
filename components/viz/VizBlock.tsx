@@ -44,6 +44,7 @@ import { ExceptionFlow } from "./ExceptionFlow";
 import { TruthinessTester } from "./TruthinessTester";
 import { CentralTendency } from "./CentralTendency";
 import { BellCurve } from "./BellCurve";
+import { BoxPlot } from "./BoxPlot";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -86,6 +87,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "truthiness-tester": TruthinessTester,
   "central-tendency": CentralTendency,
   "bell-curve": BellCurve,
+  "box-plot": BoxPlot,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,

@@ -50,7 +50,7 @@ export function BellCurve() {
       </svg>
 
       <div className="cast-flow" style={{ justifyContent: "center", marginTop: 10 }}>
-        <div className="cast-res ok" style={{ minWidth: 130 }}><div className="lbl">left me data</div><div className="val">{pct}%</div></div>
+        <div className="cast-res ok" style={{ minWidth: 130 }}><div className="lbl">data to the left</div><div className="val">{pct}%</div></div>
         <div className="cast-res" style={{ minWidth: 90 }}><div className="lbl">z-score</div><div className="val">{z.toFixed(1)}</div></div>
       </div>
 
