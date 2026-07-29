@@ -533,32 +533,85 @@ const L4 = [
 ];
 
 const L5 = [
-  { t: "objectives", items: ["List banana aur index se item nikaalna","append, len, slicing use karna","Tuple (fix list) samajhna"] },
-  { t: "hook", q: "Ek class ke 60 students ke naam rakhne hain. 60 variables banaoge — <code>name1</code>, <code>name2</code>… <code>name60</code>?", why: "Aur agar 61st student aa gaya? Ya poori list sort karni ho? 60 alag naam ek saath handle karne ka koi tarika hi nahi. Isiliye ek aisa dabba chahiye jisme <b>kai cheezein, ek order me</b> rakhi ja sakein." },
-  { t: "think", q: "<code>fruits = [\"apple\", \"mango\", \"kiwi\"]</code> — <code>fruits[1]</code> kya dega? Aur <code>fruits[-1]</code>?", a: "<code>fruits[1]</code> → <b>\"mango\"</b>. Index <b>0 se</b> shuru hota hai, isliye 1 matlab doosra item.<br/><code>fruits[-1]</code> → <b>\"kiwi\"</b>. Negative index peeche se ginta hai, aur -1 hamesha <b>aakhri</b> item hai.<br/><br/><code>len(fruits) - 1</code> likhne ki zaroorat nahi — <code>[-1]</code> hi kaafi hai." },
-  { t: "h2", n: "1", text: "List aur index" },
-  { t: "def", term: "List", en: "A list is an ordered, mutable collection of values, accessed by index.", hi: "<b>Ordered</b> = jis order me daala usi order me rahega. <b>Mutable</b> = banane ke baad badal sakte ho. <b>Index</b> = har item ki position, <code>0</code> se shuru." },
-  { t: "p", html: "List me kai values ek jagah, square brackets me. Har item ka index aage se <code>0</code> se, peeche se <code>-1</code> se." },
-  { t: "code", file: "list.py", code: "fruits = [\"apple\", \"mango\", \"kiwi\"]\nprint(fruits[0])   # apple\nprint(fruits[-1])  # kiwi\nprint(len(fruits)) # 3", output: "apple\nkiwi\n3" },
-  { t: "viz", name: "list-indexer" },
-  { t: "h2", n: "2", text: "List badalna" },
-  { t: "p", html: "<code>append()</code> se item jodo, index se badlo, <code>[a:b]</code> se slice (tukda) lo." },
-  { t: "code", file: "listops.py", code: "nums = [10, 20, 30]\nnums.append(40)     # [10,20,30,40]\nnums[0] = 99        # [99,20,30,40]\nprint(nums[1:3])    # [20, 30]", output: "[20, 30]" },
-  { t: "h2", n: "3", text: "Tuple — fix list" },
-  { t: "p", html: "Tuple list jaisi hai par <b>badalti nahi</b> — round brackets me. Jab data fix rakhna ho to use karo." },
-  { t: "note", variant: "tip", html: "<b>List vs Tuple:</b> List <code>[]</code> badal sakti hai, Tuple <code>()</code> nahi." },
-  { t: "analogy", concept: "List vs Tuple", real: "Shopping list vs Aadhaar card", html: "<b>Shopping list</b> — kuch bhi jodo, hatao, badlo. Wahi list hai. <b>Aadhaar card</b> — chhap gaya, ab badal nahi sakte; badalna hai to naya banwao. Wahi tuple hai. Isiliye coordinates <code>(x, y)</code> ya RGB <code>(255, 0, 0)</code> tuple hote hain — wo cheezein badalni nahi chahiye." },
-  { t: "mistakes", items: [
-    { bad: "fruits[3]  # list me 3 items hain", why: "3 items ke index hain <b>0, 1, 2</b> — index 3 hai hi nahi. <code>IndexError</code> milega. Aakhri item hamesha <code>len-1</code> pe hota hai, ya seedha <code>[-1]</code> likh do.", fix: "fruits[2]   # ya fruits[-1]" },
-    { bad: "b = a\nb.append(4)  # a bhi badal gaya!", why: "<code>b = a</code> nayi list nahi banata — dono naam <b>ek hi list</b> ko point karte hain. Ek ko badlo, dono me dikhega. Ye har beginner ko kaatta hai.", fix: "b = a[:]   # ya list(a)" },
-    { bad: "nums = (1, 2, 3)\nnums.append(4)", why: "Tuple <b>immutable</b> hai — usme <code>append</code> hota hi nahi. <code>AttributeError</code> milega. Badalna hai to list use karo, ya naya tuple banao.", fix: "nums = [1, 2, 3]\nnums.append(4)" },
+  { t: "objectives", items: [
+    "Build a list and reach any item by index, from either end",
+    "Change a list with <code>append</code>, <code>extend</code>, assignment and <code>pop</code>",
+    "Cut a piece out with slicing, and know that a slice is a new list",
+    "Choose between a list and a tuple, and know why copying a list is not <code>b = a</code>",
   ]},
-  { t: "recap", items: ["List [] — kai values, index 0 se","fruits[-1] = last item","append() jodta hai, [a:b] slice deta hai","Tuple () = badalti nahi"] },
+  { t: "hook", q: "You need to hold the names of 60 students in a class. Sixty variables — <code>name1</code>, <code>name2</code> … <code>name60</code>?", why: "And when the 61st joins? Or you need them sorted? Sixty separate names cannot be handled together at all — you cannot loop over them, count them or sort them. What you need is one container that holds <b>many things, in order</b>." },
+  { t: "think", q: "<code>fruits = [\"apple\", \"mango\", \"kiwi\"]</code> — what is <code>fruits[1]</code>? And <code>fruits[-1]</code>?", a: "<code>fruits[1]</code> is <b>\"mango\"</b>. Indexing starts at <b>0</b>, so 1 is the second item.<br/><code>fruits[-1]</code> is <b>\"kiwi\"</b>. Negative indexes count from the back, and -1 is always the last item.<br/><br/>You never need <code>fruits[len(fruits) - 1]</code>. <code>[-1]</code> says the same thing and cannot go wrong." },
+
+  { t: "h2", n: "1", text: "Lists and indexing" },
+  { t: "def", term: "List", en: "A list is an ordered, mutable collection of values, each reachable by its index.", hi: "<b>Ordered</b> means items stay in the order you put them. <b>Mutable</b> means you can change it after creating it. <b>Index</b> is an item's position, counting from <code>0</code> forwards and <code>-1</code> backwards." },
+  { t: "p", html: "A list holds several values in square brackets. Every item has a position: <code>0</code> for the first, and <code>-1</code> for the last no matter how long the list is." },
+  { t: "code", file: "list.py", code: "fruits = [\"apple\", \"mango\", \"kiwi\"]\nprint(fruits[0])\nprint(fruits[-1])\nprint(len(fruits))", output: "apple\nkiwi\n3" },
+  { t: "viz", name: "list-indexer" },
+  { t: "p", html: "Move the index in that panel past the end of the list and watch what happens. Three items means valid indexes <code>0</code>, <code>1</code>, <code>2</code> — asking for <code>3</code> is an <code>IndexError</code>, and it is the commonest error message a beginner ever sees." },
+
+  { t: "h2", n: "2", text: "Changing a list" },
+  { t: "p", html: "A list is meant to be modified. <code>append()</code> adds one item at the end, assignment by index replaces one, and <code>pop()</code> removes the last item <b>and hands it back</b>." },
+  { t: "code", file: "listops.py", code: "nums = [10, 20, 30]\nnums.append(40)\nnums[0] = 99\nprint(nums)\nprint(nums.pop())\nprint(nums)", output: "[99, 20, 30, 40]\n40\n[99, 20, 30]" },
+  { t: "note", variant: "tip", html: "<code>append</code> adds <b>one</b> item; <code>extend</code> adds <b>each item</b> of another list. <code>a.append([3, 4])</code> gives you <code>[1, 2, [3, 4]]</code> — a list inside a list — while <code>a.extend([3, 4])</code> gives <code>[1, 2, 3, 4]</code>. An unexpected nested list is almost always this." },
+
+  { t: "h2", n: "3", text: "Slicing — taking a piece" },
+  { t: "p", html: "<code>[start:stop]</code> cuts out a section. Same rule as <code>range()</code>: the start is included, the stop is not. Leave either side empty to mean \"from the beginning\" or \"to the end\"." },
+  { t: "code", file: "slicing.py", code: "letters = [\"a\", \"b\", \"c\", \"d\", \"e\"]\nprint(letters[1:3])\nprint(letters[:2])\nprint(letters[2:])\nprint(letters[::-1])", output: "['b', 'c']\n['a', 'b']\n['c', 'd', 'e']\n['e', 'd', 'c', 'b', 'a']" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> a slice is how you take the first hundred rows of a dataset to test on, how you split data into training and test sets, and how you page results. Two things make it worth knowing exactly: a slice always returns a <b>new</b> list, so it never damages the original — and <code>[::-1]</code> is the shortest reverse in the language." },
+
+  { t: "h2", n: "4", text: "Tuples — the list that will not change" },
+  { t: "p", html: "A tuple looks like a list in round brackets, but once made it cannot be changed. Use it when the data is not supposed to move — and unpack it straight into names." },
+  { t: "code", file: "tuple.py", code: "point = (3, 7)\nx, y = point\nprint(x)\nprint(y)\nprint(len(point))", output: "3\n7\n2" },
+  { t: "analogy", concept: "List vs tuple", real: "A shopping list, or an Aadhaar card", html: "A <b>shopping list</b> is meant to be scribbled on — add, cross out, reorder. That is a list. An <b>Aadhaar card</b> is printed and finished; if the details change you get a new one issued. That is a tuple. It is why coordinates <code>(x, y)</code> and colours <code>(255, 0, 0)</code> are tuples: those values belong together and are not supposed to drift apart." },
+
+  { t: "h2", n: "5", text: "Copying — the one that catches everyone" },
+  { t: "p", html: "<code>b = a</code> does <b>not</b> make a second list. It gives the same list a second name, so a change through either name shows up in both. <code>a[:]</code> makes a real copy." },
+  { t: "code", file: "copying.py", code: "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)\n\nc = a[:]\nc.append(5)\nprint(a)\nprint(c)", output: "[1, 2, 3, 4]\n[1, 2, 3, 4]\n[1, 2, 3, 4, 5]" },
+  { t: "note", variant: "warn", html: "Read the first two lines of output again. Appending to <code>b</code> changed <code>a</code>, because they were never two lists. Appending to <code>c</code> did not, because <code>a[:]</code> actually copied. Nothing errors either way, which is exactly why this bug survives so long." },
+
+  { t: "trace", intro: "A list of scores being updated. Work out what each name holds once the line has run.", code: "scores = [40, 55, 70]\nscores.append(90)\ntop = scores[-1]\nfirst_two = scores[:2]\ncount = len(scores)", steps: [
+    { q: "After line 3, <code>top</code> is", answer: "90", why: "<code>append</code> put 90 at the end on line 2, and <code>[-1]</code> always reads the last item — whatever the length happens to be." },
+    { q: "After line 4, <code>first_two</code> is", answer: "[40, 55]", accept: ["[40,55]", "40, 55", "40,55"], why: "<code>[:2]</code> takes indexes 0 and 1. The stop value is excluded, so 70 is not included — and the original list is untouched." },
+    { q: "After line 5, <code>count</code> is", answer: "4", why: "Three to start with, one appended. Note that slicing on line 4 did not remove anything: a slice copies, it does not cut." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the first item of the list.", code: "print([\"a\", \"b\", \"c\"][0])", out: "a" },
+    { task: "Print the last item without using <code>len()</code>.", code: "print([\"a\", \"b\", \"c\"][-1])", out: "c" },
+    { task: "Print how many items a list has.", code: "print(len([1, 2, 3, 4]))", out: "4" },
+    { task: "Add 3 to the end of the list and print it.", code: "nums = [1, 2]\nnums.append(3)\nprint(nums)", out: "[1, 2, 3]" },
+    { task: "Replace the middle item with 99.", code: "nums = [1, 2, 3]\nnums[1] = 99\nprint(nums)", out: "[1, 99, 3]" },
+    { task: "Print the middle two items of a four-item list.", code: "print([10, 20, 30, 40][1:3])", out: "[20, 30]" },
+    { task: "Print the list reversed, using a slice.", code: "print([1, 2, 3][::-1])", out: "[3, 2, 1]" },
+    { task: "Copy a list safely, then add to the copy. The original must not change.", code: "a = [1, 2]\nb = a[:]\nb.append(3)\nprint(a)", out: "[1, 2]" },
+    { task: "Join two lists into one with <code>extend</code>.", code: "a = [1, 2]\na.extend([3, 4])\nprint(a)", out: "[1, 2, 3, 4]" },
+    { task: "Unpack a tuple into two names and print their sum.", code: "x, y = (4, 9)\nprint(x + y)", out: "13" },
+    { task: "Print the total of a list of numbers.", code: "print(sum([5, 10, 15]))", out: "30" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "fruits[3]   # the list has 3 items", why: "Three items have indexes <b>0, 1, 2</b>. There is no index 3, so this is an <code>IndexError</code>. The last item sits at <code>len - 1</code>, or just write <code>[-1]</code> and stop counting.", fix: "fruits[2]   # or fruits[-1]" },
+    { bad: "b = a\nb.append(4)   # a changed too", why: "<code>b = a</code> does not build a new list — both names point at the <b>same</b> list, so a change through one is visible through the other. This catches every beginner exactly once, and it never raises an error.", fix: "b = a[:]   # or list(a)" },
+    { bad: "nums = (1, 2, 3)\nnums.append(4)", why: "A tuple is <b>immutable</b>, so it has no <code>append</code> at all — <code>AttributeError</code>. If the data needs to change, it should have been a list; if it should not change, that is the tuple doing its job.", fix: "nums = [1, 2, 3]\nnums.append(4)" },
+    { bad: "a = [1, 2]\na.append([3, 4])   # expecting [1, 2, 3, 4]", why: "<code>append</code> adds its argument as <b>one item</b>, so you get <code>[1, 2, [3, 4]]</code> — a list nested inside a list. Later code then trips over an item that is not a number.", fix: "a.extend([3, 4])   # [1, 2, 3, 4]" },
+  ]},
+
+  { t: "debug", intro: "This takes a backup of a list before changing it, then prints the backup. The backup shows the change too, which defeats the whole point. Nothing crashes. Read it before opening the fix.", code: "original = [1, 2, 3]\nbackup = original\n\noriginal.append(4)\n\nprint(\"backup:\", backup)", symptom: "prints backup: [1, 2, 3, 4], but the backup was taken before the append", q: "The backup was made on line 2, before anything was added. So how did the 4 get into it?", fix: "original = [1, 2, 3]\nbackup = original[:]\n\noriginal.append(4)\n\nprint(\"backup:\", backup)", why: "<code>backup = original</code> never made a backup. It gave the one list a second name, so there was only ever one list to append to. <code>original[:]</code> copies the items into a genuinely new list, and only then does the word backup mean anything. This is the most expensive one-character-class mistake in Python: nothing errors, the code reads correctly, and the data quietly moves under you. Any time you plan to keep an <i>earlier</i> version of something, ask whether you copied it or just renamed it." },
+
+  { t: "recap", items: [
+    "A list is ordered and changeable; index from <code>0</code>, or from the back with <code>-1</code>",
+    "<code>append</code> adds one item, <code>extend</code> adds each item of another list",
+    "<code>[a:b]</code> includes <code>a</code>, excludes <code>b</code>, and returns a <b>new</b> list",
+    "A tuple <code>()</code> cannot be changed — use it for values that belong together",
+    "<code>b = a</code> is a second name, not a copy. Use <code>a[:]</code>",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "List aur tuple me kya farak hai?", a: "List <b>mutable</b> hai (<code>[]</code>, badal sakti hai), tuple <b>immutable</b> (<code>()</code>, nahi badal sakta). Tuple thoda tez aur kam memory leta hai, aur — sabse zaroori — <b>dict ki key</b> ban sakta hai; list nahi ban sakti, kyunki uske badalne se hash tootega." },
-    { level: "beginner", q: "<code>nums[1:3]</code> kya dega?", a: "Index <b>1 aur 2</b> ke items — <b>3 nahi</b>. Slicing me start included, stop excluded. Aur slice hamesha <b>nayi list</b> deta hai, original ko chhedta nahi." },
-    { level: "intermediate", q: "<code>b = a</code> aur <code>b = a[:]</code> me kya farak hai?", a: "<code>b = a</code> sirf <b>naya naam</b> hai usi list ka — ek badlo, dono badle. <code>b = a[:]</code> <b>shallow copy</b> banata hai — top level alag ho jaata hai. Par nested list ho to andar wali abhi bhi shared hai; wahan <code>copy.deepcopy()</code> chahiye." },
-    { level: "intermediate", q: "<code>append()</code> aur <code>extend()</code> me kya farak hai?", a: "<code>a.append([1,2])</code> poori list ko <b>ek item</b> ki tarah andar daal deta hai → <code>[..., [1,2]]</code>. <code>a.extend([1,2])</code> uske <b>har item</b> ko alag-alag jodta hai → <code>[..., 1, 2]</code>. Nested list ban jaana isi galti ki nishani hai." },
+    { level: "beginner", q: "What is the difference between a list and a tuple?", a: "A list is <b>mutable</b> (<code>[]</code>, can be changed); a tuple is <b>immutable</b> (<code>()</code>, cannot). A tuple is slightly faster and smaller, and — the answer they are usually listening for — it can be used as a <b>dictionary key</b>, which a list cannot." },
+    { level: "beginner", q: "What does <code>nums[1:3]</code> give you?", a: "The items at indexes <b>1 and 2</b> — not 3. Slicing includes the start and excludes the stop, the same rule as <code>range()</code>. It also returns a <b>new</b> list, leaving the original alone." },
+    { level: "intermediate", q: "What is the difference between <code>b = a</code> and <code>b = a[:]</code>?", a: "<code>b = a</code> is just another name for the same list — change one and both show it. <code>b = a[:]</code> makes a <b>shallow copy</b>, so the outer list is genuinely separate. But if the list contains other lists, those inner ones are still shared; that needs <code>copy.deepcopy()</code>." },
+    { level: "intermediate", q: "<code>append()</code> versus <code>extend()</code>?", a: "<code>a.append([1, 2])</code> puts the whole list in as <b>one item</b>, giving <code>[..., [1, 2]]</code>. <code>a.extend([1, 2])</code> adds <b>each item separately</b>, giving <code>[..., 1, 2]</code>. If you find an unexpected nested list, this is why." },
+    { level: "advanced", q: "Why can a tuple be a dictionary key when a list cannot?", a: "Dictionary keys must be <b>hashable</b>, and a hash has to stay the same for as long as the key is in use. A list can be changed after it is stored, which would move it to a different bucket and make it unfindable — so Python refuses outright with <code>TypeError: unhashable type: 'list'</code>. A tuple cannot change, so its hash is stable. The catch: a tuple containing a list is itself unhashable, because the mutable part is still in there." },
   ]},
 ];
 
@@ -4153,10 +4206,19 @@ export const QUIZZES = {
     { level: "hard", q: "<code>for i, c in enumerate(\"ab\"): print(i, c)</code> — what is printed?", options: ["a 0 then b 1", "0 then 1", "a then b", "0 a then 1 b"], correct: 3, why: "<code>enumerate</code> yields the index first and the item second, so each line is the position followed by the character." },
   ],
   "lists-tuples": [
-    { q: "<code>nums = [1, 2, 3]; print(nums[3])</code> — kya hoga?", options: ["3", "None", "IndexError", "0"], correct: 2, why: "Index 0, 1, 2 hi valid hain (3 items). <code>nums[3]</code> range ke bahar — <b>IndexError</b>." },
-    { q: "<code>t = (1, 2); t[0] = 9</code> — kya hoga?", options: ["t = (9, 2)", "TypeError", "kuch nahi", "IndexError"], correct: 1, why: "Tuple <b>immutable</b> hai — badal nahi sakte. <code>TypeError</code>. Badalna ho to list use karo." },
-    { q: "<code>nums = [10, 20, 30]; print(nums[-1])</code> ka output?", options: ["30", "10", "IndexError", "-1"], correct: 0, why: "Negative index peeche se — <code>-1</code> = <b>aakhri</b> item = 30." },
-    { q: "List aur tuple me — kaunsa <b>badla</b> ja sakta hai?", options: ["tuple", "dono", "koi nahi", "list"], correct: 3, why: "<b>list</b> mutable (badalti hai), <b>tuple</b> immutable (fix). Data fix rakhna ho to tuple." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>fruits = [\"apple\", \"mango\", \"kiwi\"]</code>. What is <code>fruits[1]</code>?", options: ["apple", "mango", "kiwi", "IndexError"], correct: 1, why: "Indexing starts at 0, so index 1 is the <b>second</b> item." },
+    { level: "easy", q: "Which of these reads the last item of a list of any length?", options: ["fruits[-1]", "fruits[last]", "fruits[len]", "fruits[0]"], correct: 0, why: "Negative indexes count from the back, and -1 is always the final item. No need to work out the length first." },
+    { level: "easy", q: "Which one can be changed after it is created?", options: ["tuple", "list", "neither of them", "both of them"], correct: 1, why: "A list is mutable; a tuple is immutable. That single difference is the reason to pick one over the other." },
+    // Medium — apply it
+    { level: "medium", q: "<code>print([10, 20, 30, 40][1:3])</code> — what appears?", options: ["[20, 30]", "[10, 20, 30]", "[20, 30, 40]", "[10, 20]"], correct: 0, why: "Indexes 1 and 2. The stop value is excluded, exactly like range()." },
+    { level: "medium", q: "<code>a = [1, 2, 3]</code>, then <code>b = a</code>, then <code>b.append(4)</code>. What does <code>print(a)</code> show?", options: ["[1, 2, 3]", "[1, 2, 3, 4]", "an error", "[4]"], correct: 1, why: "<code>b = a</code> is a second name for the same list, not a copy - so the append is visible through both names." },
+    { level: "medium", q: "<code>a = [1, 2]</code>, then <code>a.append([3, 4])</code>. What is <code>a</code> now?", options: ["[1, 2, [3, 4]]", "[1, 2, 3, 4]", "an error", "[3, 4]"], correct: 0, why: "<code>append</code> adds its argument as a single item, so the whole list goes in as one nested item. <code>extend</code> is what flattens it." },
+    { level: "medium", q: "You call <code>.append()</code> on a tuple. What happens?", options: ["It appends normally", "It returns a new tuple", "AttributeError", "The tuple becomes a list"], correct: 2, why: "A tuple has no <code>append</code> method at all, because it cannot be changed - so Python reports the missing attribute." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "<code>print([1, 2, 3][::-1])</code> — what appears?", options: ["[1, 2, 3]", "[3, 2, 1]", "an error", "[1, 3]"], correct: 1, why: "A step of -1 walks the list backwards, which is the shortest way to reverse one. It also returns a new list, leaving the original as it was." },
+    { level: "hard", q: "Why can a tuple be used as a dictionary key when a list cannot?", options: ["Tuples are faster to compare", "Tuples use less memory", "Keys must be hashable, and only an unchangeable value has a stable hash", "Lists are not ordered"], correct: 2, why: "A key's hash decides where it is stored. A list could change after being stored and would then be unfindable, so Python refuses it outright." },
+    { level: "hard", q: "<code>a = [[1, 2], [3, 4]]</code> and <code>b = a[:]</code>. You then run <code>b[0].append(99)</code>. What is <code>a[0]</code>?", options: ["[1, 2]", "an error", "[]", "[1, 2, 99]"], correct: 3, why: "<code>a[:]</code> is a <b>shallow</b> copy - the outer list is new, but the inner lists are still the same objects. Copying all the way down needs <code>copy.deepcopy()</code>." },
   ],
   "dicts-sets": [
     // Easy
