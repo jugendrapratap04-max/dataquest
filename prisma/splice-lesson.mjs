@@ -40,6 +40,24 @@ if (target.startsWith("quiz:")) {
   close = "\n];\n";
 }
 
+// A subject whose lessons were stubs has no quiz for them yet, so "replace" has
+// nothing to replace. Insert a new entry at the top of QUIZZES instead — the
+// alternative was a second throwaway script living in a temp folder, which is
+// exactly how the previous splice helper got lost.
+if (target.startsWith("quiz:") && src.indexOf(startMarker) < 0) {
+  const slug = target.slice(5);
+  const anchor = "export const QUIZZES = {\n";
+  const at = src.indexOf(anchor);
+  if (at < 0) {
+    console.error("✗ could not find the QUIZZES object");
+    process.exit(1);
+  }
+  const out = src.slice(0, at + anchor.length) + `  "${slug}": [\n${body}\n  ],\n` + src.slice(at + anchor.length);
+  writeFileSync(SEED, out);
+  console.log(`✓ quiz added for "${slug}" (it had none)`);
+  process.exit(0);
+}
+
 const at = src.indexOf(startMarker);
 if (at < 0) {
   console.error(`✗ could not find ${target} in ${SEED}`);

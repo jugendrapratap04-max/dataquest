@@ -89,8 +89,16 @@ export function VoiceCall({
   const audioCtxRef = useRef<AudioContext | null>(null);
   const meterRef = useRef<Map<string, { analyser: AnalyserNode; data: Uint8Array }>>(new Map());
   const joinedRef = useRef(false);
+  // Keeps the signalling callbacks below on the latest `post` without making
+  // every one of them re-subscribe when it changes.
+  //
+  // This used to be a bare `postRef.current = post` in the render body. React
+  // renders may be thrown away before they commit — under StrictMode every one
+  // runs twice — so writing a ref there can publish a value from a render that
+  // never happened. An effect only runs on a render that committed, which is
+  // exactly when the new `post` is the real one.
   const postRef = useRef(post);
-  postRef.current = post;
+  useEffect(() => { postRef.current = post; }, [post]);
 
   const others = members.filter((m) => !m.isMe);
   const inCall = members.filter((m) => m.inVoice);
@@ -290,7 +298,13 @@ export function VoiceCall({
   }, [pollSeq]);
 
   // The host switched voice off while we were in it.
+  //
+  // `voiceEnabled` arrives from the server, so this is the rule's "subscribe to
+  // an external system" case: someone else's action has to tear down our
+  // microphone and peer connections, and hangUp sets state on the way. There is
+  // no event handler to hang it off — the change happens on another machine.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (joined && !voiceEnabled) void hangUp(true);
   }, [voiceEnabled, joined, hangUp]);
 

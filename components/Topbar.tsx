@@ -56,6 +56,9 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   const [index, setIndex] = useState<Item[] | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
+  // Same external-store case as TodoList: the saved theme and the OS dark-mode
+  // preference are both browser-only, so this cannot run before mount. It also
+  // has to setTheme, because the menu renders a tick next to the active one.
   useEffect(() => {
     let saved: string | null = null;
     try { saved = localStorage.getItem("dq-theme"); } catch {}
@@ -67,6 +70,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
       : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     document.documentElement.setAttribute("data-theme", cur);
     if (cur !== saved) { try { localStorage.setItem("dq-theme", cur); } catch {} }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(cur);
   }, [xp]);
 

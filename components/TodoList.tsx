@@ -26,9 +26,16 @@ export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: 
   const [ready, setReady] = useState(false);
 
   // load from localStorage after mount (avoids hydration mismatch)
+  //
+  // localStorage does not exist on the server, so seeding this in useState would
+  // render different markup on each side and React would throw the whole tree
+  // away. Reading it after mount is the documented fix, and localStorage is an
+  // external store — the case the lint rule itself carves out. It cannot tell
+  // the difference, so it is silenced here rather than obeyed.
   useEffect(() => {
     try {
       const saved = localStorage.getItem(KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (saved) setItems(JSON.parse(saved));
     } catch {}
     setReady(true);

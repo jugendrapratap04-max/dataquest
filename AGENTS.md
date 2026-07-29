@@ -17,6 +17,8 @@ Before you design a schema, a service, an AI workflow or a screen, read
 
 What the learning experience is supposed to be: [`docs/LEARNING-SPEC.md`](docs/LEARNING-SPEC.md)
 — the two product documents merged, with the conflicts between them resolved.
+Continuing the build in a fresh session: [`docs/HANDOFF.md`](docs/HANDOFF.md) —
+the per-lesson recipe, what is left in order, and the traps that have cost time.
 Current state and open work: [`docs/IMPROVEMENTS.md`](docs/IMPROVEMENTS.md).
 Technical findings: [`docs/REVIEW-2026-07-29.md`](docs/REVIEW-2026-07-29.md).
 
