@@ -766,35 +766,88 @@ const L7 = [
 ];
 
 const L8 = [
-  { t: "objectives", items: ["Index aur slicing se string ke tukde nikaalna","<code>upper / lower / strip / replace</code> jaise methods","<code>split</code> aur <code>join</code>","Strings <b>immutable</b> kyun hain"] },
-  { t: "hook", q: "Ek file me 5000 logon ke naam aaye — kisi me aage-peeche extra space, koi <code>ALL CAPS</code>, koi <code>small</code>. Kya tum 5000 naam haath se theek karoge?", why: "Kabhi nahi. Ye kaam computer <b>strings</b> pe ek line me karta hai — aur data science me raw data hamesha aisa hi <b>ganda</b> aata hai. String cleaning analyst ka rozana kaam #1 hai." },
-  { t: "def", term: "String", en: "A string is an immutable, ordered sequence of characters.", hi: "Matlab: letters ki ek <b>line</b>, jiske har character ki ek fixed <b>jagah (index)</b> hai — aur jo ban-ne ke baad <b>badalti nahi</b> (immutable). Koi bhi change hamesha ek <b>naya</b> string banata hai." },
-  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> raw data — naam, dates, categories, address, CSV ke fields — sab text hota hai, aur ganda aata hai. <code>strip()</code>, <code>lower()</code>, <code>replace()</code>, <code>split()</code> — yehi analyst har din use karta hai. Ye lesson seedha job ka daily skill hai." },
-  { t: "h2", n: "1", text: "Index — har letter ki position" },
-  { t: "p", html: "String ek <b>sequence</b> hai. Har letter ka ek <b>index</b> — aage se <code>0, 1, 2…</code>, peeche se <code>-1, -2…</code>. <code>s[0]</code> pehla letter, <code>s[-1]</code> aakhri." },
-  { t: "code", file: "index.py", code: "s = \"DATA\"\nprint(s[0])    # D  (pehla)\nprint(s[-1])   # A  (aakhri)", output: "D\nA" },
-  { t: "h2", n: "2", text: "Slicing — tukda nikaalo" },
-  { t: "p", html: "<code>s[start:stop:step]</code> se tukda milta hai. Rule (yaad rakho): <b>start included, stop excluded</b>. <code>step</code> optional — <code>2</code> matlab ek chhod ke, <code>-1</code> matlab ulta. Neeche khud khel ke dekho 👇" },
+  { t: "objectives", items: [
+    "Reach any character by index, and cut out any piece with slicing",
+    "Clean text with <code>strip</code>, <code>lower</code>, <code>upper</code>, <code>replace</code> and <code>title</code>",
+    "Break text apart with <code>split</code> and put it back with <code>join</code>",
+    "Explain why strings are <b>immutable</b>, and why that changes how you write every line",
+  ]},
+  { t: "hook", q: "A file arrives with 5,000 names. Some have extra spaces, some are in ALL CAPS, some in lower case. Are you going to fix 5,000 names by hand?", why: "Never. A computer does it in one line — and the reason this matters is that real data always arrives like that. Cleaning text is not a beginner exercise you outgrow; it is the single most common thing a data person does before anything interesting can start." },
+  { t: "def", term: "String", en: "A string is an immutable, ordered sequence of characters.", hi: "A line of characters, each at a fixed position (its <b>index</b>), which cannot be changed once created. Any change produces a <b>new</b> string — the original is left exactly as it was." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> raw data is text. Names, dates, categories, addresses, every field of a CSV — all of it arrives as strings, and almost all of it arrives dirty. <code>strip()</code>, <code>lower()</code>, <code>replace()</code> and <code>split()</code> are what an analyst reaches for every single day, before a single chart is drawn. This is not preparation for the job; it <i>is</i> the job." },
+
+  { t: "h2", n: "1", text: "Index — every character has a position" },
+  { t: "p", html: "A string is a sequence, exactly like a list. Each character has an index: <code>0, 1, 2…</code> from the front, and <code>-1, -2…</code> from the back." },
+  { t: "code", file: "index.py", code: "s = \"DATA\"\nprint(s[0])\nprint(s[-1])\nprint(len(s))", output: "D\nA\n4" },
+
+  { t: "h2", n: "2", text: "Slicing — take a piece" },
+  { t: "p", html: "<code>s[start:stop:step]</code> gives you a section. Same rule you already know from <code>range()</code> and lists: <b>start included, stop excluded</b>. Leave a side blank to mean \"from the beginning\" or \"to the end\"." },
+  { t: "code", file: "slicing.py", code: "s = \"DATAMARG\"\nprint(s[0:4])\nprint(s[4:])\nprint(s[::2])\nprint(s[::-1])", output: "DATA\nMARG\nDTMR\nGRAMATAD" },
   { t: "viz", name: "string-slicer" },
-  { t: "think", q: "<code>s[::-1]</code> kya karega?", a: "<b>Poori string ulti (reverse)</b> kar dega — step <code>-1</code> peeche se chalta hai. Yehi Python ka sabse chhota reverse trick hai, aur <b>palindrome check</b> me kaam aata hai: <code>s == s[::-1]</code>." },
-  { t: "h2", n: "3", text: "Kaam ke string methods" },
-  { t: "p", html: "<code>.strip()</code> aage-peeche ke space hatao, <code>.upper()</code> / <code>.lower()</code> case badlo, <code>.replace(a, b)</code> a ko b se badlo. Method chain bhi kar sakte ho." },
-  { t: "code", file: "clean.py", code: "raw = \"  Freya THOMPSAN  \"\nclean = raw.strip().lower()\nprint(clean)                          # freya thompsan\nprint(\"09-08-2026\".replace(\"-\", \"/\"))  # 09/08/2026", output: "freya thompsan\n09/08/2026" },
-  { t: "h2", n: "4", text: "split aur join" },
-  { t: "p", html: "<code>.split(sep)</code> string ko ek <b>list</b> me todta hai; <code>sep.join(list)</code> ulta kaam — list ko wapas string banata hai. CSV-jaise data me rozana." },
-  { t: "code", file: "split.py", code: "row = \"Freya,Chef,India\"\nparts = row.split(\",\")\nprint(parts)              # ['Freya', 'Chef', 'India']\nprint(\" | \".join(parts))  # Freya | Chef | India", output: "['Freya', 'Chef', 'India']\nFreya | Chef | India" },
-  { t: "analogy", concept: "String", real: "Letter-dabbon ki train", html: "String = ek train 🚂 jiske har <b>dabbe</b> me ek letter, aur har dabbe ka ek <b>seat number</b> (index). <b>Slice</b> = kuch dabbe kaat ke alag train bana lena. <b>Immutable</b> = dabbe fix hain — tum badal nahi sakte, sirf ek <b>nayi</b> train bana sakte ho. Isiliye har string method <b>naya</b> string deta hai." },
+  { t: "p", html: "Drag the handles in that panel and watch which characters survive. Then try a start beyond the end of the string: slicing quietly returns an empty string rather than crashing, which is the one place Python is <i>more</i> forgiving than indexing." },
+  { t: "think", q: "What does <code>s[::-1]</code> do, and what is it good for?", a: "It <b>reverses</b> the string — a step of <code>-1</code> walks backwards from the end.<br/><br/>It is the shortest reverse in the language, and it is how a palindrome check is written: <code>s == s[::-1]</code>. That one line is a genuine interview question, and it is just a slice." },
+
+  { t: "h2", n: "3", text: "The cleaning methods" },
+  { t: "p", html: "<code>.strip()</code> removes whitespace at both ends, <code>.lower()</code> and <code>.upper()</code> change case, <code>.replace(a, b)</code> swaps one piece of text for another, and <code>.title()</code> capitalises each word. They chain, left to right." },
+  { t: "code", file: "clean.py", code: "raw = \"  Freya THOMPSAN  \"\nprint(raw.strip().lower())\nprint(\"09-08-2026\".replace(\"-\", \"/\"))\nprint(\"data science\".title())", output: "freya thompsan\n09/08/2026\nData Science" },
+  { t: "note", variant: "tip", html: "<code>.lower()</code> is how you compare text fairly. <code>\"Delhi\" == \"delhi\"</code> is <code>False</code>, which is why a customer list can hold the same city four times under four spellings. Comparing <code>a.strip().lower() == b.strip().lower()</code> is the fix, and it is worth making a habit." },
+
+  { t: "h2", n: "4", text: "split and join" },
+  { t: "p", html: "<code>.split(sep)</code> breaks a string into a <b>list</b>. <code>sep.join(list)</code> does the reverse, gluing a list back into one string. Together they are how every row of a CSV gets handled." },
+  { t: "code", file: "split.py", code: "row = \"Freya,Chef,India\"\nparts = row.split(\",\")\nprint(parts)\nprint(\" | \".join(parts))\nprint(len(parts))", output: "['Freya', 'Chef', 'India']\nFreya | Chef | India\n3" },
+  { t: "note", variant: "warn", html: "<code>join</code> is called <b>on the separator</b>, not on the list — <code>\", \".join(parts)</code>, never <code>parts.join(\", \")</code>. It reads backwards the first few times, and then it never confuses you again." },
+
+  { t: "h2", n: "5", text: "Immutable — and why it changes how you type" },
+  { t: "p", html: "A string cannot be modified. Every method that looks like it changes one is really <b>returning a new string</b> and leaving the original alone. If you do not catch the return value, nothing happens at all." },
+  { t: "code", file: "immutable.py", code: "name = \"  Freya  \"\nname.strip()\nprint(repr(name))\nname = name.strip()\nprint(repr(name))", output: "'  Freya  '\n'Freya'" },
+  { t: "p", html: "Line 2 did the work and threw the answer away. Line 4 is the same call with the result kept. Python raises no error for line 2 — it is perfectly valid code that simply achieves nothing, which is what makes it hard to spot." },
+  { t: "analogy", concept: "A string", real: "A train of lettered coaches", html: "A string is a train where each coach holds one character and has a fixed seat number — that is the index. A <b>slice</b> is uncoupling some coaches to make a shorter train, leaving the original standing. <b>Immutable</b> means you cannot repaint a coach: you can only build a new train. That is exactly why every string method hands you back a new string." },
+
+  { t: "trace", intro: "A messy field being cleaned and split. Work out what each name holds once the line has run.", code: "raw = \"  Data Science  \"\nclean = raw.strip()\nwords = clean.split(\" \")\nfirst = words[0]\ncount = len(words)", steps: [
+    { q: "After line 2, <code>clean</code> is", answer: "Data Science", why: "<code>strip()</code> removes whitespace from both ends only. The space between the two words is inside the text, so it stays." },
+    { q: "After line 4, <code>first</code> is", answer: "Data", why: "<code>split(\" \")</code> produced <code>['Data', 'Science']</code>, and index 0 is the first piece. Note that <code>raw</code> is still the original messy string — none of this changed it." },
+    { q: "After line 5, <code>count</code> is", answer: "2", why: "Two words, because the ends were stripped first. Split the unstripped string and you would get four pieces, two of them empty — which is the bug in the debug task below." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the first character of <code>Python</code>.", code: "print(\"Python\"[0])", out: "P" },
+    { task: "Print the last character without using <code>len()</code>.", code: "print(\"Python\"[-1])", out: "n" },
+    { task: "Print how many characters are in <code>Python</code>.", code: "print(len(\"Python\"))", out: "6" },
+    { task: "Print the first four characters of <code>DATAMARG</code>.", code: "print(\"DATAMARG\"[0:4])", out: "DATA" },
+    { task: "Print <code>abc</code> reversed.", code: "print(\"abc\"[::-1])", out: "cba" },
+    { task: "Print <code>data</code> in capitals.", code: "print(\"data\".upper())", out: "DATA" },
+    { task: "Remove the spaces around <code>  hi  </code>.", code: "print(\"  hi  \".strip())", out: "hi" },
+    { task: "Turn the dashes in a date into slashes.", code: "print(\"2026-01-05\".replace(\"-\", \"/\"))", out: "2026/01/05" },
+    { task: "Break <code>a,b,c</code> into a list.", code: "print(\"a,b,c\".split(\",\"))", out: "['a', 'b', 'c']" },
+    { task: "Join a list back into one string with dashes.", code: "print(\"-\".join([\"a\", \"b\", \"c\"]))", out: "a-b-c" },
+    { task: "Check whether <code>madam</code> is a palindrome.", code: "s = \"madam\"\nprint(s == s[::-1])", out: "True" },
+    { task: "Count how many times <code>a</code> appears in <code>banana</code>.", code: "print(\"banana\".count(\"a\"))", out: "3" },
+  ]},
+
   { t: "mistakes", items: [
-    { bad: "name = \"  Freya  \"\nname.strip()\nprint(name)   # abhi bhi space!", why: "Strings <b>immutable</b> hain — <code>.strip()</code> string badalta nahi, <b>naya</b> string <b>return</b> karta hai. Return value pakadni padegi.", fix: "name = name.strip()\nprint(name)   # Freya" },
-    { bad: "s = \"DATA\"\nprint(s[1:4])   # 3 chahiye the?", why: "<code>[1:4]</code> deta hai index 1,2,3 — <b>4 nahi</b> (stop hamesha excluded). Ye off-by-one Python ki sabse aam galti hai.", fix: "print(s[1:4])   # ATA  (3 letters, sahi)" },
-    { bad: "s = \"Hi\"\nprint(s[5])   # IndexError!", why: "Index range ke bahar gaye — <code>s[5]</code> exist nahi karta, crash. Par <b>slicing</b> range bahar jaane pe crash nahi karti.", fix: "print(s[5:])   # ''  (khaali, no error)" },
-  ] },
-  { t: "recap", items: ["<code>s[i]</code> index, <code>s[a:b:c]</code> slice — <b>start in, stop out</b>","<code>s[::-1]</code> = reverse","<code>strip / lower / upper / replace</code> — cleaning","<code>split</code> → list, <code>join</code> → string","strings <b>immutable</b> — method <b>naya</b> string deta hai"] },
+    { bad: "name = \"  Freya  \"\nname.strip()\nprint(name)   # still padded", why: "Strings are <b>immutable</b>. <code>.strip()</code> does not change <code>name</code>, it returns a cleaned copy — and here that copy is thrown away. No error, no warning, no effect.", fix: "name = name.strip()\nprint(name)   # Freya" },
+    { bad: "s = \"DATA\"\nprint(s[1:4])   # expecting 4 characters", why: "<code>[1:4]</code> gives indexes 1, 2 and 3 — <b>three</b> characters, because the stop is excluded. The same off-by-one rule as <code>range()</code> and list slicing.", fix: "print(s[1:4])   # ATA, and that is correct" },
+    { bad: "s = \"Hi\"\nprint(s[5])", why: "There is no index 5, so this is an <code>IndexError</code>. Worth knowing that <b>slicing</b> does not behave this way: <code>s[5:]</code> on the same string returns an empty string instead of crashing.", fix: "print(s[5:])   # '' , no error" },
+    { bad: "if city == \"Delhi\":", why: "Text comparison is exact — case and spaces included. A file holding <code>delhi</code>, <code>DELHI</code> and <code>&nbsp;Delhi&nbsp;</code> will match none of them, and the rows silently go missing from your count.", fix: "if city.strip().lower() == \"delhi\":" },
+  ]},
+
+  { t: "debug", intro: "This should count the words in a messy field and print 2. It prints 8. Nothing crashes, and split is clearly the right tool. Read it before opening the fix.", code: "raw = \"  data   science  \"\n\nwords = raw.split(\" \")\n\nprint(len(words))", symptom: "prints 8, but there are only two words", q: "There are two words and split was given the right separator. Where are the other six pieces coming from?", fix: "raw = \"  data   science  \"\n\nwords = raw.split()\n\nprint(len(words))", why: "<code>split(\" \")</code> means \"cut at <b>every single</b> space\". Two spaces in a row have nothing between them, so an empty string is produced — and this field has seven spaces in total, giving eight pieces, six of them empty.<br/><br/><code>split()</code> with <b>no argument</b> is a different rule, not just a default: it treats any run of whitespace as one separator and drops the empties. For real-world text — which is exactly the messy kind — the no-argument version is almost always what you want. The lesson is that the plainest-looking call was the more sophisticated one." },
+
+  { t: "recap", items: [
+    "<code>s[i]</code> indexes, <code>s[a:b:c]</code> slices — <b>start included, stop excluded</b>",
+    "<code>s[::-1]</code> reverses; <code>s == s[::-1]</code> is a palindrome check",
+    "<code>strip / lower / upper / replace / title</code> are the everyday cleaning tools",
+    "<code>split</code> makes a list, <code>join</code> makes a string — and <code>join</code> is called on the separator",
+    "Strings are <b>immutable</b>: every method returns a new one, so you must assign the result",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "Strings <b>immutable</b> hain — iska matlab?", a: "Ban-ne ke baad string badalti nahi. <code>.upper()</code>, <code>.replace()</code> — koi bhi change asli string ko nahi chhedta, hamesha ek <b>naya</b> string return karta hai. Isiliye <code>s = s.strip()</code> likhna padta hai." },
-    { level: "beginner", q: "<code>s[::-1]</code> kya karta hai?", a: "String ko <b>ulta</b> (reverse) kar deta hai — step <code>-1</code> peeche se. Palindrome check ka classic tareeka: <code>s == s[::-1]</code>." },
-    { level: "intermediate", q: "<code>replace()</code> aur <code>split()</code> kab use karoge?", a: "<code>replace(a,b)</code> jab kisi character/substring ko badalna ho (jaise <code>-</code> ko <code>/</code>). <code>split(sep)</code> jab ek string ko tukdon ki <b>list</b> me todna ho (CSV row → columns). split ke baad aksar <code>strip()</code> lagta hai kyunki tukdon me space reh jaata hai." },
-  ] },
+    { level: "beginner", q: "What does it mean that strings are immutable?", a: "Once created, a string cannot be changed. <code>.upper()</code>, <code>.replace()</code> and the rest never touch the original — they return a <b>new</b> string. That is why <code>s.strip()</code> on its own does nothing and <code>s = s.strip()</code> is required." },
+    { level: "beginner", q: "What does <code>s[::-1]</code> do?", a: "Reverses the string, by slicing with a step of <code>-1</code>. It is the standard way to test a palindrome: <code>s == s[::-1]</code>." },
+    { level: "intermediate", q: "When would you use <code>replace()</code> and when <code>split()</code>?", a: "<code>replace(a, b)</code> when you are swapping something inside the text but keeping one string — dashes to slashes in a date, for instance. <code>split(sep)</code> when you want the pieces <b>separately</b>, as a list — a CSV row into its columns. In practice a <code>strip()</code> often follows a split, because the pieces come back with spaces attached." },
+    { level: "intermediate", q: "What is the difference between <code>split(\" \")</code> and <code>split()</code>?", a: "<code>split(\" \")</code> cuts at every single space, so consecutive spaces produce empty strings. <code>split()</code> with no argument treats any run of whitespace — spaces, tabs, newlines — as one separator and discards the empties. For messy real-world text the no-argument form is nearly always the correct one." },
+    { level: "advanced", q: "Why is <code>\"\".join(parts)</code> preferred over building a string with <code>+=</code> in a loop?", a: "Because strings are immutable, <code>s += x</code> cannot extend anything — it builds a whole new string each time and copies everything across. Over a long loop that is quadratic work. <code>join</code> looks at all the pieces, allocates once and copies once. It is the difference between a script finishing and a script appearing to hang." },
+  ]},
 ];
 
 const L9 = [
@@ -4251,10 +4304,19 @@ export const QUIZZES = {
     { level: "hard", q: "<code>return min(x), max(x)</code> — what does the caller actually receive?", options: ["Two separate values", "Only the min", "An error", "One tuple, which can be unpacked"], correct: 3, why: "A function returns one object. The comma builds a tuple, and <code>low, high = stats(x)</code> unpacks it — which is why it feels like returning two things. Past two or three values, a dictionary reads better than positional unpacking." },
   ],
   "strings": [
-    { q: "<code>s = \"DATA\"; print(s[1:3])</code> — kya aayega?", options: ["ATA", "DAT", "AT", "TA"], correct: 2, why: "Index 1, 2 = A, T — <b>stop (3) excluded</b>. Result <code>AT</code>." },
-    { q: "<code>s = \"hi\"; s.upper(); print(s)</code> — kya chhapega?", options: ["HI", "hi", "TypeError", "\"\""], correct: 1, why: "Strings <b>immutable</b> — <code>.upper()</code> naya string return karta hai, <code>s</code> nahi badalta. Return pakadna padta: <code>s = s.upper()</code>." },
-    { q: "<code>print(\"abc\"[::-1])</code> ka output?", options: ["cba", "abc", "cab", "TypeError"], correct: 0, why: "Step <code>-1</code> = <b>reverse</b>. <code>abc</code> → <code>cba</code>." },
-    { q: "<code>\"a,b,c\".split(\",\")</code> kya deta hai?", options: ["abc", "a b c", "TypeError", "['a', 'b', 'c']"], correct: 3, why: "<code>.split(\",\")</code> string ko <b>list</b> me todta hai — <code>['a', 'b', 'c']</code>." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>print(\"Python\"[0])</code> — what appears?", options: ["P", "p", "y", "n"], correct: 0, why: "Indexing starts at 0, so index 0 is the very first character, capital P included." },
+    { level: "easy", q: "What does <code>.strip()</code> remove?", options: ["Every space in the text", "The first character", "Whitespace at the start and end only", "All punctuation"], correct: 2, why: "It trims both ends. Spaces sitting between words are part of the text and are left alone." },
+    { level: "easy", q: "<code>print(\"abc\"[::-1])</code> — what appears?", options: ["abc", "cba", "a", "an error"], correct: 1, why: "A step of -1 walks the string backwards, which is the shortest way to reverse one." },
+    // Medium — apply it
+    { level: "medium", q: "<code>name = \"  Freya  \"</code>, then <code>name.strip()</code> on its own line, then <code>print(name)</code>. What is printed?", options: ["Freya", "  Freya  ", "an error", "an empty string"], correct: 1, why: "Strings are immutable. <code>.strip()</code> returned a cleaned copy which was never stored, so <code>name</code> is untouched. No error is raised - the line simply did nothing." },
+    { level: "medium", q: "<code>print(\"a,b,c\".split(\",\"))</code> — what appears?", options: ["['a', 'b', 'c']", "a,b,c", "['a,b,c']", "abc"], correct: 0, why: "<code>split</code> returns a <b>list</b> of the pieces between the separators." },
+    { level: "medium", q: "How do you join <code>[\"a\", \"b\"]</code> into <code>a-b</code>?", options: ["[\"a\", \"b\"].join(\"-\")", "join([\"a\", \"b\"], \"-\")", "\"-\".split([\"a\", \"b\"])", "\"-\".join([\"a\", \"b\"])"], correct: 3, why: "<code>join</code> is called on the <b>separator</b>, with the list as its argument. It reads backwards at first and then never confuses you again." },
+    { level: "medium", q: "<code>print(\"DATAMARG\"[::2])</code> — what appears?", options: ["DATA", "DTMR", "GRAM", "AAAG"], correct: 1, why: "A step of 2 takes every second character starting at index 0: D, T, M, R." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "<code>s = \"Hi\"</code>. What is the difference between <code>s[5]</code> and <code>s[5:]</code>?", options: ["Both raise IndexError", "Both return an empty string", "s[5] raises IndexError, but s[5:] returns an empty string", "Both return Hi"], correct: 2, why: "Indexing past the end is an error; <b>slicing</b> past the end is not. It is the one place Python is more forgiving with slices than with indexes." },
+    { level: "hard", q: "On the text <code>\"  a   b  \"</code>, how do <code>split(\" \")</code> and <code>split()</code> differ?", options: ["They give the same result", "split() is only faster", "split(\" \") produces empty strings for repeated spaces, split() ignores runs of whitespace", "split() only works on tabs"], correct: 2, why: "<code>split()</code> with no argument is a different rule, not a default: it treats any run of whitespace as one separator and drops the empty pieces. For messy real text it is nearly always the right call." },
+    { level: "hard", q: "Why is <code>\"\".join(parts)</code> preferred over building a string with <code>+=</code> inside a loop?", options: ["+= changes the string in place, which is unsafe", "+= returns None", "+= raises an error on long strings", "Strings are immutable, so += copies the whole string every pass, while join allocates once"], correct: 3, why: "Each <code>+=</code> builds an entirely new string and copies everything over, which becomes quadratic work. <code>join</code> looks at all the pieces once and copies once." },
   ],
   "comprehensions": [
     { q: "<code>[x*x for x in [1, 2, 3]]</code> — result?", options: ["[1, 2, 3]", "[2, 4, 6]", "[1, 4, 9]", "[1, 8, 27]"], correct: 2, why: "Har item ka square: 1, 4, 9." },
