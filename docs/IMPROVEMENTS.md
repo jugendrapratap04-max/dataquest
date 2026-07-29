@@ -22,7 +22,7 @@ Backlog"* (29 July 2026) and his review notes in chat the same day.
 | 4 | "Next problem" not related to the topic | ✅ | — |
 | 5 | Problems arranged concept-wise | 🟡 | M |
 | 6 | 7 more lessons still in old Hinglish format | ⬜ | L |
-| 7 | All problem text in English | ⬜ | L |
+| 7 | All problem text in English | ✅ | — |
 | 8 | Topic-wise learning + unlock flow | ⬜ | L |
 | 9 | Chapter locked until problems solved, then downloadable | ⬜ | M |
 | 10 | First-time welcome: gender, class, interests, language | ⬜ | M |
@@ -126,18 +126,26 @@ words; these run 600–780.
 ⚠️ **`booleans` was not on your list** — you listed 3, 9, 5, 6, 10, 11, 12. The
 measurement found an eighth lesson in exactly the same state.
 
-### 2. ⬜ All problem text in English
+### 2. ✅ All problem text in English — done
 You wrote: *"copiler mai jitani bhi problems hai unme hinglish hai, isko bhi
-English mai karna hai"*.
+English mai karna hai"*, and then decided the whole platform is English.
 
-Measured: **all 156 problem descriptions are Hinglish, and 140 of them have
-Hinglish hints.** This is the single largest content job on the list, and it has
-a real consequence today — a student reads an English lesson and then opens a
-Hinglish problem underneath it.
+Before: **156 of 156 problems were Hinglish.** After, measured against the live
+database: **0**. Descriptions, hints, titles, examples and starter-code comments,
+across all three sources — 121 in `seed.mjs`, 18 SQL, 17 pandas.
 
-**Open question only you can answer:** should the *teaching prose* be English
-too, or stay Hinglish with only code and UI in English? The answer changes 7
-lessons and 156 problems, so it is worth deciding before any of it starts.
+**No code changed.** Function names, starter code, reference solutions, test
+arguments and expected values are byte-identical, which is why this was done by
+exact-match replacement (`prisma/apply-translations.mjs`) instead of by hand.
+
+Two traps hit on the way, both caught before deploy: `seed.mjs` uses both quote
+styles, and ten pandas descriptions are built by string concatenation — the first
+attempt at splitting those cut inside `count_missing(records, col)` and produced
+a truncated question. The guessing step was removed rather than patched.
+
+**Still Hinglish, deliberately:** the eight old-format *lessons* in §D.1. Those
+are being rewritten rather than translated, since they need the full teaching
+standard anyway.
 
 ### 3. ⬜ Four stub lessons, and everything beyond Python
 - 4 Python lessons are still stubs: testing, debugging-logging, clean-code, project-git.
