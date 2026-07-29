@@ -35,7 +35,7 @@ export function ObjectInspector() {
           <div className="oi-line c-fn">bark()</div>
         </div>
 
-        <div className="oi-arrow">banata hai →</div>
+        <div className="oi-arrow">builds →</div>
 
         <div className="oi-objs">
           {dogs.map((d, i) => (
