@@ -208,7 +208,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
             Focus {summary.focusPct}% — of the session’s {humanDuration(summary.elapsedSeconds)} you were actually here for {humanDuration(summary.activeSeconds)}.
             {summary.doubtsWritten > 0 && <> You wrote {summary.doubtsWritten} doubts in the notebook — clear them in Notes.</>}
           </p>
-          <button className="btn btn-primary" onClick={() => setSummary(null)}>Naya session</button>
+          <button className="btn btn-primary" onClick={() => setSummary(null)}>New session</button>
         </div>
       </>
     );

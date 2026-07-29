@@ -1005,28 +1005,81 @@ const L10 = [
 ];
 
 const L11 = [
-  { t: "objectives", items: ["<code>try / except</code> se crash rokna","Specific errors pakadna (<code>ValueError</code> waghairah)","<code>else</code> aur <code>finally</code> ka kaam","<b>Bare except</b> kyun khatarnaak hai"] },
-  { t: "hook", q: "Tumhare 50,000 rows ke data me ek row me age likhi hai <code>\"pachees\"</code> (number ki jagah shabd). <code>int(\"pachees\")</code> crash karega — kya poora analysis ek gande row ki wajah se ruk jaaye?", why: "Bilkul nahi. <b>try / except</b> se tum us ek row ko sambhal ke aage badh jaate ho — program zinda rehta hai. Real data <b>hamesha</b> ganda hota hai, isiliye ye skill roz kaam aati hai." },
-  { t: "def", term: "Exception handling", en: "A mechanism to catch runtime errors so the program can respond gracefully instead of crashing.", hi: "Jo code fail ho sakta hai use <code>try</code> me rakho; agar error (exception) aaye to <code>except</code> use <b>pakad</b> leta hai aur program crash hone ke bajaye sambhal jaata hai." },
-  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> raw data me gande values, missing files, galat types — normal hai. <code>try/except</code> se ek kharab row/file poori pipeline nahi giraati; tum use skip/log karke aage badhte ho. Robust data code ki reedh ki haddi." },
-  { t: "h2", n: "1", text: "try / except" },
-  { t: "p", html: "Risky code <code>try</code> me, aur error aane pe kya karna hai <code>except</code> me. <b>Specific</b> error pakdo (jaise <code>ValueError</code>) — taaki sirf wahi galti sambhle jiski umeed hai." },
-  { t: "code", file: "try.py", code: "try:\n    age = int(\"pachees\")\nexcept ValueError:\n    age = 0            # default, crash nahi\nprint(age)   # 0", output: "0" },
-  { t: "h2", n: "2", text: "else aur finally" },
-  { t: "p", html: "<code>else</code> tab chalta hai jab <b>koi error nahi</b> aaya. <code>finally</code> <b>hamesha</b> chalta hai — chahe error ho ya na ho (cleanup ke liye: file band karna waghairah). Neeche scenario badal ke dekho 👇" },
+  { t: "objectives", items: [
+    "Catch a failure with <code>try</code> / <code>except</code> instead of letting the program die",
+    "Catch the <b>specific</b> exception, and know why a bare <code>except</code> is dangerous",
+    "Use <code>else</code> and <code>finally</code>, and <code>raise</code> your own errors",
+    "Decide when to catch an error and when to let it through",
+  ]},
+  { t: "hook", q: "Your script reads 50,000 rows from a file. Row 40,000 has the word <code>unknown</code> where a number should be. What happens to the other 10,000 rows?", why: "Without error handling, nothing. The program stops on that row and everything after it is lost — after forty minutes of work. Handling the failure is the difference between a script that finishes with one row flagged and a script that has to be rerun." },
+  { t: "def", term: "Exception", en: "An exception is an error raised during execution which interrupts the normal flow, and which a program may catch and respond to.", hi: "An exception is not the same as a crash. It is Python <b>reporting</b> a problem — and if you are ready for it, you decide what happens next instead of the program ending." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> real data is broken in small ways — a missing value, a date typed by hand, a division by a count that turned out to be zero. Handling those is what separates a script that runs once on your machine from one that can be scheduled and trusted. The goal is never to hide failures; it is to keep going and record which rows failed." },
+
+  { t: "h2", n: "1", text: "try and except" },
+  { t: "p", html: "Put the risky work in <code>try</code>. If it raises, the matching <code>except</code> runs instead of the program stopping." },
+  { t: "code", file: "basic.py", code: "try:\n    n = int(\"abc\")\nexcept ValueError:\n    print(\"that is not a number\")", output: "that is not a number" },
   { t: "viz", name: "exception-flow" },
-  { t: "think", q: "<code>finally</code> block kab chalta hai?", a: "<b>Hamesha</b> — error aaye ya na aaye, <code>except</code> chale ya <code>else</code>, <code>finally</code> zaroor chalta hai. Isiliye usme cleanup rakhte hain (file close, connection band) — jo har haal me hona chahiye." },
-  { t: "analogy", concept: "try / except", real: "Trapeze ke neeche jaal", html: "<code>try</code> = trapeze artist ka daring jump (risky code). <b>Jaal (except)</b> neeche laga hai — agar girre (error), jaal pakad leta hai, artist zinda. <code>finally</code> = show ke baad safai, jo hamesha hoti hai. Bina jaal ke ek galti = poora show (program) khatam." },
+  { t: "p", html: "Follow the arrows in that panel. The moment a line inside <code>try</code> raises, the <b>rest of the try block is skipped</b> — control jumps straight to the matching <code>except</code>. Nothing between the failing line and the end of the block ever runs." },
+
+  { t: "h2", n: "2", text: "Catch the specific exception" },
+  { t: "p", html: "Name the error you expect. Anything else still travels up and gets reported, which is exactly what you want for a problem you did not plan for." },
+  { t: "code", file: "specific.py", code: "def divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"cannot divide by zero\"\n\nprint(divide(10, 2))\nprint(divide(10, 0))", output: "5.0\ncannot divide by zero" },
+  { t: "note", variant: "warn", html: "<b>Never write a bare <code>except:</code>.</b> It catches everything — including your own typos, and including Ctrl-C. A misspelt variable name inside a bare <code>try</code> becomes a <code>NameError</code> that is silently swallowed, and your function calmly returns a wrong answer forever. The debug task below is exactly that." },
+
+  { t: "h2", n: "3", text: "else and finally" },
+  { t: "p", html: "<code>else</code> runs only when nothing was raised. <code>finally</code> runs either way — it is where cleanup goes, such as closing a file or a connection." },
+  { t: "code", file: "elsefinally.py", code: "try:\n    value = int(\"42\")\nexcept ValueError:\n    print(\"bad input\")\nelse:\n    print(\"parsed\", value)\nfinally:\n    print(\"done\")", output: "parsed 42\ndone" },
+
+  { t: "h2", n: "4", text: "Raising your own" },
+  { t: "p", html: "<code>raise</code> reports a problem your own code has detected. Refusing bad input loudly is better than storing it and finding out later." },
+  { t: "code", file: "raising.py", code: "def set_age(age):\n    if age < 0:\n        raise ValueError(\"age cannot be negative\")\n    return age\n\nprint(set_age(30))\n\ntry:\n    set_age(-5)\nexcept ValueError as e:\n    print(\"caught:\", e)", output: "30\ncaught: age cannot be negative" },
+  { t: "think", q: "If you can catch an error, should you always catch it?", a: "No — and this is the judgement the topic is really about.<br/><br/>Catch it when you know what to do instead: skip the bad row, use a default, retry. <b>Let it through</b> when you do not, because an error that reaches you is information, and one that is swallowed is a wrong answer with no warning attached.<br/><br/>A caught exception that returns a plausible-looking number is worse than a crash. The crash tells you where to look." },
+  { t: "analogy", concept: "try / except", real: "A safety net under a trapeze", html: "The net does not stop the fall — it decides what happens after one. <code>try</code> is the part of the act where a fall is possible; <code>except</code> is the net, placed for the fall you actually expect. A bare <code>except</code> is a net stretched over the whole circus: it catches the trapeze artist, the audience, and the person who came to fix the lights, and nobody can tell what went wrong." },
+
+  { t: "trace", intro: "A parser that falls back to -1 on bad input. Work out what each name holds once the line has run.", code: "def parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return -1\n\na = parse(\"10\")\nb = parse(\"x\")\nc = a + b", steps: [
+    { q: "After line 7, <code>a</code> is", answer: "10", why: "<code>int(\"10\")</code> succeeded, so the <code>return</code> inside <code>try</code> ran and the <code>except</code> was never reached." },
+    { q: "After line 8, <code>b</code> is", answer: "-1", why: "<code>int(\"x\")</code> raised <code>ValueError</code>, so the <code>try</code> was abandoned at that point and the fallback returned instead." },
+    { q: "After line 9, <code>c</code> is", answer: "9", why: "<code>10 + (-1)</code>. Worth noticing: the -1 flowed onward as if it were real data. A fallback value is a decision, not a fix." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Catch the error from converting a word to an integer.", code: "try:\n    int(\"x\")\nexcept ValueError:\n    print(\"bad\")", out: "bad" },
+    { task: "Catch a division by zero.", code: "try:\n    print(1 / 0)\nexcept ZeroDivisionError:\n    print(\"no\")", out: "no" },
+    { task: "Run something that always happens at the end.", code: "try:\n    pass\nfinally:\n    print(\"always\")", out: "always" },
+    { task: "Run a block only when nothing failed.", code: "try:\n    v = 1\nexcept ValueError:\n    print(\"bad\")\nelse:\n    print(\"ok\")", out: "ok" },
+    { task: "Raise your own error and catch it.", code: "try:\n    raise ValueError(\"boom\")\nexcept ValueError as e:\n    print(e)", out: "boom" },
+    { task: "Catch a missing dictionary key.", code: "d = {}\ntry:\n    d[\"a\"]\nexcept KeyError:\n    print(\"missing\")", out: "missing" },
+    { task: "Catch an index that is out of range.", code: "try:\n    [1][5]\nexcept IndexError:\n    print(\"out of range\")", out: "out of range" },
+    { task: "Catch adding a string to a number.", code: "try:\n    \"a\" + 1\nexcept TypeError:\n    print(\"wrong types\")", out: "wrong types" },
+    { task: "Give two <code>except</code> blocks and let the right one run.", code: "try:\n    int(\"x\")\nexcept ZeroDivisionError:\n    print(\"zero\")\nexcept ValueError:\n    print(\"value\")", out: "value" },
+    { task: "Print the name of the exception you caught.", code: "try:\n    int(\"x\")\nexcept ValueError as e:\n    print(type(e).__name__)", out: "ValueError" },
+    { task: "Avoid the try entirely by asking for a default instead.", code: "d = {}\nprint(d.get(\"a\", 0))", out: "0" },
+  ]},
+
   { t: "mistakes", items: [
-    { bad: "try:\n    risky()\nexcept:            # sab kuch pakad liya\n    pass", why: "<b>Bare except</b> (ya <code>except Exception</code> + <code>pass</code>) <b>har</b> error nigal jaata hai — tumhari asli bug (typo, galat naam) bhi chup-chaap chhup jaati hai. Debugging naamumkin ho jaati hai.", fix: "try:\n    risky()\nexcept ValueError as e:\n    print(\"skip:\", e)" },
-    { bad: "# normal flow control ke liye exception\ntry:\n    return d[key]\nexcept KeyError:\n    return None", why: "Kaam to karta hai, par jab har baar key miss ho sakti ho to exception mehnga aur galat tareeka hai. Iske liye seedha tareeka hai.", fix: "return d.get(key)   # miss pe None, no exception" },
-  ] },
-  { t: "recap", items: ["<code>try</code> risky code, <code>except</code> error handle","<b>specific</b> error pakdo (<code>except ValueError</code>)","<code>else</code> = koi error nahi to chala","<code>finally</code> = <b>hamesha</b> (cleanup)","<b>bare except</b> mat karo — bugs chhup jaati hain"] },
+    { bad: "try:\n    risky()\nexcept:\n    pass", why: "Two errors in four lines. The bare <code>except</code> catches <b>everything</b> — your typos, out-of-memory, even Ctrl-C — and <code>pass</code> then throws the evidence away. The program continues in a state you no longer understand.", fix: "try:\n    risky()\nexcept ValueError as e:\n    log.warning(\"skipping row: %s\", e)" },
+    { bad: "try:\n    a = load()\n    b = clean(a)\n    c = save(b)\nexcept Exception:\n    print(\"something failed\")", why: "The <code>try</code> covers three different operations, so the message cannot say which one broke. Keep the block around the line that can actually fail — a wide <code>try</code> turns a precise error into a shrug.", fix: "a = load()\nb = clean(a)\ntry:\n    c = save(b)\nexcept IOError as e:\n    print(\"could not save:\", e)" },
+    { bad: "try:\n    value = d[\"name\"]\nexcept KeyError:\n    value = \"\"", why: "Not wrong, but there is a plainer way to say it. Exceptions are for the unexpected; a key that is <i>known</i> to be optional is ordinary logic.", fix: "value = d.get(\"name\", \"\")" },
+    { bad: "except ValueError:\n    return 0", why: "Returning a plausible number for a failure hides it forever. Nobody downstream can tell a real 0 from a failed one, and the wrong total ships. If a fallback is genuinely right, record that it happened.", fix: "except ValueError:\n    log.warning(\"bad row, skipped\")\n    return None" },
+  ]},
+
+  { t: "debug", intro: "This should return the length of the list. It returns 0 for a list that clearly has three items, and nothing crashes. Read it before opening the fix.", code: "def safe_len(items):\n    try:\n        return len(itmes)\n    except:\n        return 0\n\nprint(safe_len([1, 2, 3]))", symptom: "prints 0, but the list has three items", q: "The list is fine and <code>len</code> is the right function. So what is being caught?", fix: "def safe_len(items):\n    try:\n        return len(items)\n    except TypeError:\n        return 0\n\nprint(safe_len([1, 2, 3]))", why: "<code>itmes</code> is a typo. Python raised <code>NameError</code> — a bug in <i>your</i> code, not in the data — and the bare <code>except</code> caught it, returned 0, and told nobody. The function will report 0 for every list it is ever given.<br/><br/>This is the whole argument against a bare <code>except</code> in one screen. Name the exception you are prepared for, and everything you were <b>not</b> prepared for keeps its right to interrupt you. Fixing the typo is half the fix; narrowing the <code>except</code> is what stops the next typo from hiding." },
+
+  { t: "recap", items: [
+    "<code>try</code> holds the risky line, <code>except</code> decides what happens if it raises",
+    "Catch the <b>specific</b> exception — never a bare <code>except:</code>",
+    "<code>else</code> runs when nothing failed; <code>finally</code> runs either way",
+    "<code>raise</code> reports a problem your own code detected",
+    "Catch it only when you know what to do instead — otherwise let it through",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "<code>try/except</code> ka kaam?", a: "Risky code ko crash hone se bachana — error aaye to <code>except</code> use pakad ke sambhal leta hai, program aage chalta rehta hai." },
-    { level: "beginner", q: "<code>else</code> aur <code>finally</code> me farak?", a: "<code>else</code> sirf tab jab koi error <b>na</b> aaye. <code>finally</code> <b>hamesha</b> — error ho ya na ho — cleanup ke liye." },
-    { level: "intermediate", q: "<b>Bare <code>except:</code></b> kyun bura hai?", a: "Woh <b>har</b> exception pakad leta hai — <code>KeyboardInterrupt</code>, tumhari apni bug, sab. Asli galti chhup jaati hai aur debugging behad mushkil. Hamesha <b>specific</b> exception pakdo." },
-  ] },
+    { level: "beginner", q: "What is the difference between an error and an exception being handled?", a: "An unhandled exception stops the program and prints a traceback. A handled one is caught by an <code>except</code> block, which decides what happens next — a default, a skip, a retry — and execution carries on." },
+    { level: "beginner", q: "What is wrong with <code>except:</code> on its own?", a: "It catches every exception there is, including bugs in your own code such as a misspelt name, and including <code>KeyboardInterrupt</code>. The failure disappears and the function returns something plausible instead. Always name the exception you expect." },
+    { level: "intermediate", q: "What is the difference between <code>else</code> and <code>finally</code>?", a: "<code>else</code> runs only if the <code>try</code> completed without raising — it is where the \"it worked\" path goes, kept out of the <code>try</code> so it is not accidentally protected. <code>finally</code> runs in every case, raised or not, and is for cleanup that must happen regardless." },
+    { level: "intermediate", q: "When should you not catch an exception?", a: "When you have no sensible response to it. Catching an error you cannot handle converts a loud, locatable failure into a quiet wrong answer. Letting it propagate to a level that <i>can</i> decide — or letting it stop the job — is often the correct engineering choice." },
+    { level: "advanced", q: "What does <code>raise ... from e</code> do, and why use it?", a: "It chains exceptions: it raises a new one while recording the original as its cause, so the traceback shows both. It is how you translate a low-level failure into a meaningful one — a <code>KeyError</code> becoming <code>ConfigError</code> — without losing the line that actually broke. Without it, the original context is hidden, and the traceback tells you what your wrapper thought rather than what really happened." },
+  ]},
 ];
 
 const L12 = [
@@ -1359,28 +1412,84 @@ const L15 = [
   ]},
 ];
 const L16 = [
-  { t: "objectives", items: ["<code>True</code>/<code>False</code> aur comparisons","<code>and</code> / <code>or</code> / <code>not</code>","<b>Truthy</b> aur <b>Falsy</b> values","<code>== None</code> ki jagah <code>is None</code>"] },
-  { t: "hook", q: "Code me likha hai <code>if my_list:</code> — bina <code>== something</code> ke. Iska kya matlab? Aur ek khaali list <code>[]</code> — woh <code>True</code> hai ya <code>False</code>?", why: "<code>if my_list:</code> ka matlab hai \"agar list <b>khaali nahi</b>\". Aur haan — khaali <code>[]</code> ko Python <b>False</b> maanta hai! Ye \"truthiness\" har condition ke peeche hai." },
-  { t: "def", term: "Boolean", en: "A boolean is one of exactly two values, True or False, used to represent logic and drive conditions.", hi: "Sirf do value: <code>True</code> aur <code>False</code>. Har comparison (<code>&gt;</code>, <code>==</code>, <code>in</code>) ek boolean deta hai, aur <code>if</code>/<code>while</code> isi pe faisla lete hain." },
-  { t: "note", variant: "key", html: "💼 <b>DS job me:</b> data filter karna = boolean soch. Pandas me <code>df[df.age &gt; 18]</code> — ye <code>df.age &gt; 18</code> ek poora <b>True/False</b> ka column banata hai (boolean mask), aur wahi rows chunta hai jahan True hai. Boolean pakka to filtering pakki." },
-  { t: "h2", n: "1", text: "Comparison aur logic" },
-  { t: "p", html: "Comparisons (<code>&gt; &lt; == != &gt;= &lt;=</code>) bool dete hain. Jodne ke liye <code>and</code> (dono sach), <code>or</code> (koi ek), <code>not</code> (ulta)." },
-  { t: "code", file: "bool.py", code: "age = 20\nprint(age > 18 and age < 60)   # True\nprint(age < 13 or age > 60)    # False\nprint(not True)                # False", output: "True\nFalse\nFalse" },
-  { t: "h2", n: "2", text: "Truthy aur Falsy" },
-  { t: "p", html: "Sirf <code>True</code>/<code>False</code> hi nahi — <b>har</b> value ki ek \"truthiness\" hoti hai. <b>Falsy</b> (False jaisi): <code>0</code>, <code>0.0</code>, <code>\"\"</code>, <code>[]</code>, <code>{}</code>, <code>None</code>. Baaki <b>sab truthy</b>. Neeche khud check karo 👇" },
+  { t: "objectives", items: [
+    "Work with <code>True</code> / <code>False</code> and the comparisons that produce them",
+    "Say which values are <b>falsy</b>, and why <code>if items:</code> is better than <code>if len(items) &gt; 0:</code>",
+    "Tell <code>==</code> from <code>is</code>, and know which one you actually want",
+    "Avoid the trap where <code>0</code> and <code>\"\"</code> are mistaken for missing data",
+  ]},
+  { t: "hook", q: "A form field comes back as <code>0</code>. Your code says <code>if not value: return \"missing\"</code>. Is 0 missing?", why: "To Python, <code>0</code> is falsy — so that line reports it as missing. But a score of zero, a price of zero and a count of zero are all real answers. This one confusion quietly corrupts more beginner code than any syntax error, because nothing ever crashes." },
+  { t: "def", term: "Truthiness", en: "Truthiness is the boolean value Python assigns to any object when it is used in a condition.", hi: "Every value answers true or false in an <code>if</code>, not just <code>True</code> and <code>False</code>. Empty things — <code>0</code>, <code>\"\"</code>, <code>[]</code>, <code>{}</code>, <code>None</code> — are <b>falsy</b>; everything else is <b>truthy</b>." },
+
+  { t: "h2", n: "1", text: "Booleans and comparisons" },
+  { t: "p", html: "There are exactly two boolean values. Every comparison produces one of them." },
+  { t: "code", file: "basic.py", code: "print(True)\nprint(type(True).__name__)\nprint(5 > 3)\nprint(bool(0))", output: "True\nbool\nTrue\nFalse" },
+
+  { t: "h2", n: "2", text: "Truthy and falsy" },
+  { t: "p", html: "Anything can be used as a condition. The rule is short enough to memorise: <b>empty is false, everything else is true</b>." },
+  { t: "code", file: "truthy.py", code: "print(bool(0), bool(1))\nprint(bool(\"\"), bool(\"a\"))\nprint(bool([]), bool([1]))\nprint(bool(None))", output: "False True\nFalse True\nFalse True\nFalse" },
   { t: "viz", name: "truthiness-tester" },
-  { t: "think", q: "<code>bool([])</code> kya dega — aur <code>bool([0])</code>?", a: "<code>bool([])</code> → <b>False</b> (khaali list falsy). Par <code>bool([0])</code> → <b>True</b>! List <b>khaali nahi</b> hai — usme ek item (0) hai. \"Khaali\" matter karta hai, andar kya hai wo nahi." },
-  { t: "analogy", concept: "Boolean", real: "On/Off switch", html: "Boolean = ek switch 🔘 — sirf <b>ON (True)</b> ya <b>OFF (False)</b>, beech me kuch nahi. Truthiness ka matlab: Python har cheez ko dekh ke keh deta hai \"ye switch on maanein ya off\" — khaali/zero/None ko OFF, baaki sab ko ON." },
+  { t: "p", html: "Try each value in that panel. The falsy list is complete and worth knowing by heart: <code>False</code>, <code>0</code>, <code>0.0</code>, <code>\"\"</code>, <code>[]</code>, <code>()</code>, <code>{}</code>, <code>set()</code> and <code>None</code>. Nothing else is falsy — not <code>\"0\"</code>, not <code>\" \"</code>, not <code>[0]</code>." },
+  { t: "note", variant: "tip", html: "This is why <code>if items:</code> is the idiomatic way to ask \"does this list have anything in it\". <code>if len(items) &gt; 0:</code> says the same thing in more words, and reads as though the length mattered when it does not." },
+
+  { t: "h2", n: "3", text: "and, or, not — and what they return" },
+  { t: "p", html: "You met these with operators. The part worth repeating here: <code>and</code> and <code>or</code> return an <b>operand</b>, not a boolean, and that is what makes the default-value idiom work." },
+  { t: "code", file: "shortcircuit.py", code: "name = \"\"\nprint(name or \"Guest\")\nprint(0 and 99)\nprint(2 and 99)", output: "Guest\n0\n99" },
+
+  { t: "h2", n: "4", text: "== compares values, is compares identity" },
+  { t: "p", html: "<code>==</code> asks whether two things <b>hold the same value</b>. <code>is</code> asks whether they are <b>the same object</b> in memory. They are different questions and they can disagree." },
+  { t: "code", file: "isvsequals.py", code: "a = [1, 2]\nb = [1, 2]\nprint(a == b)\nprint(a is b)\nprint(a is a)", output: "True\nFalse\nTrue" },
+  { t: "note", variant: "warn", html: "Use <code>==</code> for values, and reserve <code>is</code> for <code>None</code>, <code>True</code> and <code>False</code> — the singletons, where there genuinely is only one object. <code>if x is 5</code> may appear to work on small numbers because Python caches them, and then fail on larger ones. That is not a rule you want your correctness resting on." },
+  { t: "think", q: "<code>True + True</code> — is that an error?", a: "No. It is <b>2</b>.<br/><br/><code>bool</code> is a subclass of <code>int</code>: <code>True</code> is 1 and <code>False</code> is 0. That is not a curiosity — it is genuinely useful, because <code>sum(flags)</code> counts how many are true in one call." },
+  { t: "code", file: "boolint.py", code: "flags = [True, False, True, True]\nprint(sum(flags))\nprint(True + True)\nprint(isinstance(True, int))", output: "3\n2\nTrue" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> <code>sum()</code> over a list of conditions is how you count matching rows without a loop — how many orders were late, how many values were missing. In pandas the same idea becomes <code>(df[\"amount\"] &gt; 1000).sum()</code>. The truthiness rule is also why filtering out empty strings is written <code>[v for v in values if v]</code> and not a comparison." },
+  { t: "analogy", concept: "Truthiness", real: "An empty box on a shelf", html: "Nobody asks whether a box's contents count is greater than zero. They pick it up: if it feels empty, it is empty. Python does the same — <code>if items:</code> is picking the box up. The catch is that Python calls a box holding a single <code>0</code> empty too, and that is where the bug in the debug task comes from." },
+
+  { t: "trace", intro: "Filtering a list on truthiness. Work out what each name holds once the line has run.", code: "values = [0, \"\", \"data\", 5]\nkept = [v for v in values if v]\ncount = len(kept)\nfirst = kept[0]", steps: [
+    { q: "After line 2, <code>kept</code> is", answer: "['data', 5]", accept: ["['data',5]", "[data, 5]", "[\"data\", 5]"], why: "<code>0</code> and <code>\"\"</code> are both falsy, so the filter dropped them. Note it dropped a real number — a zero measurement would be lost by this line." },
+    { q: "After line 3, <code>count</code> is", answer: "2", why: "Two of the four survived. Four went in and two came out, which is what a filtering <code>if</code> does." },
+    { q: "After line 4, <code>first</code> is", answer: "data", why: "The first surviving item. The original <code>values</code> is untouched — the comprehension built a new list." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Is zero truthy or falsy?", code: "print(bool(0))", out: "False" },
+    { task: "Is a non-empty string truthy?", code: "print(bool(\"a\"))", out: "True" },
+    { task: "Is an empty list truthy?", code: "print(bool([]))", out: "False" },
+    { task: "Print the result of a comparison.", code: "print(5 > 3)", out: "True" },
+    { task: "Flip a boolean with <code>not</code>.", code: "print(not True)", out: "False" },
+    { task: "Combine two conditions with <code>and</code>.", code: "print(True and False)", out: "False" },
+    { task: "Fall back to a default when the name is empty.", code: "print(\"\" or \"Guest\")", out: "Guest" },
+    { task: "Count how many conditions are true, without a loop.", code: "print(sum([True, False, True]))", out: "2" },
+    { task: "Compare two lists by value.", code: "print([1, 2] == [1, 2])", out: "True" },
+    { task: "Ask whether they are the same object.", code: "print([1, 2] is [1, 2])", out: "False" },
+    { task: "Drop the empty values from a list.", code: "print([v for v in [0, 1, \"\", \"a\"] if v])", out: "[1, 'a']" },
+    { task: "Check that a value is genuinely absent rather than empty.", code: "x = 0\nprint(x is None)", out: "False" },
+  ]},
+
   { t: "mistakes", items: [
-    { bad: "if is_ready == True:   # fizool\n    go()", why: "<code>is_ready</code> pehle se bool hai — <code>== True</code> lagana bekaar hai. Seedha <code>if is_ready:</code> saaf aur sahi hai.", fix: "if is_ready:\n    go()" },
-    { bad: "if x == None:          # kaam karta, par galat style", why: "<code>None</code> ke liye <code>==</code> nahi, <code>is</code> use karo — <code>None</code> poore program me ek hi cheez hai (identity check), aur <code>is None</code> tez + sahi maana jaata hai.", fix: "if x is None:\n    ..." },
-  ] },
-  { t: "recap", items: ["<code>True</code>/<code>False</code> — comparisons se milte hain","<code>and</code> (dono), <code>or</code> (koi ek), <code>not</code> (ulta)","Falsy: <code>0, 0.0, \"\", [], {}, None</code> — baaki truthy","<code>if my_list:</code> = \"khaali nahi\"","<code>None</code> ke liye <code>is None</code>, <code>== None</code> nahi"] },
+    { bad: "if x == True:", why: "Redundant, and narrower than you meant. <code>if x:</code> accepts anything truthy; <code>x == True</code> only accepts the boolean itself, so a non-empty string or a list of results would fail it.", fix: "if x:" },
+    { bad: "if len(items) > 0:", why: "Correct, but it says the length matters when what you actually want to know is whether there is anything there. The shorter form is the one every Python reader expects.", fix: "if items:" },
+    { bad: "if name is \"admin\":", why: "<code>is</code> asks whether these are the <b>same object</b>, not whether the text matches. It sometimes appears to work because Python reuses short strings, and then fails on a string built at runtime — the worst kind of bug, one that passes your test and fails in production.", fix: "if name == \"admin\":" },
+    { bad: "if not value:\n    return \"missing\"", why: "This treats <code>0</code>, <code>\"\"</code> and <code>[]</code> as missing. A price of zero, an empty note and an empty basket are all real answers. If you mean absent, say absent.", fix: "if value is None:\n    return \"missing\"" },
+  ]},
+
+  { t: "debug", intro: "This should print the score, whatever it is. A score of 0 is reported as no score at all. Nothing crashes. Read it before opening the fix.", code: "def label(score):\n    if not score:\n        return \"no score\"\n    return \"score: \" + str(score)\n\nprint(label(10))\nprint(label(0))", symptom: "prints 'no score' for a score of 0, which is a real score", q: "Zero was passed in and the function was given no reason to reject it. So why was it treated as nothing?", fix: "def label(score):\n    if score is None:\n        return \"no score\"\n    return \"score: \" + str(score)\n\nprint(label(10))\nprint(label(0))", why: "<code>not score</code> is a <b>truthiness</b> test, and <code>0</code> is falsy — so it means \"empty or absent or zero\", which is three different questions rolled into one. The function was asked whether a score existed and answered whether it was non-zero.<br/><br/>Say what you mean: <code>is None</code> for absent, <code>== 0</code> for zero, <code>not items</code> for empty. This bug is common in exactly the places it matters most — a zero balance, a zero count, an empty comment field — and it never announces itself, because a wrong label is not an error." },
+
+  { t: "recap", items: [
+    "Every value answers true or false in a condition — <b>empty is falsy</b>, everything else truthy",
+    "Falsy in full: <code>False, 0, 0.0, \"\", [], (), {}, set(), None</code>",
+    "<code>if items:</code> beats <code>if len(items) &gt; 0:</code>",
+    "<code>==</code> compares values, <code>is</code> compares identity — use <code>is</code> only for <code>None</code>, <code>True</code>, <code>False</code>",
+    "<code>True</code> is <code>1</code>, so <code>sum(flags)</code> counts the true ones",
+  ]},
+
   { t: "interview", items: [
-    { level: "beginner", q: "Truthy aur Falsy kya hai?", a: "Har value ko Python <code>if</code> me True ya False jaisa maanta hai. <b>Falsy</b>: <code>0, 0.0, \"\", [], {}, (), None, False</code>. Baaki <b>sab truthy</b> — jaise non-empty list/string, non-zero number." },
-    { level: "beginner", q: "<code>and</code> aur <code>or</code> ka result kya hota hai?", a: "<code>and</code>: dono True to True. <code>or</code>: koi ek True to True. Dono <b>short-circuit</b> karte hain — <code>and</code> pehli False pe ruk jaata hai, <code>or</code> pehli True pe." },
-    { level: "intermediate", q: "<code>== None</code> aur <code>is None</code> me farak?", a: "<code>is None</code> <b>identity</b> check karta hai (None poore program me ek hi object) — sahi aur tez tareeka. <code>==</code> value compare karta hai aur custom objects me galat bhi ho sakta hai. None ke liye hamesha <code>is</code>." },
-  ] },
+    { level: "beginner", q: "Which values are falsy in Python?", a: "<code>False</code>, <code>0</code>, <code>0.0</code>, the empty string, the empty list, tuple, dict and set, and <code>None</code>. Everything else is truthy — including <code>\"0\"</code>, <code>\" \"</code> and <code>[0]</code>, which look empty but are not." },
+    { level: "beginner", q: "What is the difference between <code>==</code> and <code>is</code>?", a: "<code>==</code> compares values; <code>is</code> compares identity — whether both names point at the same object. Two lists with identical contents are <code>==</code> but not <code>is</code>. Use <code>is</code> only for <code>None</code>, <code>True</code> and <code>False</code>." },
+    { level: "intermediate", q: "Why is <code>if x is None</code> preferred over <code>if not x</code> for checking a missing value?", a: "Because <code>not x</code> is also true for <code>0</code>, <code>\"\"</code> and <code>[]</code>, which are real values rather than missing ones. <code>is None</code> asks the exact question. Mixing the two is a classic source of silently wrong results." },
+    { level: "intermediate", q: "Is <code>True</code> really an integer?", a: "Yes — <code>bool</code> subclasses <code>int</code>, with <code>True == 1</code> and <code>False == 0</code>. It is why <code>sum(flags)</code> counts the true values, and why <code>True + True</code> is 2 rather than an error." },
+    { level: "advanced", q: "How does an object decide its own truthiness?", a: "Python calls <code>__bool__</code> if the class defines it. If not, it falls back to <code>__len__</code> and treats zero length as false. If neither exists, the object is always truthy. This is why an empty custom collection can be falsy for free by defining <code>__len__</code> — and why a class defining neither will pass an <code>if</code> even when it is conceptually empty." },
+  ]},
 ];
 const L17 = [
   { t: "objectives", items: [
@@ -2839,45 +2948,320 @@ const L34 = [
   ]},
 ];
 const L35 = [
-  { t: "objectives", items: ["Testing kyun zaroori","assert se basic test","unittest / pytest ka idea"] },
-  { t: "h2", n: "1", text: "Code test kyun karein" },
-  { t: "p", html: "Bade code me ek jagah change doosri jagah tod sakta hai. <b>Tests</b> automatically check karte hain sab sahi chal raha hai — bugs jaldi pakde jaate hain." },
-  { t: "code", file: "assert.py", code: "def add(a, b):\n    return a + b\n\nassert add(2, 3) == 5      # sahi to kuch nahi\nassert add(0, 0) == 0\nprint(\"saare tests pass!\")", output: "saare tests pass!" },
-  { t: "h2", n: "2", text: "unittest aur pytest" },
-  { t: "p", html: "<code>unittest</code> Python ka built-in testing framework hai, <code>pytest</code> popular external tool — dono functions ko automatically test karte hain. Companies me testing standard practice hai." },
-  { t: "note", variant: "tip", html: "<b>Interview me:</b> 'tests likhte ho?' — achhe engineers ki nishaani. Basic pata hona zaroori hai." },
-  { t: "recap", items: ["Tests = auto bug-catching","assert se basic check","unittest = built-in","pytest = popular external tool"] },
+  { t: "objectives", items: [
+    "Check your own code with <code>assert</code>, and read what a failure tells you",
+    "Write a small <code>unittest</code> class and run it",
+    "Choose test cases that catch real bugs — the empty case, the single case, the edge",
+    "Explain why a passing test suite is a claim, not a proof",
+  ]},
+  { t: "hook", q: "You change one line in a function that six other functions call. How do you know you have not broken any of them?", why: "You run the program and try a few things — and you check the cases you happened to think of, in the mood you happened to be in. A test suite is the same checking, written down once, and repeated identically every time you touch the code. That is the entire idea." },
+  { t: "def", term: "Test", en: "A test is code that runs your code with known input and fails loudly if the result is not what was expected.", hi: "It is not a special skill or a separate tool. A test is an ordinary function that calls your function and complains when the answer is wrong." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the first thing an interviewer looks for in a GitHub project is whether there is a <code>tests/</code> folder — it separates someone who writes scripts from someone who ships. And in real data work the value is concrete: a cleaning function tested on the empty file, the one-row file and the file with a missing column will not take your Sunday away." },
+
+  { t: "h2", n: "1", text: "assert — the smallest test there is" },
+  { t: "p", html: "<code>assert</code> takes a condition. If it is true, nothing happens and the program moves on. If it is false, Python raises <code>AssertionError</code> and stops." },
+  { t: "code", file: "assert_basic.py", code: "def average(nums):\n    if not nums:\n        return 0.0\n    return sum(nums) / len(nums)\n\nassert average([2, 4, 6]) == 4.0\nassert average([5]) == 5.0\nassert average([]) == 0.0\n\nprint(\"all 3 passed\")", output: "all 3 passed" },
+  { t: "viz", name: "test-lab" },
+  { t: "p", html: "Swap the implementation in that panel. Notice the middle one: it passes both ordinary cases and fails only on the empty list — which is exactly the shape of a bug that survives review and then arrives at two in the morning." },
+  { t: "code", file: "failing.py", code: "def double(n):\n    return n + n\n\ntry:\n    assert double(3) == 7\nexcept AssertionError:\n    print(\"AssertionError: double(3) was not 7\")", output: "AssertionError: double(3) was not 7" },
+
+  { t: "h2", n: "2", text: "unittest — tests with names" },
+  { t: "p", html: "Once there is more than a handful, tests want names and a runner that reports them. <code>unittest</code> ships with Python, so there is nothing to install." },
+  { t: "code", file: "unittest_run.py", code: "import unittest\nimport io\n\ndef add(a, b):\n    return a + b\n\nclass TestAdd(unittest.TestCase):\n    def test_positive(self):\n        self.assertEqual(add(2, 3), 5)\n\n    def test_negative(self):\n        self.assertEqual(add(-1, 1), 0)\n\nsuite = unittest.TestLoader().loadTestsFromTestCase(TestAdd)\nresult = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)\n\nprint(\"ran\", result.testsRun, \"tests, failures:\", len(result.failures))", output: "ran 2 tests, failures: 0" },
+  { t: "note", variant: "tip", html: "Every test method must start with <code>test_</code> — that is how the runner finds them. A method named <code>check_positive</code> is simply never run, and a suite that silently skips half its tests still reports success." },
+
+  { t: "h2", n: "3", text: "Which cases are worth writing" },
+  { t: "p", html: "A test that only tries the case you had in mind while writing the code proves very little. The cases that earn their keep are the ones at the boundaries." },
+  { t: "code", file: "edge.py", code: "def first_word(text):\n    parts = text.split()\n    if not parts:\n        return \"\"\n    return parts[0]\n\nassert first_word(\"hello world\") == \"hello\"\nassert first_word(\"  padded  \") == \"padded\"\nassert first_word(\"\") == \"\"\n\nprint(\"edges covered\")", output: "edges covered" },
+  { t: "think", q: "Your tests all pass. Does that mean the code is correct?", a: "No. It means it is correct <b>for the cases you thought of</b>.<br/><br/>A passing suite is a claim with a known scope, not a proof. That is why bugs found in production are worth turning into tests: the bug proved that a case existed which nobody had imagined, and adding it means that particular surprise can only happen once." },
+  { t: "analogy", concept: "A test suite", real: "The checks before a flight", html: "A pilot does not inspect an aircraft by feel each time, in whatever order occurs to them. There is a list, it is the same list every flight, and it is worked through even when everything looks fine. It does not make a crash impossible; it makes the <b>known</b> failures impossible to forget. A test suite is that list for your code." },
+
+  { t: "trace", intro: "A clamp function that keeps a number inside a range. Work out what each name holds once the line has run.", code: "def clamp(n, low, high):\n    if n < low:\n        return low\n    if n > high:\n        return high\n    return n\n\na = clamp(5, 1, 10)\nb = clamp(-3, 1, 10)\nc = clamp(99, 1, 10)", steps: [
+    { q: "After line 8, <code>a</code> is", answer: "5", why: "5 is inside the range, so neither guard fires and the value comes back unchanged. This is the case everybody tests first." },
+    { q: "After line 9, <code>b</code> is", answer: "1", why: "Below the floor, so the first guard returns <code>low</code>. This is a boundary case, and it is where a wrong comparison would show up." },
+    { q: "After line 10, <code>c</code> is", answer: "10", why: "Above the ceiling. Three assertions covering these three lines would catch almost any mistake in this function — which is what makes it a good size to test." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Assert something true, then print a confirmation.", code: "assert 1 + 1 == 2\nprint(\"ok\")", out: "ok" },
+    { task: "Write a function and assert its result.", code: "def double(n):\n    return n * 2\n\nassert double(4) == 8\nprint(\"passed\")", out: "passed" },
+    { task: "Catch a failing assertion.", code: "try:\n    assert 1 == 2\nexcept AssertionError:\n    print(\"caught\")", out: "caught" },
+    { task: "Give an assertion a message and print it.", code: "try:\n    assert False, \"boom\"\nexcept AssertionError as e:\n    print(e)", out: "boom" },
+    { task: "Test the empty case of a function.", code: "def total(nums):\n    return sum(nums)\n\nassert total([]) == 0\nprint(\"empty case ok\")", out: "empty case ok" },
+    { task: "Test a negative input.", code: "def sign(n):\n    return \"neg\" if n < 0 else \"pos\"\n\nassert sign(-4) == \"neg\"\nprint(\"passed\")", out: "passed" },
+    { task: "Assert on a string result.", code: "assert \"data\".upper() == \"DATA\"\nprint(\"ok\")", out: "ok" },
+    { task: "Assert on a list result.", code: "assert sorted([3, 1, 2]) == [1, 2, 3]\nprint(\"ok\")", out: "ok" },
+    { task: "Check that a value round-trips.", code: "n = 42\nassert int(str(n)) == n\nprint(\"round trip ok\")", out: "round trip ok" },
+    { task: "Run several checks in a loop and count the passes.", code: "cases = [(1, 2), (2, 4), (3, 6)]\npassed = 0\nfor n, want in cases:\n    if n * 2 == want:\n        passed += 1\nprint(passed, \"of\", len(cases), \"passed\")", out: "3 of 3 passed" },
+    { task: "Use <code>unittest</code>'s <code>assertEqual</code> directly.", code: "import unittest\n\ntc = unittest.TestCase()\ntc.assertEqual(2 + 2, 4)\nprint(\"assertEqual ok\")", out: "assertEqual ok" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "def check_addition(self):\n    self.assertEqual(add(2, 3), 5)", why: "The runner only collects methods whose name begins with <code>test_</code>. This one is never called, and the suite reports success while testing nothing at all.", fix: "def test_addition(self):\n    self.assertEqual(add(2, 3), 5)" },
+    { bad: "assert average([2, 4, 6]) == 4.0", why: "One test, and it is the case you already had in your head while writing the function. It cannot catch the empty list, the single item, or the negative number — which is where the bugs live.", fix: "assert average([2, 4, 6]) == 4.0\nassert average([5]) == 5.0\nassert average([]) == 0.0" },
+    { bad: "assert clean(row) is not None", why: "This passes for almost any return value, including a wrong one. A test that cannot fail is worse than no test, because it produces confidence without evidence.", fix: "assert clean(\"  A1 \") == \"a1\"" },
+    { bad: "python -O script.py   # with asserts as your safety net", why: "The <code>-O</code> flag <b>removes every assert</b> from the running program. That is fine for tests, which never run under it, and dangerous for validating real input — use a real check and <code>raise</code> for that.", fix: "if value < 0:\n    raise ValueError(\"value must not be negative\")" },
+  ]},
+
+  { t: "debug", intro: "Three test cases are collected and counted, and the suite reports that all of them passed. One of them is plainly wrong. Nothing crashes. Read it before opening the fix.", code: "def double(n):\n    return n * 2\n\ncases = [(1, 2), (2, 4), (3, 7)]\npassed = 0\n\nfor n, want in cases:\n    if double(n) == want:\n        passed += 1\n    continue\n\nprint(\"passed\", len(cases), \"of\", len(cases))", symptom: "prints passed 3 of 3, but double(3) is 6 and the case expects 7", q: "The comparison is right and the loop visits every case. So why does the report say everything passed?", fix: "def double(n):\n    return n * 2\n\ncases = [(1, 2), (2, 4), (3, 7)]\npassed = 0\n\nfor n, want in cases:\n    if double(n) == want:\n        passed += 1\n\nprint(\"passed\", passed, \"of\", len(cases))", why: "The loop counted correctly into <code>passed</code> — and then the report printed <code>len(cases)</code> instead. The number shown was never the number measured.<br/><br/>This is the most embarrassing failure a test suite can have, and it is common: the tests are fine, the <b>reporting</b> lies. It is exactly why you should watch a new test <b>fail</b> before you make it pass. A test you have only ever seen green might be checking nothing." },
+
+  { t: "recap", items: [
+    "<code>assert condition</code> is the smallest possible test — silent on success, loud on failure",
+    "<code>unittest</code> is in the standard library; every test method must start with <code>test_</code>",
+    "Test the boundaries: empty, one item, negative, too large",
+    "A passing suite proves the cases you thought of, nothing more",
+    "Watch a new test fail once, so you know it can",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does <code>assert</code> do?", a: "It checks a condition. If it holds, execution continues silently; if not, Python raises <code>AssertionError</code> and stops. It is the simplest way to state what your code should be true of." },
+    { level: "beginner", q: "Why write tests at all when you can just run the program?", a: "Because running it checks the cases you happen to try, in the order you happen to try them, and only today. A test suite writes those checks down once and repeats them identically after every change — which is when things break." },
+    { level: "intermediate", q: "What makes a good test case?", a: "The boundaries rather than the middle: empty input, exactly one item, the largest allowed value, a negative, a wrong type. The happy path is the case you already had in mind while writing the code, so it is the least likely to find anything." },
+    { level: "intermediate", q: "Your tests all pass. Is the code correct?", a: "It is correct for the cases that were written. A suite is a claim with a known scope, not a proof. That is why every bug found in production is worth converting into a test — it documents a case nobody had imagined." },
+    { level: "advanced", q: "Why should you see a test fail before you trust it?", a: "Because a test that cannot fail proves nothing, and there are many ways to write one by accident — an assertion so loose that anything satisfies it, a method the runner never collects because of its name, or a report that prints the total instead of the count. Watching it go red first is the cheapest available evidence that it is actually connected to the code." },
+  ]},
 ];
 const L36 = [
-  { t: "objectives", items: ["Debugging ka tarika","print vs logging","Errors sahi se padhna"] },
-  { t: "h2", n: "1", text: "Debugging" },
-  { t: "p", html: "Jab code galat chale, <b>debugging</b> se problem dhoondhte hain. Simple: <code>print()</code> laga ke values dekho. VS Code me 'breakpoints' se line-by-line bhi chala sakte ho." },
-  { t: "h2", n: "2", text: "Logging — print se behtar" },
-  { t: "p", html: "Bade programs me print ki jagah <code>logging</code> — levels (info, warning, error) ke saath messages, aur production me on/off ho sakta hai." },
-  { t: "code", file: "log.py", code: "import logging, sys\nlogging.basicConfig(level=logging.INFO, stream=sys.stdout,\n                    format=\"%(levelname)s: %(message)s\")\nlogging.info(\"Data loaded\")\nlogging.warning(\"Some values are missing\")", output: "INFO: Data loaded\nWARNING: Some values are missing" },
-  { t: "note", variant: "warn", html: "<b>By default logging goes to <i>stderr</i>, not stdout</b> — so you still see it in the console, but it won't show up if you only capture stdout. Pass <code>stream=sys.stdout</code> (as above) when you want it on stdout." },
-  { t: "note", variant: "tip", html: "<b>Sabse kaam ki tip:</b> error traceback ki <b>last line</b> asli problem batati hai — usse Google karo, 90% jawaab mil jaata hai." },
-  { t: "recap", items: ["Debugging = problem dhoondhna","print() sabse simple","logging = levels, production-ready","Error ki last line padho"] },
+  { t: "objectives", items: [
+    "Say why <code>logging</code> replaces <code>print</code> once code leaves your laptop",
+    "Use the five levels, and set the one that decides what you see",
+    "Log a skipped row inside <code>except</code> so failures are recorded rather than hidden",
+    "Read a traceback from the bottom up, and find the line that actually broke",
+  ]},
+  { t: "hook", q: "Your cleaning script ran overnight and finished. It kept 4,900 rows out of 5,000. Which hundred did it drop, and why?", why: "If the answer is \"no idea\", the script did not fail — it lied. Work that runs unattended has to leave a record behind, and that record is what logging is. A <code>print</code> can tell you something today; a log can tell you what happened last Tuesday at 3am." },
+  { t: "def", term: "Logging", en: "Logging is recording events from a running program, each tagged with a severity level so the volume can be tuned without changing the code.", hi: "The important half is the <b>level</b>. Every message carries one, and one setting decides how much of it reaches you — the same code can be silent in production and fully detailed while you debug." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> a scheduled job with no logs is unmaintainable, because the only debugging tool left is running it again and hoping. The habit worth forming now is small: log <b>what was skipped and why</b>. Almost every data incident is a silently dropped row that nobody noticed for a month." },
+
+  { t: "h2", n: "1", text: "Why not print?" },
+  { t: "p", html: "<code>print</code> has one volume: on. It cannot be turned down, it carries no severity, no timestamp and no source, and it goes to standard output whether that is a terminal, a file or nowhere at all." },
+  { t: "code", file: "first_log.py", code: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\nlogging.debug(\"row 41 raw value\")\nlogging.info(\"loaded 5000 rows\")\nlogging.warning(\"row 41 had a comma in a number\")", output: "INFO: loaded 5000 rows\nWARNING: row 41 had a comma in a number" },
+  { t: "p", html: "Three messages were written and two appeared. The <code>debug</code> line is still in the code, doing nothing, costing nothing — and one setting away from coming back." },
+  { t: "viz", name: "log-levels" },
+  { t: "p", html: "Move the level in that panel. The code never changes; only how much of it reaches you does. That is the whole reason logging exists, and the thing <code>print</code> can never do." },
+
+  { t: "h2", n: "2", text: "The five levels" },
+  { t: "p", html: "<code>DEBUG</code> for detail you want while hunting, <code>INFO</code> for milestones, <code>WARNING</code> for something odd that was handled, <code>ERROR</code> for something that failed, <code>CRITICAL</code> for the run being over. Setting the level shows that level <b>and everything above it</b>." },
+  { t: "code", file: "levels.py", code: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.WARNING,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\nlogging.info(\"this is hidden\")\nlogging.warning(\"this shows\")\nlogging.error(\"this shows too\")", output: "WARNING: this shows\nERROR: this shows too" },
+
+  { t: "h2", n: "3", text: "Logging what you skipped" },
+  { t: "p", html: "The most valuable line of logging in a data script sits inside an <code>except</code>. It turns a silently discarded row into a recorded one." },
+  { t: "code", file: "skiplog.py", code: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\ndef parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        logging.warning(\"could not parse %s, skipping\", text)\n        return None\n\nprint(parse(\"12\"))\nprint(parse(\"x\"))", output: "12\nWARNING: could not parse x, skipping\nNone" },
+  { t: "note", variant: "tip", html: "Pass values as arguments — <code>logging.warning(\"skipped %s\", row)</code> — rather than building the string with <code>+</code> or an f-string. The formatting is then only done if the message is actually going to be shown, which matters when a <code>debug</code> line sits inside a loop over a million rows." },
+
+  { t: "h2", n: "4", text: "Reading a traceback" },
+  { t: "p", html: "A traceback is printed in call order, so the <b>last</b> lines are the ones that matter: the final line names the exception, and the frame just above it is where it happened. Everything higher up is how the program got there." },
+  { t: "code", file: "logexc.py", code: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.ERROR,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\ntry:\n    1 / 0\nexcept ZeroDivisionError:\n    logging.error(\"division failed\")\n\nprint(\"carried on\")", output: "ERROR: division failed\ncarried on" },
+  { t: "think", q: "You have a wrong number coming out of a 200-line script. What is the fastest way to find where it goes wrong?", a: "<b>Halve it.</b> Check the value at the midpoint. If it is already wrong there, the fault is in the first half; if it is still right, it is in the second. Repeat.<br/><br/>Ten steps of this locate a bad line in a thousand. Reading the whole file from the top is the slowest available method, and it is what most people do first." },
+  { t: "analogy", concept: "Log levels", real: "A hospital triage desk", html: "Everyone who walks in is recorded, but not everyone interrupts the surgeon. Triage assigns a severity, and the setting decides who gets attention right now. <code>DEBUG</code> is the note in the file, <code>CRITICAL</code> is the alarm in the corridor — and crucially, the notes are still written even when nobody is reading them, so they are there when someone asks what happened." },
+
+  { t: "trace", intro: "A small calculation with a bug hunt in mind. Work out what each name holds once the line has run.", code: "def net(price, tax):\n    total = price + tax\n    return total\n\na = net(100, 18)\nb = net(0, 0)\nc = a - b", steps: [
+    { q: "After line 5, <code>a</code> is", answer: "118", why: "100 plus 18. Checking a known input like this is the first move when a result looks wrong — if the simple case is already broken, you can stop reading the rest." },
+    { q: "After line 6, <code>b</code> is", answer: "0", why: "The zero case. It is worth checking precisely because it is the one nobody writes down, and it is where division and averaging tend to fail." },
+    { q: "After line 7, <code>c</code> is", answer: "118", why: "118 minus 0. Narrowing a bug is exactly this: evaluate the pieces you can predict, and the first one that surprises you is where to look." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Log an informational message.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.info(\"started\")", out: "INFO: started" },
+    { task: "Set the level so an <code>info</code> message is hidden.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.WARNING, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.info(\"hidden\")\nlogging.warning(\"shown\")", out: "WARNING: shown" },
+    { task: "Log an error.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.error(\"bad row\")", out: "ERROR: bad row" },
+    { task: "Put a value into the message the lazy way.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.warning(\"row %s skipped\", 41)", out: "WARNING: row 41 skipped" },
+    { task: "Log from inside an <code>except</code>.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(levelname)s: %(message)s\", force=True)\ntry:\n    int(\"x\")\nexcept ValueError:\n    logging.warning(\"could not parse\")", out: "WARNING: could not parse" },
+    { task: "Give the logger a name and show it in the output.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(name)s: %(message)s\", force=True)\nlog = logging.getLogger(\"etl\")\nlog.warning(\"starting\")", out: "etl: starting" },
+    { task: "Turn the detail back on with <code>DEBUG</code>.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.debug(\"raw value = ' 12 '\")", out: "DEBUG: raw value = ' 12 '" },
+    { task: "Log a critical failure.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.INFO, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.critical(\"database unreachable\")", out: "CRITICAL: database unreachable" },
+    { task: "Print the numeric value of the WARNING level.", code: "import logging\nprint(logging.WARNING)", out: "30" },
+    { task: "Show that two messages at or above the level both appear.", code: "import logging, sys\nlogging.basicConfig(stream=sys.stdout, level=logging.WARNING, format=\"%(levelname)s: %(message)s\", force=True)\nlogging.warning(\"first\")\nlogging.error(\"second\")", out: "WARNING: first\nERROR: second" },
+    { task: "Read the last line of a caught exception, the way a traceback ends.", code: "try:\n    int(\"x\")\nexcept ValueError as e:\n    print(type(e).__name__)", out: "ValueError" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "print(\"row\", n, \"skipped\")", why: "It cannot be turned off, carries no severity, and disappears entirely when the script runs as a scheduled job with nowhere to print to. Fine while writing; not what you leave behind.", fix: "logging.warning(\"row %s skipped\", n)" },
+    { bad: "logging.debug(\"row \" + str(row))", why: "The string is built <b>every time</b>, even when the level means nobody will ever see it. Inside a loop over a million rows that is a million wasted concatenations.", fix: "logging.debug(\"row %s\", row)" },
+    { bad: "except Exception:\n    logging.error(\"failed\")", why: "You have recorded that something failed and thrown away what it was. <code>logging.exception</code> logs the message <b>and</b> the traceback, which is the part that tells you where to look.", fix: "except Exception:\n    logging.exception(\"failed while saving\")" },
+    { bad: "logging.info(\"starting\")\nlogging.basicConfig(level=logging.DEBUG)", why: "<code>basicConfig</code> only takes effect if no handler exists yet, and that first <code>info</code> call installs one. The configuration is silently ignored and the level never changes — configure before you log anything, or pass <code>force=True</code>.", fix: "logging.basicConfig(level=logging.DEBUG)\nlogging.info(\"starting\")" },
+  ]},
+
+  { t: "debug", intro: "This cleans three values and reports how many it kept. One row was dropped and there is a warning in the code for exactly that — but nothing about it appears. Read it before opening the fix.", code: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.ERROR,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\nrows = [\"12\", \"x\", \"7\"]\nclean = []\n\nfor r in rows:\n    try:\n        clean.append(int(r))\n    except ValueError:\n        logging.warning(\"skipped %s\", r)\n\nprint(\"kept\", len(clean), \"rows\")", symptom: "prints only 'kept 2 rows' - one row was dropped and nothing said so", q: "The warning is written, the except block definitely runs, and nothing crashes. So where did the message go?", fix: "import logging\nimport sys\n\nlogging.basicConfig(stream=sys.stdout, level=logging.WARNING,\n                    format=\"%(levelname)s: %(message)s\", force=True)\n\nrows = [\"12\", \"x\", \"7\"]\nclean = []\n\nfor r in rows:\n    try:\n        clean.append(int(r))\n    except ValueError:\n        logging.warning(\"skipped %s\", r)\n\nprint(\"kept\", len(clean), \"rows\")", why: "The level was set to <code>ERROR</code>, and a warning is below that, so the message was created and then discarded. The code was doing its job perfectly; the <b>dial</b> was set to hide it.<br/><br/>What makes this dangerous is the shape of the remaining output. \"kept 2 rows\" looks like a clean success, and there is no hint that a third row ever existed. If a log line matters enough to write, make sure the level it is written at is one you are actually listening to — and when a number looks slightly low, check the level before you check the logic." },
+
+  { t: "recap", items: [
+    "<code>print</code> has one volume; a log message carries a <b>level</b> you can tune",
+    "DEBUG · INFO · WARNING · ERROR · CRITICAL — setting one shows it and everything above",
+    "Log inside <code>except</code>, so a skipped row is recorded rather than lost",
+    "Pass values as arguments (<code>\"%s\"</code>), not by building the string yourself",
+    "Read a traceback from the <b>bottom</b>; narrow a bug by halving, not by re-reading",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Why use <code>logging</code> instead of <code>print</code>?", a: "Because a log message has a severity and can be turned up or down without touching the code, and it can be sent to a file or a service rather than a terminal that may not exist. Print is a debugging aid; logging is what you leave in." },
+    { level: "beginner", q: "Name the levels in order.", a: "DEBUG, INFO, WARNING, ERROR, CRITICAL. Setting the level to one of them shows that level and everything more severe, so a level of WARNING hides DEBUG and INFO." },
+    { level: "intermediate", q: "How do you read a traceback?", a: "From the bottom. The last line names the exception and its message; the frame directly above it is the line that raised it. The frames further up are the path that got you there, which matters only once you know what broke." },
+    { level: "intermediate", q: "Why write <code>logging.debug(\"row %s\", row)</code> instead of an f-string?", a: "Because the formatting is deferred until the message is known to be needed. With an f-string the text is built on every call even when the level means it will be thrown away — measurable inside a large loop, and free to avoid." },
+    { level: "advanced", q: "What is the difference between <code>logging.error</code> and <code>logging.exception</code>?", a: "<code>logging.exception</code> is <code>error</code> plus the current traceback, and it is only meaningful inside an <code>except</code> block. It preserves the part that identifies the failing line — without it you have recorded that something went wrong and destroyed the evidence of what." },
+  ]},
 ];
 const L37 = [
-  { t: "objectives", items: ["PEP 8 style guide","Docstrings likhna","Type hints"] },
-  { t: "h2", n: "1", text: "PEP 8 — Python ka style guide" },
-  { t: "p", html: "PEP 8 code likhne ka official standard hai: 4-space indent, meaningful naam (snake_case), lines chhoti. Saaf code padhna aur maintain karna aasaan hota hai." },
-  { t: "h2", n: "2", text: "Docstrings aur Type Hints" },
-  { t: "p", html: "<b>Docstring</b> = function ke andar <code>\"\"\"...\"\"\"</code> me explanation. <b>Type hints</b> batate hain kaunsa type expected hai — bugs kam, editor better help deta hai." },
-  { t: "code", file: "clean.py", code: "def repeat(text: str, n: int) -> str:\n    \"\"\"text ko n baar repeat karta hai.\"\"\"\n    return text * n\n\nprint(repeat(\"ab\", 3))   # ababab", output: "ababab" },
-  { t: "note", variant: "tip", html: "<b>Interview me farak:</b> saaf, documented, type-hinted code turant 'professional' impression deta hai — resume projects me zaroor use karo." },
-  { t: "recap", items: ["PEP 8 = official style guide","snake_case, 4-space indent","Docstring = function ki explanation","Type hints = types batao, bugs kam"] },
+  { t: "objectives", items: [
+    "Name things so the code explains itself, in the style PEP 8 expects",
+    "Space and lay out code the way every Python reader is used to",
+    "Write a docstring and type hints, and know what each one is for",
+    "Recognise the habits that make code hard to change — magic numbers, long functions, stale comments",
+  ]},
+  { t: "hook", q: "You open a file you wrote four months ago and the first function is <code>def calc(x, y, z):</code>. How long before you can safely change one line?", why: "Long enough to be annoying, and the person paying for that time is you. Code is read far more often than it is written, and almost always by someone who has forgotten it — which is why clean code is not politeness. It is the cheapest speed-up available." },
+  { t: "def", term: "PEP 8", en: "PEP 8 is Python's official style guide: the shared conventions for naming, spacing and layout that make unfamiliar Python readable.", hi: "None of it changes what the code does. All of it changes how quickly the next person understands it — and it is a <b>convention</b>, so the value comes from everyone following the same one." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the first real judgement anyone makes about you is reading your code. In a review, unclear names and hundred-line functions get more comments than algorithms do — because a reviewer who cannot follow the code cannot approve it. Teams automate the mechanical half with <code>black</code> and <code>ruff</code>; naming and structure stay yours." },
+
+  { t: "h2", n: "1", text: "Names" },
+  { t: "p", html: "PEP 8 asks for <code>lower_case_with_underscores</code> for functions and variables, <code>CapWords</code> for classes and <code>UPPER_CASE</code> for constants. Beyond the shape: a name should say what the thing <b>is</b>, not what type it happens to be." },
+  { t: "code", file: "names.py", code: "def area(width, height):\n    return width * height\n\nprint(area(3, 4))", output: "12" },
+  { t: "viz", name: "style-lab" },
+  { t: "p", html: "Step through the rules in that panel. Every pair does exactly the same thing — the difference is entirely in how long it takes to be sure of that." },
+
+  { t: "h2", n: "2", text: "Spacing and layout" },
+  { t: "p", html: "One space around operators and after commas, none just inside brackets or before a colon, four spaces per indent level, and a blank line to separate ideas." },
+  { t: "code", file: "spacing.py", code: "price = 250\nqty = 3\ntotal = price * qty\n\nif total > 500:\n    discount = total * 0.1\nelse:\n    discount = 0\n\nprint(total, discount)", output: "750 75.0" },
+
+  { t: "h2", n: "3", text: "Docstrings" },
+  { t: "p", html: "A docstring is the first string in a function, and it goes <b>inside</b> the definition. That position is what makes it reachable by <code>help()</code>, by your editor's tooltip and by documentation tools — a comment above the <code>def</code> reaches none of them." },
+  { t: "code", file: "docstring.py", code: "def area(width, height):\n    \"\"\"Return the area of a rectangle.\"\"\"\n    return width * height\n\nprint(area.__doc__)\nprint(area(2, 5))", output: "Return the area of a rectangle.\n10" },
+
+  { t: "h2", n: "4", text: "Type hints" },
+  { t: "p", html: "Hints say what a function expects and returns. Python does not enforce them at all — they are for the reader, the editor and the type checker." },
+  { t: "code", file: "hints.py", code: "def area(width: float, height: float) -> float:\n    return width * height\n\nprint(area(2.5, 4))\nprint(area.__annotations__[\"width\"].__name__)", output: "10.0\nfloat" },
+  { t: "note", variant: "tip", html: "Because they are not enforced, a hint that has drifted out of date is <b>worse than none</b> — it is a confident statement that happens to be false. Either keep them true or leave them off; a type checker such as <code>mypy</code> is what keeps them honest at scale." },
+  { t: "think", q: "Should a comment explain <b>what</b> the code does, or <b>why</b> it does it?", a: "<b>Why.</b> The code already says what it does, and says it more reliably — a comment can go stale while the line beneath it changes.<br/><br/><code># add 1 to i</code> is noise. <code># the vendor's export is 1-indexed</code> is information that exists nowhere else in the file, and it is exactly what the next reader will need." },
+
+  { t: "h2", n: "5", text: "One job per function" },
+  { t: "p", html: "A function that does one thing can be named accurately, tested on its own, and reused. A function that does three cannot be named at all — which is why the vague ones tend to be called <code>process</code> or <code>handle</code>." },
+  { t: "code", file: "onejob.py", code: "def clean(name):\n    \"\"\"Strip surrounding spaces and lower-case a name.\"\"\"\n    return name.strip().lower()\n\ndef label(name):\n    \"\"\"Format a cleaned name for display.\"\"\"\n    return \"user: \" + clean(name)\n\nprint(label(\"  Freya  \"))", output: "user: freya" },
+  { t: "analogy", concept: "Clean code", real: "A kitchen at the end of the shift", html: "Every cook can work in their own mess for one evening. The rule exists because tomorrow morning someone else opens the kitchen — and the time they spend finding the knives is time the food does not get made. Naming things well is putting the knives back in the block. It costs you seconds and saves the next person minutes, and often the next person is you." },
+
+  { t: "trace", intro: "A small cleaning helper. Work out what each name holds once the line has run.", code: "def clean(name):\n    \"\"\"Strip surrounding spaces and lower-case a name.\"\"\"\n    return name.strip().lower()\n\nraw = \"  Freya  \"\ntidy = clean(raw)\nsize = len(tidy)\nshout = tidy.upper()", steps: [
+    { q: "After line 6, <code>tidy</code> is", answer: "freya", why: "Stripped and lower-cased. The function name says exactly this, which is the point — you did not have to read its body to answer." },
+    { q: "After line 7, <code>size</code> is", answer: "5", why: "Five letters, because the spaces were removed first. Had <code>raw</code> been measured instead it would be 9." },
+    { q: "After line 8, <code>shout</code> is", answer: "FREYA", why: "Upper-cased from the cleaned value. Note that <code>raw</code> is still the original padded string — none of these steps changed it." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Write a function with a name that explains it.", code: "def area(width, height):\n    return width * height\n\nprint(area(2, 6))", out: "12" },
+    { task: "Space an expression the way PEP 8 asks.", code: "total = 3 * 4 + 2\nprint(total)", out: "14" },
+    { task: "Read a function's docstring.", code: "def greet():\n    \"\"\"Say hello.\"\"\"\n    return \"hi\"\n\nprint(greet.__doc__)", out: "Say hello." },
+    { task: "Add type hints and read one back.", code: "def double(n: int) -> int:\n    return n * 2\n\nprint(double.__annotations__[\"n\"].__name__)", out: "int" },
+    { task: "Name a constant the way PEP 8 expects.", code: "GST_RATE = 0.18\nprint(GST_RATE)", out: "0.18" },
+    { task: "Replace a magic number with a named constant.", code: "MAX_ROWS = 500\nrows = 620\nprint(rows > MAX_ROWS)", out: "True" },
+    { task: "Split one job out into its own function.", code: "def clean(name):\n    return name.strip().lower()\n\nprint(clean(\"  Freya \"))", out: "freya" },
+    { task: "Use an early return instead of nesting.", code: "def sign(n):\n    if n < 0:\n        return \"neg\"\n    return \"pos\"\n\nprint(sign(-2))", out: "neg" },
+    { task: "Give a boolean a name that reads as a question.", code: "is_adult = 20 >= 18\nprint(is_adult)", out: "True" },
+    { task: "Build a message with an f-string rather than joining pieces.", code: "name = \"Freya\"\nprint(f\"user: {name}\")", out: "user: Freya" },
+    { task: "Say the same thing in one readable comprehension.", code: "prices = [100, 250]\nprint([p * 2 for p in prices])", out: "[200, 500]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "def calc(x, y, z):\n    return (x * y) - z", why: "Four names and not one of them says anything. The reader has to reconstruct the intent from the arithmetic every single time, and can never be quite sure they got it right.", fix: "def net_total(price, qty, discount):\n    return (price * qty) - discount" },
+    { bad: "if total > 5000:\n    discount = total * 0.2", why: "Two magic numbers. Nobody can tell whether 5000 is a business rule or a guess, and when it changes it has to be found in every file it was copied into.", fix: "BULK_THRESHOLD = 5000\nBULK_DISCOUNT = 0.2\n\nif total > BULK_THRESHOLD:\n    discount = total * BULK_DISCOUNT" },
+    { bad: "def process(rows):\n    # reads the file, cleans it,\n    # writes it, and emails a report\n    ...", why: "A function that does four things cannot be named after any of them — which is why it ended up called <code>process</code>. It also cannot be tested in pieces or reused for three of the four.", fix: "rows = read_rows(path)\nclean = clean_rows(rows)\nwrite_rows(clean, out_path)\nsend_report(clean)" },
+    { bad: "i = i + 1   # add 1 to i", why: "The comment repeats the line without adding anything, and it will still say this after the line changes. Comments should carry what the code cannot: the reason.", fix: "i = i + 1   # the vendor's export is 1-indexed" },
+  ]},
+
+  { t: "debug", intro: "Each call adds one item to a fresh basket and returns it. The second call comes back with two items in it. Nothing crashes. Read it before opening the fix.", code: "def add_item(item, basket=[]):\n    basket.append(item)\n    return basket\n\nprint(add_item(\"pen\"))\nprint(add_item(\"book\"))", symptom: "prints ['pen', 'book'] on the second call, but each call was given only one item", q: "The default is an empty list and the function was called twice. So why is the second basket not empty?", fix: "def add_item(item, basket=None):\n    if basket is None:\n        basket = []\n    basket.append(item)\n    return basket\n\nprint(add_item(\"pen\"))\nprint(add_item(\"book\"))", why: "A default argument is evaluated <b>once</b>, when the <code>def</code> line runs — not on each call. So there is exactly one list, created at import time, and every call that omits the argument appends to that same one.<br/><br/>This is the most famous trap in Python, and it is here rather than in a chapter on functions for a reason: it is invisible in a single call, it never raises, and it looks like the tidiest possible way to write the signature. The fix is the standard idiom — default to <code>None</code> and build the real default inside. Any mutable default (list, dict, set) is the same bug waiting." },
+
+  { t: "recap", items: [
+    "<code>snake_case</code> for functions and variables, <code>CapWords</code> for classes, <code>UPPER_CASE</code> for constants",
+    "One space around operators, four per indent, blank lines between ideas",
+    "A <b>docstring</b> goes inside the function; a comment above the <code>def</code> reaches nothing",
+    "Comments explain <b>why</b>; the code already says what",
+    "One job per function — and never a mutable default argument",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is PEP 8?", a: "Python's official style guide — naming, spacing, indentation and layout. None of it changes behaviour; all of it makes unfamiliar Python readable, and the value comes precisely from everyone following the same conventions." },
+    { level: "beginner", q: "Where does a docstring go, and why does the position matter?", a: "As the first string <b>inside</b> the function or class. That is where <code>help()</code>, editors and documentation tools look for it. A comment placed above the <code>def</code> reads the same to a human and is invisible to all of them." },
+    { level: "intermediate", q: "Do type hints change how Python runs?", a: "No — they are not enforced at runtime. They exist for readers, editors and type checkers such as <code>mypy</code>. That is also why a stale hint is worse than none: it is a confident claim that is no longer true." },
+    { level: "intermediate", q: "What should a comment say?", a: "Why, not what. The code states what it does more reliably than any comment, and a comment describing it goes stale the moment the line changes. The reason behind a decision exists nowhere else in the file." },
+    { level: "advanced", q: "Why is <code>def f(items=[])</code> a bug?", a: "The default is evaluated once, when the function is defined, so every call sharing that default shares <b>one</b> list — appends accumulate across calls. It is invisible with a single call and never raises. The idiom is <code>def f(items=None)</code> with <code>if items is None: items = []</code> inside, and it applies to any mutable default." },
+  ]},
 ];
 const L38 = [
-  { t: "objectives", items: ["Project ka structure","Git — version control","GitHub — code + portfolio"] },
-  { t: "h2", n: "1", text: "Project structure" },
-  { t: "p", html: "Bade project ko folders me organize karo: code alag, data alag, <code>requirements.txt</code> me packages. Saaf structure se doosre (aur future tum) code samajh paate hain." },
-  { t: "h2", n: "2", text: "Git aur GitHub" },
-  { t: "p", html: "<b>Git</b> code ke versions save karta hai — kuch toota to peeche ja sakte ho. <b>GitHub</b> pe code online rakhte hain — ye tumhara <b>portfolio</b> ban jaata hai jo recruiters dekhte hain." },
-  { t: "note", variant: "tip", html: "<b>Git ke 4 basic commands</b> (ye terminal me chalte hain, Python me nahi):<pre>git init                       # git shuru\ngit add .                      # files add\ngit commit -m \"first version\"  # save\ngit push                       # GitHub pe bhejo</pre>" },
-  { t: "note", variant: "tip", html: "<b>Sabse zaroori job-tip:</b> apne DS projects GitHub pe daalo. 'GitHub link' resume ka sabse strong part hai — ye tumhara asli proof hai." },
-  { t: "recap", items: ["Project = organized folders","requirements.txt = packages list","Git = version control (undo)","GitHub = online code + portfolio"] },
+  { t: "objectives", items: [
+    "Lay a project out in files and folders instead of one long script",
+    "Use <code>if __name__ == \"__main__\"</code>, and say what it actually guards against",
+    "Track work with the four git commands that cover almost everything",
+    "Keep secrets and generated files out of the repository with <code>.gitignore</code>",
+  ]},
+  { t: "hook", q: "Your analysis works. It is one file, 800 lines, called <code>final_v3_FINAL.py</code>, and yesterday's working version is gone. What do you do?", why: "Everyone does this once. The fix is not discipline — it is two habits: split the file so each part can be understood alone, and let git keep the history so no version is ever lost. Neither takes more than a minute to start." },
+  { t: "def", term: "Repository", en: "A repository is a project folder whose full history of changes is tracked by git, so any previous state can be recovered.", hi: "Git does not save files; it saves <b>changes</b>, each with a message and an author. That is why you can ask what a file looked like last Tuesday, and why nothing needs a <code>_final_v3</code> in its name ever again." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> a GitHub link is on your CV whether you plan it or not, and it is opened. What is looked at is not cleverness — it is whether the repository has a readable structure, a README, real commit messages, and no <code>.env</code> full of passwords. Those four things put a project ahead of most of what gets submitted." },
+
+  { t: "h2", n: "1", text: "A layout instead of a script" },
+  { t: "p", html: "Split by responsibility, not by length. Each file should be describable in one sentence." },
+  { t: "note", variant: "tip", html: "<pre>sales-report/\n├── README.md          what it is, how to run it\n├── requirements.txt   the packages it needs\n├── .gitignore         what git must never track\n├── src/\n│   ├── load.py        reading the data\n│   ├── clean.py       fixing the data\n│   └── report.py      producing the output\n└── tests/\n    └── test_clean.py  proof that clean.py works</pre>" },
+  { t: "viz", name: "git-flow" },
+  { t: "p", html: "Step through that panel before reading further. The reason git confuses people is that three different places are all called \"my code\", and a change has to be moved through them deliberately." },
+
+  { t: "h2", n: "2", text: "The __main__ guard" },
+  { t: "p", html: "When a file is run directly, Python sets <code>__name__</code> to <code>\"__main__\"</code>. When it is <b>imported</b>, <code>__name__</code> is the module's own name instead. The guard uses that difference." },
+  { t: "code", file: "name_main.py", code: "def build():\n    return \"report built\"\n\nprint(__name__)\nprint(build())", output: "__main__\nreport built" },
+  { t: "p", html: "Without the guard, everything at the top level of a file runs the moment somebody imports it — so importing one helper function from <code>report.py</code> would run the whole report. With it, the file can be both a reusable module and a runnable script." },
+  { t: "code", file: "guard.py", code: "def build():\n    return \"report built\"\n\nif __name__ == \"__main__\":\n    print(build())", output: "report built" },
+
+  { t: "h2", n: "3", text: "Modules are objects too" },
+  { t: "p", html: "An import binds a module to a name, and you can inspect it like anything else. This is worth seeing once, because it demystifies what <code>import</code> actually does." },
+  { t: "code", file: "modules.py", code: "import json\n\nprint(json.__name__)\nprint(type(json).__name__)\nprint(hasattr(json, \"dumps\"))", output: "json\nmodule\nTrue" },
+
+  { t: "h2", n: "4", text: "Configuration that does not leak" },
+  { t: "p", html: "Shared defaults belong in one place — and must be <b>copied</b> when used, or one caller's changes reach everyone. This is the list-aliasing trap wearing a project-sized hat." },
+  { t: "code", file: "config.py", code: "DEFAULTS = {\"rows\": 100, \"debug\": False}\n\ndef make_config(extra):\n    cfg = dict(DEFAULTS)\n    cfg.update(extra)\n    return cfg\n\na = make_config({\"rows\": 500})\nb = make_config({})\n\nprint(a[\"rows\"], b[\"rows\"])", output: "500 100" },
+
+  { t: "h2", n: "5", text: "The four git commands" },
+  { t: "p", html: "There are hundreds. These four cover almost every day of ordinary work, and they map exactly onto the panel above." },
+  { t: "note", variant: "tip", html: "<pre>git status                 what has changed, and what is staged\ngit add report.py          stage this change for the next commit\ngit commit -m \"Add report\" save it to local history, with a message\ngit push                   send local history to GitHub</pre>" },
+  { t: "note", variant: "warn", html: "<b>Never commit secrets.</b> A password pushed once stays in the history even after you delete the file, and public repositories are scanned for keys within minutes. Put <code>.env</code> in <code>.gitignore</code> <b>before</b> the first commit, along with <code>venv/</code>, <code>__pycache__/</code> and any generated data — a repository should hold what you wrote, not what your machine produced." },
+  { t: "think", q: "What makes a good commit message?", a: "It says <b>what changed and why</b>, in a line someone can read in a list six months later.<br/><br/><code>update</code>, <code>fix</code> and <code>changes</code> say nothing — and a history of forty of them is no history at all. <code>Fix date parsing for rows exported from the vendor portal</code> is the whole story, and it is the message you will be grateful for when a bug appears and you are reading back through the log." },
+  { t: "analogy", concept: "Git's three places", real: "Writing, then posting, a letter", html: "The <b>working directory</b> is the page you are writing on — changeable, unsaved, yours. <b>Staging</b> is choosing which pages go in the envelope, and you may choose only some. The <b>commit</b> is sealing it with a note on the front saying what it is. <b>Pushing</b> is putting it in the postbox. Until that last step, only your desk has a copy." },
+
+  { t: "trace", intro: "A shared defaults dictionary, used twice. Work out what each name holds once the line has run.", code: "DEFAULTS = {\"rows\": 100}\n\ndef make_config(extra):\n    cfg = dict(DEFAULTS)\n    cfg.update(extra)\n    return cfg\n\nbig = make_config({\"rows\": 500})[\"rows\"]\nplain = make_config({})[\"rows\"]\noriginal = DEFAULTS[\"rows\"]", steps: [
+    { q: "After line 8, <code>big</code> is", answer: "500", why: "The copy was updated with the caller's value. The copy is the important word — <code>dict(DEFAULTS)</code> built a new dictionary before touching anything." },
+    { q: "After line 9, <code>plain</code> is", answer: "100", why: "No overrides were given, so the defaults come through untouched. This only holds because the previous call worked on a copy." },
+    { q: "After line 10, <code>original</code> is", answer: "100", why: "The shared defaults survived both calls. Remove the <code>dict(...)</code> and this would be 500 — which is the debug task below." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Print the name Python gives a file that is run directly.", code: "print(__name__)", out: "__main__" },
+    { task: "Guard code so it only runs as a script.", code: "def build():\n    return \"built\"\n\nif __name__ == \"__main__\":\n    print(build())", out: "built" },
+    { task: "Import a module and print its name.", code: "import json\nprint(json.__name__)", out: "json" },
+    { task: "Check that a module has a function before using it.", code: "import math\nprint(hasattr(math, \"sqrt\"))", out: "True" },
+    { task: "Import one name out of a module.", code: "from math import sqrt\nprint(sqrt(9))", out: "3.0" },
+    { task: "Import a module under a shorter alias.", code: "import math as m\nprint(m.floor(2.7))", out: "2" },
+    { task: "Name a configuration constant the way PEP 8 expects.", code: "MAX_ROWS = 500\nprint(MAX_ROWS)", out: "500" },
+    { task: "Copy a defaults dictionary before changing it.", code: "DEFAULTS = {\"rows\": 100}\ncfg = dict(DEFAULTS)\ncfg[\"rows\"] = 500\nprint(DEFAULTS[\"rows\"])", out: "100" },
+    { task: "Read the major number out of a version string.", code: "VERSION = \"1.2.0\"\nprint(VERSION.split(\".\")[0])", out: "1" },
+    { task: "Confirm a module is loaded after importing it.", code: "import json\nimport sys\nprint(\"json\" in sys.modules)", out: "True" },
+    { task: "Build a message from a module-level constant.", code: "VERSION = \"1.2.0\"\n\ndef describe():\n    return f\"report v{VERSION}\"\n\nprint(describe())", out: "report v1.2.0" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "# report.py\nrows = load_everything()\nbuild_report(rows)", why: "There is no guard, so this runs the entire report the moment anything imports <code>report.py</code> — including your test file, which now takes four minutes and hits the database.", fix: "def main():\n    rows = load_everything()\n    build_report(rows)\n\nif __name__ == \"__main__\":\n    main()" },
+    { bad: "git add .\ngit commit -m \"update\"", why: "Two problems. <code>add .</code> sweeps in whatever happens to be in the folder — the virtual environment, cached files, the <code>.env</code> with your database password. And \"update\" tells the next reader nothing at all.", fix: "git add src/clean.py\ngit commit -m \"Fix date parsing for vendor exports\"" },
+    { bad: "def make_config(extra):\n    cfg = DEFAULTS\n    cfg.update(extra)\n    return cfg", why: "<code>cfg = DEFAULTS</code> is a second name, not a copy, so the first caller's overrides become everybody's defaults for the rest of the run.", fix: "def make_config(extra):\n    cfg = dict(DEFAULTS)\n    cfg.update(extra)\n    return cfg" },
+    { bad: "DB_PASSWORD = \"hunter2\"   # committed to the repo", why: "Once pushed it is in the history <b>permanently</b>, and deleting the line later does not remove it. Public repositories are scanned for keys within minutes of a push.", fix: "import os\nDB_PASSWORD = os.environ[\"DB_PASSWORD\"]   # and .env is in .gitignore" },
+  ]},
+
+  { t: "debug", intro: "A defaults dictionary is used to build two configurations. The second asks for no overrides at all and still comes back with the first one's value. Nothing crashes. Read it before opening the fix.", code: "DEFAULTS = {\"rows\": 100}\n\ndef make_config(extra):\n    cfg = DEFAULTS\n    cfg.update(extra)\n    return cfg\n\na = make_config({\"rows\": 500})\nb = make_config({})\n\nprint(b[\"rows\"])", symptom: "prints 500, but b asked for no overrides and the default is 100", q: "The second call passed an empty dictionary, so nothing should have been overridden. Where did 500 come from?", fix: "DEFAULTS = {\"rows\": 100}\n\ndef make_config(extra):\n    cfg = dict(DEFAULTS)\n    cfg.update(extra)\n    return cfg\n\na = make_config({\"rows\": 500})\nb = make_config({})\n\nprint(b[\"rows\"])", why: "<code>cfg = DEFAULTS</code> does not copy anything — it is a second name for the one shared dictionary. The first call updated it in place, so the defaults themselves became 500 and every later caller inherited that.<br/><br/>It is the list-aliasing bug from earlier in the course, at project scale, and that is why it belongs here: shared module-level state is exactly where it does the most damage. One function quietly changed a value that the whole program depends on, and the only visible symptom was a number being slightly wrong somewhere else entirely. Treat anything defined at module level as read-only, and copy it before you modify it." },
+
+  { t: "recap", items: [
+    "Split by responsibility — each file describable in one sentence, plus a README",
+    "<code>if __name__ == \"__main__\"</code> keeps a file importable as well as runnable",
+    "<code>status</code> → <code>add</code> → <code>commit</code> → <code>push</code> covers almost every day",
+    "A commit message says what changed and <b>why</b>, not \"update\"",
+    "<code>.gitignore</code> before the first commit — secrets in history are permanent",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does <code>if __name__ == \"__main__\"</code> do?", a: "<code>__name__</code> is <code>\"__main__\"</code> when a file is run directly and the module's own name when it is imported. The guard therefore runs the script part only in the first case, which lets one file be both a reusable module and a runnable program." },
+    { level: "beginner", q: "What are the everyday git commands?", a: "<code>git status</code> to see what changed, <code>git add</code> to stage the changes you want, <code>git commit -m</code> to save them to local history with a message, and <code>git push</code> to send that history to GitHub. Everything else is occasional." },
+    { level: "intermediate", q: "What belongs in <code>.gitignore</code>, and why does it matter so much?", a: "Anything your machine produced rather than you: <code>venv/</code>, <code>__pycache__/</code>, generated data, and above all <code>.env</code>. Secrets are the reason it is urgent — once a password is pushed it stays in the history even after the file is deleted, and public repos are scanned for keys within minutes." },
+    { level: "intermediate", q: "What makes a good commit message?", a: "One line saying what changed and why, readable in a list months later. \"Fix date parsing for vendor exports\" is useful; \"update\" is not, and forty commits called \"update\" leave you with no history worth reading." },
+    { level: "advanced", q: "Why is mutable module-level state a problem in a multi-file project?", a: "Because every module that imports it shares the same object, so one function mutating it changes the program's behaviour everywhere — with no error and no obvious cause. It also makes tests order-dependent, since one test can leave the state altered for the next. Treat module-level values as read-only and copy before modifying, or hand configuration in as an argument instead." },
+  ]},
 ];
 
 /* ------------------------------------------------------------------ */
@@ -4285,6 +4669,66 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "project-git": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is <code>__name__</code> when a file is run directly?", options: ["the file name", "__main__", "None", "the folder name"], correct: 1, why: "When the same file is imported instead, __name__ is the module's own name. The guard uses exactly that difference." },
+    { level: "easy", q: "Which command saves your staged changes to local history?", options: ["git push", "git add", "git commit", "git status"], correct: 2, why: "add stages, commit saves with a message, push sends it to GitHub. Three different places, three different commands." },
+    { level: "easy", q: "What belongs in <code>.gitignore</code>?", options: ["Your source files", "The README", "Generated files, venv/ and .env", "Everything in the project"], correct: 2, why: "A repository should hold what you wrote, not what your machine produced - and above all not your secrets." },
+    // Medium — apply it
+    { level: "medium", q: "A file has no <code>__main__</code> guard and loads a database at the top level. What happens when a test imports one function from it?", options: ["Only that function is loaded", "The whole file runs, including the database load", "Python raises ImportError", "The import is ignored"], correct: 1, why: "Importing a module executes everything at its top level. That is why the guard exists, and why a test suite can mysteriously start hitting production." },
+    { level: "medium", q: "Which is the better commit message?", options: ["update", "Fix date parsing for vendor exports", "changes", "final version"], correct: 1, why: "A message is read in a list months later. It should say what changed and why - forty commits called update leave you with no history worth reading." },
+    { level: "medium", q: "You accidentally committed and pushed a password, then deleted the line in a later commit. Is the password safe?", options: ["Yes, the deletion removes it", "Yes, if the repo is private", "No - it stays in the history permanently and must be rotated", "Only if you also push again"], correct: 2, why: "Git saves history, not just the current state. Public repositories are scanned for keys within minutes of a push, so the only real fix is changing the secret." },
+    { level: "medium", q: "<code>cfg = DEFAULTS</code> inside a function that then calls <code>cfg.update(extra)</code>. What is the effect?", options: ["A copy is modified, defaults are safe", "The shared defaults themselves are changed for the whole program", "It raises TypeError", "Nothing, update returns a new dict"], correct: 1, why: "It is a second name for one dictionary, not a copy. One caller's overrides silently become everyone's defaults for the rest of the run." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "Why is mutable module-level state a problem across a multi-file project?", options: ["It uses more memory", "Python forbids it", "Every importer shares the same object, so one mutation changes behaviour everywhere with no error", "It cannot be imported twice"], correct: 2, why: "It also makes tests order-dependent, since one test can leave the state altered for the next. Treat module-level values as read-only and copy before modifying." },
+    { level: "hard", q: "What does <code>git add .</code> risk that naming a file does not?", options: ["It is slower", "It sweeps in whatever is in the folder - venv, caches, .env", "It skips new files", "It commits immediately"], correct: 1, why: "Staging everything present is how secrets and hundred-megabyte virtual environments end up in history. A .gitignore written before the first commit is the real protection." },
+    { level: "hard", q: "A module is imported twice in the same program. How many times does its top-level code run?", options: ["Once - the module is cached in sys.modules", "Twice, once per import", "Once per function that imports it", "It raises an error on the second import"], correct: 0, why: "Python caches modules on first import, which is why an expensive top-level load is paid once - and why a module that mutates its own state keeps that mutation for the rest of the run." },
+  ],
+  "clean-code": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which name follows PEP 8 for a function?", options: ["NetTotal", "NET_TOTAL", "net_total", "nettotal"], correct: 2, why: "Functions and variables use lower_case_with_underscores. CapWords is for classes and UPPER_CASE for constants." },
+    { level: "easy", q: "Where must a docstring go?", options: ["In a comment above the def", "As the first string inside the function", "At the end of the function", "In a separate file"], correct: 1, why: "That position is what makes it reachable by help(), editors and documentation tools. A comment above the def reaches none of them." },
+    { level: "easy", q: "How many spaces does PEP 8 use for one indent level?", options: ["2", "8", "A tab", "4"], correct: 3, why: "Four spaces. What matters most is consistency, and four is the convention everyone else is already using." },
+    // Medium — apply it
+    { level: "medium", q: "Do type hints change how the code runs?", options: ["No - they are for readers, editors and type checkers", "Yes, they enforce the types", "Yes, they make it faster", "Only inside classes"], correct: 0, why: "Python ignores them at runtime. That is also why a stale hint is worse than none: it is a confident claim that is no longer true." },
+    { level: "medium", q: "What should a comment explain?", options: ["What the line does", "Why the line is there", "Who wrote it", "When it was written"], correct: 1, why: "The code already states what it does, and states it more reliably. The reason behind a decision exists nowhere else in the file." },
+    { level: "medium", q: "Why replace <code>if total > 5000</code> with a named constant?", options: ["It runs faster", "It is required by Python", "Nobody can tell whether 5000 is a business rule or a guess, and it has to be found everywhere when it changes", "Constants use less memory"], correct: 2, why: "A magic number carries no meaning and no single place to change it. A name gives it both." },
+    { level: "medium", q: "A function is called <code>process</code>. What does that usually signal?", options: ["It is well named", "It is a built-in", "It is too short", "It does several unrelated things, so it could not be named after any of them"], correct: 3, why: "A function that does one thing can be named accurately. Vague names are usually a symptom of doing too much, and such a function cannot be tested in pieces either." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "<code>def add(item, basket=[])</code> is called twice with one item each. What does the second call return?", options: ["A list with one item", "A list with both items", "An empty list", "TypeError"], correct: 1, why: "The default is evaluated once when the def runs, so every call sharing it appends to the same list. It is invisible with a single call and never raises." },
+    { level: "hard", q: "What is the correct way to give a function a mutable default?", options: ["def f(items=[])", "def f(items=list())", "def f(items=None), then build the list inside", "You cannot have one at all"], correct: 2, why: "Defaulting to None and creating the real value inside the body means a fresh object per call. The same applies to dicts and sets." },
+    { level: "hard", q: "Why is a type hint that has drifted out of date worse than no hint at all?", options: ["It is a confident statement that happens to be false, and readers trust it", "It slows the function down", "It stops the function from running", "Python raises a warning"], correct: 0, why: "Nothing enforces it, so nothing corrects it. A reader who believes it is misled by a line that looks authoritative - which is why a type checker is what keeps hints honest at scale." },
+  ],
+  "debugging-logging": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which is the least severe logging level?", options: ["INFO", "DEBUG", "WARNING", "CRITICAL"], correct: 1, why: "DEBUG is the most detailed and the first to be hidden when you raise the level." },
+    { level: "easy", q: "The level is set to WARNING. Which of these appears?", options: ["A debug message", "An info message", "An error message", "Nothing at all"], correct: 2, why: "Setting a level shows that level and everything above it, so ERROR and CRITICAL still come through while DEBUG and INFO are hidden." },
+    { level: "easy", q: "What can logging do that <code>print</code> cannot?", options: ["Be turned down or off without changing the code", "Show text on screen", "Run inside a function", "Handle numbers"], correct: 0, why: "Print has one volume: on. The level is the whole reason logging exists." },
+    // Medium — apply it
+    { level: "medium", q: "Where is the most valuable place to put a log line in a data script?", options: ["At the very top of the file", "After every single line", "Only at the end", "Inside except, recording what was skipped and why"], correct: 3, why: "A silently discarded row is the most common data incident there is. One warning inside except turns it into something you can find later." },
+    { level: "medium", q: "Why write <code>logging.debug(\"row %s\", row)</code> rather than an f-string?", options: ["The formatting is skipped entirely if the message will not be shown", "f-strings do not work with logging", "It is required by PEP 8", "It makes the message shorter"], correct: 0, why: "With an f-string the text is built on every call even when the level throws it away. Inside a loop over a million rows that is a million wasted operations." },
+    { level: "medium", q: "You call <code>logging.info(...)</code> and then <code>logging.basicConfig(level=logging.DEBUG)</code>. What happens?", options: ["The level changes to DEBUG", "It raises an error", "The configuration is ignored, because logging is already configured", "Both lines are ignored"], correct: 2, why: "basicConfig only acts when no handler exists, and that first info call installs one. Configure before you log, or pass force=True." },
+    { level: "medium", q: "Which line of a traceback tells you what actually went wrong?", options: ["The first line", "The middle frame", "The last line", "The file path at the top"], correct: 2, why: "A traceback is printed in call order. The final line names the exception, and the frame just above it is where it was raised." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "The level is ERROR and a warning is logged inside an except. The run reports 'kept 2 rows' and nothing else. What went wrong?", options: ["The except block never ran", "The warning was created and then discarded, because it is below the level", "logging is broken without a file handler", "The rows were never read"], correct: 1, why: "The code was doing its job; the dial was set to hide it. The output looks like a clean success, which is exactly what makes it dangerous." },
+    { level: "hard", q: "What does <code>logging.exception</code> add over <code>logging.error</code>?", options: ["It exits the program", "It retries the operation", "It raises the exception again", "It records the traceback as well, so the failing line is preserved"], correct: 3, why: "It is only meaningful inside an except block. Without it you have logged that something failed and destroyed the evidence of what." },
+    { level: "hard", q: "A wrong number comes out of a 200-line script. What is the fastest way to locate the fault?", options: ["Check the value at the midpoint and halve the search each time", "Read the file from the top", "Add a print to every line", "Rewrite the script"], correct: 0, why: "Ten halvings locate a bad line among a thousand. Reading from the top is the slowest available method and the one most people try first." },
+  ],
+  "testing": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What happens when an <code>assert</code> condition is true?", options: ["It prints OK", "Nothing - execution continues silently", "It returns True", "It stops the program"], correct: 1, why: "An assert is silent on success and loud on failure. That is what makes a file full of them readable." },
+    { level: "easy", q: "Which exception does a failed <code>assert</code> raise?", options: ["ValueError", "TestError", "AssertionError", "RuntimeError"], correct: 2, why: "The name is the message: an assertion about your code did not hold." },
+    { level: "easy", q: "Do you need to install anything to use <code>unittest</code>?", options: ["Yes, with pip", "No - it ships with Python", "Only on Windows", "Yes, it needs pytest first"], correct: 1, why: "It is part of the standard library, which is why it is the safest thing to reach for in a course or on a machine you do not control." },
+    // Medium — apply it
+    { level: "medium", q: "A test method is named <code>check_addition</code> instead of <code>test_addition</code>. What happens?", options: ["It runs normally", "The runner never collects it, and the suite still reports success", "unittest raises an error at import", "It runs but the result is ignored"], correct: 1, why: "Only methods starting with test_ are collected. A suite that silently skips half its tests still comes back green." },
+    { level: "medium", q: "You have one test: <code>assert average([2, 4, 6]) == 4.0</code>. Which bug can it NOT catch?", options: ["A wrong operator in the sum", "Dividing by the wrong number", "Crashing on an empty list", "Returning a string"], correct: 2, why: "The empty list is never passed in, so nothing exercises that path. Boundaries are where the bugs are, and that test only visits the middle." },
+    { level: "medium", q: "Which of these is the strongest assertion about a cleaning function?", options: ["assert clean(row) is not None", "assert clean(row)", "assert len(clean(row)) >= 0", "assert clean(\"  A1 \") == \"a1\""], correct: 3, why: "The first three pass for almost any return value, including a wrong one. Only the last states what the answer should actually be." },
+    { level: "medium", q: "Which case is most worth adding to a test suite?", options: ["Another ordinary input similar to the first", "The empty input", "The same input twice", "A very long comment explaining the function"], correct: 1, why: "The boundaries earn their keep. The happy path is the case you already had in mind while writing the code." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "What does running Python with the <code>-O</code> flag do to <code>assert</code> statements?", options: ["Makes them run faster", "Turns failures into warnings", "Removes them from the running program entirely", "Nothing at all"], correct: 2, why: "Asserts are stripped under -O. Fine for tests, which never run that way, and dangerous if you were relying on them to validate real input - use an explicit check and raise." },
+    { level: "hard", q: "Why should you watch a new test fail before making it pass?", options: ["It is required by unittest", "To measure how slow it is", "Because a test that cannot fail proves nothing, and there are many ways to write one by accident", "To generate a coverage report"], correct: 2, why: "An assertion that is too loose, a method the runner never collects, or a report printing the total instead of the count all look green. Seeing red once is the cheapest proof that the test is connected to the code." },
+    { level: "hard", q: "Your entire test suite passes. What has that proved?", options: ["The code is correct", "The code is correct for the cases that were written", "There are no bugs left", "The code is faster than before"], correct: 1, why: "A suite is a claim with a known scope. It is why a bug found in production is worth turning into a test - it records a case nobody had imagined." },
+  ],
   "getting-started": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which line prints the word <b>Hello</b> on screen?", options: ["print(\"Hello\")", "print(Hello)", "Print(\"Hello\")", "say(\"Hello\")"], correct: 0, why: "Text needs quotes, and the instruction is lowercase <code>print</code>. Without quotes Python looks for something you stored called <code>Hello</code>." },
@@ -4451,16 +4895,34 @@ export const QUIZZES = {
     { level: "hard", q: "Why does Python make you write <code>self</code> explicitly, when many languages hide it?", options: ["To make classes run faster", "Because it is required by the parser", "Only for backwards compatibility with Python 2", "It makes the object visible in the signature, so methods are ordinary functions and the scope is never guessed"], correct: 3, why: "A method really is a plain function that takes the object as its first argument - which is why <code>Dog.bark(d)</code> works. Explicit self keeps that honest, and means an attribute read is never confused with a local variable." },
   ],
   "error-handling": [
-    { q: "<code>int(\"x\")</code> ko <code>try</code> me daala, aur <code>except ValueError:</code> me <code>print(\"caught\")</code>. Kya chhapega?", options: ["program crash", "x", "caught", "ValueError"], correct: 2, why: "<code>int(\"x\")</code> ValueError deta, jise <code>except</code> pakad leta hai — <b>caught</b>, crash nahi." },
-    { q: "<code>finally</code> block kab chalta hai?", options: ["sirf error pe", "hamesha", "sirf success pe", "kabhi nahi"], correct: 1, why: "<b>Hamesha</b> — error ho ya na ho. Cleanup ke liye." },
-    { q: "<b>Bare</b> <code>except:</code> kyun bura hai?", options: ["asli bugs bhi chup-chaap chhup jaati hain", "tez hai", "kaam nahi karta", "kuch bura nahi"], correct: 0, why: "Woh <b>har</b> error nigal jaata hai — tumhari apni bug bhi. Hamesha specific exception pakdo." },
-    { q: "Key miss ho sakti ho — crash NA ho, kaunsa?", options: ["d[key]", "d.key(key)", "get d[key]", "d.get(key)"], correct: 3, why: "<code>d.get(key)</code> miss pe <b>None</b> deta (no crash). <code>d[key]</code> KeyError deta." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which block holds the code that might fail?", options: ["except", "try", "finally", "else"], correct: 1, why: "<code>try</code> wraps the risky work. <code>except</code> is what runs if that work raises." },
+    { level: "easy", q: "<code>int(\"abc\")</code> raises which exception?", options: ["TypeError", "KeyError", "ValueError", "IndexError"], correct: 2, why: "The type is right - it is a string - but the value cannot be read as a number, which is exactly what ValueError means." },
+    { level: "easy", q: "When does a <code>finally</code> block run?", options: ["Only when an exception was raised", "Only when nothing was raised", "Never, unless you call it", "Always, raised or not"], correct: 3, why: "That is what makes it the place for cleanup - closing a file or a connection has to happen either way." },
+    // Medium — apply it
+    { level: "medium", q: "An exception is raised on the first line inside a three-line <code>try</code>. What happens to the other two lines?", options: ["They run anyway", "They are skipped entirely", "They run after the except block", "Python retries them"], correct: 1, why: "Control jumps straight to the matching <code>except</code>. Nothing between the failing line and the end of the try block executes." },
+    { level: "medium", q: "When does an <code>else</code> block on a try run?", options: ["Only if an exception was raised", "Only if the try finished without raising", "Always", "Only if there is no finally"], correct: 1, why: "It is the success path, kept outside the <code>try</code> so it is not accidentally protected by the same except." },
+    { level: "medium", q: "You want a dictionary value with a fallback when the key is missing. What is the plainest way?", options: ["d.get(\"name\", \"\")", "try / except KeyError", "if d != None", "d[\"name\"] or \"\""], correct: 0, why: "Exceptions are for the unexpected. A key that is known to be optional is ordinary logic, and <code>.get</code> says so in one line." },
+    { level: "medium", q: "What does <code>raise ValueError(\"bad age\")</code> do?", options: ["Prints a warning and continues", "Catches an error", "Raises an exception your own code detected", "Ends the program silently"], correct: 2, why: "<code>raise</code> reports a problem you found yourself. Refusing bad input loudly beats storing it and discovering it later." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "A bare <code>except:</code> wraps code containing a misspelt variable name. What happens?", options: ["SyntaxError at import", "The NameError is caught and hidden, and the function returns its fallback", "Python warns about the bare except", "Only the misspelt line is skipped"], correct: 1, why: "A bare except catches everything, including bugs in your own code. The function then returns a plausible wrong answer forever, with no warning anywhere." },
+    { level: "hard", q: "Why is <code>except Exception: pass</code> considered harmful even though it looks tidy?", options: ["It is slower than naming the exception", "It only works inside functions", "It throws the evidence away, so the program continues in a state nobody understands", "It stops finally from running"], correct: 2, why: "Silencing a failure does not remove it. It removes your ability to find out about it, and the wrong result ships as if it were right." },
+    { level: "hard", q: "What does <code>raise NewError(\"...\") from e</code> add?", options: ["It retries the failed operation", "It suppresses the original exception", "It converts the exception into a warning", "It records the original exception as the cause, so the traceback shows both"], correct: 3, why: "It chains them. You can translate a low-level failure into a meaningful one without losing the line that actually broke." },
   ],
   "booleans": [
-    { q: "<code>print(bool([]))</code> — kya aayega?", options: ["True", "TypeError", "False", "None"], correct: 2, why: "Khaali list <b>falsy</b> hai — <code>False</code>." },
-    { q: "<code>print(bool([0]))</code> — kya aayega?", options: ["False", "True", "TypeError", "0"], correct: 1, why: "List <b>khaali nahi</b> (usme 0 hai) — to <b>truthy</b>, <code>True</code>. \"Khaali\" matter karta hai, andar kya hai wo nahi." },
-    { q: "<code>print(0 or \"hi\")</code> — kya chhapega?", options: ["hi", "True", "0", "False"], correct: 0, why: "<code>or</code> <b>pehli truthy value</b> return karta hai — <code>0</code> falsy, to <code>\"hi\"</code>." },
-    { q: "<code>None</code> check karne ka <b>sahi</b> tareeka?", options: ["x == None", "x = None", "None(x)", "x is None"], correct: 3, why: "<code>is None</code> — identity check, sahi aur tez. <code>== None</code> style-wise galat." },
+    // Easy — did the core idea land?
+    { level: "easy", q: "<code>print(bool(0))</code> — what appears?", options: ["True", "False", "0", "an error"], correct: 1, why: "Zero is falsy. Empty things are false and everything else is true - that is the whole rule." },
+    { level: "easy", q: "Which of these is <b>truthy</b>?", options: ["\"0\"", "0", "[]", "None"], correct: 0, why: "It is a non-empty string, so it is truthy - even though the character inside it is a zero. Only the empty string is falsy." },
+    { level: "easy", q: "What does a comparison like <code>5 > 3</code> produce?", options: ["5", "the number 1", "True or False", "nothing"], correct: 2, why: "Every comparison evaluates to a boolean, which is what makes it usable directly in an if." },
+    // Medium — apply it
+    { level: "medium", q: "Which is the idiomatic way to check that a list has items?", options: ["if len(items) > 0:", "if items != []:", "if items:", "if bool(items) == True:"], correct: 2, why: "All four work. Only the third says what you mean without extra words, and it is what every Python reader expects." },
+    { level: "medium", q: "<code>a = [1, 2]</code> and <code>b = [1, 2]</code>. What are <code>a == b</code> and <code>a is b</code>?", options: ["True and True", "True and False", "False and False", "False and True"], correct: 1, why: "The values match, so <code>==</code> is True. They are two separate objects in memory, so <code>is</code> is False." },
+    { level: "medium", q: "<code>print(sum([True, False, True]))</code> — what appears?", options: ["2", "True", "an error", "3"], correct: 0, why: "<code>bool</code> subclasses <code>int</code>, so True is 1 and False is 0. Summing conditions is how you count matching rows without a loop." },
+    { level: "medium", q: "<code>print(\"\" or \"Guest\")</code> — what appears?", options: ["True", "an empty string", "Guest", "an error"], correct: 2, why: "The empty string is falsy, so <code>or</code> moves on and returns the second operand. This is the standard default-value idiom." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "A function uses <code>if not score: return \"no score\"</code>. A real score of 0 is passed in. What happens?", options: ["It returns \"score: 0\"", "It raises TypeError", "It returns \"no score\", because 0 is falsy", "It returns None"], correct: 2, why: "<code>not score</code> asks about truthiness, not about absence. Zero is a real value and a falsy one, so the check answers a different question than the one intended." },
+    { level: "hard", q: "Why is <code>if name is \"admin\"</code> unreliable?", options: ["is cannot be used on strings at all", "It compares identity, and may only appear to work because Python reuses short strings", "It is slower than ==", "It raises a SyntaxError"], correct: 1, why: "It asks whether they are the same object. Small literals are often cached so it seems to work, then fails on a string built at runtime - a bug that passes tests and fails in production." },
+    { level: "hard", q: "How does a custom object decide whether it is truthy?", options: ["Every custom object is always falsy", "Python compares it to None", "Only classes with a __bool__ method can be used in an if", "Python calls __bool__, falls back to __len__, and otherwise treats it as truthy"], correct: 3, why: "Defining <code>__len__</code> is enough to make an empty collection falsy for free. A class defining neither will pass an if even when it is conceptually empty." },
   ],
   "numbers-math": [
     // Easy

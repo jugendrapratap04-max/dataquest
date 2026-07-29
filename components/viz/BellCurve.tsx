@@ -55,7 +55,7 @@ export function BellCurve() {
       </div>
 
       <input type="range" min={-3} max={3} step={0.1} value={z} onChange={(e) => setZ(Number(e.target.value))} style={{ width: "100%", marginTop: 14, accentColor: "var(--teal)" }} />
-      <p style={{ fontSize: 11.5, color: "var(--ink-faint)", margin: "8px 0 0", textAlign: "center" }}>z = 0 pe aadha data (50%) left me · z = 2 pe ~97.7% (top performers!)</p>
+      <p style={{ fontSize: 11.5, color: "var(--ink-faint)", margin: "8px 0 0", textAlign: "center" }}>z = 0 has half the data (50%) to its left · z = 2 covers ~97.7% (top performers!)</p>
     </div>
   );
 }

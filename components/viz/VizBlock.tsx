@@ -1,6 +1,10 @@
 "use client";
 
 import { CodeRunner } from "./CodeRunner";
+import { TestLab } from "./TestLab";
+import { LogLevels } from "./LogLevels";
+import { StyleLab } from "./StyleLab";
+import { GitFlow } from "./GitFlow";
 import { ConditionFlow } from "./ConditionFlow";
 import { CollectionBench } from "./CollectionBench";
 import { FunctionMachine } from "./FunctionMachine";
@@ -82,6 +86,10 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "bell-curve": BellCurve,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
+  "test-lab": TestLab,
+  "log-levels": LogLevels,
+  "style-lab": StyleLab,
+  "git-flow": GitFlow,
 };
 
 // Renders an interactive visualization by key (from lesson content blocks).

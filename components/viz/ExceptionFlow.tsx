@@ -19,7 +19,7 @@ export function ExceptionFlow() {
     { key: "try", label: "try:", note: errored ? "started, then stopped at the error" : "ran all the way", on: true, kind: errored ? "partial" : "run" },
     { key: "except", label: "except:", note: errored ? `caught ${scn.err} — this one ran` : "no error — skipped", on: errored, kind: errored ? "catch" : "skip" },
     { key: "else", label: "else:", note: errored ? "there was an error — skipped" : "all clear — this one ran", on: !errored, kind: errored ? "skip" : "run" },
-    { key: "finally", label: "finally:", note: "hamesha chalta hai — cleanup", on: true, kind: "always" },
+    { key: "finally", label: "finally:", note: "always runs — cleanup", on: true, kind: "always" },
   ];
 
   return (
@@ -40,7 +40,7 @@ export function ExceptionFlow() {
           <div key={r.key} className={`ef-row ef-${r.kind}`}>
             <span className="ef-lbl">{r.label}</span>
             <span className="ef-note">{r.note}</span>
-            <span className="ef-badge">{r.on ? (r.kind === "catch" ? "⚠ chala" : r.kind === "always" ? "♾ chala" : "✓ chala") : "⊘ skip"}</span>
+            <span className="ef-badge">{r.on ? (r.kind === "catch" ? "⚠ ran" : r.kind === "always" ? "♾ ran" : "✓ ran") : "⊘ skip"}</span>
           </div>
         ))}
       </div>

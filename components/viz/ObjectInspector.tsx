@@ -59,7 +59,7 @@ export function ObjectInspector() {
 
       {barkIdx !== null && dogs[barkIdx] && (
         <div className="viz-code" style={{ marginTop: 14 }}>
-          <div><span className="c-com"># self = jis object pe call hua, uska data</span></div>
+          <div><span className="c-com"># self = the data of whichever object it was called on</span></div>
           <div>{dogs[barkIdx].name.toLowerCase()}.bark() <span className="c-kw">→</span> <span className="c-str">&quot;{dogs[barkIdx].name} says woof!&quot;</span></div>
         </div>
       )}

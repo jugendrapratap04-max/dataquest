@@ -4,7 +4,7 @@ import { useState } from "react";
 
 type Mode = "positive" | "negative" | "none";
 const SETS: Record<Mode, { pts: [number, number][]; r: string; label: string }> = {
-  positive: { pts: [[1,2],[2,3],[3,3],[4,5],[5,5],[6,7],[7,8]], r: "+0.96", label: "ek badhe to doosra bhi badhe" },
+  positive: { pts: [[1,2],[2,3],[3,3],[4,5],[5,5],[6,7],[7,8]], r: "+0.96", label: "as one rises, so does the other" },
   negative: { pts: [[1,8],[2,7],[3,7],[4,5],[5,4],[6,2],[7,1]], r: "−0.97", label: "ek badhe to doosra ghate" },
   none: { pts: [[1,4],[2,8],[3,2],[4,6],[5,3],[6,7],[7,4]], r: "~0.0", label: "no pattern" },
 };
