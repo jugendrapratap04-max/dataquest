@@ -70,11 +70,28 @@ problems (23 across the track). Six new visuals were built for it: `box-plot`,
 `scatter-correlation` and `bell-curve` were corrected rather than replaced —
 the scatter panel had been reporting r values that did not match its own points.
 
-### After Statistics
+### Pandas — done ✅
+
+All 6 topics at the full standard, 27 practice problems (4–5 per topic, so the
+unlock gate needs nothing). Five new visuals: `vectorize-lab`, `filter-lab`,
+`missing-data-lab`, `groupby-lab`, `cleaning-lab`, alongside the
+`dataframe-anatomy` that already existed.
+
+Note for whoever writes the next runtime-backed subject: the verifier runs on
+this machine's Python (pandas 3.0.3 / numpy 2.5.1) while the student runs
+Pyodide (pandas 3.0.2 / numpy 2.4.3). Same print formatting at that distance,
+but do not claim an output that depends on a repr you have not checked in both.
+
+### What is left
 
 `npm run syllabus` prints the honest state of every subject. The remaining stub
-subjects are pandas (6), viz (5), sql (6), bi (3), ml (6), dl (3), deploy (4).
+subjects are viz (5), sql (6), bi (3), ml (6), dl (3), deploy (4).
 `docs/IMPROVEMENTS.md` §H has the recommended order and the reasoning.
+
+**SQL is the obvious next one**: it already has 18 practice problems, it runs
+in the browser today on sql.js, and it is the subject interviews ask about most
+after Python. Note it needs `kind: "sql"` problems and the SqlWorkbench rather
+than Pyodide, so the lesson recipe is the same but the problems are not.
 
 Confirm an array name before editing it — **the number does not match the lesson
 order** (`L3` is *conditionals*, not lesson 3):
