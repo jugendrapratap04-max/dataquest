@@ -53,6 +53,7 @@ import { ABTestLab } from "./ABTestLab";
 import { VectorizeLab } from "./VectorizeLab";
 import { FilterLab } from "./FilterLab";
 import { MissingDataLab } from "./MissingDataLab";
+import { GroupByLab } from "./GroupByLab";
 import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 
@@ -104,6 +105,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "vectorize-lab": VectorizeLab,
   "filter-lab": FilterLab,
   "missing-data-lab": MissingDataLab,
+  "groupby-lab": GroupByLab,
   "scatter-correlation": ScatterCorrelation,
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
