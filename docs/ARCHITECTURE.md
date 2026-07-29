@@ -52,7 +52,7 @@ closer to the vision than its naming suggests: `Track` is already, in effect,
 
 | Vision requires | Today | Gap |
 |---|---|---|
-| Subject → Chapter → Topic → content | Track → Lesson → Problem | **One level missing.** There is no Chapter, and `Lesson` plays the part of Topic. |
+| Subject → Chapter → Topic → content | Track → **Chapter** → Lesson → Problem | ✅ **Done.** `Chapter` exists and all 83 lessons sit in one. Python is split into 6 real chapters; the other eight subjects have a single chapter each, labelled "not split yet" rather than given invented structure. `npm run db:chapters` maintains it. |
 | Any subject can have its own runtime | `Problem.kind` is `"python"` or `"sql"` | A two-value flag, not a language registry. |
 | Nothing hardcoded to Python | Mostly true, four real spots | See below. |
 | Progress across all subjects | Already user-level | XP, streak, submissions and lesson progress are per user and subject-agnostic. **No change needed.** |
@@ -116,8 +116,10 @@ TopicProgress   (today's LessonProgress)
 ```
 
 **Migration path, in order:**
-1. Add `Chapter`, give every existing subject one chapter, and point today's
-   lessons at it. Nothing visibly changes; the level simply exists.
+1. ✅ **Done.** `Chapter` added (migration `20260729180000_add_chapter`), every
+   subject given chapters and all 83 lessons placed. `Lesson.chapterId` is
+   nullable and `Lesson.trackId` is untouched, so nothing visibly changed and no
+   progress row moved — the level simply exists now, ready to be used.
 2. Add `Subject.runtime` and `Problem.language`, backfilled from `kind`.
 3. Fix the four hardcoded spots to read from those fields.
 4. Split the real chapters out of the long lessons, subject by subject.

@@ -54,7 +54,31 @@ model Track {
   skillsJson String  @default("[]")
   checkpoint String? // e.g. "Data Analyst · ₹4-8 LPA"
 
+  lessons  Lesson[]
+  chapters Chapter[]
+}
+
+// The level the vision requires and the schema did not have:
+// Subject -> Chapter -> Topic -> { lesson, visualization, quiz, problems }.
+// See docs/ARCHITECTURE.md. `Track` is the Subject in all but name, and
+// `Lesson` is the Topic.
+//
+// Added additively on purpose. Lesson.chapterId is nullable and Lesson.trackId
+// stays, so every existing page keeps working untouched and no student's
+// progress moves. Chapters can then be split for real, one subject at a time,
+// instead of in one risky rewrite.
+model Chapter {
+  id      String @id @default(cuid())
+  slug    String @unique
+  order   Int
+  title   String
+  summary String @default("")
+  trackId String
+  track   Track  @relation(fields: [trackId], references: [id])
+
   lessons Lesson[]
+
+  @@index([trackId, order])
 }
 
 model Lesson {
@@ -68,8 +92,15 @@ model Lesson {
   trackId     String
   track       Track  @relation(fields: [trackId], references: [id])
 
+  // Nullable while chapters are introduced subject by subject. A lesson with no
+  // chapter yet still belongs to its subject through trackId.
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id])
+
   problems Problem[]
   progress LessonProgress[]
+
+  @@index([chapterId, order])
 }
 
 model Problem {
