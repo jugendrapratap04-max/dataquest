@@ -22,13 +22,14 @@ export function ConditionFlow() {
 
   // Walk the branches exactly the way Python does: in order, stopping at the
   // first true one. Everything after it is never even looked at.
-  let ran = -1;
-  const state = BRANCHES.map((b, i) => {
-    if (ran >= 0) return "skipped" as const;
-    const pass = b.test(marks);
-    if (pass) { ran = i; return "ran" as const; }
-    return "false" as const;
-  });
+  //
+  // Derived rather than accumulated into a mutable `let` — the same value, but
+  // nothing is reassigned while rendering, which is what React needs in order to
+  // be free to re-run this safely.
+  const ranIndex = BRANCHES.findIndex((b) => b.test(marks));
+  const state = BRANCHES.map((_, i) =>
+    ranIndex < 0 || i < ranIndex ? ("false" as const) : i === ranIndex ? ("ran" as const) : ("skipped" as const)
+  );
 
   return (
     <div className="viz">
@@ -74,7 +75,7 @@ export function ConditionFlow() {
 
       <div className="cf-out">
         <span className="cf-out-cap">Output</span>
-        <span className="cf-out-val" key={ran}>{BRANCHES[ran]?.out}</span>
+        <span className="cf-out-val" key={ranIndex}>{BRANCHES[ranIndex]?.out}</span>
       </div>
 
       <div className="note tip" style={{ marginTop: 12 }}>

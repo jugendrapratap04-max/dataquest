@@ -24,18 +24,13 @@ const PAIRS: [number, number][] = [
 
 const bits = (n: number) => n.toString(2).padStart(8, "0").split("").map(Number);
 
-export function BitwiseLab() {
-  const [op, setOp] = useState<Op>("&");
-  const [pi, setPi] = useState(0);
-  const [a, b] = PAIRS[pi];
-
-  const A = bits(a);
-  const B = bits(b);
-  const O = OPS[op];
-  const R = A.map((x, i) => O.bit(x, B[i]));
-  const result = parseInt(R.join(""), 2);
-
-  const Row = ({ label, val, arr, kind }: { label: string; val: number; arr: number[]; kind: string }) => (
+// Module level, not inside BitwiseLab — the same bug Jugendra found in the quiz.
+// A component declared in the render body is a new component TYPE on every
+// render, so React throws away the rows and rebuilds them on every click instead
+// of updating them. Here that meant the bit grid remounted rather than animating
+// the bits that actually changed.
+function Row({ label, val, arr, kind }: { label: string; val: number; arr: number[]; kind: string }) {
+  return (
     <div className={`bw-row ${kind}`}>
       <span className="bw-label">{label}</span>
       <span className="bw-dec">{val}</span>
@@ -46,6 +41,18 @@ export function BitwiseLab() {
       </span>
     </div>
   );
+}
+
+export function BitwiseLab() {
+  const [op, setOp] = useState<Op>("&");
+  const [pi, setPi] = useState(0);
+  const [a, b] = PAIRS[pi];
+
+  const A = bits(a);
+  const B = bits(b);
+  const O = OPS[op];
+  const R = A.map((x, i) => O.bit(x, B[i]));
+  const result = parseInt(R.join(""), 2);
 
   return (
     <div className="viz">

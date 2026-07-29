@@ -12,14 +12,18 @@ export function LoopVisualizer() {
   const total = step < 0 ? 0 : DATA.slice(0, step + 1).reduce((s, x) => s + x, 0);
   const done = step >= DATA.length - 1;
 
+  // Whether the auto-run is actually advancing. Derived, not stored: the effect
+  // used to call setAuto(false) when the loop finished, and a setState made
+  // synchronously inside an effect schedules another render immediately — a
+  // cascade React has to run twice for no benefit. Reading "am I running?" off
+  // the state we already have needs no second render at all.
+  const running = auto && !done;
+
   useEffect(() => {
-    if (auto && !done) {
-      timer.current = setTimeout(() => setStep((s) => s + 1), 750);
-    } else if (done) {
-      setAuto(false);
-    }
+    if (!running) return;
+    timer.current = setTimeout(() => setStep((s) => s + 1), 750);
     return () => { if (timer.current) clearTimeout(timer.current); };
-  }, [auto, step, done]);
+  }, [running, step]);
 
   const reset = () => { setAuto(false); setStep(-1); };
 
@@ -47,7 +51,7 @@ export function LoopVisualizer() {
 
       <div className="viz-controls">
         <button className="btn btn-primary" style={{ padding: "8px 14px" }} onClick={() => setStep((s) => Math.min(s + 1, DATA.length - 1))} disabled={done}>Step →</button>
-        <button className="btn btn-ghost" style={{ padding: "8px 14px" }} onClick={() => setAuto((a) => !a)} disabled={done}>{auto ? "Pause" : "Auto-run"}</button>
+        <button className="btn btn-ghost" style={{ padding: "8px 14px" }} onClick={() => setAuto((a) => !a)} disabled={done}>{running ? "Pause" : "Auto-run"}</button>
         <button className="btn btn-ghost" style={{ padding: "8px 14px" }} onClick={reset}>Reset</button>
       </div>
 
