@@ -34,7 +34,7 @@ Backlog"* (29 July 2026) and his review notes in chat the same day.
 | 8 | Topic-wise learning + unlock flow | ⬜ | L |
 | 9 | Chapter locked until problems solved, then downloadable | ⬜ | M |
 | 10 | First-time welcome: gender, class, interests, language | ⬜ | M |
-| 11 | Subject-based themes, textures and animation | ⬜ | L |
+| 11 | Subject-based themes, textures and animation | 🟡 | L |
 | 12 | Many subjects: Java, C, C++, JS, Web, AI/ML, DSA, Cloud, Security | ⬜ | XL |
 
 ---
@@ -209,7 +209,17 @@ the privacy policy has to be updated to say what is stored and why. And "preferr
 language" implies the content exists in more than one language, which today it
 does not (see §D.2). Better to collect it only once it changes something.
 
-### 9. ⬜ Subject-based themes, textures and animation (L)
+### 9. 🟡 Subject-based themes, textures and animation (L)
+
+**The colour half is done and live.** Every subject now carries its own hue, shown
+as a named pill and a tinted rule on the lesson header, plus a "Lesson 5 of 39"
+counter and progress bar. `lib/subjects.ts` holds one number per subject and the
+stylesheet derives every shade, so light and dark are handled once and **a new
+subject needs no new CSS** — an unknown slug gets a stable hue from its own name.
+
+Still to do here: carrying the tint onto the roadmap and dashboard cards, and
+the transition animation when the subject changes.
+
 Your idea: each subject a different world — Python dark blue with floating
 particles, Java orange/red with coffee steam, C++ metallic with circuit textures,
 Web with a browser-style interface and neon, AI/ML with neural-network
