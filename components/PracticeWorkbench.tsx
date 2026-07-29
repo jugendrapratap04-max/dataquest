@@ -185,7 +185,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                   <div className="res-empty">▶ Press &quot;Run&quot; — Python takes a moment to load the first time (~30s for pandas problems), then it is instant.</div>
                 ) : !result.compiled ? (
                   <>
-                    <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Code me error hai</div>
+                    <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your code has an error</div>
                     <div className="console-out">{result.error}</div>
                   </>
                 ) : (
@@ -218,7 +218,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
           xp={celebrate}
           onClose={() => setCelebrate(null)}
           onNext={() => router.push(p.nextSlug ? `/practice/${p.nextSlug}` : "/practice")}
-          nextLabel={p.nextSlug ? "Agla problem →" : "Sab problems →"}
+          nextLabel={p.nextSlug ? "Next problem →" : "All problems →"}
         />
       )}
     </>

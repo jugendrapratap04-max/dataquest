@@ -10,19 +10,32 @@ import { SqlWorkbench, type SqlProblemData } from "@/components/SqlWorkbench";
 // each problem's own order, then title.
 const DIFF_RANK: Record<string, number> = { Easy: 0, Medium: 1, Hard: 2, "Super Hard": 3 };
 
-// The problem the "Agla problem →" button should open on a solve: the next
-// unsolved one after this in list order, or the earliest unsolved anywhere if
-// there's nothing after (surfaces skipped ones), or null when everything's done.
+// Which problem "Agla problem →" opens after a solve.
+//
+// It used to sort every problem on the platform by difficulty and hand back the
+// next one in that global list — so finishing an Easy loops problem could drop
+// you into a strings problem from a lesson you had not opened yet. The student
+// is mid-topic and the app changes the subject on them.
+//
+// Now it stays where the learning is, in this order:
+//   1. Anything still unsolved in the SAME lesson — finish the topic you are on.
+//   2. Unsolved problems from EARLIER lessons in the same track, nearest first —
+//      revision of ground already covered, never a topic not yet taught.
+//   3. Only when nothing is left behind, the next unsolved anywhere. By then
+//      moving forward is the right answer, and the button never dies.
 async function nextUnsolvedSlug(currentSlug: string, userId: string): Promise<string | null> {
   const all = await prisma.problem.findMany({
-    select: { id: true, slug: true, difficulty: true, order: true, title: true },
+    select: {
+      id: true, slug: true, difficulty: true, order: true, title: true, lessonId: true,
+      lesson: { select: { order: true, trackId: true } },
+    },
   });
-  all.sort(
-    (a, b) =>
-      (DIFF_RANK[a.difficulty] ?? 9) - (DIFF_RANK[b.difficulty] ?? 9) ||
-      a.order - b.order ||
-      a.title.localeCompare(b.title)
-  );
+
+  const byDifficulty = (a: (typeof all)[number], b: (typeof all)[number]) =>
+    (DIFF_RANK[a.difficulty] ?? 9) - (DIFF_RANK[b.difficulty] ?? 9) ||
+    a.order - b.order ||
+    a.title.localeCompare(b.title);
+
   const solvedIds = new Set(
     (
       await prisma.submission.findMany({
@@ -32,10 +45,33 @@ async function nextUnsolvedSlug(currentSlug: string, userId: string): Promise<st
       })
     ).map((s) => s.problemId)
   );
-  const i = all.findIndex((p) => p.slug === currentSlug);
-  if (i < 0) return null;
-  const candidate = (p: { id: string; slug: string }) => p.slug !== currentSlug && !solvedIds.has(p.id);
-  return all.slice(i + 1).find(candidate)?.slug ?? all.find(candidate)?.slug ?? null;
+
+  const current = all.find((p) => p.slug === currentSlug);
+  if (!current) return null;
+  const open = all.filter((p) => p.slug !== currentSlug && !solvedIds.has(p.id));
+
+  // 1. Same lesson, easiest first.
+  const sameLesson = open
+    .filter((p) => current.lessonId && p.lessonId === current.lessonId)
+    .sort(byDifficulty);
+  if (sameLesson.length) return sameLesson[0].slug;
+
+  // 2. Earlier lessons in the same track, nearest lesson first — revision that
+  //    stays close to what the student has just been reading.
+  if (current.lesson) {
+    const earlier = open
+      .filter(
+        (p) =>
+          p.lesson &&
+          p.lesson.trackId === current.lesson!.trackId &&
+          p.lesson.order < current.lesson!.order
+      )
+      .sort((a, b) => b.lesson!.order - a.lesson!.order || byDifficulty(a, b));
+    if (earlier.length) return earlier[0].slug;
+  }
+
+  // 3. Nothing left behind — move on.
+  return open.sort(byDifficulty)[0]?.slug ?? null;
 }
 
 export async function generateMetadata({

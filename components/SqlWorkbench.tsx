@@ -218,7 +218,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
                   <div className="res-empty">▶ Press &quot;Run&quot; — the SQL engine takes a second to load the first time, then it is instant.</div>
                 ) : result.error ? (
                   <>
-                    <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Query me error hai</div>
+                    <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your query has an error</div>
                     <div className="console-out">{result.error}</div>
                   </>
                 ) : (
@@ -247,7 +247,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
           xp={celebrate}
           onClose={() => setCelebrate(null)}
           onNext={() => router.push(p.nextSlug ? `/practice/${p.nextSlug}` : "/practice")}
-          nextLabel={p.nextSlug ? "Agla problem →" : "Sab problems →"}
+          nextLabel={p.nextSlug ? "Next problem →" : "All problems →"}
         />
       )}
     </>

@@ -20,6 +20,47 @@ const LEVELS: { key: Level; label: string; dot: string; sub: string }[] = [
 // separate sections that score separately, stacked easiest first with no gate
 // between them — a student who can't do Hard still keeps their Easy/Medium score.
 // Quizzes written before levels existed have no `level` and render as one list.
+// Defined at module level, NOT inside LessonQuiz — and that is the whole fix for
+// the quiz jumping back to question 1 after every answer.
+//
+// It used to be declared in the render body, so each answer created a brand-new
+// component *type*. React can't know it is "the same" component, so it unmounted
+// and remounted all ten questions on every click. The browser lost the scroll
+// anchor with the DOM nodes and snapped to the top of the quiz, which is why
+// answering Q7 sent you back to Q1 and you had to scroll down again each time.
+function Question({
+  it, i, n, answer, onChoose,
+}: {
+  it: Q; i: number; n: number; answer: number | null; onChoose: (qi: number, oi: number) => void;
+}) {
+  const a = answer;
+  return (
+    <div className="quiz-q">
+      <div className="quiz-qt"><span className="quiz-n">Q{n}</span><span dangerouslySetInnerHTML={{ __html: it.q }} /></div>
+      <div className="quiz-opts">
+        {it.options.map((o, oi) => {
+          let cls = "quiz-opt";
+          if (a !== null) {
+            if (oi === it.correct) cls += " correct";
+            else if (oi === a) cls += " wrong";
+            else cls += " dim";
+          }
+          return (
+            <button key={oi} className={cls} disabled={a !== null} onClick={() => onChoose(i, oi)}>
+              <span className="quiz-key">{String.fromCharCode(65 + oi)}</span>{o}
+            </button>
+          );
+        })}
+      </div>
+      {a !== null && (
+        <div className={`quiz-why ${a === it.correct ? "ok" : "no"}`}>
+          <b>{a === it.correct ? "✅ Correct." : "❌ Not quite."}</b> <span dangerouslySetInnerHTML={{ __html: it.why }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function LessonQuiz({ items }: { items: Q[] }) {
   const [ans, setAns] = useState<(number | null)[]>(() => items.map(() => null));
 
@@ -43,35 +84,6 @@ export function LessonQuiz({ items }: { items: Q[] }) {
     ? LEVELS.map((L) => ({ ...L, qs: indexed.filter(({ it }) => it.level === L.key) })).filter((s) => s.qs.length)
     : [{ key: "all" as const, label: "", dot: "", sub: "", qs: indexed }];
 
-  const Question = ({ it, i, n }: { it: Q; i: number; n: number }) => {
-    const a = ans[i];
-    return (
-      <div className="quiz-q">
-        <div className="quiz-qt"><span className="quiz-n">Q{n}</span><span dangerouslySetInnerHTML={{ __html: it.q }} /></div>
-        <div className="quiz-opts">
-          {it.options.map((o, oi) => {
-            let cls = "quiz-opt";
-            if (a !== null) {
-              if (oi === it.correct) cls += " correct";
-              else if (oi === a) cls += " wrong";
-              else cls += " dim";
-            }
-            return (
-              <button key={oi} className={cls} disabled={a !== null} onClick={() => choose(i, oi)}>
-                <span className="quiz-key">{String.fromCharCode(65 + oi)}</span>{o}
-              </button>
-            );
-          })}
-        </div>
-        {a !== null && (
-          <div className={`quiz-why ${a === it.correct ? "ok" : "no"}`}>
-            <b>{a === it.correct ? "✅ Correct." : "❌ Not quite."}</b> <span dangerouslySetInnerHTML={{ __html: it.why }} />
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="card quiz">
       <div className="quiz-head">🧠 <b>Check your understanding</b><span className="quiz-count">{answered}/{items.length}</span></div>
@@ -92,7 +104,9 @@ export function LessonQuiz({ items }: { items: Q[] }) {
                 {secDone && <span className="ql-score">{secScore}/{s.qs.length}</span>}
               </div>
             )}
-            {s.qs.map(({ it, i }) => <Question key={i} it={it} i={i} n={i + 1} />)}
+            {s.qs.map(({ it, i }) => (
+              <Question key={i} it={it} i={i} n={i + 1} answer={ans[i]} onChoose={choose} />
+            ))}
           </div>
         );
       })}

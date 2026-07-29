@@ -6,8 +6,8 @@ const LINES = [
   "Another skill locked in. Keep this up daily — the job is not far. 🚀",
   "Nicely done. What you solve by typing it yourself, you never forget. 💪",
   "Consistency is the real talent — and you are showing it. 🔥",
-  "Chhote steps, bada result. Aaj ka topic clear! ✅",
-  "Ye lo +XP! Ek din ye saare chhote wins ek badi job banenge. 🎯",
+  "Small steps, big result. Today's topic is clear! ✅",
+  "There's your XP. All these small wins add up to one big job. 🎯",
 ];
 
 function Confetti() {
@@ -76,7 +76,7 @@ export function Celebrate({
           <p>{line}</p>
           {typeof xp === "number" && xp > 0 && <div className="celebrate-xp">+{xp} XP</div>}
           <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 6 }}>
-            <button className="btn btn-ghost" onClick={onClose}>Yahin ruko</button>
+            <button className="btn btn-ghost" onClick={onClose}>Stay here</button>
             {onNext && <button className="btn btn-primary" onClick={onNext}>{nextLabel}</button>}
           </div>
         </div>

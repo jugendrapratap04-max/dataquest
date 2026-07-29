@@ -26,7 +26,7 @@ export type VerifyResult = { passed: boolean; reason?: string };
 
 /** Last meaningful line of an error. A Python traceback ends with a newline, so
  *  a plain .pop() on the split hands back an empty string — which is how this
- *  verifier spent its first run reporting "Server pe error: " and nothing else. */
+ *  verifier spent its first run reporting "Error on the server: " and nothing else. */
 function lastLine(e: unknown): string {
   const msg = (e as { message?: string })?.message ?? String(e);
   const lines = String(msg).split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
@@ -219,7 +219,7 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
         // student can't tell a bug in their code from a bug in this verifier, and
         // neither can we.
         if (isTimeout(e)) return { passed: false, reason: TIMEOUT_REASON };
-        return { passed: false, reason: `Server pe error: ${lastLine(e)}` };
+        return { passed: false, reason: `Error on the server: ${lastLine(e)}` };
       }
     }
     return { passed: true };
@@ -230,7 +230,7 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
 
 async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResult> {
   if (!problem.solutionCode?.trim()) {
-    return { passed: false, reason: "Is problem ka reference query missing hai." };
+    return { passed: false, reason: "This problem has no reference query." };
   }
 
   const initSqlJs = (await import("sql.js")).default;
@@ -261,7 +261,7 @@ async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResu
   try {
     ref = run(problem.solutionCode);
   } catch {
-    return { passed: false, reason: "Is problem ka reference query hi toota hua hai." };
+    return { passed: false, reason: "This problem's own reference query is broken." };
   }
 
   const norm = (rows: unknown[][], ordered: boolean) => {
