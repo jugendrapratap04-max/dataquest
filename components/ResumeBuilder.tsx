@@ -8,10 +8,13 @@ type Data = {
   summary: string; skills: string; education: string; projects: Project[];
 };
 
-const CORE = ["python", "sql", "pandas", "machine learning", "statistics", "numpy", "excel", "visualization", "tableau", "power bi", "scikit"];
+// Fallback only. The real keyword list is passed in from the subjects that
+// actually exist on the platform — this list is Data Science shaped, and a
+// student learning Java or DevOps would have been told to "add Pandas".
+const CORE_FALLBACK = ["python", "sql", "pandas", "machine learning", "statistics", "numpy", "excel", "visualization", "tableau", "power bi", "scikit"];
 const VERBS = ["built", "analyzed", "developed", "designed", "created", "improved", "predicted", "cleaned", "visualized", "deployed", "automated", "trained"];
 
-function scoreResume(d: Data) {
+function scoreResume(d: Data, CORE: string[]) {
   const checks: { ok: boolean; label: string; tip: string; weight: number }[] = [];
   const add = (ok: boolean, label: string, tip: string, weight: number) => checks.push({ ok, label, tip, weight });
 
@@ -24,14 +27,14 @@ function scoreResume(d: Data) {
   add(sw >= 15 && sw <= 70, "Focused summary (15–70 words)", "Write a crisp 2–3 line summary.", 10);
 
   const skills = d.skills.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-  add(skills.length >= 6, "6+ skills listed", "Kam se kam 6 relevant skills.", 15);
+  add(skills.length >= 6, "6+ skills listed", "List at least 6 relevant skills.", 15);
 
   const text = (d.summary + " " + d.skills).toLowerCase();
   const matched = CORE.filter((k) => skills.some((s) => s.includes(k)) || text.includes(k));
-  add(matched.length >= 4, `Core DS keywords (${matched.length} found)`, "Add keywords like Python, SQL, Pandas, ML, Statistics.", 15);
+  add(matched.length >= 4, `Core keywords (${matched.length} found)`, "Add the skills your subjects actually teach - they are what the filter looks for.", 15);
 
   const projs = d.projects.filter((p) => p.title.trim());
-  add(projs.length >= 2, "2+ projects", "Kam se kam 2 projects — portfolio ka proof.", 15);
+  add(projs.length >= 2, "2+ projects", "At least 2 projects - they are the proof behind your portfolio.", 15);
 
   const allDesc = projs.map((p) => p.desc.toLowerCase()).join(" ");
   add(VERBS.some((v) => allDesc.includes(v)), "Action verbs used", "Start project lines with 'Built / Analyzed / Developed'.", 10);
@@ -45,7 +48,10 @@ function scoreResume(d: Data) {
   return { score, checks, matched };
 }
 
-export function ResumeBuilder({ name, role }: { name: string; role: string }) {
+export function ResumeBuilder({ name, role, keywords }: { name: string; role: string; keywords?: string[] }) {
+  // Keywords come from the platform's subjects, not from a hardcoded Data Science
+  // list - see docs/ARCHITECTURE.md. Falls back if none were passed.
+  const CORE = keywords?.length ? keywords : CORE_FALLBACK;
   // Your saved title, so the resume starts from what your profile actually says
   // rather than a hardcoded one. Changing it here can be saved back (it's the
   // only place the role was ever editable).
@@ -67,7 +73,7 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
     ],
   });
 
-  const { score, checks, matched } = useMemo(() => scoreResume(d), [d]);
+  const { score, checks, matched } = useMemo(() => scoreResume(d, CORE), [d, CORE]);
   const set = (k: keyof Data, v: string) => setD((p) => ({ ...p, [k]: v }));
 
   async function saveRole() {
@@ -112,7 +118,7 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
         </div>
         <div className="rb-field"><label htmlFor="rb-linkedin">LinkedIn</label><input id="rb-linkedin" className="auth-input" value={d.linkedin} onChange={(e) => set("linkedin", e.target.value)} /></div>
         <div className="rb-field"><label htmlFor="rb-summary">Summary</label><textarea id="rb-summary" className="auth-input" rows={3} value={d.summary} onChange={(e) => set("summary", e.target.value)} /></div>
-        <div className="rb-field"><label htmlFor="rb-skills">Skills (comma se alag)</label><textarea id="rb-skills" className="auth-input" rows={2} value={d.skills} onChange={(e) => set("skills", e.target.value)} /></div>
+        <div className="rb-field"><label htmlFor="rb-skills">Skills (comma separated)</label><textarea id="rb-skills" className="auth-input" rows={2} value={d.skills} onChange={(e) => set("skills", e.target.value)} /></div>
         <div className="rb-field"><label htmlFor="rb-education">Education</label><input id="rb-education" className="auth-input" value={d.education} onChange={(e) => set("education", e.target.value)} /></div>
         <div className="sec-head" style={{ margin: "8px 0 10px" }}><h2 style={{ fontSize: 13 }}>Projects</h2></div>
         {d.projects.map((p, i) => (

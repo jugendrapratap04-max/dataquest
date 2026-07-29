@@ -58,18 +58,26 @@ closer to the vision than its naming suggests: `Track` is already, in effect,
 | Progress across all subjects | Already user-level | XP, streak, submissions and lesson progress are per user and subject-agnostic. **No change needed.** |
 | AI Mentor across subjects | Not built | Deliberately — see §6. |
 
-**The four places Python or Data Science is actually hardcoded:**
+**The four places Python or Data Science was hardcoded — all four now fixed:**
 
-1. `components/PracticeWorkbench.tsx` — the editor is fixed to
-   `defaultLanguage="python"`. Must come from the problem's language.
-2. `app/(app)/dashboard/page.tsx` — icons chosen by a chain of
-   `slug === "python" ? … : slug === "sql" ? …`. Must be a field on the subject.
-3. `components/ResumeBuilder.tsx` — the skill list is Data Science only
-   (pandas, tableau, power bi, scikit…). Must be per subject.
-4. `prisma/check-syllabus.mjs` — grades **only the Python track**, which is why it
-   reported "4 lessons below standard" while 44 lessons across the other eight
-   subjects were untouched stubs. A subject-agnostic report is needed or the
-   number keeps lying.
+1. ✅ `components/PracticeWorkbench.tsx` — the editor was pinned to
+   `defaultLanguage="python"` and the bar always read "Python 3". Both now come
+   from the problem, through the new registry in **`lib/languages.ts`**. Adding a
+   language is one entry there; `runnable` records honestly whether its code can
+   execute in the browser yet.
+2. ✅ `app/(app)/dashboard/page.tsx` — icons came from a chain of
+   `slug === "python" ? … : slug === "sql" ? …`, so every subject past the four it
+   named silently borrowed the statistics colour. Unknown slugs now get a stable
+   accent derived from the slug; adding a subject needs no code change.
+3. ✅ `components/ResumeBuilder.tsx` — the ATS keyword list was Data Science only
+   (pandas, tableau, power bi, scikit), so a student learning Java would have been
+   told to "add Pandas". The list is now built from the skills the platform's own
+   subjects teach, with the old list kept only as a fallback.
+4. ✅ `prisma/check-syllabus.mjs` — graded **only the Python track**, which is why
+   it reported "4 lessons below standard" while 44 stubs sat across the other
+   eight subjects. It now scores every subject against the same bar. The honest
+   platform number is **35 of 83 lessons (42%)**, and **eight of nine subjects
+   have nothing at standard at all**.
 
 Plus `Track` carries Data-Science-shaped fields — `checkpoint`
 ("Data Analyst · ₹4-8 LPA"), `weeks`, `milestone`, `toolsCsv`. These are fine as

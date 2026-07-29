@@ -1,4 +1,4 @@
-/* Scoreboard: what the Python track covers, against the reference syllabus.
+/* Scoreboard: what every subject covers, measured against one bar.
  *
  * A topic is only "done" if the lesson claiming it is actually substantial —
  * a slug existing in the database proves nothing. Every lesson is measured
@@ -34,14 +34,37 @@ function measure(lesson) {
   };
 }
 
-const track = await prisma.track.findUnique({ where: { slug: "python" }, select: { id: true } });
-if (!track) { console.error("no python track"); process.exit(1); }
-const lessons = await prisma.lesson.findMany({
-  where: { trackId: track.id },
-  select: { slug: true, title: true, order: true, contentJson: true, _count: { select: { problems: true } } },
+// Every subject is measured, not just Python.
+//
+// This tool used to load the python track alone and report "4 lessons below
+// standard", which read as "the platform is nearly done" while 44 stub lessons
+// sat untouched across the other eight subjects. DataMarg is a multi-subject
+// platform (docs/ARCHITECTURE.md); a scoreboard that can only see one subject
+// is a scoreboard that misleads.
+//
+// The syllabus mapping below is still Python's reference syllabus — that part is
+// legitimately per-subject, and other subjects will get their own.
+const subjects = await prisma.track.findMany({
+  select: {
+    id: true, slug: true, title: true, order: true,
+    lessons: {
+      select: { slug: true, title: true, order: true, contentJson: true, _count: { select: { problems: true } } },
+      orderBy: { order: "asc" },
+    },
+  },
   orderBy: { order: "asc" },
 });
-const bySlug = Object.fromEntries(lessons.map((l) => [l.slug, { ...l, m: measure(l) }]));
+if (!subjects.length) { console.error("no subjects in the database"); process.exit(1); }
+
+const measured = subjects.map((s) => ({
+  ...s,
+  lessons: s.lessons.map((l) => ({ ...l, m: measure(l), subject: s.slug })),
+}));
+
+const pythonSubject = measured.find((s) => s.slug === "python");
+if (!pythonSubject) { console.error("no python subject"); process.exit(1); }
+const lessons = pythonSubject.lessons;
+const bySlug = Object.fromEntries(lessons.map((l) => [l.slug, l]));
 
 let done = 0, thin = 0, missing = 0, broken = 0;
 const gaps = [];
@@ -70,10 +93,31 @@ console.log(`  --  nothing covers it    ${String(missing).padStart(3)} / ${total
 if (broken) console.log(`  !!  broken mapping      ${String(broken).padStart(3)} / ${total}   <- fix prisma/syllabus.mjs`);
 console.log(`\n  a lesson counts as taught at >=${MIN_WORDS} words, >=1 visualisation and >=4/5 teaching blocks`);
 
-const stubs = Object.values(bySlug).filter((l) => !l.m.solid).sort((a, b) => a.order - b.order);
-console.log(`\nLESSONS NOT YET AT STANDARD: ${stubs.length}/${lessons.length}`);
-for (const l of stubs.slice(0, FULL ? 99 : 12)) {
-  console.log(`  ${String(l.order).padStart(2)}. ${l.slug.padEnd(24)} ${String(l.m.words).padStart(5)}w  viz:${l.m.viz}  probs:${String(l.m.problems).padStart(2)}  teaching:${l.m.teaching}/5  quiz:${l.m.quiz ? "y" : "n"}`);
+// ---------------------------------------------------------------------------
+// Platform scoreboard — every subject, against the same bar.
+// ---------------------------------------------------------------------------
+const allLessons = measured.flatMap((s) => s.lessons);
+const atStandard = allLessons.filter((l) => l.m.solid).length;
+
+console.log(`\n${"=".repeat(74)}`);
+console.log("PLATFORM — every subject against the same bar\n");
+console.log(`  ${"subject".padEnd(16)} ${"lessons".padStart(7)} ${"at standard".padStart(11)} ${"problems".padStart(8)} ${"quizzes".padStart(7)}`);
+for (const s of measured) {
+  const solid = s.lessons.filter((l) => l.m.solid).length;
+  const probs = s.lessons.reduce((n, l) => n + l.m.problems, 0);
+  const quizzes = s.lessons.filter((l) => l.m.quiz).length;
+  const flag = s.lessons.length && solid === 0 ? "  <- nothing at standard" : "";
+  console.log(`  ${s.slug.padEnd(16)} ${String(s.lessons.length).padStart(7)} ${String(solid).padStart(11)} ${String(probs).padStart(8)} ${String(quizzes).padStart(7)}${flag}`);
+}
+console.log(`\n  ${"TOTAL".padEnd(16)} ${String(allLessons.length).padStart(7)} ${String(atStandard).padStart(11)}`);
+console.log(`  ${atStandard} of ${allLessons.length} lessons (${Math.round((atStandard / allLessons.length) * 100)}%) meet the bar.`);
+
+const stubs = allLessons.filter((l) => !l.m.solid).sort(
+  (a, b) => (a.subject > b.subject ? 1 : a.subject < b.subject ? -1 : a.order - b.order)
+);
+console.log(`\nLESSONS NOT YET AT STANDARD: ${stubs.length}/${allLessons.length}`);
+for (const l of stubs.slice(0, FULL ? 999 : 12)) {
+  console.log(`  ${l.subject.padEnd(12)} ${String(l.order).padStart(2)}. ${l.slug.padEnd(24)} ${String(l.m.words).padStart(5)}w  viz:${l.m.viz}  probs:${String(l.m.problems).padStart(2)}  teaching:${l.m.teaching}/5  quiz:${l.m.quiz ? "y" : "n"}`);
 }
 if (!FULL && stubs.length > 12) console.log(`  … and ${stubs.length - 12} more (run with --full)`);
 

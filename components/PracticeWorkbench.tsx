@@ -13,6 +13,12 @@ export type ProblemData = {
   descriptionMd: string; examples: { input: string; output: string }[];
   starterCode: string; functionName: string; tests: TestCase[]; hints: string[];
   xp: number; recap: string; lessonSlug?: string; nextSlug?: string | null;
+  /** Editor language id, from the problem — not assumed. DataMarg is a
+   *  multi-subject platform, so the day a JavaScript or C++ problem exists the
+   *  editor must already be reading this rather than being pinned to Python. */
+  language?: string;
+  /** What the editor bar calls it. Same reason as `language`. */
+  languageLabel?: string;
 };
 
 function mdLite(md: string) {
@@ -144,7 +150,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
         {/* editor */}
         <div className="editor-wrap">
           <div className="ed-bar">
-            <span className="ed-lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg> Python 3</span>
+            <span className="ed-lang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg> {p.languageLabel ?? "Python 3"}</span>
             <span className="no-paste-badge" title="Copy-paste is off — type it yourself!">🔒 no paste</span>
             <div className="ed-actions">
               <button className="btn btn-run" onClick={() => doRun(false)} disabled={busy !== null}>
@@ -160,7 +166,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
 
           <div style={{ position: "relative" }}>
             <Editor
-              height="300px" defaultLanguage="python" theme="vs-dark" value={code}
+              height="300px" defaultLanguage={p.language ?? "python"} theme="vs-dark" value={code}
               onChange={(v) => setCode(v ?? "")} onMount={handleMount}
               options={{ minimap: { enabled: false }, fontSize: 13, lineNumbers: "on", scrollBeyondLastLine: false, padding: { top: 12 }, tabSize: 4, contextmenu: false }}
               loading={<div style={{ color: "#8890A0", padding: 20, fontFamily: "var(--mono)", fontSize: 13 }}>Loading the editor…</div>}

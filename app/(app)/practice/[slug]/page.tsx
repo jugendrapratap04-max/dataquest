@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL, clamp } from "@/lib/seo";
+import { languageOf } from "@/lib/languages";
 import { getCurrentUser } from "@/lib/session";
 import { PracticeWorkbench, type ProblemData } from "@/components/PracticeWorkbench";
 import { SqlWorkbench, type SqlProblemData } from "@/components/SqlWorkbench";
@@ -86,7 +87,7 @@ export async function generateMetadata({
   });
   if (!problem) return { title: "Problem not found — DataMarg" };
 
-  const lang = problem.kind === "sql" ? "SQL" : "Python";
+  const lang = languageOf(problem.kind).name;
   const title = `${problem.title} — ${problem.difficulty} ${lang} practice | DataMarg`;
   const description =
     clamp(problem.descriptionMd) ||
@@ -125,6 +126,9 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
     recap: "",
     lessonSlug: problem.lesson?.slug,
     nextSlug,
+    // Read from the problem, never assumed. See lib/languages.ts.
+    language: languageOf(problem.kind).monaco,
+    languageLabel: languageOf(problem.kind).label,
   };
 
   if (problem.kind === "sql") {

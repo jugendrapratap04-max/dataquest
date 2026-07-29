@@ -5,8 +5,19 @@ import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 
+// Accent for a subject's tile.
+//
+// This used to be a chain of `slug === "python" ? … : slug === "sql" ? …`, so
+// every subject beyond the four it named silently borrowed the statistics
+// colour — and a tenth subject would have too. DataMarg is meant to take many
+// subjects (docs/ARCHITECTURE.md), so unknown slugs now get a stable accent of
+// their own, picked from the slug itself. Adding a subject needs no code change.
+const ACCENTS = ["py", "sql", "pd", "st"];
+const PINNED: Record<string, string> = { python: "py", sql: "sql", pandas: "pd", statistics: "st" };
+
 const iconClass = (slug: string) =>
-  slug === "python" ? "py" : slug === "sql" ? "sql" : slug === "pandas" ? "pd" : "st";
+  PINNED[slug] ??
+  ACCENTS[[...slug].reduce((sum, c) => sum + c.charCodeAt(0), 0) % ACCENTS.length];
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
