@@ -87,7 +87,7 @@ export default async function DashboardPage() {
         </section>
 
         <section className="card pad">
-          <div className="sec-head"><h2>Your Roadmap<span className="sub">zero to job-ready</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
+          <div className="sec-head"><h2>Your Roadmap<span className="sub">nine subjects, in order</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
           <div className="trackrow">
             {p.tracks.map((t) => (
               <Link key={t.id} href="/roadmap" className={`node ${t.status}`}>
@@ -122,7 +122,10 @@ export default async function DashboardPage() {
         <section className="card pad"><div className="sec-head"><h2>Overall Progress</h2></div>
           <div className="ring-wrap">
             <div className="ring" style={{ background: `conic-gradient(var(--accent) 0turn ${p.jobReady/100}turn, var(--panel-2) ${p.jobReady/100}turn 1turn)` }}>
-              <div className="inner"><div><b className="num">{p.jobReady}%</b><span>Job-ready</span></div></div>
+              {/* This number is mastered skills over total skills. Calling it
+                  "Job-ready" was reading an employment outcome off a completion
+                  percentage, which it has never measured. */}
+              <div className="inner"><div><b className="num">{p.jobReady}%</b><span>Skills mastered</span></div></div>
             </div>
             {/* All three count skills, so they add up to totalSkills. The old legend
                 mixed skill counts with track counts and the numbers meant nothing. */}

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+// No "job-ready" in the title or the description. It is a claim about an outcome
+// nobody here controls, and it was the first thing Google showed for every page.
 export const metadata: Metadata = {
-  title: "DataMarg — Learn. Practice. Get Job-Ready.",
-  description: "Learn data science, practise it in the browser, and get job-ready — in one place.",
+  title: "DataMarg — Learn it. Practise it. Build with it.",
+  description: "Learn data science and practise it in the browser — real Python and SQL that run as you type, with visuals that make the concepts click.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

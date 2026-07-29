@@ -34,7 +34,7 @@ export default async function ResumePage() {
       {!user && <GuestBanner what="Try the resume builder — signing in is what saves it" />}
       <p className="page-intro">
         Build your resume and see straight away how it would score in <b>ATS</b> — the software companies use to filter applications.
-        Work through each tip to raise the score, and the resume is job-ready. 🎯
+        Work through each tip to raise the score — a higher score means more of these filters let your resume through to a human. 🎯
       </p>
       <ResumeBuilder name={user?.name ?? ""} role={user?.role ?? ""} keywords={keywords} canSave={!!user} />
     </>

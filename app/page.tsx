@@ -54,7 +54,7 @@ const REASONS = [
   {
     k: "04",
     title: "Pointed at a job",
-    body: "Every topic says where it's used in real data work. The roadmap runs from your first variable to job-ready, with checkpoints along the way.",
+    body: "Every topic says where it's used in real data work. The roadmap runs from your first variable to a deployed project, one subject at a time.",
   },
 ];
 
@@ -129,7 +129,7 @@ export default async function LandingPage() {
       <section className="lp-stats">
         <div><b className="num">{counts.lessons}</b><span>lessons</span></div>
         <div><b className="num">{counts.problems}</b><span>practice problems</span></div>
-        <div><b className="num">9</b><span>tracks to job-ready</span></div>
+        <div><b className="num">9</b><span>subjects on the path</span></div>
         <div><b className="num">₹0</b><span>to learn everything</span></div>
       </section>
 
@@ -162,7 +162,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="lp-sec">
-        <h2 className="lp-h2">The full road, start to job-ready</h2>
+        <h2 className="lp-h2">The full road, start to finish</h2>
         <p className="lp-secsub">Nine tracks in order. Start at the very beginning — no prior coding needed.</p>
         <div className="lp-tracks">
           {TRACKS.map((t, i) => (
@@ -180,7 +180,7 @@ export default async function LandingPage() {
       </section>
 
       <footer className="lp-foot">
-        <span className="mono">DataMarg</span> — learn, practice, get job-ready.
+        <span className="mono">DataMarg</span> — learn it, practise it, build with it.
         <br />
         <Link href="/book">Free written notes</Link> · <Link href="/guidelines">Community Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
       </footer>

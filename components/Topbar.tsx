@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 const titles: Record<string, [string, string]> = {
   "/dashboard": ["{greeting}, {name}", "Today's target — read one topic, then solve five problems."],
-  "/roadmap": ["Data Science Skill Sheet", "Zero to job-ready — 9 phases, do career checkpoints."],
+  "/roadmap": ["Skill Sheet", "Nine subjects in the order that works — learn it, practise it, build with it."],
   "/learn": ["Lessons", "Understand it first, then move on — one topic at a time."],
   "/practice": ["Practice Arena", "Write code for what you just read — that is what makes it stick."],
   "/projects": ["Projects", "Put your skills into real projects — this is where a portfolio comes from."],
@@ -14,12 +14,15 @@ const titles: Record<string, [string, string]> = {
   "/progress": ["Your Analytics", "Track your growth — both your strengths and your gaps."],
   "/leaderboard": ["Leaderboard", "Ranked by XP — solve more, climb higher."],
   "/certificates": ["Certificates", "Finish a track and earn its certificate."],
-  "/resume": ["Resume + ATS", "Build a job-ready resume and check its ATS score."],
+  "/resume": ["Resume + ATS", "Build your resume and check how it scores against ATS filters."],
 };
 
+// No "job-ready" anywhere in here. It reads as a promise about an outcome we do
+// not control — we teach the skill and show the evidence, and that is the claim
+// we can actually stand behind.
 function pick(pathname: string): [string, string] {
   const key = Object.keys(titles).find((k) => pathname.startsWith(k));
-  return key ? titles[key] : ["DataMarg", "Learn. Practice. Get job-ready."];
+  return key ? titles[key] : ["DataMarg", "Learn it. Practise it. Build with it."];
 }
 
 // Two free themes, two earned with coins (= XP; never spent, unlocks at a

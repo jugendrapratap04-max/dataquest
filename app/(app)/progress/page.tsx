@@ -24,7 +24,7 @@ export default async function ProgressPage() {
         <div className="card ovc"><div className="k">Total XP</div><div className="v">{(user?.xp ?? 0).toLocaleString()}</div></div>
         <div className="card ovc"><div className="k">Day Streak</div><div className="v">{streak} 🔥</div></div>
         <div className="card ovc"><div className="k">Best Streak</div><div className="v">{bestStreak}</div></div>
-        <div className="card ovc"><div className="k">Job-Ready</div><div className="v">{p.jobReady}%</div></div>
+        <div className="card ovc"><div className="k">Skills Mastered</div><div className="v">{p.jobReady}%</div></div>
       </div>
 
       <div className="card pad" style={{ marginBottom: 20 }}>
