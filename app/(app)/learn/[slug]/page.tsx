@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { SITE_URL, clamp } from "@/lib/seo";
+import { subjectStyle, subjectName } from "@/lib/subjects";
 import { getCurrentUser } from "@/lib/session";
 import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
@@ -343,9 +344,22 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
         <div className="crumb">
           <Link href="/roadmap">← Roadmap</Link> / <Link href="/learn">{lesson.track.title.split(" — ")[0]}</Link> / <b>{lesson.title}</b>
         </div>
-        <div className="lesson-head">
-          <div className="eyebrow">Lesson {lesson.order} · {lesson.track.title.split(" — ").pop()}</div>
+        {/* Each subject gets its own colour, carried as a hue on the wrapper.
+            Python should not look like SQL — see docs/ARCHITECTURE.md. Adding a
+            subject needs no code change: an unknown slug gets a stable hue of
+            its own from lib/subjects.ts. */}
+        <div className="lesson-head subject-tint" style={subjectStyle(lesson.track.slug)}>
+          <div className="eyebrow">
+            <span className="subject-pill">{subjectName(lesson.track.title, lesson.track.slug)}</span>{" "}
+            Lesson {lesson.order} of {siblings.length}
+          </div>
           <h1>{lesson.title}</h1>
+          {/* Where you are in this subject, from the progress that already
+              exists. The old header said "Lesson 6" with nothing to measure it
+              against, so a student could not tell 6 of 39 from 6 of 6. */}
+          <div className="subject-bar" title={`${doneIds.size} of ${siblings.length} lessons done in ${subjectName(lesson.track.title, lesson.track.slug)}`}>
+            <span style={{ width: `${Math.round((doneIds.size / Math.max(siblings.length, 1)) * 100)}%` }} />
+          </div>
           <div className="lh-meta">
             {/* Measured from the content, not typed in by hand — and split,
                 because "39 min" reads as 39 minutes of reading and scares

@@ -1816,3 +1816,36 @@ select.inp { cursor:pointer; }
 .fla-ev.bad { color:var(--bad); }
 .fla-ev.wipe { color:var(--bad); font-weight:700; }
 .fla-ev.just { animation:viz-land .22s ease-out; }
+
+/* ---- Subject identity ------------------------------------------------------
+   Every subject should feel like its own place, not the same page with
+   different words (docs/ARCHITECTURE.md). lib/subjects.ts sets one number —
+   --sub-h, the hue — and every shade is derived here, so light and dark are
+   handled once and a NEW SUBJECT NEEDS NO NEW CSS. */
+.subject-tint {
+  --sub-fg: hsl(var(--sub-h) 72% 30%);
+  --sub-bg: hsl(var(--sub-h) 72% 93%);
+}
+:root[data-theme="dark"] .subject-tint,
+:root[data-theme="focus"] .subject-tint,
+:root[data-theme="sunset"] .subject-tint {
+  --sub-fg: hsl(var(--sub-h) 78% 70%);
+  --sub-bg: hsl(var(--sub-h) 45% 17%);
+}
+/* Only for the instant before the theme script runs; it always sets data-theme. */
+:root:not([data-theme]) .subject-tint {
+  --sub-fg: hsl(var(--sub-h) 72% 30%);
+  --sub-bg: hsl(var(--sub-h) 72% 93%);
+}
+
+.subject-pill {
+  display:inline-block; margin-right:9px; padding:2px 9px; border-radius:20px;
+  background:var(--sub-bg); color:var(--sub-fg);
+  font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
+}
+.lesson-head.subject-tint { border-left:3px solid var(--sub-fg); padding-left:15px; }
+/* Where you are in this subject. Uses progress that already existed — the header
+   used to say "Lesson 6" with nothing to measure it against. */
+.subject-bar { height:4px; max-width:320px; margin-top:11px; border-radius:20px; background:var(--sub-bg); overflow:hidden; }
+.subject-bar span { display:block; height:100%; border-radius:20px; background:var(--sub-fg); transition:width .4s ease; }
+@media (max-width:640px){ .lesson-head.subject-tint { padding-left:12px; } .subject-bar { max-width:100%; } }
