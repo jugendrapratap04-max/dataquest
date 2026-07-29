@@ -47,3 +47,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# scratch space for one-off helper scripts (real tools belong in prisma/)
+scratchpad/

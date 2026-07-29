@@ -18,17 +18,24 @@ const SETS = [
   ["pandas/numpy", pandasProblems],
 ];
 
-// Push the seed's xp and order onto problems that already exist in the database.
+// Push the seed's problem definitions onto rows that already exist in the
+// database, additively.
 //
-// Two things were wrong and neither could be fixed by re-seeding a live database:
-// every problem created through seed.mjs paid a flat 20 XP regardless of
-// difficulty (so a Super Hard problem was worth the same as an Easy one, while
-// SQL and pandas correctly paid 20/30/40), and every "extra" problem was created
-// with order 50 — nine of them on the strings lesson alone, sorting arbitrarily.
+// `db:reset` is the only other way to get an edited python problem onto a live
+// database, and it wipes every student's progress — far too blunt for fixing the
+// wording of a question. The SQL and pandas modules always had this path (the
+// SETS above); the problems defined inside seed.mjs did not.
 //
-// Only these two columns are touched. Nothing about the question, the tests or
-// anybody's progress is rewritten.
-async function syncXpAndOrder() {
+// It syncs the *content* columns only. Nothing about submissions, XP already
+// earned, or lesson progress is touched, and a slug that does not exist yet is
+// skipped rather than created — creation still belongs to the seed.
+const CONTENT_FIELDS = [
+  "title", "difficulty", "functionName", "descriptionMd", "tagsCsv",
+  "examplesJson", "starterCode", "solutionCode", "testsJson", "hintsJson",
+  "xp", "order",
+];
+
+async function syncSeedProblems() {
   const defs = [];
   for (const lessons of Object.values(trackLessons)) {
     for (const lesson of lessons) {
@@ -41,17 +48,18 @@ async function syncXpAndOrder() {
   for (const d of defs) {
     const row = await prisma.problem.findUnique({
       where: { slug: d.slug },
-      select: { xp: true, order: true },
+      select: Object.fromEntries(CONTENT_FIELDS.map((f) => [f, true])),
     });
     if (!row) continue;
-    if (row.xp === d.xp && row.order === d.order) continue;
-    await prisma.problem.update({
-      where: { slug: d.slug },
-      data: { xp: d.xp, order: d.order },
-    });
+    const data = {};
+    for (const f of CONTENT_FIELDS) {
+      if (d[f] !== undefined && row[f] !== d[f]) data[f] = d[f];
+    }
+    if (Object.keys(data).length === 0) continue;
+    await prisma.problem.update({ where: { slug: d.slug }, data });
     changed++;
   }
-  console.log(`\n   xp/order synced: ${changed} problem(s) updated of ${defs.length} defined`);
+  console.log(`\n   seed problems synced: ${changed} updated of ${defs.length} defined`);
 }
 
 async function apply(label, problems) {
@@ -99,7 +107,7 @@ async function normaliseSkills() {
 async function main() {
   await normaliseSkills();
   for (const [label, problems] of SETS) await apply(label, problems);
-  await syncXpAndOrder();
+  await syncSeedProblems();
 
   const total = await prisma.problem.count();
   const sql = await prisma.problem.count({ where: { kind: "sql" } });
