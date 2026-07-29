@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getActivity, getStreak } from "@/lib/progress";
+import { GuestBanner } from "@/components/GuestBanner";
 
 const barColor = (i: number) => ["var(--good)", "var(--teal)", "var(--accent)", "var(--indigo)", "var(--ink-faint)"][i % 5];
 
@@ -9,18 +9,19 @@ const level = (n: number) => (n === 0 ? "" : n === 1 ? "l1" : n <= 3 ? "l2" : "l
 
 export default async function ProgressPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const uid = user?.id ?? "__guest__";
 
-  const p = await getProgress(user.id);
-  const activity = await getActivity(user.id, 28);
-  const { streak, bestStreak } = await getStreak(user.id);
+  const p = await getProgress(uid);
+  const activity = await getActivity(uid, 28);
+  const { streak, bestStreak } = await getStreak(uid);
   const activeDays = activity.filter((n) => n > 0).length;
   const totalSubs = activity.reduce((a, b) => a + b, 0);
 
   return (
     <>
+      {!user && <GuestBanner what="An empty progress page — until you start filling it" />}
       <div className="ov" style={{ marginBottom: 20 }}>
-        <div className="card ovc"><div className="k">Total XP</div><div className="v">{user.xp.toLocaleString()}</div></div>
+        <div className="card ovc"><div className="k">Total XP</div><div className="v">{(user?.xp ?? 0).toLocaleString()}</div></div>
         <div className="card ovc"><div className="k">Day Streak</div><div className="v">{streak} 🔥</div></div>
         <div className="card ovc"><div className="k">Best Streak</div><div className="v">{bestStreak}</div></div>
         <div className="card ovc"><div className="k">Job-Ready</div><div className="v">{p.jobReady}%</div></div>

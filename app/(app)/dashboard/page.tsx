@@ -1,9 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
+import { GuestBanner } from "@/components/GuestBanner";
 import { subjectStyle } from "@/lib/subjects";
 
 // Subject tiles are coloured from lib/subjects.ts, the same hue as the lesson
@@ -11,12 +11,20 @@ import { subjectStyle } from "@/lib/subjects";
 // local accent map that used to live here is gone with it — one source, and a
 // new subject needs no code change anywhere.
 
+// A guest sees the real dashboard with every number at zero, not a redirect to
+// a login form. Nothing here is anyone else's data — the roadmap, the lesson
+// count and the subject tiles are the same for everybody, and a visitor who can
+// see what the finished thing looks like has a reason to sign up. The reverse
+// order, which is what this page did before, asks for the commitment first.
+//
+// getProgress and getStreak both take a userId that matches nobody, and return
+// honest zeros. Same call the roadmap has always made for guests.
 export default async function DashboardPage() {
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
+  const uid = user?.id ?? "__guest__";
 
-  const p = await getProgress(user.id);
-  const { streak, bestStreak } = await getStreak(user.id);
+  const p = await getProgress(uid);
+  const { streak, bestStreak } = await getStreak(uid);
   const lessons = await prisma.lesson.findMany({
     include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
@@ -33,9 +41,13 @@ export default async function DashboardPage() {
     <div className="grid">
       {/* left */}
       <div className="col">
+        {!user && <GuestBanner what="This is your dashboard, once you have one" />}
+
         <section className="card resume">
           <div className="pad">
-            <div className="eyebrow">Continue where you left off</div>
+            {/* "Continue where you left off" is a lie to somebody who has never
+                been here. Same card, honest label. */}
+            <div className="eyebrow">{user ? "Continue where you left off" : "Start here"}</div>
             <h2>{nextLesson ? nextLesson.title : "Start your journey"}</h2>
             <div className="sub">
               {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Start with Python"}
@@ -51,7 +63,9 @@ export default async function DashboardPage() {
             </div>
             <div className="rfoot">
               {nextLesson && (
-                <Link className="btn btn-primary" href={`/learn/${nextLesson.slug}`}>Resume learning →</Link>
+                <Link className="btn btn-primary" href={`/learn/${nextLesson.slug}`}>
+                  {user ? "Resume learning →" : "Start the first lesson →"}
+                </Link>
               )}
               <Link className="btn btn-ghost" href="/practice">Practice now</Link>
             </div>
@@ -69,7 +83,7 @@ export default async function DashboardPage() {
           <div className="card stat"><div className="k">Lessons Done</div>
             <div className="v num">{p.lessonsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalLessons}</small></div></div>
           <div className="card stat"><div className="k">Total XP</div>
-            <div className="v num">{user.xp.toLocaleString()}</div></div>
+            <div className="v num">{(user?.xp ?? 0).toLocaleString()}</div></div>
         </section>
 
         <section className="card pad">

@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { GuestBanner } from "@/components/GuestBanner";
 
 const medals = ["🥇", "🥈", "🥉"];
 const colors = ["#5B4CD6", "#0C9384", "#DB3B3B", "#E8920C", "#2C5FC0", "#1FA85A"];
@@ -15,12 +15,11 @@ function publicName(name: string): string {
 }
 
 export default async function LeaderboardPage() {
+  // Open to guests. Everything on this board is already public — a first name,
+  // a last initial and an XP total, of people who chose to compete on it. There
+  // was never anything here to protect, and hiding it meant a visitor could not
+  // see that the platform has other students on it at all.
   const me = await getCurrentUser();
-  if (!me) redirect("/login");
-  // Same guard as every other authed page. The layout already redirects, so this
-  // is belt-and-braces — but leaving one page out is how the next page copied
-  // from it ends up without one.
-  if (!me) return null;
   // Only people who have actually solved something appear here.
   //
   // This board used to be `findMany(orderBy: xp desc)` with no filter, so the
@@ -43,6 +42,7 @@ export default async function LeaderboardPage() {
 
   return (
     <>
+      {!me && <GuestBanner what="These are real students, and none of them are you yet" />}
       {/* Topbar already explains the leaderboard — only add what it can't. */}
       {myRank > 0 ? (
         <p className="page-intro">

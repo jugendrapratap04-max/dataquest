@@ -1,16 +1,19 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress } from "@/lib/progress";
+import { GuestBanner } from "@/components/GuestBanner";
 
 function SealIcon() {
   return (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="5" /><path d="M8.5 12 7 22l5-3 5 3-1.5-10" /></svg>);
 }
 
 export default async function CertificatesPage() {
+  // Open to guests: seeing what a certificate is for, and what it takes to earn
+  // one, is the argument for signing up. Issuing one still needs an account —
+  // that is /certificates/[slug], which stays gated because a certificate has a
+  // name on it.
   const user = await getCurrentUser();
-  if (!user) redirect("/login");
-  const { tracks } = await getProgress(user.id);
+  const { tracks } = await getProgress(user?.id ?? "__guest__");
 
   const cards = tracks.map((t) => {
     const state =
@@ -25,9 +28,12 @@ export default async function CertificatesPage() {
 
   return (
     <>
+      {!user && <GuestBanner what="Certificates you can earn, once there is a name to put on them" />}
       {/* Topbar already says what certificates are — only add what it can't. */}
       <p className="page-intro">
-        {earnedCount > 0
+        {!user
+          ? <>These are the certificates the platform issues. Finish a subject and yours is generated automatically.</>
+          : earnedCount > 0
           ? <><b>{earnedCount} earned</b> so far 🎉 — put them on your resume and LinkedIn.</>
           : <>None earned yet. The first one is close — finish the Python track!</>}
       </p>

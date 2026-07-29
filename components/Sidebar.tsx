@@ -17,15 +17,25 @@ const ResumeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentCo
 const TimerIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>);
 const RoomIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v1"/><path d="M16 6a3 3 0 0 1 0 6M18 20v-1a5 5 0 0 0-2-4"/></svg>);
 
-// `member: true` = needs an account. Visitors still see these, with a lock, so
-// it's obvious what signing up gets you — hiding them would hide the reason.
+// `member: true` = a page a signed-out visitor genuinely cannot be shown,
+// because everything on it is one person's own: their notes, their focus
+// session, a room they would appear inside as a participant. Those keep the
+// lock, and the lock is honest.
+//
+// Everything else is open. Dashboard, Analytics, Leaderboard, Certificates and
+// the resume builder used to carry `member: true` and redirect to a login form,
+// which meant a visitor could see a marketing page and nothing else — and 12 of
+// 14 real signups never opened a single lesson. You cannot ask somebody to
+// commit before they have seen what they are committing to. Those five now
+// render with honest zeros and a "sign in to keep this" banner instead.
+//
 // `soon` marks a page that exists but is not built yet. Saying so in the nav is
 // the honest alternative to letting it sit unlabelled beside working features.
 type Item = { href: string; label: string; icon: React.ReactNode; count?: string; member?: boolean; soon?: boolean };
 
 const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
   { label: "Learn", items: [
-    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon />, member: true },
+    { href: "/dashboard", label: "Dashboard", icon: <HomeIcon /> },
     { href: "/roadmap", label: "Roadmap", icon: <MapIcon />, count: `${roadmapPct}%` },
     { href: "/learn", label: "Lessons", icon: <BookIcon /> },
     { href: "/book", label: "Written Notes", icon: <BookIcon /> },
@@ -40,10 +50,10 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
     { href: "/rooms", label: "Study Rooms", icon: <RoomIcon />, member: true },
   ]},
   { label: "Progress", items: [
-    { href: "/leaderboard", label: "Leaderboard", icon: <TrophyIcon />, member: true },
-    { href: "/certificates", label: "Certificates", icon: <CertIcon />, member: true },
-    { href: "/resume", label: "Resume + ATS", icon: <ResumeIcon />, member: true },
-    { href: "/progress", label: "Analytics", icon: <ChartIcon />, member: true },
+    { href: "/leaderboard", label: "Leaderboard", icon: <TrophyIcon /> },
+    { href: "/certificates", label: "Certificates", icon: <CertIcon /> },
+    { href: "/resume", label: "Resume + ATS", icon: <ResumeIcon /> },
+    { href: "/progress", label: "Analytics", icon: <ChartIcon /> },
   ]},
 ];
 

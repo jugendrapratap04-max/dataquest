@@ -48,7 +48,7 @@ function scoreResume(d: Data, CORE: string[]) {
   return { score, checks, matched };
 }
 
-export function ResumeBuilder({ name, role, keywords }: { name: string; role: string; keywords?: string[] }) {
+export function ResumeBuilder({ name, role, keywords, canSave = true }: { name: string; role: string; keywords?: string[]; canSave?: boolean }) {
   // Keywords come from the platform's subjects, not from a hardcoded Data Science
   // list - see docs/ARCHITECTURE.md. Falls back if none were passed.
   const CORE = keywords?.length ? keywords : CORE_FALLBACK;
@@ -106,7 +106,10 @@ export function ResumeBuilder({ name, role, keywords }: { name: string; role: st
         <div className="rb-field">
           <label htmlFor="rb-role">Title / Role</label>
           <input id="rb-role" className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} />
-          {d.role.trim() && d.role.trim() !== savedRole && (
+          {/* No profile to save into without an account. The button would POST,
+              collect a 401 and do nothing visible, which reads as a broken
+              button rather than as a reason to sign up. */}
+          {canSave && d.role.trim() && d.role.trim() !== savedRole && (
             <button type="button" className="rb-saverole" onClick={saveRole} disabled={savingRole}>
               {savingRole ? "Saving…" : "↑ Save this title to your profile too"}
             </button>
