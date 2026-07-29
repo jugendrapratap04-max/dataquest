@@ -3853,15 +3853,84 @@ const S2 = [
   ]},
 ];
 const S3 = [
-  { t: "objectives", items: ["Probability ka basic formula","0 se 1 ke beech samajhna","Complement nikaalna"] },
-  { t: "h2", n: "1", text: "Probability kya hai?" },
-  { t: "p", html: "Kisi cheez ke hone ki sambhavna. <b>Formula:</b> favorable ÷ total. Jawaab hamesha <b>0 (kabhi nahi) se 1 (pakka)</b> ke beech." },
-  { t: "code", file: "prob.py", code: "# dice pe 6 aane ki probability\nfavorable = 1\ntotal = 6\nprint(favorable / total)   # 0.1666...", output: "0.16666666666666666" },
-  { t: "h2", n: "2", text: "Complement — 'na hone' ki probability" },
-  { t: "p", html: "Agar kisi cheez ki probability <code>p</code> hai, to us cheez ke <b>na hone</b> ki probability <code>1 − p</code> hoti hai." },
-  { t: "code", file: "comp.py", code: "p_rain = 0.3\nprint(1 - p_rain)   # 0.7 (baarish na hone ki)", output: "0.7" },
-  { t: "note", variant: "tip", html: "<b>DS me:</b> ML models 'probability' hi predict karte hain — jaise 'ye email 92% spam hai'." },
-  { t: "recap", items: ["P = favorable / total","Hamesha 0 aur 1 ke beech","Complement = 1 − p","Models probability predict karte hain"] },
+  { t: "objectives", items: [
+    "Work out a probability by counting favourable outcomes against all outcomes",
+    "Use the <b>complement</b> — often the fastest route to an answer",
+    "Multiply for <b>independent</b> events, and add only when events cannot overlap",
+    "Spot the double-count that makes \"or\" questions go wrong",
+  ]},
+  { t: "hook", q: "Roll two dice. Which is more likely — a total of 7, or a total of 2?", why: "Both are single totals, so it feels like a coin flip between them. It is not close: 7 happens six times as often. The reason is that 2 can only be made one way and 7 can be made six, and you cannot see that until you count the outcomes instead of the totals. Probability is counting, and almost every mistake in it is a counting mistake." },
+  { t: "def", term: "Probability", en: "The probability of an event is the number of outcomes that satisfy it, divided by the number of possible outcomes, when every outcome is equally likely.", hi: "Always between 0 and 1. Zero means it cannot happen, one means it must, and everything real sits in between." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> every model you will meet outputs a probability, not an answer — a spam filter says 0.93, not \"spam\". Deciding where to cut that number is a business decision, and it is the same counting logic underneath. This lesson is also the floor under A/B testing and p-values later in this track." },
+
+  { t: "h2", n: "1", text: "Counting, not guessing" },
+  { t: "p", html: "Count the outcomes that satisfy the event, count all the outcomes, divide." },
+  { t: "code", file: "basic.py", code: "favourable = 3\ntotal = 6\n\nprint(favourable / total)\nprint(round(favourable / total * 100, 1))", output: "0.5\n50.0" },
+  { t: "viz", name: "probability-lab" },
+  { t: "p", html: "That panel draws all 36 ways two dice can land. Switch between the events and watch the shape of the highlighted set change — same grid, completely different counts. This is what a probability actually is before it becomes a fraction." },
+  { t: "code", file: "dice.py", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\nsevens = [o for o in outcomes if o[0] + o[1] == 7]\n\nprint(len(outcomes))\nprint(len(sevens))\nprint(round(len(sevens) / len(outcomes), 4))", output: "36\n6\n0.1667" },
+  { t: "p", html: "Six ways out of thirty-six. A total of 2 has exactly one way, which is where the hook's answer comes from — and the code counted it rather than arguing about it." },
+
+  { t: "h2", n: "2", text: "The complement" },
+  { t: "p", html: "Everything that is not the event is its <b>complement</b>, and the two must add to 1. When the question says \"at least one\", the complement is nearly always the shorter road." },
+  { t: "code", file: "complement.py", code: "p_rain = 0.3\nprint(round(1 - p_rain, 2))\n\n# \"at least one head in 3 flips\" = 1 - \"no heads at all\"\nprint(round(1 - 0.5 ** 3, 3))", output: "0.7\n0.875" },
+  { t: "think", q: "Why is \"at least one\" easier through the complement?", a: "Because \"at least one\" is a pile of separate cases — exactly one, exactly two, exactly three — and each needs its own count.<br/><br/>Its complement is a single case: <b>none</b>. Work that out, subtract from 1, and you are done. With three coin flips it is the difference between adding three probabilities and computing <code>1 - 0.5 ** 3</code>." },
+
+  { t: "h2", n: "3", text: "Independent events multiply" },
+  { t: "p", html: "Two events are <b>independent</b> when one happening tells you nothing about the other. Then the probability of both is the product." },
+  { t: "code", file: "independent.py", code: "p_head = 0.5\n\nprint(round(p_head * p_head, 2))\nprint(round(p_head ** 5, 5))", output: "0.25\n0.03125" },
+  { t: "note", variant: "warn", html: "<b>A coin has no memory.</b> After four heads in a row, the next flip is still 0.5 — the coin does not know and cannot correct. Believing otherwise is the gambler's fallacy, and it is the reason casinos display the last twenty results on a screen." },
+
+  { t: "h2", n: "4", text: "Adding — and the trap in it" },
+  { t: "p", html: "For \"A <b>or</b> B\" you add — but only when the two cannot happen together. If they can, the overlap has been counted twice and must be subtracted." },
+  { t: "code", file: "addition.py", code: "p_king = 4 / 52\np_heart = 13 / 52\np_king_of_hearts = 1 / 52\n\nprint(round(p_king + p_heart, 4))\nprint(round(p_king + p_heart - p_king_of_hearts, 4))", output: "0.3269\n0.3077" },
+  { t: "p", html: "The first line is wrong. There is one card that is both a king and a heart, and adding the two probabilities counts it in each — so it is counted twice and the answer comes out too high. The second line subtracts it back." },
+  { t: "analogy", concept: "Probability", real: "Tickets in a hat", html: "Every possible outcome is one ticket, and the hat holds all of them. A probability is just: how many of these tickets say yes, out of how many tickets there are. \"Or\" means counting the tickets in two piles — and if a ticket sits in both piles, you have to notice you picked it up twice. The whole subject is honest counting of the hat." },
+
+  { t: "trace", intro: "Counting a two-dice event from the outcomes up. Work out what each name holds once the line has run.", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\ntotal = len(outcomes)\ndoubles = [o for o in outcomes if o[0] == o[1]]\nhits = len(doubles)\nchance = round(hits / total, 4)", steps: [
+    { q: "After line 2, <code>total</code> is", answer: "36", why: "Six faces on the first die times six on the second. Every one of them is equally likely, which is what makes plain counting valid here." },
+    { q: "After line 4, <code>hits</code> is", answer: "6", why: "(1,1) through (6,6). Note this is the same count as a total of 7, and the two look nothing alike on the grid." },
+    { q: "After line 5, <code>chance</code> is", answer: "0.1667", why: "6 divided by 36, rounded. About one roll in six - the same as a single die showing a chosen face, which is a coincidence worth not reading anything into." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it yourself before you open the answer.", items: [
+    { task: "Probability of an even number on one die.", code: "print(3 / 6)", out: "0.5" },
+    { task: "The same, as a percentage.", code: "print(round(3 / 6 * 100, 1))", out: "50.0" },
+    { task: "Build every outcome of two dice and count them.", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\nprint(len(outcomes))", out: "36" },
+    { task: "Count the ways to total 7.", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\nprint(len([o for o in outcomes if o[0] + o[1] == 7]))", out: "6" },
+    { task: "Count the ways to total 2.", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\nprint(len([o for o in outcomes if o[0] + o[1] == 2]))", out: "1" },
+    { task: "The complement of a 0.3 chance of rain.", code: "print(round(1 - 0.3, 2))", out: "0.7" },
+    { task: "Two heads in a row.", code: "print(round(0.5 * 0.5, 2))", out: "0.25" },
+    { task: "At least one head in three flips, using the complement.", code: "print(round(1 - 0.5 ** 3, 3))", out: "0.875" },
+    { task: "Probability of drawing a king from a full deck.", code: "print(round(4 / 52, 4))", out: "0.0769" },
+    { task: "King or heart, with the overlap subtracted.", code: "print(round(4 / 52 + 13 / 52 - 1 / 52, 4))", out: "0.3077" },
+    { task: "Count \"at least one six\" on two dice - carefully.", code: "outcomes = [(a, b) for a in range(1, 7) for b in range(1, 7)]\nprint(len([o for o in outcomes if o[0] == 6 or o[1] == 6]))", out: "11" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "p_six_on_two_dice = 1/6 + 1/6", why: "This counts the double six twice, because it appears in both the \"first die is 6\" set and the \"second die is 6\" set. The honest count is <b>11</b> out of 36, not 12.", fix: "p = 11 / 36   # count the grid, or subtract the overlap" },
+    { bad: "# four heads already, so tails is due\np_tails_next = 0.7", why: "The coin has no memory. Each flip is independent and stays at 0.5 forever, however lopsided the run has been. This is the gambler's fallacy, and it has cost more money than any other error in this topic.", fix: "p_tails_next = 0.5" },
+    { bad: "p_a_and_b = p_a * p_b   # for any two events", why: "Multiplying only works when the events are <b>independent</b>. Drawing two kings without replacement is 4/52 then 3/51, not 4/52 twice - the first draw changed the deck.", fix: "p_two_kings = (4 / 52) * (3 / 51)" },
+    { bad: "if probability > 1:", why: "A probability above 1 is not a large probability, it is a bug - almost always a double-count from adding overlapping events. Treat it as an assertion failure rather than a value to handle.", fix: "assert 0 <= probability <= 1" },
+  ]},
+
+  { t: "debug", intro: "This works out the chance of drawing a card that is a king or a heart. It returns 0.3269, which is 17 cards out of 52. There are not 17 such cards. Nothing crashes. Read it before opening the fix.", code: "def king_or_heart():\n    p_king = 4 / 52\n    p_heart = 13 / 52\n    return round(p_king + p_heart, 4)\n\nprint(king_or_heart())", symptom: "prints 0.3269, which is 17 cards out of 52, but only 16 cards are a king or a heart", q: "Four kings and thirteen hearts. Adding gives seventeen. Why is the real answer sixteen?", fix: "def king_or_heart():\n    p_king = 4 / 52\n    p_heart = 13 / 52\n    p_both = 1 / 52\n    return round(p_king + p_heart - p_both, 4)\n\nprint(king_or_heart())", why: "The king of hearts is a king <b>and</b> a heart. It is in both groups, so adding the two counts it twice and invents a card that does not exist.<br/><br/>The rule is <code>P(A or B) = P(A) + P(B) - P(A and B)</code>, and the subtraction is only zero when the two events genuinely cannot happen together. Plain addition is the special case, not the default — which is exactly backwards from how most people remember it. The tell here was that the answer implied a number of cards you could go and count." },
+
+  { t: "recap", items: [
+    "Probability = favourable outcomes ÷ all outcomes, when outcomes are equally likely",
+    "Every probability sits between 0 and 1 — above 1 means a double-count",
+    "<b>Complement</b>: <code>P(not A) = 1 - P(A)</code>, and it is the short road for \"at least one\"",
+    "Independent events <b>multiply</b>; a coin has no memory",
+    "\"Or\" adds, then subtracts the overlap — <code>P(A) + P(B) - P(A and B)</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the probability of rolling a 7 with two dice?", a: "Six of the thirty-six equally likely outcomes total seven, so 6/36, about 0.167. The way to get it right is to count outcomes rather than totals — 7 has six ways, 2 has one, and the totals are not equally likely even though the outcomes are." },
+    { level: "beginner", q: "What is the complement rule?", a: "<code>P(not A) = 1 - P(A)</code>. It is most useful for \"at least one\" questions, where the event itself is many cases and its complement — none — is a single one." },
+    { level: "intermediate", q: "When can you multiply two probabilities?", a: "When the events are independent, meaning one happening does not change the other's chances. Two coin flips qualify; drawing two cards without replacement does not, because the first draw changes what is left." },
+    { level: "intermediate", q: "Why is P(king or heart) not 4/52 + 13/52?", a: "Because the king of hearts belongs to both groups and gets counted twice. The general rule is <code>P(A) + P(B) - P(A and B)</code>; plain addition is only valid when the events are mutually exclusive." },
+    { level: "advanced", q: "What is the gambler's fallacy, and why does it feel so convincing?", a: "It is the belief that a run of one outcome makes the other \"due\". Independent trials have no memory, so the next flip is 0.5 regardless. It feels convincing because the law of large numbers is real — the long-run proportion does settle at 0.5 — but it settles by <b>diluting</b> the early run across many more trials, not by correcting it. Nothing ever pushes back the other way." },
+  ]},
 ];
 const S4 = [
   { t: "objectives", items: ["Normal distribution (bell curve) pehchanna","Z-score nikaalna","Outlier detect karna"] },
@@ -4806,6 +4875,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "probability-basics": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What range must every probability fall in?", options: ["0 to 1", "1 to 100", "-1 to 1", "Any number"], correct: 0, why: "Zero means it cannot happen and one means it must. A value above 1 is a bug, almost always a double-count." },
+    { level: "easy", q: "How do you compute a probability when every outcome is equally likely?", options: ["Total outcomes divided by favourable ones", "Favourable outcomes divided by total outcomes", "Favourable minus total", "Favourable times total"], correct: 1, why: "Probability is counting: how many outcomes say yes, out of how many there are." },
+    { level: "easy", q: "The chance of rain is 0.3. What is the chance of no rain?", options: ["0.3", "1.3", "0.7", "0"], correct: 2, why: "An event and its complement must add to 1." },
+    // Medium — apply it
+    { level: "medium", q: "Two dice. How many of the 36 outcomes total 7?", options: ["1", "3", "6", "7"], correct: 2, why: "Six ways, which is why 7 is the most common total. A total of 2 has only one way, and that is the whole point of counting outcomes rather than totals." },
+    { level: "medium", q: "What is the probability of three heads in three flips?", options: ["0.5", "0.125", "1.5", "0.375"], correct: 1, why: "Independent events multiply: 0.5 to the power of 3." },
+    { level: "medium", q: "You have flipped four heads in a row. What is the chance of tails next?", options: ["Higher than 0.5, because tails is due", "0.5", "Lower than 0.5", "It depends on the coin's history"], correct: 1, why: "A coin has no memory. Each flip is independent and stays at 0.5 however lopsided the run has been." },
+    { level: "medium", q: "Why is \"at least one head in 3 flips\" easier via the complement?", options: ["The complement is a single case - no heads at all", "Complements are always faster", "Because 3 is an odd number", "It is not easier"], correct: 0, why: "The event itself is three separate cases; its complement is one. Work that out and subtract from 1." },
+    // Hard — edge cases and bugs; not written in the lesson
+    { level: "hard", q: "Two dice. How many outcomes have at least one six?", options: ["12", "6", "11", "36"], correct: 2, why: "Six in the row plus six in the column, minus the double six that sits in both. Counting it twice is the commonest error in this topic." },
+    { level: "hard", q: "Why is P(king or heart) not 4/52 + 13/52?", options: ["Hearts are not a valid event", "The king of hearts is in both groups and gets counted twice", "Cards are not equally likely", "You should multiply instead"], correct: 1, why: "The general rule is P(A) + P(B) - P(A and B). Plain addition is the special case, valid only when the events cannot both happen." },
+    { level: "hard", q: "You draw two cards without replacement. Is P(two kings) equal to (4/52) squared?", options: ["Yes, the draws are independent", "No - the first draw changes the deck, so it is (4/52) x (3/51)", "Yes, if you shuffle between draws", "No, you should add them"], correct: 1, why: "Multiplying requires independence. Removing a card changes both the favourable count and the total, so the second probability is different." },
+  ],
   "spread": [
     // Easy — did the core idea land?
     { level: "easy", q: "What does the standard deviation measure?", options: ["How far a typical value is from the mean", "The middle value", "The largest value", "How many values there are"], correct: 0, why: "It is the second number an average should always travel with - the centre alone describes two very different datasets identically." },

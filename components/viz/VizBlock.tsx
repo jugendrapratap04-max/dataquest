@@ -3,6 +3,7 @@
 import { CodeRunner } from "./CodeRunner";
 import { TestLab } from "./TestLab";
 import { SpreadLab } from "./SpreadLab";
+import { ProbabilityLab } from "./ProbabilityLab";
 import { LogLevels } from "./LogLevels";
 import { StyleLab } from "./StyleLab";
 import { GitFlow } from "./GitFlow";
@@ -89,6 +90,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "dataframe-anatomy": DataFrameAnatomy,
   "test-lab": TestLab,
   "spread-lab": SpreadLab,
+  "probability-lab": ProbabilityLab,
   "log-levels": LogLevels,
   "style-lab": StyleLab,
   "git-flow": GitFlow,
