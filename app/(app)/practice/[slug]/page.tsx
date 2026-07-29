@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL, clamp } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { PracticeWorkbench, type ProblemData } from "@/components/PracticeWorkbench";
 import { SqlWorkbench, type SqlProblemData } from "@/components/SqlWorkbench";
@@ -34,6 +36,34 @@ async function nextUnsolvedSlug(currentSlug: string, userId: string): Promise<st
   if (i < 0) return null;
   const candidate = (p: { id: string; slug: string }) => p.slug !== currentSlug && !solvedIds.has(p.id);
   return all.slice(i + 1).find(candidate)?.slug ?? all.find(candidate)?.slug ?? null;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const problem = await prisma.problem.findUnique({
+    where: { slug },
+    select: { title: true, slug: true, difficulty: true, descriptionMd: true, kind: true },
+  });
+  if (!problem) return { title: "Problem not found — DataMarg" };
+
+  const lang = problem.kind === "sql" ? "SQL" : "Python";
+  const title = `${problem.title} — ${problem.difficulty} ${lang} practice | DataMarg`;
+  const description =
+    clamp(problem.descriptionMd) ||
+    `Solve ${problem.title}, a ${problem.difficulty.toLowerCase()} ${lang} problem you can run and check in the browser.`;
+  const url = `${SITE_URL}/practice/${problem.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "article", siteName: "DataMarg" },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function ProblemPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -41,6 +41,14 @@ const SQLJS_DIR = path.join(process.cwd(), "public", "sqljs");
 /* eslint-disable @typescript-eslint/no-explicit-any */
 let pyPromise: Promise<any> | null = null;
 
+// Set by getPy(), used by runGuarded() to stop a submission that never ends.
+let interruptBuffer: Uint8Array | null = null;
+
+/** How long one piece of submitted code may run before it is interrupted. A real
+ *  solution to any problem here finishes in milliseconds; anything near this is
+ *  either an infinite loop or an attack. */
+const RUN_TIMEOUT_MS = 5000;
+
 async function getPy(): Promise<any> {
   if (!pyPromise) {
     pyPromise = (async () => {
@@ -48,16 +56,100 @@ async function getPy(): Promise<any> {
       // Point at our own wheel copy, the same one the browser uses — otherwise
       // loadPackage reaches for a CDN, and a verifier that needs the network to
       // agree you solved a loop problem is a verifier that fails offline.
-      return loadPyodide({ indexURL: PYODIDE_DIR + path.sep });
+      const py = await loadPyodide({
+        indexURL: PYODIDE_DIR + path.sep,
+        // THE reason this line exists: Pyodide's default for jsglobals is
+        // `globalThis`, so `import js` inside a *submitted solution* would reach
+        // the Node process — `js.process.env.AUTH_SECRET` and DATABASE_URL came
+        // back in a canary test on 2026-07-29. In the browser that default is
+        // harmless (it's the student's own tab); on the server it hands out the
+        // session-signing key. An empty object keeps the `js` module importable
+        // (so code that touches it fails with AttributeError, not a crash) while
+        // reaching nothing.
+        jsglobals: {},
+      });
+      // A dedicated byte the run guard flips to raise KeyboardInterrupt inside
+      // Python. Must be installed once, on the interpreter, not per run.
+      interruptBuffer = new Uint8Array(new SharedArrayBuffer(1));
+      py.setInterruptBuffer(interruptBuffer);
+      return py;
     })();
   }
   return pyPromise;
+}
+
+// The watchdog has to live on another thread, and that is not over-engineering.
+//
+// The obvious version — setTimeout(() => interruptBuffer[0] = 2, 5000) — cannot
+// work: Python runs as synchronous WASM on this very thread, so a submission
+// that loops forever blocks the event loop and the timer never fires. (Tried it
+// first; the test process hung for ten minutes.) A worker thread keeps its own
+// loop running and writes into memory *shared* with this one, so it can flip the
+// interrupt byte while this thread is pinned.
+const WATCHDOG_SRC = `
+const { parentPort, workerData } = require("node:worker_threads");
+const done = new Int32Array(workerData.done);
+const interrupt = new Uint8Array(workerData.interrupt);
+parentPort.on("message", (ms) => {
+  // Sleeps until either the deadline passes or the main thread stores 1 and
+  // notifies (the run finished on its own).
+  if (Atomics.wait(done, 0, 0, ms) === "timed-out") interrupt[0] = 2;
+});
+`;
+
+let watchdog: { worker: import("node:worker_threads").Worker; done: Int32Array } | null = null;
+
+async function getWatchdog(interrupt: Uint8Array) {
+  if (!watchdog) {
+    const { Worker } = await import("node:worker_threads");
+    const done = new Int32Array(new SharedArrayBuffer(4));
+    const worker = new Worker(WATCHDOG_SRC, {
+      eval: true,
+      workerData: { done: done.buffer, interrupt: interrupt.buffer },
+    });
+    // Never hold the process open for the sake of the watchdog.
+    worker.unref();
+    watchdog = { worker, done };
+  }
+  return watchdog;
+}
+
+/** Run one piece of submitted Python with a hard time limit.
+ *
+ *  Without this, `while True: pass` pins the runtime and the function stops
+ *  answering every other student until the platform kills it. Pyodide checks the
+ *  interrupt byte between bytecodes, so setting it to 2 (SIGINT) raises
+ *  KeyboardInterrupt inside the student's code. */
+async function runGuarded<T>(fn: () => Promise<T>): Promise<T> {
+  if (!interruptBuffer) return fn();
+  interruptBuffer[0] = 0;
+  const wd = await getWatchdog(interruptBuffer);
+  Atomics.store(wd.done, 0, 0);
+  wd.worker.postMessage(RUN_TIMEOUT_MS);
+  try {
+    return await fn();
+  } finally {
+    // Wake the watchdog early so it doesn't interrupt the *next* submission.
+    Atomics.store(wd.done, 0, 1);
+    Atomics.notify(wd.done, 0);
+    interruptBuffer[0] = 0;
+  }
 }
 
 /** Mirror the browser runner's comparison exactly, or the two disagree and the
  *  student gets no XP for a solution their screen just called correct. */
 function eq(a: unknown, b: unknown): boolean {
   try { return JSON.stringify(a) === JSON.stringify(b); } catch { return a === b; }
+}
+
+/** The watchdog stops a run by raising KeyboardInterrupt. Reporting that verbatim
+ *  would tell a student their loop problem failed with a keyboard error. */
+const TIMEOUT_REASON =
+  "Your code ran too long on the server (over 5 seconds) — check for a loop that never ends.";
+
+function isTimeout(e: unknown): boolean {
+  const s = `${(e as { type?: string })?.type ?? ""} ${(e as { message?: string })?.message ?? ""}`;
+  return s.includes("KeyboardInterrupt");
 }
 
 function toJs(v: any): unknown {
@@ -98,17 +190,26 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
   try {
     try {
       try { await py.loadPackagesFromImports(code); } catch {}
-      await py.runPythonAsync(code, { globals: ns });
+      // Deliberately the SYNCHRONOUS runner. runPythonAsync drives the code from
+      // a setImmediate callback, so a KeyboardInterrupt from the watchdog is
+      // thrown *outside* this promise chain — it escaped every catch here and
+      // took the whole process down with it (seen on 2026-07-29). runPython
+      // throws on this stack, where it can be caught and turned into a message.
+      // Packages are already loaded above, so nothing here needs top-level await.
+      await runGuarded(async () => py.runPython(code, { globals: ns }));
     } catch (e: any) {
+      if (isTimeout(e)) return { passed: false, reason: TIMEOUT_REASON };
       return { passed: false, reason: `The code did not run on the server: ${lastLine(e)}` };
     }
 
     for (const t of tests) {
       try {
         ns.set("__dq_args_json", JSON.stringify(t.args));
-        const raw = await py.runPythonAsync(
-          `import json as __json\n${problem.functionName}(*__json.loads(__dq_args_json))`,
-          { globals: ns }
+        const raw = await runGuarded(async () =>
+          py.runPython(
+            `import json as __json\n${problem.functionName}(*__json.loads(__dq_args_json))`,
+            { globals: ns }
+          )
         );
         if (!eq(toJs(raw), t.expected)) {
           return { passed: false, reason: "Re-run on the server: not every test passed." };
@@ -117,6 +218,7 @@ async function verifyPython(problem: ProblemLike, code: string): Promise<VerifyR
         // Say what actually went wrong. A bare "error aaya" is unfalsifiable: the
         // student can't tell a bug in their code from a bug in this verifier, and
         // neither can we.
+        if (isTimeout(e)) return { passed: false, reason: TIMEOUT_REASON };
         return { passed: false, reason: `Server pe error: ${lastLine(e)}` };
       }
     }

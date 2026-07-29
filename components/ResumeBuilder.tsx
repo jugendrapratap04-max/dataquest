@@ -94,10 +94,12 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
       {/* form */}
       <div className="card pad rb-form">
         <div className="sec-head"><h2>Fill in your details</h2></div>
-        <div className="rb-field"><label>Full name</label><input className="auth-input" value={d.fullName} onChange={(e) => set("fullName", e.target.value)} /></div>
+        {/* htmlFor/id throughout: these labels sat next to their inputs without
+            being attached to them, so a screen reader read ten unnamed boxes. */}
+        <div className="rb-field"><label htmlFor="rb-fullName">Full name</label><input id="rb-fullName" className="auth-input" value={d.fullName} onChange={(e) => set("fullName", e.target.value)} /></div>
         <div className="rb-field">
-          <label>Title / Role</label>
-          <input className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} />
+          <label htmlFor="rb-role">Title / Role</label>
+          <input id="rb-role" className="auth-input" value={d.role} onChange={(e) => set("role", e.target.value)} />
           {d.role.trim() && d.role.trim() !== savedRole && (
             <button type="button" className="rb-saverole" onClick={saveRole} disabled={savingRole}>
               {savingRole ? "Saving…" : "↑ Save this title to your profile too"}
@@ -105,13 +107,13 @@ export function ResumeBuilder({ name, role }: { name: string; role: string }) {
           )}
         </div>
         <div className="rb-row">
-          <div className="rb-field"><label>Email</label><input className="auth-input" value={d.email} onChange={(e) => set("email", e.target.value)} /></div>
-          <div className="rb-field"><label>Phone</label><input className="auth-input" value={d.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+          <div className="rb-field"><label htmlFor="rb-email">Email</label><input id="rb-email" className="auth-input" value={d.email} onChange={(e) => set("email", e.target.value)} /></div>
+          <div className="rb-field"><label htmlFor="rb-phone">Phone</label><input id="rb-phone" className="auth-input" value={d.phone} onChange={(e) => set("phone", e.target.value)} /></div>
         </div>
-        <div className="rb-field"><label>LinkedIn</label><input className="auth-input" value={d.linkedin} onChange={(e) => set("linkedin", e.target.value)} /></div>
-        <div className="rb-field"><label>Summary</label><textarea className="auth-input" rows={3} value={d.summary} onChange={(e) => set("summary", e.target.value)} /></div>
-        <div className="rb-field"><label>Skills (comma se alag)</label><textarea className="auth-input" rows={2} value={d.skills} onChange={(e) => set("skills", e.target.value)} /></div>
-        <div className="rb-field"><label>Education</label><input className="auth-input" value={d.education} onChange={(e) => set("education", e.target.value)} /></div>
+        <div className="rb-field"><label htmlFor="rb-linkedin">LinkedIn</label><input id="rb-linkedin" className="auth-input" value={d.linkedin} onChange={(e) => set("linkedin", e.target.value)} /></div>
+        <div className="rb-field"><label htmlFor="rb-summary">Summary</label><textarea id="rb-summary" className="auth-input" rows={3} value={d.summary} onChange={(e) => set("summary", e.target.value)} /></div>
+        <div className="rb-field"><label htmlFor="rb-skills">Skills (comma se alag)</label><textarea id="rb-skills" className="auth-input" rows={2} value={d.skills} onChange={(e) => set("skills", e.target.value)} /></div>
+        <div className="rb-field"><label htmlFor="rb-education">Education</label><input id="rb-education" className="auth-input" value={d.education} onChange={(e) => set("education", e.target.value)} /></div>
         <div className="sec-head" style={{ margin: "8px 0 10px" }}><h2 style={{ fontSize: 13 }}>Projects</h2></div>
         {d.projects.map((p, i) => (
           <div className="rb-proj" key={i}>

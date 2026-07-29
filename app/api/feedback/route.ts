@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
+import { readJson, idOf } from "@/lib/http";
 
 const CATEGORIES = new Set(["bug", "idea", "other"]);
 
@@ -17,8 +18,9 @@ export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
 
-  const { category, message, path } = await req.json();
-  const msg = typeof message === "string" ? message.trim() : "";
+  const b = await readJson(req);
+  const { category, path } = b;
+  const msg = typeof b.message === "string" ? b.message.trim() : "";
   if (msg.length < 3) {
     return NextResponse.json({ error: "Add a little detail — what happened, or what you would like." }, { status: 400 });
   }
@@ -29,7 +31,7 @@ export async function POST(req: Request) {
   await prisma.feedback.create({
     data: {
       userId: user.id,
-      category: CATEGORIES.has(category) ? category : "other",
+      category: typeof category === "string" && CATEGORIES.has(category) ? category : "other",
       message: msg,
       path: typeof path === "string" ? path.slice(0, 200) : "",
     },
@@ -43,7 +45,9 @@ export async function PATCH(req: Request) {
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
   if (!isAdmin(user.email)) return NextResponse.json({ error: "Not allowed" }, { status: 403 });
 
-  const { id, status } = await req.json();
+  const b = await readJson(req);
+  const id = idOf(b.id);
+  const status = b.status;
   if (!id || (status !== "new" && status !== "seen")) {
     return NextResponse.json({ error: "id and status required" }, { status: 400 });
   }

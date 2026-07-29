@@ -40,11 +40,14 @@ export function NotesClient({ initial }: { initial: Note[] }) {
       {show && (
         <div className="card pad note-form">
           <div className="nf-row">
-            <input placeholder="Topic (for example Python)" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} />
-            <input placeholder="Title *" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
+            {/* aria-label on each field: a placeholder is not a label — it
+                disappears the moment you type, and a screen reader announces
+                these four boxes as "edit text" with nothing to tell them apart. */}
+            <input aria-label="Topic" placeholder="Topic (for example Python)" value={f.topic} onChange={(e) => setF({ ...f, topic: e.target.value })} />
+            <input aria-label="Title" placeholder="Title *" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
           </div>
-          <textarea placeholder="Note — what you want to remember" rows={2} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
-          <input placeholder="Code snippet (optional)" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value })} />
+          <textarea aria-label="Note" placeholder="Note — what you want to remember" rows={2} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
+          <input aria-label="Code snippet" placeholder="Code snippet (optional)" value={f.code} onChange={(e) => setF({ ...f, code: e.target.value })} />
           <button className="btn btn-primary" onClick={add} disabled={busy}>{busy ? "Saving…" : "Save note"}</button>
         </div>
       )}

@@ -1,6 +1,8 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { SITE_URL, clamp } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/session";
 import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
@@ -256,6 +258,44 @@ function Block({ b }: { b: any }) {
     default:
       return null;
   }
+}
+
+// Without this every lesson served the root layout's title, so search engines
+// saw 83 pages all called "DataMarg — Learn. Practice. Get Job-Ready." The
+// description is taken from the lesson's own first paragraph rather than being
+// generated, so it always matches what the page actually says.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const lesson = await prisma.lesson.findUnique({
+    where: { slug },
+    include: { track: { select: { title: true } } },
+  });
+  if (!lesson) return { title: "Lesson not found — DataMarg" };
+
+  let blocks: any[] = [];
+  try { blocks = JSON.parse(lesson.contentJson || "[]"); } catch {}
+  const intro =
+    blocks.find((b) => b.t === "p")?.html ??
+    blocks.find((b) => b.t === "def")?.en ??
+    "";
+
+  const track = lesson.track.title.split(" — ")[0];
+  const title = `${lesson.title} — ${track} | DataMarg`;
+  const description =
+    clamp(intro) || `Learn ${lesson.title} with an interactive lesson, worked examples and practice you can run in the browser.`;
+  const url = `${SITE_URL}/learn/${lesson.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "article", siteName: "DataMarg" },
+    twitter: { card: "summary", title, description },
+  };
 }
 
 export default async function LessonPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -59,8 +59,18 @@ const P = (order, slug, title, functionName, descriptionMd, examples, starter, s
   order, slug, title, difficulty, functionName, descriptionMd,
   tagsCsv: tags.join(","), examplesJson: JSON.stringify(examples),
   starterCode: starter, solutionCode: solution, testsJson: JSON.stringify(tests),
-  hintsJson: JSON.stringify(hints), xp: 20,
+  hintsJson: JSON.stringify(hints), xp: xpFor(difficulty),
 });
+
+// A Super Hard problem used to pay exactly what an Easy one pays, because this
+// helper hardcoded 20 while the SQL and pandas modules already scaled by
+// difficulty. Same ladder as those, in one place, so the three agree.
+function xpFor(difficulty) {
+  if (difficulty === "Medium") return 30;
+  if (difficulty === "Hard") return 40;
+  if (difficulty === "Super Hard") return 50;
+  return 20;
+}
 
 /* ------------------------------------------------------------------ */
 /* Lesson content                                                      */
@@ -3666,11 +3676,17 @@ const deployLessons = [
 /* Extra graded practice problems (Easy / Medium / Hard / Super Hard) */
 /* attached to existing lessons by slug                               */
 /* ------------------------------------------------------------------ */
+// Every extra problem used to be created with order 50, so nine problems on the
+// strings lesson all sorted identically and their order on the page was whatever
+// the database felt like. Counting up from 50 keeps them after a lesson's inline
+// problems (which start at 1) and gives each a stable place.
+let exOrder = 50;
+
 const EX = (lessonSlug, diff, slug, title, fn, desc, examples, starter, solution, tests, hints, tags) =>
-  ({ lessonSlug, ...P(50, slug, title, fn, desc, examples, starter, solution, tests, hints, tags, diff) });
+  ({ lessonSlug, ...P(exOrder++, slug, title, fn, desc, examples, starter, solution, tests, hints, tags, diff) });
 
 
-const extraProblems = [
+export const extraProblems = [
   /* ---------- LOOPS ---------- */
   EX("loops", "Easy", "count-positives", "Count Positives", "count_positives",
     "Ek function `count_positives(nums)` banao jo list me kitne numbers 0 se bade hain wo ginti kare.",

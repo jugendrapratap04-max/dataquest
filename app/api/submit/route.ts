@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { getStreak } from "@/lib/progress";
 import { verifySolution } from "@/lib/verify";
+import { readJson, idOf } from "@/lib/http";
 
 // Record a submission. On the first passing submission for a problem, award XP.
 //
@@ -21,7 +22,10 @@ import { verifySolution } from "@/lib/verify";
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
-  const { problemId, code, passed } = await req.json();
+  const b = await readJson(req);
+  const problemId = idOf(b.problemId);
+  const code = b.code;
+  const passed = b.passed;
 
   if (!problemId) {
     return NextResponse.json({ error: "problemId required" }, { status: 400 });
@@ -31,10 +35,6 @@ export async function POST(req: Request) {
   if (!problem) {
     return NextResponse.json({ error: "problem not found" }, { status: 404 });
   }
-
-  const alreadySolved = await prisma.submission.findFirst({
-    where: { userId: user.id, problemId, passed: true },
-  });
 
   const submittedCode = typeof code === "string" ? code : "";
 
@@ -51,20 +51,47 @@ export async function POST(req: Request) {
     if (!result.passed) verifyNote = result.reason;
   }
 
+  // Recording the submission and paying for it have to happen together.
+  //
+  // They used to be a read ("have they solved this before?") followed by two
+  // separate writes. Fire twenty concurrent submits of one genuinely correct
+  // solution and all twenty read "not solved yet", so all twenty get paid — the
+  // leaderboard for the price of one right answer. Serializable is what makes
+  // the read part of the write; on a conflict Postgres aborts one side (P2034)
+  // and the retry then sees the winner's row.
+  //
   // A submission the server couldn't confirm is still a submission — it belongs
   // in the history, it just isn't a pass. Progress reads `passed`, so writing the
   // client's claim here would hand back everything the check just stopped.
-  await prisma.submission.create({
-    data: { userId: user.id, problemId, code: submittedCode, passed: verified },
-  });
+  const settle = async () =>
+    prisma.$transaction(
+      async (tx) => {
+        const alreadySolved = await tx.submission.findFirst({
+          where: { userId: user.id, problemId, passed: true },
+          select: { id: true },
+        });
+        await tx.submission.create({
+          data: { userId: user.id, problemId, code: submittedCode, passed: verified },
+        });
+        if (!verified || alreadySolved) return 0;
+        await tx.user.update({
+          where: { id: user.id },
+          data: { xp: { increment: problem.xp } },
+        });
+        return problem.xp;
+      },
+      { isolationLevel: "Serializable" }
+    );
 
   let awardedXp = 0;
-  if (verified && !alreadySolved) {
-    awardedXp = problem.xp;
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { xp: { increment: problem.xp } },
-    });
+  try {
+    awardedXp = await settle();
+  } catch (e: unknown) {
+    if ((e as { code?: string })?.code === "P2034") {
+      awardedXp = await settle();
+    } else {
+      throw e;
+    }
   }
 
   const updated = await prisma.user.findUnique({ where: { id: user.id } });
@@ -73,7 +100,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     awardedXp,
-    firstSolve: verified && !alreadySolved,
+    firstSolve: awardedXp > 0,
     xp: updated?.xp ?? user.xp,
     streak,
     // Set only when the client said "passed" and the server disagreed. The UI can

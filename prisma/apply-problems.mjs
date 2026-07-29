@@ -9,6 +9,7 @@
 import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
+import { trackLessons, extraProblems } from "./seed.mjs";
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,42 @@ const SETS = [
   ["SQL", sqlProblems],
   ["pandas/numpy", pandasProblems],
 ];
+
+// Push the seed's xp and order onto problems that already exist in the database.
+//
+// Two things were wrong and neither could be fixed by re-seeding a live database:
+// every problem created through seed.mjs paid a flat 20 XP regardless of
+// difficulty (so a Super Hard problem was worth the same as an Easy one, while
+// SQL and pandas correctly paid 20/30/40), and every "extra" problem was created
+// with order 50 — nine of them on the strings lesson alone, sorting arbitrarily.
+//
+// Only these two columns are touched. Nothing about the question, the tests or
+// anybody's progress is rewritten.
+async function syncXpAndOrder() {
+  const defs = [];
+  for (const lessons of Object.values(trackLessons)) {
+    for (const lesson of lessons) {
+      for (const p of lesson.problems ?? []) defs.push(p);
+    }
+  }
+  defs.push(...extraProblems);
+
+  let changed = 0;
+  for (const d of defs) {
+    const row = await prisma.problem.findUnique({
+      where: { slug: d.slug },
+      select: { xp: true, order: true },
+    });
+    if (!row) continue;
+    if (row.xp === d.xp && row.order === d.order) continue;
+    await prisma.problem.update({
+      where: { slug: d.slug },
+      data: { xp: d.xp, order: d.order },
+    });
+    changed++;
+  }
+  console.log(`\n   xp/order synced: ${changed} problem(s) updated of ${defs.length} defined`);
+}
 
 async function apply(label, problems) {
   let added = 0;
@@ -62,6 +99,7 @@ async function normaliseSkills() {
 async function main() {
   await normaliseSkills();
   for (const [label, problems] of SETS) await apply(label, problems);
+  await syncXpAndOrder();
 
   const total = await prisma.problem.count();
   const sql = await prisma.problem.count({ where: { kind: "sql" } });

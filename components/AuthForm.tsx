@@ -40,7 +40,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       });
       const data = await res.json();
       if (!res.ok) { setErr(data.error || "Something went wrong."); setBusy(false); return; }
-      router.push("/dashboard");
+      // A brand-new account goes straight into lesson 1 (/learn redirects to the
+      // first lesson), not to the dashboard. Of 14 real signups, 12 never opened
+      // a single lesson — and what they were shown one click earlier was a
+      // progress dashboard with no progress in it. Returning users still land on
+      // the dashboard, which is genuinely theirs by then.
+      router.push(isSignup ? "/learn" : "/dashboard");
       router.refresh();
     } catch {
       setErr("Network problem — please try again.");
@@ -62,19 +67,22 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
         {err && <div className="auth-err">{err}</div>}
 
+        {/* htmlFor/id on every field: a label that is merely a sibling of its
+            input is not a label to a screen reader, and this is the first form
+            anyone meets. */}
         {isSignup && (
           <div className="auth-field">
-            <label>Name</label>
-            <input className="auth-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jugendra Pratap" autoComplete="name" />
+            <label htmlFor="auth-name">Name</label>
+            <input id="auth-name" className="auth-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Jugendra Pratap" autoComplete="name" />
           </div>
         )}
         <div className="auth-field">
-          <label>Email</label>
-          <input className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" autoComplete="email" />
+          <label htmlFor="auth-email">Email</label>
+          <input id="auth-email" className="auth-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" autoComplete="email" />
         </div>
         <div className="auth-field">
-          <label>Password</label>
-          <input className="auth-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={isSignup ? "6+ characters" : "••••••••"} autoComplete={isSignup ? "new-password" : "current-password"} />
+          <label htmlFor="auth-password">Password</label>
+          <input id="auth-password" className="auth-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={isSignup ? "6+ characters" : "••••••••"} autoComplete={isSignup ? "new-password" : "current-password"} />
         </div>
 
         <button className="btn btn-primary auth-btn" type="submit" disabled={busy}>

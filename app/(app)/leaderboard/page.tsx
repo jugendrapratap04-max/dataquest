@@ -21,18 +21,39 @@ export default async function LeaderboardPage() {
   // is belt-and-braces — but leaving one page out is how the next page copied
   // from it ends up without one.
   if (!me) return null;
+  // Only people who have actually solved something appear here.
+  //
+  // This board used to be `findMany(orderBy: xp desc)` with no filter, so the
+  // five seeded demo accounts — 1450 to 3940 XP, and not one submission between
+  // them — sat on top of it. A real student with 20 honestly-earned XP opened
+  // the leaderboard and found himself ranked below five people who do not
+  // exist. Same trap as the seeded streak and the seeded Track.status, both
+  // already removed for exactly this reason.
+  //
+  // The rule is deliberately about *evidence*, not about a list of fake emails:
+  // XP with no passing submission behind it does not rank. Seeded accounts
+  // vanish, and a new student appears the moment they solve their first problem.
   const users = await prisma.user.findMany({
+    where: { submissions: { some: { passed: true } } },
     orderBy: [{ xp: "desc" }, { createdAt: "asc" }],
     take: 25,
+    select: { id: true, name: true, xp: true },
   });
   const myRank = me ? users.findIndex((u) => u.id === me.id) + 1 : 0;
 
   return (
     <>
       {/* Topbar already explains the leaderboard — only add what it can't. */}
-      {myRank > 0 && (
+      {myRank > 0 ? (
         <p className="page-intro">
           You are currently ranked <b>#{myRank}</b> out of {users.length}. 🔥
+        </p>
+      ) : (
+        // Without this, a student who hasn't solved anything just doesn't appear
+        // and is never told why — which reads as a broken page, not a rule.
+        <p className="page-intro">
+          Solve your first practice problem and you will appear here. Only solved
+          problems count towards the board.
         </p>
       )}
       <div className="card pad">

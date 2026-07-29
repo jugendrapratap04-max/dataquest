@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { unstable_cache } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
+import { prisma } from "@/lib/prisma";
 import { highlightPython } from "@/lib/highlight";
 
 // The public front door. Anyone who arrives without an account sees what's
@@ -10,6 +12,22 @@ import { highlightPython } from "@/lib/highlight";
 // No database work for a visitor: with no session cookie getCurrentUser()
 // returns null on the signature check alone, and the numbers below are static.
 // A cold database must never be the first thing a new student waits on.
+
+// The headline numbers were typed in by hand and had already drifted — the page
+// advertised 82 lessons while the database held 83, and every lesson written
+// widens the gap. Counted for real now, but cached for an hour and wrapped in a
+// fallback, because the rule above still holds: a visitor must never wait on a
+// cold database, and a database hiccup must not take the front door down.
+const FALLBACK_COUNTS = { lessons: 83, problems: 156 };
+
+const getLandingCounts = unstable_cache(
+  async () => {
+    const [lessons, problems] = await Promise.all([prisma.lesson.count(), prisma.problem.count()]);
+    return { lessons, problems };
+  },
+  ["landing-counts"],
+  { revalidate: 3600 }
+);
 
 const SAMPLE = `# Real Python. Runs right here, in your browser.
 marks = [72, 85, 91, 64]
@@ -55,6 +73,13 @@ const TRACKS = [
 export default async function LandingPage() {
   const user = await getCurrentUser();
   if (user) redirect("/dashboard");
+
+  let counts = FALLBACK_COUNTS;
+  try {
+    counts = await getLandingCounts();
+  } catch {
+    // Keep the last known-good numbers rather than rendering a broken hero.
+  }
 
   return (
     <div className="lp">
@@ -102,8 +127,8 @@ export default async function LandingPage() {
       </section>
 
       <section className="lp-stats">
-        <div><b className="num">82</b><span>lessons</span></div>
-        <div><b className="num">156</b><span>practice problems</span></div>
+        <div><b className="num">{counts.lessons}</b><span>lessons</span></div>
+        <div><b className="num">{counts.problems}</b><span>practice problems</span></div>
         <div><b className="num">9</b><span>tracks to job-ready</span></div>
         <div><b className="num">₹0</b><span>to learn everything</span></div>
       </section>

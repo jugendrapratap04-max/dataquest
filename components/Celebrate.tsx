@@ -51,13 +51,28 @@ export function Celebrate({
   // Pick the motivational line once on mount (lazy init keeps Math.random out of
   // the render body and stable across re-renders).
   const [line] = useState(() => sub ?? LINES[Math.floor(Math.random() * LINES.length)]);
+
+  // Escape closes it. Clicking the backdrop already did, but a keyboard user had
+  // no way out of a dialog that appears at the best moment in the app.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <>
       <Confetti />
       <div className="celebrate-overlay" onClick={onClose}>
-        <div className="celebrate-card" onClick={(e) => e.stopPropagation()}>
-          <div className="em">🏆</div>
-          <h2>{title}</h2>
+        <div
+          className="celebrate-card"
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="celebrate-title"
+        >
+          <div className="em" aria-hidden="true">🏆</div>
+          <h2 id="celebrate-title">{title}</h2>
           <p>{line}</p>
           {typeof xp === "number" && xp > 0 && <div className="celebrate-xp">+{xp} XP</div>}
           <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 6 }}>

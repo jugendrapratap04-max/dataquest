@@ -118,6 +118,14 @@ model Submission {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   problem   Problem  @relation(fields: [problemId], references: [id])
+
+  // This is the busiest table in the app and it had no index at all. It is read
+  // by userId on nearly every authed page render (the app layout, progress, the
+  // streak, focus, rooms), and getStreak reads every passing row a student has
+  // ever written. The first index serves the "have they solved this?" lookup in
+  // /api/submit; the second serves the activity and streak scans.
+  @@index([userId, problemId, passed])
+  @@index([userId, createdAt])
 }
 
 model Note {

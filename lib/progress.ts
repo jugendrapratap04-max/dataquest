@@ -176,7 +176,13 @@ async function getStreakImpl(userId: string): Promise<Streak> {
   return { streak: current, bestStreak: best };
 }
 
-/** Submissions per day for the last `days` days, oldest first. */
+/** Solved problems per day for the last `days` days, oldest first.
+ *
+ *  Counts passing submissions only, and that matters: this used to count every
+ *  submission while getStreak counted only passing ones, so the heatmap could
+ *  light a day green while the streak stayed at zero — two numbers on the same
+ *  page disagreeing about whether you studied. A green square now means the same
+ *  thing everywhere: you solved something that day. */
 export const getActivity = cache(getActivityImpl);
 async function getActivityImpl(userId: string, days = 28): Promise<number[]> {
   const start = new Date();
@@ -184,7 +190,7 @@ async function getActivityImpl(userId: string, days = 28): Promise<number[]> {
   start.setDate(start.getDate() - (days - 1));
 
   const subs = await prisma.submission.findMany({
-    where: { userId, createdAt: { gte: start } },
+    where: { userId, passed: true, createdAt: { gte: start } },
     select: { createdAt: true },
   });
 

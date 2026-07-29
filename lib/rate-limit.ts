@@ -53,6 +53,41 @@ function prune(now: number): void {
   }
 }
 
+// Signup had no throttle at all while login did, which is backwards: an account
+// is what buys access to the submission verifier, and creating one costs a
+// scrypt hash plus a row on a free-tier database. Same in-memory caveat as
+// above — a speed bump, not a wall — but a script that wants a thousand accounts
+// now has to work for them.
+const signups = new Map<string, Entry>();
+
+const SIGNUP_MAX = 5;                    // accounts per IP per window
+const SIGNUP_WINDOW_MS = 60 * 60 * 1000; // one hour
+const SIGNUP_LOCK_MS = 60 * 60 * 1000;
+
+/** Seconds remaining before this IP may create another account, or 0. */
+export function signupRetryAfter(key: string, now = Date.now()): number {
+  const e = signups.get(key);
+  if (!e) return 0;
+  if (e.lockedUntil > now) return Math.ceil((e.lockedUntil - now) / 1000);
+  return 0;
+}
+
+export function recordSignup(key: string, now = Date.now()): void {
+  let e = signups.get(key);
+  if (!e || now - e.windowStart > SIGNUP_WINDOW_MS) {
+    e = { fails: 0, windowStart: now, lockedUntil: 0 };
+  }
+  e.fails += 1;
+  if (e.fails >= SIGNUP_MAX) e.lockedUntil = now + SIGNUP_LOCK_MS;
+  signups.set(key, e);
+
+  if (signups.size > MAX_KEYS) {
+    for (const [k, v] of signups) {
+      if (v.lockedUntil <= now && now - v.windowStart > SIGNUP_WINDOW_MS) signups.delete(k);
+    }
+  }
+}
+
 /** Best-effort client IP from proxy headers; falls back to a shared bucket. */
 export function clientIp(req: Request): string {
   const xff = req.headers.get("x-forwarded-for");
