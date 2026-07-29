@@ -40,12 +40,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       });
       const data = await res.json();
       if (!res.ok) { setErr(data.error || "Something went wrong."); setBusy(false); return; }
-      // A brand-new account goes straight into lesson 1 (/learn redirects to the
-      // first lesson), not to the dashboard. Of 14 real signups, 12 never opened
-      // a single lesson — and what they were shown one click earlier was a
-      // progress dashboard with no progress in it. Returning users still land on
-      // the dashboard, which is genuinely theirs by then.
-      router.push(isSignup ? "/learn" : "/dashboard");
+      // A brand-new account goes to the one-time welcome, which asks four
+      // optional questions and then drops them into lesson 1 — not to the
+      // dashboard. Of 14 real signups, 12 never opened a single lesson, and what
+      // they were shown one click earlier was a progress dashboard with no
+      // progress in it. Returning users still land on the dashboard, which is
+      // genuinely theirs by then.
+      router.push(isSignup ? "/welcome" : "/dashboard");
       router.refresh();
     } catch {
       setErr("Network problem — please try again.");

@@ -24,6 +24,14 @@ model User {
   // lib/progress.ts now, exactly like Track.status was.
   createdAt    DateTime @default(now())
 
+  // Onboarding. All optional — a student who skips still gets an account.
+  gender       String?  // "male" | "female" | "unspecified"
+  institution  String?  // class or college, free text
+  interestsCsv String   @default("")
+  language     String   @default("en") // stated preference; no content varies by it yet
+  onboardedAt  DateTime?
+  welcomedAt   DateTime? // set the first time the welcome plays, so it plays once
+
   lessonProgress LessonProgress[]
   submissions    Submission[]
   notes          Note[]
@@ -67,6 +75,13 @@ model Track {
 // stays, so every existing page keeps working untouched and no student's
 // progress moves. Chapters can then be split for real, one subject at a time,
 // instead of in one risky rewrite.
+// Onboarding answers (docs/LEARNING-SPEC.md §5). All optional: a student who
+// skips the questions still gets an account and a neutral welcome.
+//
+// `gender` is one of "male" | "female" | "unspecified" — "prefer not to say" is
+// a real choice with its own welcome, not a missing answer.
+// `welcomedAt` is what makes the welcome play exactly once, ever.
+
 model Chapter {
   id      String @id @default(cuid())
   slug    String @unique

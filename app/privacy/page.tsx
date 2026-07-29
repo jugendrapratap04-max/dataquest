@@ -17,6 +17,14 @@ export default function PrivacyPage() {
       <h2>What we store</h2>
       <ul>
         <li><b>Your account</b> — name, email address, and your password stored only as a salted hash. We never hold your password itself.</li>
+        <li>
+          <b>What you tell us when you join</b> — the four optional answers on the welcome screen:
+          gender, your class or college, what you are here to learn, and the language you are most
+          comfortable in. Every one of them can be skipped, and skipping changes nothing except
+          which welcome you see. We use them to choose your welcome and to understand who the
+          platform is actually reaching. They are never shown to other students, never used for
+          advertising, and never sold or shared.
+        </li>
         <li><b>Your learning</b> — which lessons you have finished, the code you submit to practice problems, your XP, and the notes you write.</li>
         <li><b>Study sessions</b> — when a focus session or room sitting started and ended, and how much of it you were actually active for.</li>
         <li><b>Study rooms</b> — which rooms you joined, the preset messages and emoji you send in them, and doubts you choose to push to the discussion queue.</li>

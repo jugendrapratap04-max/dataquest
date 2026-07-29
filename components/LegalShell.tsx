@@ -4,7 +4,7 @@ import Link from "next/link";
  * route group on purpose: a visitor has to be able to read what they are
  * agreeing to before they have an account. */
 
-export const LEGAL_UPDATED = "22 July 2026";
+export const LEGAL_UPDATED = "29 July 2026";
 export const GRIEVANCE_EMAIL = "jugendrapratap04@gmail.com";
 
 const TABS = [

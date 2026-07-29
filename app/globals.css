@@ -1873,3 +1873,23 @@ select.inp { cursor:pointer; }
 .bk-gate h4 { margin:0 0 8px; font-size:15px; }
 .bk-gate p { margin:0 0 12px; font-size:13.5px; color:var(--ink-soft); }
 @media print { .bk-gate, .bk-locked-pill { display:none; } }
+
+/* ---- Onboarding and the one-time welcome ---------------------------------- */
+.ob-wrap { max-width:620px; margin:0 auto; padding:8px 0 40px; }
+.ob-form h1, .ob-welcome h1 { font-size:26px; margin:6px 0 8px; }
+.ob-sub { color:var(--ink-soft); font-size:14px; margin:0 0 22px; }
+.ob-field { margin-bottom:22px; }
+.ob-label { display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:9px; }
+.ob-choices { display:flex; flex-wrap:wrap; gap:8px; }
+.ob-chip { border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:20px; padding:8px 14px; font-size:13px; cursor:pointer; }
+.ob-chip:hover { border-color:var(--accent); }
+.ob-chip.on { background:var(--accent-soft); border-color:var(--accent); color:var(--accent-2); font-weight:700; }
+.ob-note { font-size:12px; color:var(--ink-faint); margin:9px 0 0; }
+.ob-actions { display:flex; gap:10px; align-items:center; margin-top:26px; }
+.ob-welcome { text-align:center; padding:40px 0; }
+.ob-art { font-size:72px; line-height:1; animation:ob-pop .5s ease both; }
+.ob-line { font-size:16px; color:var(--ink); margin:4px 0 14px; }
+.ob-welcome .ob-sub { max-width:460px; margin:0 auto 24px; }
+.ob-cta { padding:11px 20px; }
+@keyframes ob-pop { from { transform:scale(.6) translateY(10px); opacity:0; } to { transform:scale(1) translateY(0); opacity:1; } }
+@media (max-width:560px){ .ob-form h1, .ob-welcome h1 { font-size:22px; } .ob-art { font-size:60px; } }
