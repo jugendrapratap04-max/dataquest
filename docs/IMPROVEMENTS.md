@@ -1,5 +1,13 @@
 # DataMarg — Improvements Backlog
 
+> **Read [`ARCHITECTURE.md`](./ARCHITECTURE.md) first.** DataMarg is an
+> AI-powered, multi-subject learning ecosystem — not a Python course and not a
+> Data Science platform. Python is only the first subject, because a browser can
+> already run it. An earlier draft of this backlog read as though the platform
+> were Python/Data-Science shaped; that was a framing mistake in the document, not
+> the plan. Everything below is work on the **first subject** and on the **engine
+> every subject will share**.
+
 Everything Jugendra has asked for, in one place, with what is done, what is left,
 and what changes on screen.
 
@@ -221,7 +229,10 @@ already has a `prefers-reduced-motion` switch that must turn all of it off.
 of the feeling), animation second, and only on the dashboard and subject-switch
 screen rather than behind every lesson.
 
-### 10. ⬜ Many subjects — Java, C, C++, JavaScript, Web, AI/ML, DSA, Cloud, Security (XL)
+### 10. ⬜ Many subjects — the full list in [`ARCHITECTURE.md`](./ARCHITECTURE.md) (XL)
+Java, C, C++, JavaScript, Web Development, ML, AI, Agentic AI, Cloud, Cyber
+Security, DevOps, Mobile, DSA, System Design, Interview Prep, Projects, Career.
+
 This is the vision, and it is the most expensive item on the list. Two separate
 problems hide inside it:
 
