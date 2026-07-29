@@ -12,8 +12,15 @@ either in this file or in the repo.
 > standing brief and they override any assumption you would otherwise make.
 >
 > **Job:** rebuild the remaining stub lessons to the full standard, one at a
-> time, in the order listed in `docs/HANDOFF.md` §3. Python is finished (39/39).
-> Statistics is finished (11/11), including its practice problems.
+> time, in the order listed in `docs/HANDOFF.md` §3. Four subjects are already
+> finished — Python (39/39), Statistics (11/11), Pandas (6/6) and SQL (6/6).
+> The platform is 62 of 83 lessons at the full standard.
+>
+> The five that remain are viz (5), bi (3), ml (6), dl (3) and deploy (4). None
+> of them runs in the browser today and all five have **zero practice problems**,
+> so read §3 before choosing — this is a decision about what to teach, not about
+> which is cheapest to verify. Ask Jugendra which subject he wants next rather
+> than assuming.
 >
 > Work autonomously and do not stop to ask which lesson is next — the order is
 > written down. For each lesson: write it, verify it, commit it, deploy it, then
@@ -174,8 +181,41 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 - **New visuals need a `const` sweep.** `prefer-const` is an error, not a
   warning, and a `let` copied from an existing component will fail lint after
   the build has already passed.
+- **`def.en` and `def.hi` are plain-text fields.** Markup in them prints
+  literally — `<code>` tags appear on the page as `<code>`. `db:check` catches
+  it, but only after `db:lessons` has already pushed it to the live database.
+- **Never background a deploy with its output discarded.** `(npx vercel deploy
+  --prod --yes >/dev/null 2>&1 &)` hides a failure completely: the push
+  succeeds, nothing is live, and the next check says 404 with no explanation of
+  why. Run it in the foreground, or tee the output somewhere you will read.
+- **`npx prisma migrate dev` sometimes fails with P1017 "server has closed the
+  connection"** against Neon. It is a dropped idle connection, not a schema
+  problem — run the same command again and it applies.
 
 ---
+
+## 4b. Features shipped alongside the lessons
+
+Not lesson work, but you will meet them and they change what "done" means.
+
+- **The lock is content-driven.** `lib/progress.ts` marks a subject `locked`
+  when any of its lessons is still a stub, judged by the five teaching blocks
+  `check-syllabus.mjs` grades on. Finish a subject and it opens on the next page
+  load — there is no flag to flip, and the roadmap, the dashboard tiles and the
+  challenge subject-picker all follow it automatically.
+- **Guests can see everything except their own data.** Dashboard, analytics,
+  leaderboard, certificates and the resume builder render signed-out with honest
+  zeros. Only `/notes`, `/focus`, `/rooms`, `/welcome` and `/feedback` redirect,
+  because those hold one person's own data and there is nothing to show a
+  stranger. Use `<GuestBanner>` rather than inventing another prompt.
+- **`ProblemAttempt`** autosaves the practice editor, stamps `startedAt` on the
+  first save and records `solvedSeconds` on the first pass. The lesson page's
+  practice button points at the first **unsolved** problem, not `problems[0]`.
+- **Challenges** (`/challenge`) are the async half of PRD chapter 5: a frozen
+  set of quiz questions with a shareable code, marked server-side, one scored
+  run per person. Questions come from the `{t:"quiz"}` blocks inside lesson
+  content, so **a subject only appears in the picker once its lessons carry
+  quizzes** — another thing that grows by itself as subjects are written.
 
 ## 5. Two things only Jugendra decides
 
