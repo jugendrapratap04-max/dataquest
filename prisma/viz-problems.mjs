@@ -84,6 +84,59 @@ const vizProblems = [
     ],
     ["Build the list in the stated order: count, mean, median, sd.", "`len()` for the count — do not round that one.", "`st.stdev` is the sample standard deviation, dividing by n-1. `st.pstdev` divides by n and gives a different answer."],
     ["eda", "statistics"]),
+
+  /* ================= 2. matplotlib-basics — the chart as an object ================= */
+  VP("matplotlib-basics", "Easy", 211, "mpl-bar-heights", "Read the Bars Back", "bar_heights",
+    "A bar's **height is its value** — which is what makes a bar chart checkable without looking at it.\n\nWrite a function `bar_heights(labels, values)` that draws a bar chart of `values` against `labels` and returns the heights of the bars it drew, as a list of floats.\n\nBuild the chart with `fig, ax = plt.subplots()`, then read `ax.patches` — one rectangle per bar. Do not call `plt.show()`; the page shows your figure in the **Chart** tab.",
+    [{ input: 'labels=["a", "b", "c"], values=[5, 3, 8]', output: "[5.0, 3.0, 8.0]" }],
+    "import matplotlib.pyplot as plt\n\ndef bar_heights(labels, values):\n    pass\n",
+    "import matplotlib.pyplot as plt\n\ndef bar_heights(labels, values):\n    fig, ax = plt.subplots()\n    ax.bar(labels, values)\n    return [float(p.get_height()) for p in ax.patches]\n",
+    [
+      { args: [["a", "b", "c"], [5, 3, 8]], expected: [5, 3, 8] },
+      { args: [["Delhi", "Mumbai"], [340, 512]], expected: [340, 512] },
+      { args: [["only"], [7]], expected: [7] },
+    ],
+    ["`fig, ax = plt.subplots()` then `ax.bar(labels, values)`.", "`ax.patches` is the list of rectangles — one per bar.", "`p.get_height()` returns a NumPy float, so wrap each one in `float(...)`."],
+    ["matplotlib", "bar-chart"]),
+
+  VP("matplotlib-basics", "Easy", 212, "mpl-chart-summary", "Label It, Then Check It", "chart_summary",
+    "A chart is not finished until it has a title. And a label you set can be read straight back off the Axes, which is how you know it landed.\n\nWrite a function `chart_summary(labels, values, title)` that draws the bar chart, sets `title` on it, and returns the list `[title_read_back, number_of_bars, tallest_height]`. Read the title with `ax.get_title()` rather than returning the argument.",
+    [{ input: 'labels=["a", "b"], values=[4, 9], title="Sales"', output: '["Sales", 2, 9.0]' }],
+    "import matplotlib.pyplot as plt\n\ndef chart_summary(labels, values, title):\n    pass\n",
+    "import matplotlib.pyplot as plt\n\ndef chart_summary(labels, values, title):\n    fig, ax = plt.subplots()\n    ax.bar(labels, values)\n    ax.set_title(title)\n    return [ax.get_title(), len(ax.patches), float(max(p.get_height() for p in ax.patches))]\n",
+    [
+      { args: [["a", "b"], [4, 9], "Sales"], expected: ["Sales", 2, 9] },
+      { args: [["x", "y", "z"], [1, 2, 3], "Growth"], expected: ["Growth", 3, 3] },
+      { args: [["one"], [12], "Only one"], expected: ["Only one", 1, 12] },
+    ],
+    ["`ax.set_title(title)` sets it; `ax.get_title()` reads it back.", "The number of bars is `len(ax.patches)`.", "The tallest is `max(p.get_height() for p in ax.patches)` — wrap it in `float(...)`."],
+    ["matplotlib", "labels"]),
+
+  VP("matplotlib-basics", "Medium", 213, "mpl-bin-counts", "What a Histogram Counts", "bin_counts",
+    "A histogram is a counting exercise: split the range into equal-width buckets, then count how many values land in each.\n\nWrite a function `bin_counts(values, bins)` that draws a histogram of `values` with `bins` buckets and returns the count in each bucket, as a list of ints, left to right.\n\nAn empty bucket is a real answer — expect a 0 in the middle sometimes.",
+    [{ input: "values=[1, 2, 2, 3, 8, 9], bins=3", output: "[4, 0, 2]" }],
+    "import matplotlib.pyplot as plt\n\ndef bin_counts(values, bins):\n    pass\n",
+    "import matplotlib.pyplot as plt\n\ndef bin_counts(values, bins):\n    fig, ax = plt.subplots()\n    ax.hist(values, bins=bins)\n    return [int(p.get_height()) for p in ax.patches]\n",
+    [
+      { args: [[1, 2, 2, 3, 8, 9], 3], expected: [4, 0, 2] },
+      { args: [[19, 21, 22, 22, 23, 23, 23, 24, 25, 25, 26, 28, 31, 34, 41], 5], expected: [7, 4, 2, 1, 1] },
+      { args: [[1, 1, 2, 2], 2], expected: [2, 2] },
+    ],
+    ["`ax.hist(values, bins=bins)` — pass `bins` through, do not hardcode it.", "The bars are in `ax.patches`, already in left-to-right order.", "A count is a whole number: `int(p.get_height())`."],
+    ["matplotlib", "histogram"]),
+
+  VP("matplotlib-basics", "Medium", 214, "mpl-line-bottom", "Where the Axis Starts", "line_bottom",
+    "A line chart does **not** start at zero by default, and usually should not — a line is read by its slope, and forcing zero can flatten the trend you were trying to show. A bar chart is the opposite case.\n\nWrite a function `line_bottom(values, zero)` that draws a line chart of `values`. If `zero` is True, force the y-axis to start at 0 with `ax.set_ylim(bottom=0)`. Either way, return the **bottom** of the y-axis, rounded to 2 decimals.",
+    [{ input: "values=[180, 190, 200], zero=False", output: "179.0" }, { input: "values=[180, 190, 200], zero=True", output: "0.0" }],
+    "import matplotlib.pyplot as plt\n\ndef line_bottom(values, zero):\n    pass\n",
+    "import matplotlib.pyplot as plt\n\ndef line_bottom(values, zero):\n    fig, ax = plt.subplots()\n    ax.plot(values)\n    if zero:\n        ax.set_ylim(bottom=0)\n    return round(float(ax.get_ylim()[0]), 2)\n",
+    [
+      { args: [[180, 190, 200], false], expected: 179 },
+      { args: [[180, 190, 200], true], expected: 0 },
+      { args: [[10, 20, 30], false], expected: 9 },
+    ],
+    ["`ax.plot(values)` is enough — with one list, matplotlib uses 0, 1, 2… for x.", "`ax.get_ylim()` returns (bottom, top); you want index 0.", "179 is not a magic number: matplotlib leaves a 5% margin below the smallest value, and 5% of the range 180-200 is 1."],
+    ["matplotlib", "axis-limits"]),
 ];
 
 export { vizProblems };

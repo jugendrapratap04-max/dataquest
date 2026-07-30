@@ -136,14 +136,23 @@ async function captureFigure(py: any): Promise<string | undefined> {
   }
 }
 
+/* Both runners below silence the streams while packages load, then install the
+ * collectors. `loadPackagesFromImports` narrates to stderr — "Loading pandas,
+ * numpy", "matplotlib already loaded from default channel", "No new packages to
+ * load" — and stderr is routed into the console pane, so the first thing a student
+ * saw above their own output was three lines of Pyodide's internal bookkeeping. */
+
 /** Run raw Python and return captured stdout, for a console with no test cases. */
 export async function runPython(code: string): Promise<{ stdout: string; error?: string }> {
   const py = await getPyodide();
+  py.setStdout({ batched: () => {} });
+  py.setStderr({ batched: () => {} });
+  try { await py.loadPackagesFromImports(code); } catch {}
+
   let stdout = "";
   py.setStdout({ batched: (s: string) => { stdout += s + "\n"; } });
   py.setStderr({ batched: (s: string) => { stdout += s + "\n"; } });
   try {
-    try { await py.loadPackagesFromImports(code); } catch {}
     await py.runPythonAsync(code);
     return { stdout };
   } catch (e: any) {
@@ -164,6 +173,10 @@ export async function runTests(
   tests: TestCase[]
 ): Promise<RunResult> {
   const py = await getPyodide();
+  py.setStdout({ batched: () => {} });
+  py.setStderr({ batched: () => {} });
+  try { await py.loadPackagesFromImports(userCode); } catch {}
+
   let stdout = "";
   py.setStdout({ batched: (s: string) => { stdout += s + "\n"; } });
   py.setStderr({ batched: (s: string) => { stdout += s + "\n"; } });
@@ -175,7 +188,6 @@ export async function runTests(
   const ns = py.globals.get("dict")();
   try {
     try {
-      try { await py.loadPackagesFromImports(userCode); } catch {}
       await py.runPythonAsync(userCode, { globals: ns });
     } catch (e: any) {
       return {
