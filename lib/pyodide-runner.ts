@@ -50,17 +50,6 @@ def __dq_fig():
 __dq_fig()
 `;
 
-async function captureFigure(py: any): Promise<string | undefined> {
-  const probe = py.globals.get("dict")();
-  try {
-    const uri = await py.runPythonAsync(FIGURE_PROBE, { globals: probe });
-    return typeof uri === "string" && uri.length > 0 ? uri : undefined;
-  } catch {
-    return undefined;
-  } finally {
-    try { probe.destroy(); } catch {}
-  }
-}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -95,9 +84,16 @@ function eq(a: unknown, b: unknown): boolean {
   try { return JSON.stringify(a) === JSON.stringify(b); } catch { return a === b; }
 }
 
+/** Pyodide's default turns a Python dict into a JS **Map**, and
+ *  `JSON.stringify(new Map([["a", 1]]))` is `"{}"` — so a problem whose answer is
+ *  a dict would compare an empty object against the expected one and fail every
+ *  test no matter what the student wrote. `dict_converter` gives a plain object
+ *  instead. The same three lines exist in lib/verify.ts and
+ *  prisma/check-content.mjs and all three have to agree, or the browser, the
+ *  server and the content check disagree about whether an answer is correct. */
 function toJs(v: any): unknown {
   if (v && typeof v.toJs === "function") {
-    const j = v.toJs();
+    const j = v.toJs({ dict_converter: Object.fromEntries });
     try { v.destroy?.(); } catch {}
     return j;
   }
@@ -126,7 +122,21 @@ function errTail(e: any, n = 4): string {
   return lines.slice(-n).join("\n") || String(e?.message ?? e) || "Python error";
 }
 
-/** Run raw Python and return captured stdout (used by the free-play console). */
+/** Runs FIGURE_PROBE in a namespace of its own, so the probe's own name does not
+ *  end up in the student's globals. */
+async function captureFigure(py: any): Promise<string | undefined> {
+  const probe = py.globals.get("dict")();
+  try {
+    const uri = await py.runPythonAsync(FIGURE_PROBE, { globals: probe });
+    return typeof uri === "string" && uri.length > 0 ? uri : undefined;
+  } catch {
+    return undefined;
+  } finally {
+    try { probe.destroy(); } catch {}
+  }
+}
+
+/** Run raw Python and return captured stdout, for a console with no test cases. */
 export async function runPython(code: string): Promise<{ stdout: string; error?: string }> {
   const py = await getPyodide();
   let stdout = "";

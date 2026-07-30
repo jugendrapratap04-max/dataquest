@@ -152,9 +152,12 @@ function isTimeout(e: unknown): boolean {
   return s.includes("KeyboardInterrupt");
 }
 
+/** dict_converter for the same reason as in lib/pyodide-runner.ts: without it a
+ *  dict answer arrives as a Map, stringifies to "{}", and the server refuses a
+ *  solution the browser just accepted. Keep the three copies identical. */
 function toJs(v: any): unknown {
   if (v && typeof v.toJs === "function") {
-    const j = v.toJs();
+    const j = v.toJs({ dict_converter: Object.fromEntries });
     try { v.destroy?.(); } catch {}
     return j;
   }

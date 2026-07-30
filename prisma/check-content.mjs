@@ -30,8 +30,11 @@ const prisma = new PrismaClient();
 // 45.0 == 45, which is the comparison the real grader uses — a stricter one here
 // would report failures students never see.
 const eq = (a, b) => { try { return JSON.stringify(a) === JSON.stringify(b); } catch { return a === b; } };
+// dict_converter, for the same reason as lib/pyodide-runner.ts: the default hands
+// back a Map, which stringifies to "{}", so a dict answer would fail here while
+// passing in the browser. Keep the three copies identical.
 const toJs = (v) => {
-  if (v && typeof v.toJs === "function") { const j = v.toJs(); try { v.destroy?.(); } catch {} return j; }
+  if (v && typeof v.toJs === "function") { const j = v.toJs({ dict_converter: Object.fromEntries }); try { v.destroy?.(); } catch {} return j; }
   return v;
 };
 const lastLine = (e) => {

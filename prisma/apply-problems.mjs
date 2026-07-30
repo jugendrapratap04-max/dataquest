@@ -9,6 +9,7 @@
 import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
+import { vizProblems } from "./viz-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
@@ -17,6 +18,7 @@ const prisma = new PrismaClient();
 const SETS = [
   ["SQL", sqlProblems],
   ["pandas/numpy", pandasProblems],
+  ["viz/EDA", vizProblems],
   ["topic gaps", topicProblems],
 ];
 

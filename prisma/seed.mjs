@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { pathToFileURL } from "url";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
+import { vizProblems } from "./viz-problems.mjs";
+import { topicProblems } from "./topic-problems.mjs";
 import { scryptSync, randomBytes } from "crypto";
 const prisma = new PrismaClient();
 
@@ -5286,52 +5288,129 @@ const pandasLessons = [
 ];
 
 /* ===================== DATA VIZ & EDA ===================== */
+const VZ1 = [
+  { t: "objectives", items: [
+    "Say what a <b>summary statistic</b> throws away, and why it throws it away",
+    "Read <b>Anscombe's quartet</b> — four datasets with the same summary and nothing else in common",
+    "Run the first five minutes of <b>EDA</b> on a dataset you have never seen",
+    "Name the two things a chart catches that a table of numbers hides: <b>shape</b> and <b>outliers</b>",
+  ]},
+  { t: "hook", q: "Four datasets. Eleven points each, the same mean, the same standard deviation, the same correlation to two decimal places, and the same fitted line. One of them contains no relationship at all. How would you ever find out?", why: "You would not — not from the numbers. Every number you would normally check agrees across all four, and one of them is a straight line, one is a clean curve, one is ten points in a row plus a single stray, and one is a vertical stack of identical values with one far-away point holding the whole correlation up by itself.<br/><br/>Francis Anscombe published those four datasets in 1973 for exactly this reason, and it is the reason this subject exists. A statistic is a <b>compression</b>: it takes eleven numbers and returns one. Compression is useful precisely because it discards — that is the whole trick — and what it discards here is the <b>shape</b>.<br/><br/>A chart does not compress. It shows every point, and it costs you about ten seconds. Those ten seconds are the cheapest quality check in data work, and you are about to see them catch three problems that four correct statistics missed." },
+  { t: "def", term: "Exploratory Data Analysis (EDA)", en: "Looking at a dataset before you make any claim about it: how big it is, what is missing, how each column is spread, and which columns move together. It comes before modelling, before charts for other people, and before any number you are willing to say out loud.", hi: "EDA is not a phase you finish; it is the habit of not trusting a dataset you have not looked at. The order matters and it is always the same: <b>shape → missing → spread → relationships</b>. Skip a step and you will find it later, usually in front of somebody who asked a reasonable question." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the first thing a data analyst does with a new file is not build a model, it is spend twenty minutes on the four checks in this lesson. This is also the most common interview task at the junior end — you are handed a CSV and asked to say something true about it in fifteen minutes. Candidates who start plotting immediately do well; candidates who start with <code>describe()</code> and stop there report an average, get asked \"is that typical?\", and have no answer." },
+
+  { t: "h2", n: "1", text: "A summary is a compression" },
+  { t: "p", html: "Eleven days of sales from one small shop. Five numbers describe them, and every one of the five is correct." },
+  { t: "code", file: "summary.py", code: "import statistics as st\n\nsales = [12, 14, 15, 15, 16, 18, 19, 21, 24, 31, 87]\n\nprint(\"n      =\", len(sales))\nprint(\"mean   =\", round(st.mean(sales), 2))\nprint(\"median =\", st.median(sales))\nprint(\"sd     =\", round(st.stdev(sales), 2))\nprint(\"min    =\", min(sales), \" max =\", max(sales))", output: "n      = 11\nmean   = 24.73\nmedian = 18\nsd     = 21.34\nmin    = 12  max = 87" },
+  { t: "p", html: "Read the mean and the median next to each other. The mean is <b>24.73</b> and the median is <b>18</b>, and the mean is higher than nine of the eleven actual days. Describing this shop as \"about 25 sales a day\" would be arithmetically perfect and factually useless — there is no such day.<br/><br/>The 87 is doing all of it. One unusual day has moved the mean by six and tripled the standard deviation, and none of the five numbers says so. The gap between the mean and the median is the only hint, and reading that gap is a learnable habit: <b>when the mean sits well above the median, something big is sitting in the tail</b>." },
+
+  { t: "h2", n: "2", text: "Anscombe's quartet" },
+  { t: "p", html: "Now the four datasets from the hook, with the summary of each printed side by side. The x values are identical in the first three; only the last set changes them." },
+  { t: "code", file: "anscombe.py", code: "import pandas as pd\n\nx_common = [10, 8, 13, 9, 11, 14, 6, 4, 12, 7, 5]\nquartet = {\n    \"I\":   (x_common, [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]),\n    \"II\":  (x_common, [9.14, 8.14, 8.74, 8.77, 9.26, 8.10, 6.13, 3.10, 9.13, 7.26, 4.74]),\n    \"III\": (x_common, [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]),\n    \"IV\":  ([8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8], [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]),\n}\n\nfor name, (x, y) in quartet.items():\n    df = pd.DataFrame({\"x\": x, \"y\": y})\n    print(name,\n          \"mean y =\", round(float(df[\"y\"].mean()), 2),\n          \" sd y =\", round(float(df[\"y\"].std()), 2),\n          \" corr =\", round(float(df[\"x\"].corr(df[\"y\"])), 3))", output: "I mean y = 7.5  sd y = 2.03  corr = 0.816\nII mean y = 7.5  sd y = 2.03  corr = 0.816\nIII mean y = 7.5  sd y = 2.03  corr = 0.816\nIV mean y = 7.5  sd y = 2.03  corr = 0.817" },
+  { t: "p", html: "Four rows, and the only difference anywhere is one thousandth in the last correlation. If these four datasets arrived in your inbox as summary tables you would report the same finding for all four, and you would be wrong about three of them.<br/><br/>The <code>float()</code> and <code>round()</code> calls are not decoration. <code>df[\"y\"].mean()</code> hands back a NumPy float, and printing one of those in a list or a dictionary shows you <code>np.float64(7.5)</code> rather than <code>7.5</code> — worth converting early, because that repr has a habit of appearing in reports." },
+  { t: "viz", name: "anscombe-lab" },
+  { t: "p", html: "Do this in the order the panel asks. Read the table with the charts still hidden and commit to an answer: <b>which set is the odd one out?</b> There is no way to tell, and noticing that you cannot tell is the point of the exercise.<br/><br/>Then press the button. The dashed line is the same in all four panels — it has to be, because the numbers that produce it are identical. Tap each panel and read what it was hiding. Set II is the one worth sitting with: there is a <b>perfect</b> relationship in it, and the summary reports a middling 0.82, because correlation only measures how well a <i>straight</i> line fits." },
+
+  { t: "h2", n: "3", text: "The first five minutes with a dataset" },
+  { t: "p", html: "Before any chart, four questions, always in this order: how big is it, what is missing, how is each column spread, and what moves with what." },
+  { t: "code", file: "first_look.py", code: "import pandas as pd\n\nrows = [\n    {\"city\": \"Delhi\",  \"orders\": 340, \"rating\": 4.2},\n    {\"city\": \"Mumbai\", \"orders\": 512, \"rating\": None},\n    {\"city\": \"Pune\",   \"orders\": 198, \"rating\": 3.9},\n    {\"city\": \"Jaipur\", \"orders\": 260, \"rating\": 4.4},\n    {\"city\": \"Delhi\",  \"orders\": 355, \"rating\": 4.1},\n]\ndf = pd.DataFrame(rows)\n\nprint(\"shape         :\", df.shape)\nprint(\"missing       :\", {c: int(n) for c, n in df.isna().sum().items()})\nprint(\"unique cities :\", df[\"city\"].nunique())\nprint(\"orders range  :\", int(df[\"orders\"].min()), \"to\", int(df[\"orders\"].max()))\nprint(\"mean rating   :\", round(float(df[\"rating\"].mean()), 2))", output: "shape         : (5, 3)\nmissing       : {'city': 0, 'orders': 0, 'rating': 1}\nunique cities : 4\norders range  : 198 to 512\nmean rating   : 4.15" },
+  { t: "p", html: "Five rows and there is already something to say: one rating is missing, and <b>four unique cities across five rows</b> means one city appears twice — so \"orders per city\" and \"orders per row\" are different questions.<br/><br/>The mean rating of <b>4.15</b> is the average of four values, not five. <code>mean()</code> skipped the missing one silently, which is the sensible default and is also why you print the missing counts <i>before</i> you print any average. On five rows you would have spotted it anyway; on fifty thousand the only thing standing between you and a wrong number is that one line." },
+
+  { t: "h2", n: "4", text: "One point can be the entire correlation" },
+  { t: "p", html: "Set IV of the quartet again, on its own. Its correlation of 0.82 sounds like a finding. Watch what it is made of." },
+  { t: "code", file: "one_point.py", code: "import pandas as pd\n\nx = [8, 8, 8, 8, 8, 8, 8, 19, 8, 8, 8]\ny = [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.50, 5.56, 7.91, 6.89]\ndf = pd.DataFrame({\"x\": x, \"y\": y})\n\nprint(\"all 11 points   :\", round(float(df[\"x\"].corr(df[\"y\"])), 3))\n\nrest = df[df[\"x\"] != 19]\nprint(\"drop one point  :\", len(df), \"rows ->\", len(rest), \"rows\")\nprint(\"spread of x now :\", round(float(rest[\"x\"].std()), 3))\nprint(\"every x is 8    :\", bool((rest[\"x\"] == 8).all()))", output: "all 11 points   : 0.817\ndrop one point  : 11 rows -> 10 rows\nspread of x now : 0.0\nevery x is 8    : True" },
+  { t: "p", html: "Remove one row out of eleven and <code>x</code> stops varying at all — every remaining value is 8, and its spread is exactly zero. A correlation asks \"when x moves, does y move with it?\", and here x never moves. There is nothing to correlate, so the honest answer is not a small number, it is <b>no answer</b>.<br/><br/>Which means the 0.817 was manufactured entirely by the single point at x=19. One row in eleven. A scatter plot shows you that in the time it takes to glance at it; the correlation coefficient will never mention it, no matter how many decimal places you print." },
+
+  { t: "think", q: "You have one column of fifty thousand numbers. Why is a histogram a better first move than <code>describe()</code>?", a: "Because <code>describe()</code> answers questions you already know how to ask, and a histogram answers the one you don't.<br/><br/>What <code>describe()</code> gives you is eight numbers: count, mean, standard deviation, min, three quartiles, max. Every one is a compression of fifty thousand values, and each one assumes the question is worth asking. Together they describe a single hump reasonably well — and they describe anything else badly.<br/><br/>A histogram shows the <b>shape</b>, and shape is where the surprises live. Two humps mean you have two populations mixed in one column, and no combination of those eight numbers will say so — the mean lands in the empty valley between them, describing nobody. A wall of values at exactly zero usually means \"missing, recorded as 0\". A hard edge at 100 means the value was capped somewhere upstream. A long thin tail to the right tells you the mean is being dragged and the median is the number you should be quoting.<br/><br/>None of those four findings is visible in a summary table, and all four change what you do next. That is the trade: <code>describe()</code> is faster to read, and a histogram is the one that tells you when your reading of it is wrong. In practice you do both, in that order, and you never skip the second." },
+  { t: "analogy", concept: "Summary statistics", real: "A batting average", html: "Two batsmen, both averaging 40. You have one place left in the team.<br/><br/>The first scores between 35 and 45 nearly every innings. The second alternates: 0, then 80, then 0, then 80. Identical average, and they are not remotely the same player — one is who you pick to hold an innings together, the other is who you pick when only a big score will do. The average cannot tell them apart because averaging is exactly the operation that removes the difference.<br/><br/>Every selector knows this, which is why nobody picks a side from averages alone; they look at the scores. \"Look at the scores\" is what a chart is. And the analogy carries the cost too: the full list of innings is far more information than you can hold in your head, which is why the average exists and why you keep using it. The mistake is never <i>computing</i> the average — it is stopping there." },
+
+  { t: "trace", intro: "A four-value dataset, deliberately lopsided. Work out what each name holds after its line has run.", code: "import statistics as st\nvalues = [4, 4, 4, 12]\navg = st.mean(values)\nspread = round(st.stdev(values), 2)\nabove = len([v for v in values if v > avg])", steps: [
+    { q: "After line 3, <code>avg</code> is", answer: "6", why: "4 + 4 + 4 + 12 is 24, divided by 4. Note where 6 sits: it is above three of the four values and far below the fourth. The average of this dataset is not a value the dataset ever takes." },
+    { q: "After line 4, <code>spread</code> is", answer: "4.0", why: "The deviations from 6 are -2, -2, -2 and +6. Squared and averaged over n-1 that gives 16, whose square root is 4. A standard deviation of 4 on a mean of 6 is enormous, and it is the number that should stop you quoting the mean on its own." },
+    { q: "After line 5, <code>above</code> is", answer: "1", why: "Only the 12 is above 6. One value in four sits above the average and three sit below it — a shape the mean and the standard deviation together still cannot describe, because neither of them says <i>which side</i> the weight is on." },
+  ]},
+
+  { t: "drills", intro: "Eleven ways to interrogate a dataset before you draw it. Write each one yourself before you open the answer.", items: [
+    { task: "The mean of four numbers.", code: "import statistics as st\nprint(st.mean([2, 4, 6, 8]))", out: "5" },
+    { task: "Print the mean and the median of the same list, and notice the gap.", code: "import statistics as st\nv = [1, 2, 3, 100]\nprint(st.mean(v), st.median(v))", out: "26.5 2.5" },
+    { task: "The standard deviation — the same eight values as the statistics track.", code: "import statistics as st\nprint(round(st.stdev([2, 4, 4, 4, 5, 5, 7, 9]), 2))", out: "2.14" },
+    { task: "The range: how far apart the two extremes are.", code: "v = [12, 15, 19, 87]\nprint(max(v) - min(v))", out: "75" },
+    { task: "How many values sit above the mean?", code: "import statistics as st\nv = [12, 15, 19, 87]\nprint(len([x for x in v if x > st.mean(v)]))", out: "1" },
+    { task: "The shape of a DataFrame — rows first, then columns.", code: "import pandas as pd\ndf = pd.DataFrame({\"a\": [1, 2, 3], \"b\": [4, 5, 6]})\nprint(df.shape)", out: "(3, 2)" },
+    { task: "How many values are missing in each column?", code: "import pandas as pd\ndf = pd.DataFrame({\"a\": [1, None, 3], \"b\": [4, 5, None]})\nprint({c: int(n) for c, n in df.isna().sum().items()})", out: "{'a': 1, 'b': 1}" },
+    { task: "How many different cities are in this column?", code: "import pandas as pd\ncity = pd.Series([\"Delhi\", \"Pune\", \"Delhi\", \"Jaipur\"])\nprint(city.nunique())", out: "3" },
+    { task: "The correlation between two columns that move together exactly.", code: "import pandas as pd\ndf = pd.DataFrame({\"x\": [1, 2, 3, 4], \"y\": [2, 4, 6, 8]})\nprint(round(float(df[\"x\"].corr(df[\"y\"])), 2))", out: "1.0" },
+    { task: "Count how often each category appears.", code: "import pandas as pd\ncity = pd.Series([\"Delhi\", \"Pune\", \"Delhi\", \"Jaipur\"])\nprint(city.value_counts().to_dict())", out: "{'Delhi': 2, 'Pune': 1, 'Jaipur': 1}" },
+    { task: "How many rows clear a threshold, out of how many altogether?", code: "import pandas as pd\ndf = pd.DataFrame({\"orders\": [340, 512, 198, 260]})\nprint(int((df[\"orders\"] > 300).sum()), \"of\", len(df))", out: "2 of 4" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "print(round(df[\"price\"].mean(), 2))\n# \"the average price is 812.45\"", why: "A mean on its own cannot be checked by whoever reads it. 812.45 from four rows and 812.45 from forty thousand are different claims, and a mean with a huge spread behind it is a different claim again. Nobody can tell which one you have.", fix: "print(len(df), round(df[\"price\"].mean(), 2), round(df[\"price\"].std(), 2))" },
+    { bad: "if df[\"x\"].corr(df[\"y\"]) > 0.8:\n    print(\"strong relationship\")", why: "Correlation measures how well a <b>straight</b> line fits, and nothing else. Set II of the quartet has a flawless curve and scores 0.82; set IV has no relationship whatsoever and also scores 0.82. The number cannot distinguish them; a scatter plot cannot fail to.", fix: "# plot x against y first, then decide what the number means" },
+    { bad: "df = df[df[\"value\"] < 1000]   # drop the outliers", why: "Deleting the surprising rows before looking at them throws away the most informative part of the dataset. An outlier is either a data-entry error, a different population that got mixed in, or the single most interesting row you have — and those three need three different responses.", fix: "print(df[df[\"value\"] >= 1000])   # look at them, then decide" },
+    { bad: "print(df[\"user_id\"].mean())", why: "An ID is a label that happens to be written with digits. Its average is a number with no referent — halfway between two customers is not a customer — and it will sit in a report looking exactly like a finding.", fix: "print(df[\"user_id\"].nunique())   # the question was probably \"how many?\"" },
+  ]},
+
+  { t: "debug", intro: "This reports the average rating from four reviews. Three people rated it and one has not rated it yet. Every rating given is between 4.0 and 5.0, and the function returns 3.38. Read it before you open the fix.", code: "import pandas as pd\n\ndef mean_rating(rows):\n    df = pd.DataFrame(rows)\n    return round(float(df[\"rating\"].fillna(0).mean()), 2)\n\ndata = [{\"rating\": 4.0}, {\"rating\": 5.0}, {\"rating\": None}, {\"rating\": 4.5}]\nprint(mean_rating(data))", symptom: "returns 3.38 when every rating in the data is between 4.0 and 5.0 - an average cannot be smaller than the smallest value it averaged", q: "Which line invents a number that nobody entered?", fix: "import pandas as pd\n\ndef mean_rating(rows):\n    df = pd.DataFrame(rows)\n    return round(float(df[\"rating\"].dropna().mean()), 2)\n\ndata = [{\"rating\": 4.0}, {\"rating\": 5.0}, {\"rating\": None}, {\"rating\": 4.5}]\nprint(mean_rating(data))", why: "<code>fillna(0)</code> reads as tidying up, and what it actually does is add a fourth reviewer who gave zero stars. The average of 4.0, 5.0, 0 and 4.5 is 3.375, which rounds to 3.38 — a completely correct average of data that includes an opinion nobody had.<br/><br/><code>dropna()</code> asks the right question instead: average the ratings that exist. That gives 4.5, and it is computed from three values rather than four, which is a fact worth reporting alongside it.<br/><br/>The reason this class of bug survives code review is that <b>it never crashes</b>. There is no error, no warning, no missing column — just a number that is wrong in a direction nobody checks. Missing means missing, and the only safe default for a missing rating is to leave it out of the average and say how many you left out.<br/><br/>Zero is a legitimate fill value when zero is the truth: units sold on a day with no sales really is 0. The test is always the same — <b>would somebody have written this value if they had been there?</b> For a rating, no. For a sale, yes." },
+
+  { t: "recap", items: [
+    "A summary statistic is a <b>compression</b>, and what it compresses away is the shape",
+    "<b>Anscombe's quartet</b>: four datasets, identical summaries, four unrelated pictures",
+    "When the <b>mean sits well above the median</b>, something large is sitting in the tail",
+    "<b>Correlation only measures a straight line</b> — a perfect curve and a single stray point both score 0.82",
+    "EDA in order: <b>shape → missing → spread → relationships</b>, and print the missing counts before any average",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is EDA, and what do you do first?", a: "Exploratory Data Analysis is looking at a dataset before making any claim about it. I start with shape, so I know how much data there is, then missing values per column, then the spread of each column, then relationships between columns. The order matters: an average computed before you know what is missing is a number you cannot defend." },
+    { level: "beginner", q: "Why look at a chart when you already have the mean and the standard deviation?", a: "Because both are compressions and neither carries shape. Two humps, a hard cap, a wall of zeros or a long tail all change what the mean means, and none of them shows up in a summary table. A histogram costs ten seconds and catches all four." },
+    { level: "intermediate", q: "What is Anscombe's quartet and why does it matter?", a: "Four eleven-point datasets published in 1973 with the same mean, standard deviation, correlation and fitted line, and four completely different shapes: a genuine linear relationship, a clean curve, a straight line plus one outlier, and a vertical stack where one distant point creates the entire correlation. It matters because it proves the summary can be entirely correct and entirely misleading at once, which is the argument for plotting before reporting." },
+    { level: "intermediate", q: "A column has a correlation of 0.85 with your target. Is that a strong relationship?", a: "It means a straight line fits reasonably well, and that is all it means. I would plot it before saying anything, because 0.85 is also what you get from a curve that a straight line only approximates, and from a cloud of points with one extreme value doing the work. If it is the outlier, the relationship disappears when that row is excluded — which is worth knowing before it becomes a feature in a model." },
+    { level: "advanced", q: "You are handed an unfamiliar CSV and fifteen minutes, and asked to say something true about it. Walk me through it.", a: "Shape and dtypes first, because a numeric column stored as text changes everything that follows. Then missing values per column, and I look at whether they are missing at random or concentrated in particular rows — a column that is 90% empty is usually not a column. Then one histogram per numeric column, which is where the real findings are: bimodal distributions mean two populations mixed together, spikes at zero usually mean missing recorded as zero, hard edges mean the data was capped upstream. Value counts for the categoricals, mostly to find the same category spelled three ways. Then a correlation matrix as a shortlist, not a conclusion, and scatter plots for the two or three pairs that look interesting. What I report at the end is the shape of the data and the two or three things that would break a naive analysis, not an average — because the average is the thing they could already have computed themselves." },
+  ]},
+];
+const VZ2 = [
+{ t: "objectives", items: ["Line, bar, scatter plots","Labels aur title","Basic customization"] },
+  { t: "h2", n: "1", text: "Pehla chart" },
+  { t: "p", html: "<code>matplotlib</code> Python ki sabse basic plotting library hai. <code>plt.plot()</code> line, <code>plt.bar()</code> bar, <code>plt.scatter()</code> scatter." },
+  { t: "code", file: "plot.py", code: "import matplotlib.pyplot as plt\nx = [1, 2, 3, 4]\ny = [10, 20, 15, 25]\nplt.plot(x, y)\nplt.title(\"Sales\")\nplt.xlabel(\"Month\")\nplt.show()", output: "# ek line chart dikhega" },
+  { t: "h2", n: "2", text: "Chart types" },
+  { t: "p", html: "<b>Line</b> — time ke saath change. <b>Bar</b> — categories compare. <b>Scatter</b> — do variables ka relation. <b>Histogram</b> — distribution." },
+  { t: "note", variant: "tip", html: "<b>Hamesha:</b> title, x-label, y-label zaroor lagao — bina label ka chart bekaar hai." },
+  { t: "recap", items: ["plt.plot/bar/scatter","title, xlabel, ylabel zaroori","plt.show() se dikhao","Chart type = data ke hisaab se"] },
+];
+const VZ3 = [
+{ t: "objectives", items: ["Seaborn kya hai","Distribution & relationship plots","Heatmap (correlation)"] },
+  { t: "h2", n: "1", text: "Seaborn — sundar aur asaan" },
+  { t: "p", html: "<code>seaborn</code> matplotlib ke upar bana hai — kam code me sundar statistical charts. DataFrames ke saath seedhe kaam karta hai." },
+  { t: "code", file: "sns.py", code: "import seaborn as sns\n# histogram\nsns.histplot(df[\"age\"])\n# relationship\nsns.scatterplot(data=df, x=\"height\", y=\"weight\")", output: "# statistical charts" },
+  { t: "h2", n: "2", text: "Heatmap — correlation dekhna" },
+  { t: "p", html: "<code>sns.heatmap(df.corr())</code> se saare columns ka correlation ek rang wale grid me dikhta hai — kaunse features jude hain turant pata." },
+  { t: "note", variant: "tip", html: "<b>EDA ke best dost:</b> histplot (distribution), boxplot (outliers), heatmap (correlation), pairplot (sab relationships)." },
+  { t: "recap", items: ["Seaborn = kam code, sundar charts","DataFrame ke saath seedhe","heatmap(df.corr()) correlation","boxplot outliers dikhata hai"] },
+];
+const VZ4 = [
+{ t: "objectives", items: ["Kaunsa chart kab","Common galtiyan","Clear communication"] },
+  { t: "h2", n: "1", text: "Data ke hisaab se chart" },
+  { t: "p", html: "<b>Trend over time</b> → line. <b>Compare categories</b> → bar. <b>Distribution</b> → histogram/box. <b>Relationship</b> → scatter. <b>Part of whole</b> → pie (kam use karo)." },
+  { t: "note", variant: "warn", html: "<b>Galtiyan:</b> 3D charts (confusing), bahut saare pie slices, y-axis 0 se na shuru karna (misleading). Simple hamesha behtar." },
+  { t: "recap", items: ["Line = time trend","Bar = categories","Histogram/box = distribution","Scatter = relationship"] },
+];
+const VZ5 = [
+{ t: "objectives", items: ["EDA ka step-by-step process","Insight nikalna","Story banana"] },
+  { t: "h2", n: "1", text: "EDA process" },
+  { t: "p", html: "1) Data load + shape dekho, 2) missing/outliers check, 3) har column ka distribution, 4) columns ke beech relationships, 5) insights likho. Ye order follow karo." },
+  { t: "h2", n: "2", text: "Data storytelling" },
+  { t: "p", html: "Charts banana kaafi nahi — unse ek <b>kahani</b> batao: 'sales December me 40% badhi kyunki...'. Business ko number nahi, matlab chahiye." },
+  { t: "note", variant: "tip", html: "<b>Portfolio tip:</b> ek achha EDA notebook (Kaggle dataset pe) tumhare resume ka strong part banta hai — insights clearly likho." },
+  { t: "recap", items: ["EDA ka fixed process follow karo","Load → clean → explore → relate → insight","Charts se kahani batao","Business ko matlab chahiye"] },
+];
 const vizLessons = [
-  { slug: "viz-intro", order: 1, title: "Why Visualize? (EDA)", minutes: 10, problems: [], content: [
-    { t: "objectives", items: ["Visualization kyun zaroori","EDA kya hai","Insight vs numbers"] },
-    { t: "h2", n: "1", text: "Ek picture 1000 numbers ke barabar" },
-    { t: "p", html: "Sirf numbers ke table se pattern dhoondhna mushkil hai. <b>Chart</b> banate hi trend, outlier, relationship turant dikh jaate hain. Yahi ek data analyst ka asli kaam hai." },
-    { t: "h2", n: "2", text: "EDA — Exploratory Data Analysis" },
-    { t: "p", html: "EDA matlab data ko 'ghoom-phir ke' samajhna — charts aur summary se. Model banane se pehle data ko jaanna sabse zaroori step hai." },
-    { t: "note", variant: "tip", html: "<b>Famous quote:</b> 'The greatest value of a picture is when it forces us to notice what we never expected.' — visualization se hidden insights milte hain." },
-    { t: "recap", items: ["Charts se pattern turant dikhta hai","EDA = data ko explore karo","Model se pehle data samjho","Insight nikalna analyst ka kaam"] },
-  ]},
-  { slug: "matplotlib-basics", order: 2, title: "Matplotlib Basics", minutes: 12, problems: [], content: [
-    { t: "objectives", items: ["Line, bar, scatter plots","Labels aur title","Basic customization"] },
-    { t: "h2", n: "1", text: "Pehla chart" },
-    { t: "p", html: "<code>matplotlib</code> Python ki sabse basic plotting library hai. <code>plt.plot()</code> line, <code>plt.bar()</code> bar, <code>plt.scatter()</code> scatter." },
-    { t: "code", file: "plot.py", code: "import matplotlib.pyplot as plt\nx = [1, 2, 3, 4]\ny = [10, 20, 15, 25]\nplt.plot(x, y)\nplt.title(\"Sales\")\nplt.xlabel(\"Month\")\nplt.show()", output: "# ek line chart dikhega" },
-    { t: "h2", n: "2", text: "Chart types" },
-    { t: "p", html: "<b>Line</b> — time ke saath change. <b>Bar</b> — categories compare. <b>Scatter</b> — do variables ka relation. <b>Histogram</b> — distribution." },
-    { t: "note", variant: "tip", html: "<b>Hamesha:</b> title, x-label, y-label zaroor lagao — bina label ka chart bekaar hai." },
-    { t: "recap", items: ["plt.plot/bar/scatter","title, xlabel, ylabel zaroori","plt.show() se dikhao","Chart type = data ke hisaab se"] },
-  ]},
-  { slug: "seaborn", order: 3, title: "Seaborn — Statistical Plots", minutes: 12, problems: [], content: [
-    { t: "objectives", items: ["Seaborn kya hai","Distribution & relationship plots","Heatmap (correlation)"] },
-    { t: "h2", n: "1", text: "Seaborn — sundar aur asaan" },
-    { t: "p", html: "<code>seaborn</code> matplotlib ke upar bana hai — kam code me sundar statistical charts. DataFrames ke saath seedhe kaam karta hai." },
-    { t: "code", file: "sns.py", code: "import seaborn as sns\n# histogram\nsns.histplot(df[\"age\"])\n# relationship\nsns.scatterplot(data=df, x=\"height\", y=\"weight\")", output: "# statistical charts" },
-    { t: "h2", n: "2", text: "Heatmap — correlation dekhna" },
-    { t: "p", html: "<code>sns.heatmap(df.corr())</code> se saare columns ka correlation ek rang wale grid me dikhta hai — kaunse features jude hain turant pata." },
-    { t: "note", variant: "tip", html: "<b>EDA ke best dost:</b> histplot (distribution), boxplot (outliers), heatmap (correlation), pairplot (sab relationships)." },
-    { t: "recap", items: ["Seaborn = kam code, sundar charts","DataFrame ke saath seedhe","heatmap(df.corr()) correlation","boxplot outliers dikhata hai"] },
-  ]},
-  { slug: "choosing-charts", order: 4, title: "Choosing the Right Chart", minutes: 10, problems: [], content: [
-    { t: "objectives", items: ["Kaunsa chart kab","Common galtiyan","Clear communication"] },
-    { t: "h2", n: "1", text: "Data ke hisaab se chart" },
-    { t: "p", html: "<b>Trend over time</b> → line. <b>Compare categories</b> → bar. <b>Distribution</b> → histogram/box. <b>Relationship</b> → scatter. <b>Part of whole</b> → pie (kam use karo)." },
-    { t: "note", variant: "warn", html: "<b>Galtiyan:</b> 3D charts (confusing), bahut saare pie slices, y-axis 0 se na shuru karna (misleading). Simple hamesha behtar." },
-    { t: "recap", items: ["Line = time trend","Bar = categories","Histogram/box = distribution","Scatter = relationship"] },
-  ]},
-  { slug: "eda-storytelling", order: 5, title: "EDA Process & Data Storytelling", minutes: 12, problems: [], content: [
-    { t: "objectives", items: ["EDA ka step-by-step process","Insight nikalna","Story banana"] },
-    { t: "h2", n: "1", text: "EDA process" },
-    { t: "p", html: "1) Data load + shape dekho, 2) missing/outliers check, 3) har column ka distribution, 4) columns ke beech relationships, 5) insights likho. Ye order follow karo." },
-    { t: "h2", n: "2", text: "Data storytelling" },
-    { t: "p", html: "Charts banana kaafi nahi — unse ek <b>kahani</b> batao: 'sales December me 40% badhi kyunki...'. Business ko number nahi, matlab chahiye." },
-    { t: "note", variant: "tip", html: "<b>Portfolio tip:</b> ek achha EDA notebook (Kaggle dataset pe) tumhare resume ka strong part banta hai — insights clearly likho." },
-    { t: "recap", items: ["EDA ka fixed process follow karo","Load → clean → explore → relate → insight","Charts se kahani batao","Business ko matlab chahiye"] },
-  ]},
+  { slug: "viz-intro", order: 1, title: "Why Visualize? (EDA)", minutes: 13, problems: [], content: VZ1},
+  { slug: "matplotlib-basics", order: 2, title: "Matplotlib Basics", minutes: 12, problems: [], content: VZ2},
+  { slug: "seaborn", order: 3, title: "Seaborn — Statistical Plots", minutes: 12, problems: [], content: VZ3},
+  { slug: "choosing-charts", order: 4, title: "Choosing the Right Chart", minutes: 10, problems: [], content: VZ4},
+  { slug: "eda-storytelling", order: 5, title: "EDA Process & Data Storytelling", minutes: 12, problems: [], content: VZ5},
 ];
 
 /* ===================== SQL ===================== */
@@ -6288,7 +6367,13 @@ async function main() {
   }
 
   // attach the extra graded practice problems by lesson slug
-  for (const ep of [...extraProblems, ...sqlProblems, ...pandasProblems]) {
+  //
+  // topicProblems was only ever wired into apply-problems.mjs, so a fresh
+  // `db:reset` produced a database 37 problems smaller than the live one and the
+  // difference was invisible until a lesson's practice button pointed at nothing.
+  // Every module belongs in both places; the applier is for adding to a live
+  // database, not for holding content the seed does not know about.
+  for (const ep of [...extraProblems, ...sqlProblems, ...pandasProblems, ...vizProblems, ...topicProblems]) {
     const lid = lessonBySlug[ep.lessonSlug];
     if (!lid) continue;
     const { lessonSlug, ...data } = ep;
@@ -6315,6 +6400,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "viz-intro": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does a summary statistic necessarily throw away?", options: ["The number of rows", "The shape of the data", "The units", "The column name"], correct: 1, why: "Compression is the point of a statistic — eleven numbers become one. Shape is what gets discarded, which is why four datasets can share a summary and look nothing alike." },
+    { level: "easy", q: "In which order should the first four EDA checks be done?", options: ["Relationships, spread, missing, shape", "Spread, shape, relationships, missing", "Missing, relationships, shape, spread", "Shape, missing, spread, relationships"], correct: 3, why: "Shape tells you how much data there is; missing tells you which numbers are computed from fewer rows than you think. Both have to come before any average, or the average is one you cannot defend." },
+    { level: "easy", q: "What is Anscombe's quartet?", options: ["Four datasets with the same summary statistics and four different shapes", "Four types of chart", "Four steps of the EDA process", "Four ways to compute a mean"], correct: 0, why: "Published in 1973 to make exactly one argument: the summary can be completely correct and completely misleading at the same time." },
+    // Medium — apply it
+    { level: "medium", q: "A column's mean is 24.73 and its median is 18. What does the gap tell you?", options: ["The data is missing values", "Half the values are negative", "Something large is sitting in the upper tail", "The column is stored as text"], correct: 2, why: "The mean is pulled by extreme values and the median is not, so a mean well above the median means weight in the right tail. Reading that gap is the cheapest shape check there is." },
+    { level: "medium", q: "Two columns have a correlation of 0.82. Which of these is NOT a possible reason?", options: ["A genuine straight-line relationship with ordinary scatter", "A perfect curve that a straight line only approximates", "A single far-away point creating it on its own", "A perfectly flat relationship where y never changes"], correct: 3, why: "If y never changed, the correlation would be undefined rather than 0.82 — there would be no variation to share. The other three all produce roughly 0.82, which is exactly why the number alone decides nothing." },
+    { level: "medium", q: "<code>df[\"rating\"].mean()</code> on five rows where one rating is missing. What happens?", options: ["It raises an exception", "It returns the mean of the four values that exist", "It treats the missing one as 0", "It returns nan"], correct: 1, why: "pandas skips missing values in an aggregate, which is the sensible default and also why you print the missing counts first — the average is over four rows, not five, and nothing on screen says so." },
+    { level: "medium", q: "Why is <code>fillna(0)</code> a bug on a ratings column but reasonable on a units-sold column?", options: ["Ratings are floats and units are integers", "fillna only works on integers", "Zero is a rating nobody gave, but zero units sold is what actually happened", "Ratings cannot contain missing values"], correct: 2, why: "The test is whether somebody would have written that value if they had been there. For a day with no sales, 0 is the truth. For a rating, 0 invents a one-star review out of nothing." },
+    // Hard — the edges
+    { level: "hard", q: "In set IV of the quartet, x is 8 in ten rows and 19 in one. Drop the row with 19. What is the correlation of what remains?", options: ["Undefined, because x no longer varies at all", "0.817, unchanged", "Exactly 0", "Exactly 1"], correct: 0, why: "Correlation asks whether y moves when x moves. With every x equal to 8 the spread of x is zero, so there is nothing to correlate — the honest answer is no answer, not a small number. Which means the original 0.817 was manufactured by that one row." },
+    { level: "hard", q: "A histogram of one column shows two separate humps. Which conclusion follows?", options: ["The column has missing values", "The mean is the number to report", "The standard deviation is zero", "Two different populations are probably mixed in that column"], correct: 3, why: "The mean lands in the empty valley between the humps and describes nobody. No combination of count, mean, sd and quartiles reveals this — it is visible only as shape, and it usually means there is a grouping column you should be splitting on." },
+    { level: "hard", q: "A colleague filters out every row above 1000 before starting the analysis, calling them outliers. What is wrong with that as a first step?", options: ["Nothing, outliers should always be removed", "It changes the column's dtype", "An outlier is a data error, a second population, or the most interesting row you have - and you cannot tell which without looking", "1000 is too high a threshold"], correct: 2, why: "Those three causes need three different responses: fix it, split on it, or report it. Deleting first destroys the information that would have told you which one you had, and the deletion never shows up in the numbers that follow." },
+  ],
   "sql-advanced": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is a subquery?", options: ["A query inside another query, whose result the outer one uses", "A query that runs after the main one", "A second table", "A comment"], correct: 0, why: "It is how you compare against an aggregate, since an aggregate cannot appear in WHERE directly." },

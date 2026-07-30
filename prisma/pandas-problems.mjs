@@ -4,7 +4,9 @@
 // House pattern for this track: tests pass `records` (a list of dicts, i.e. rows)
 // and the student builds `pd.DataFrame(records)`. Solutions must cast out of numpy
 // types (int()/float()/.tolist()) — the runner compares via JSON, and a numpy
-// scalar or a dict->Map won't survive that. So: return scalars or lists, never dicts.
+// scalar won't survive that. Still return scalars or lists rather than dicts: a
+// dict does survive the comparison now, but its key ORDER survives with it, so a
+// correct answer assembled in a different order would be marked wrong.
 
 const REC = "`records` is a list of dicts (like the rows of a database). Use `pd.DataFrame(records)` to build the DataFrame.";
 
