@@ -19,12 +19,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             diff. Topbar and ReadingToggle read the same keys on mount, so the
             script and the components never disagree.
 
-            Reading width matters here more than it looks: without this line the
-            sidebars render and then vanish a frame later, which reads as a bug. */}
+            The panel states matter here more than they look: without this line
+            the sidebars render and then vanish a frame later, which reads as a
+            bug. `dq-reading` is the retired single on/off switch — it is cleared
+            rather than honoured, so nobody is left in a layout whose control no
+            longer exists. */}
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var t=localStorage.getItem('dq-theme');if(['light','dark','focus','sunset'].indexOf(t)<0){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);if(localStorage.getItem('dq-reading')==='1'){document.documentElement.setAttribute('data-reading','1');}}catch(e){}})();",
+              "(function(){try{var d=document.documentElement;var t=localStorage.getItem('dq-theme');if(['light','dark','focus','sunset'].indexOf(t)<0){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}d.setAttribute('data-theme',t);localStorage.removeItem('dq-reading');var p=[['dq-nav','data-nav','mini'],['dq-rail','data-rail','off'],['dq-focus','data-focus','1']];for(var i=0;i<p.length;i++){if(localStorage.getItem(p[i][0])===p[i][2]){d.setAttribute(p[i][1],p[i][2]);}}}catch(e){}})();",
           }}
         />
         {children}

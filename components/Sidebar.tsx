@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { NavCollapse } from "@/components/LayoutControls";
 
 const HomeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/></svg>);
 const MapIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5h12a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4z"/><path d="M4 5v14"/></svg>);
@@ -93,6 +94,7 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
       <div className="logo">
         <div className="mark">D</div>
         <div><span className="wm">DataMarg</span><span className="beta">BETA</span></div>
+        <NavCollapse />
       </div>
       {nav.map((g) => (
         <div key={g.label}>
@@ -105,10 +107,12 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
                 href={locked ? "/signup" : it.href}
                 className={`nav-item${isActive(it.href) ? " active" : ""}${locked ? " locked" : ""}`}
                 onClick={() => setOpen(false)}
-                title={locked ? "Sign up to unlock" : undefined}
+                // The title is always set, not just when locked: collapsed to
+                // icons there is nothing else to tell you what a button does.
+                title={locked ? "Sign up to unlock" : it.label}
               >
                 {it.icon}
-                {it.label}
+                <span className="nav-text">{it.label}</span>
                 {locked ? <span className="nav-lock"><LockIcon /></span> : it.soon ? <span className="nav-soon">soon</span> : it.count && <span className="count">{it.count}</span>}
               </Link>
             );

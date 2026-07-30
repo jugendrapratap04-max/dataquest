@@ -1970,66 +1970,117 @@ select.inp { cursor:pointer; }
 .phase.subject-tint { border-left:3px solid var(--sub-fg); }
 .ic.tinted { background:var(--sub-bg); color:var(--sub-fg); }
 
-/* ---------------------------------------------------------- reading width ---
- * The lesson pages are read, not skimmed, and on a 1136px laptop the left nav
- * (232px) plus the module rail (280px + 28px gap) plus the page padding left the
- * lesson itself about 536px wide — under half the screen, and worst on the long
- * explanations and the wide interactive panels. `data-reading` on <html> folds
- * both panels away and hands that space back.
+/* ------------------------------------------------ collapsible side panels ---
+ * Desktop only, and that scoping is the point: below 1001px the nav is already a
+ * drawer and the module rail is already hidden, so a preference saved on a laptop
+ * must not follow the reader onto a phone and hide things there. The first
+ * version of this shipped unscoped, which would have done exactly that.
  *
- * The width is capped rather than filled. An unlimited line on a wide screen is
- * its own reading problem — the eye loses the start of the next line — so the
- * cap lands around 95 characters, which is nearly 60% more text per line than
- * before without going past what is comfortable.
+ * Three independent states, set on <html> before first paint by app/layout.tsx:
+ *   data-nav="mini"   left navigation collapsed to icons
+ *   data-rail="off"   right module panel collapsed to an edge tab
+ *   data-focus="1"    both hidden, lesson fills the window (Esc leaves)
  *
- * Set by app/layout.tsx before first paint and toggled by ReadingToggle. */
-html[data-reading="1"] .app { grid-template-columns: minmax(0, 1fr); }
-html[data-reading="1"] .side,
-html[data-reading="1"] .side-backdrop,
-html[data-reading="1"] .learn-side { display: none; }
-/* The cap is on the LESSON layout, not on .wrap.
- *
- * Capping .wrap looked right and measured wrong: on the practice page the split
- * went from 844px to 840px, because the 900px cap ate exactly the room that
- * hiding the nav had just freed. A code workbench is not prose and wants every
- * pixel, so only the reading column is capped and every other page gets the
- * full width. */
-html[data-reading="1"] .learn-layout {
-  grid-template-columns: minmax(0, 1fr);
-  max-width: 900px;
-  margin: 0 auto;
+ * Focus is an override rather than a third setting: it does not clear the other
+ * two, so leaving it restores the layout you had. */
+@media (min-width: 1001px) {
+
+  /* -- left navigation, collapsed to icons ------------------------------- */
+  html[data-nav="mini"] .app { grid-template-columns: 62px 1fr; }
+  html[data-nav="mini"] .side { padding: 18px 8px; }
+  html[data-nav="mini"] .nav-text,
+  html[data-nav="mini"] .nav-lbl,
+  html[data-nav="mini"] .count,
+  html[data-nav="mini"] .nav-soon,
+  html[data-nav="mini"] .nav-lock,
+  html[data-nav="mini"] .side-legal,
+  html[data-nav="mini"] .logo .wm,
+  html[data-nav="mini"] .logo .beta,
+  html[data-nav="mini"] .userbox > *:not(.av) { display: none; }
+  /* The signed-out card is three lines of copy and two full-width buttons — none
+   * of it survives 62px, and a squeezed "Create free account" is worse than none.
+   * The logout button keeps its icon and loses its word. */
+  html[data-nav="mini"] .guestbox { display: none; }
+  html[data-nav="mini"] .logout-btn { justify-content: center; font-size: 0; gap: 0; padding: 9px 0; }
+  html[data-nav="mini"] .logout-btn svg { font-size: 13.5px; }
+  html[data-nav="mini"] .nav-item { justify-content: center; padding: 10px 0; gap: 0; }
+  html[data-nav="mini"] .logo { flex-direction: column; gap: 10px; padding: 4px 0 14px; }
+  html[data-nav="mini"] .userbox { justify-content: center; }
+  /* The chevron flips to point outwards, and stays reachable when collapsed. */
+  html[data-nav="mini"] .nav-collapse { margin: 0; }
+
+  /* -- right module panel ------------------------------------------------ */
+  html[data-rail="off"] .learn-side { display: none; }
+  html[data-rail="off"] .learn-layout { grid-template-columns: minmax(0, 1fr); }
+
+  /* -- focus reading ----------------------------------------------------- */
+  html[data-focus="1"] .app { grid-template-columns: minmax(0, 1fr); }
+  html[data-focus="1"] .side,
+  html[data-focus="1"] .side-backdrop,
+  html[data-focus="1"] .learn-side,
+  html[data-focus="1"] .rail-tab { display: none; }
+  html[data-focus="1"] .learn-layout { grid-template-columns: minmax(0, 1fr); }
+  html[data-focus="1"] .wrap { max-width: none; padding-left: 44px; padding-right: 44px; }
+
+  /* -- wide media, narrow text ------------------------------------------
+   * Applied whenever the lesson column has actually widened. Measured rather
+   * than guessed: at 13.5px the average character is 6.12px, so a full-width
+   * paragraph runs to 140+ characters where comfortable is 60-90 — and the
+   * un-collapsed 521px column was already a fine 82. The paragraphs were never
+   * what felt cramped. The diagrams and code blocks were, so those take the
+   * whole width and the text keeps a readable measure. */
+  html[data-rail="off"] .learn-layout,
+  html[data-focus="1"] .learn-layout { max-width: 1180px; margin: 0 auto; }
+  html[data-rail="off"] .prose > p,
+  html[data-rail="off"] .prose > h2,
+  html[data-rail="off"] .prose > .note,
+  html[data-rail="off"] .prose > .def,
+  html[data-rail="off"] .prose > .hook,
+  html[data-rail="off"] .prose > .analogy,
+  html[data-rail="off"] .prose > details.think,
+  html[data-focus="1"] .prose > p,
+  html[data-focus="1"] .prose > h2,
+  html[data-focus="1"] .prose > .note,
+  html[data-focus="1"] .prose > .def,
+  html[data-focus="1"] .prose > .hook,
+  html[data-focus="1"] .prose > .analogy,
+  html[data-focus="1"] .prose > details.think { max-width: 680px; margin-inline: auto; }
+  html[data-rail="off"] .prose > p,
+  html[data-focus="1"] .prose > p { font-size: 15px; line-height: 1.72; }
 }
 
-/* Wide media, narrow text — and the split is measured, not guessed.
- *
- * The obvious move was to let the paragraphs fill the freed width. Measuring
- * killed it: at 13.5px the average character is 6.12px, so a 866px paragraph is
- * 142 characters a line, where comfortable is 60 to 90. The paragraphs were
- * never the problem — at 482px they were already 79 characters. What was cramped
- * was everything else: an architecture diagram in 465px, code blocks wrapping,
- * and the general feeling of reading down a corridor.
- *
- * So the text column stays close to its comfortable measure and gets a size bump,
- * while the visuals, code and exercise cards take the whole 860px. */
-html[data-reading="1"] .prose > p,
-html[data-reading="1"] .prose > h2,
-html[data-reading="1"] .prose > .note,
-html[data-reading="1"] .prose > .def,
-html[data-reading="1"] .prose > .hook,
-html[data-reading="1"] .prose > .analogy,
-html[data-reading="1"] .prose > details.think {
-  max-width: 660px;
-  margin-inline: auto;
-}
-html[data-reading="1"] .prose > p { font-size: 15px; line-height: 1.72; }
+/* -- the controls themselves ---------------------------------------------- */
+.nav-collapse { margin-left: auto; display: inline-grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 7px; border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-faint);
+  cursor: pointer; flex: none; transition: color .15s, border-color .15s; }
+.nav-collapse:hover { color: var(--ink); border-color: var(--accent); }
 
-.read-fab { position:fixed; left:20px; bottom:20px; z-index:70; display:inline-flex; align-items:center; gap:7px;
-  background:var(--panel); color:var(--ink-soft); border:1px solid var(--line); border-radius:999px;
-  padding:9px 15px; font-size:12.5px; font-weight:600; cursor:pointer; box-shadow:0 8px 22px -10px rgba(0,0,0,.45);
-  transition:border-color .15s, color .15s, background .15s; }
-.read-fab:hover { border-color:var(--accent); color:var(--ink); }
-.read-fab[aria-pressed="true"] { border-color:var(--accent); color:var(--accent-2); background:var(--accent-soft); }
-.read-fab svg { flex:none; }
-/* On a phone the rail is already hidden and the nav is a drawer, so the button
- * would only be taking up thumb space next to the nav toggle. */
-@media (max-width:1000px) { .read-fab { display:none; } }
+.rail-collapse { position: absolute; top: 10px; right: 10px; z-index: 2; display: inline-grid; place-items: center;
+  width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2);
+  color: var(--ink-faint); cursor: pointer; transition: color .15s, border-color .15s; }
+.rail-collapse:hover { color: var(--ink); border-color: var(--accent); }
+
+/* The way back. Fixed to the edge, so a reader halfway down a lesson does not
+ * have to scroll up to find it. */
+.rail-tab { position: fixed; right: 0; top: 50%; transform: translateY(-50%); z-index: 60;
+  display: inline-grid; place-items: center; width: 22px; height: 62px;
+  border: 1px solid var(--line); border-right: 0; border-radius: 9px 0 0 9px;
+  background: var(--panel); color: var(--ink-faint); cursor: pointer;
+  transition: color .15s, background .15s, width .15s; }
+.rail-tab:hover { color: var(--ink); background: var(--panel-2); width: 27px; }
+
+.focus-fab { position: fixed; left: 20px; bottom: 20px; z-index: 70; display: inline-flex; align-items: center; gap: 7px;
+  background: var(--panel); color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px;
+  padding: 9px 15px; font-size: 12.5px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 22px -10px rgba(0,0,0,.45);
+  transition: border-color .15s, color .15s, background .15s; }
+.focus-fab:hover { border-color: var(--accent); color: var(--ink); }
+.focus-fab[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-2); background: var(--accent-soft); }
+.focus-fab svg { flex: none; }
+.fab-kbd { font-family: var(--mono); font-size: 10px; padding: 1px 5px; border-radius: 4px;
+  border: 1px solid var(--line); color: var(--ink-faint); }
+
+/* Below 1001px none of this applies — the nav is a drawer and the rail is gone,
+ * so the controls would only take up thumb space. */
+@media (max-width: 1000px) {
+  .focus-fab, .rail-tab, .rail-collapse, .nav-collapse { display: none; }
+}

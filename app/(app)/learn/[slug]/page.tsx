@@ -13,6 +13,7 @@ import { FadedExample, TraceCheck } from "@/components/LessonPractice";
 import { ReadingProgress, LessonToc } from "@/components/LessonProgress";
 import { lessonOutline } from "@/lib/lesson-outline";
 import { Fragment } from "react";
+import { RailControls } from "@/components/LayoutControls";
 import { VizBlock } from "@/components/viz/VizBlock";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -552,6 +553,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
       </article>
 
       <aside className="learn-side">
+        <RailControls />
         <div className="card pad">
           <h4 className="side-card">{lesson.track.title.split(" — ")[0]} — {doneIds.size} / {siblings.length}</h4>
           <div className="pbar"><i style={{ width: `${Math.round((doneIds.size / siblings.length) * 100)}%` }} /></div>
