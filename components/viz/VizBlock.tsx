@@ -64,6 +64,7 @@ import { ScatterCorrelation } from "./ScatterCorrelation";
 import { DataFrameAnatomy } from "./DataFrameAnatomy";
 import { ChartLab } from "./ChartLab";
 import { AnscombeLab } from "./AnscombeLab";
+import { SeabornLab } from "./SeabornLab";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -125,6 +126,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "dataframe-anatomy": DataFrameAnatomy,
   "chart-lab": ChartLab,
   "anscombe-lab": AnscombeLab,
+  "seaborn-lab": SeabornLab,
   "test-lab": TestLab,
   "spread-lab": SpreadLab,
   "probability-lab": ProbabilityLab,

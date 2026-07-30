@@ -137,6 +137,56 @@ const vizProblems = [
     ],
     ["`ax.plot(values)` is enough — with one list, matplotlib uses 0, 1, 2… for x.", "`ax.get_ylim()` returns (bottom, top); you want index 0.", "179 is not a magic number: matplotlib leaves a 5% margin below the smallest value, and 5% of the range 180-200 is 1."],
     ["matplotlib", "axis-limits"]),
+
+  /* ================= 3. seaborn — the mean/total trap, mostly ====================== */
+  VP("seaborn", "Easy", 221, "sns-bar-means", "What a Barplot Really Shows", "bar_means",
+    `A default \`sns.barplot\` aggregates, and its default aggregation is the **mean** — not the total. This problem is here so you see it happen rather than read about it.\n\nWrite a function \`bar_means(records, cat, val)\` that draws \`sns.barplot(data=df, x=cat, y=val, errorbar=None)\` and returns the bar heights, rounded to 2 decimals, in the order the bars appear.\n\n${REC}`,
+    [{ input: 'records=[{"shop":"A","sales":10},{"shop":"A","sales":20},{"shop":"B","sales":30},{"shop":"B","sales":40}], cat="shop", val="sales"', output: "[15.0, 35.0]" }],
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef bar_means(records, cat, val):\n    pass\n",
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef bar_means(records, cat, val):\n    df = pd.DataFrame(records)\n    fig, ax = plt.subplots()\n    sns.barplot(data=df, x=cat, y=val, errorbar=None, ax=ax)\n    return [round(float(p.get_height()), 2) for p in ax.patches]\n",
+    [
+      { args: [[{ shop: "A", sales: 10 }, { shop: "A", sales: 20 }, { shop: "B", sales: 30 }, { shop: "B", sales: 40 }], "shop", "sales"], expected: [15, 35] },
+      { args: [[{ shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "B", sales: 25 }, { shop: "B", sales: 25 }], "shop", "sales"], expected: [12, 25] },
+    ],
+    ["Pass the column *names* through — `x=cat`, not `x=df[cat]`.", "`errorbar=None` turns off the confidence interval seaborn draws by default.", "The bars are `ax.patches`, and the height of A's bar is the mean of A's rows, not their sum."],
+    ["seaborn", "barplot", "aggregation"]),
+
+  VP("seaborn", "Medium", 222, "sns-bar-totals", "Aggregate Before You Plot", "bar_totals",
+    `Now the fix. If you want totals, do the aggregation yourself and hand seaborn a table that is already one row per category.\n\nWrite a function \`bar_totals(records, cat, val)\` that groups by \`cat\`, **sums** \`val\`, plots the result with \`sns.barplot\`, and returns the bar heights rounded to 2 decimals.\n\nCompare your answer with the previous problem on the same data: five sales of 12 and two of 25 give bars of 12 and 25 as means, and 60 and 50 as totals — which put the two shops in **opposite order**.\n\n${REC}`,
+    [{ input: 'records=[{"shop":"A","sales":10},{"shop":"A","sales":20},{"shop":"B","sales":30},{"shop":"B","sales":40}], cat="shop", val="sales"', output: "[30.0, 70.0]" }],
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef bar_totals(records, cat, val):\n    pass\n",
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef bar_totals(records, cat, val):\n    df = pd.DataFrame(records)\n    totals = df.groupby(cat, as_index=False)[val].sum()\n    fig, ax = plt.subplots()\n    sns.barplot(data=totals, x=cat, y=val, ax=ax)\n    return [round(float(p.get_height()), 2) for p in ax.patches]\n",
+    [
+      { args: [[{ shop: "A", sales: 10 }, { shop: "A", sales: 20 }, { shop: "B", sales: 30 }, { shop: "B", sales: 40 }], "shop", "sales"], expected: [30, 70] },
+      { args: [[{ shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "A", sales: 12 }, { shop: "B", sales: 25 }, { shop: "B", sales: 25 }], "shop", "sales"], expected: [60, 50] },
+      { args: [[{ city: "Delhi", orders: 5 }, { city: "Pune", orders: 7 }], "city", "orders"], expected: [5, 7] },
+    ],
+    ["`df.groupby(cat, as_index=False)[val].sum()` gives one row per category, with the category still a column.", "Plot the aggregated table, not the original — one row per bar means there is nothing left to average.", "`as_index=False` matters: without it the category becomes the index and seaborn cannot find it by name."],
+    ["seaborn", "groupby", "aggregation"]),
+
+  VP("seaborn", "Easy", 223, "sns-category-counts", "Counting Rows, Not Averaging Them", "category_counts",
+    `Sometimes the question is not \"how much\" but \"how many\". \`sns.countplot\` counts the rows in each category, so it needs no y column at all.\n\nWrite a function \`category_counts(records, cat)\` that draws \`sns.countplot(data=df, x=cat)\` and returns the bar heights as a list of ints.\n\n${REC}`,
+    [{ input: 'records=[{"shop":"A"},{"shop":"A"},{"shop":"A"},{"shop":"B"},{"shop":"B"},{"shop":"C"}], cat="shop"', output: "[3, 2, 1]" }],
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef category_counts(records, cat):\n    pass\n",
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef category_counts(records, cat):\n    df = pd.DataFrame(records)\n    fig, ax = plt.subplots()\n    sns.countplot(data=df, x=cat, ax=ax)\n    return [int(p.get_height()) for p in ax.patches]\n",
+    [
+      { args: [[{ shop: "A" }, { shop: "A" }, { shop: "A" }, { shop: "B" }, { shop: "B" }, { shop: "C" }], "shop"], expected: [3, 2, 1] },
+      { args: [[{ day: "Mon" }, { day: "Tue" }], "day"], expected: [1, 1] },
+    ],
+    ["`countplot` takes only `x` — there is no y, because the height is the count.", "A count is a whole number, so `int(p.get_height())`.", "This is the chart `value_counts()` would give you, drawn instead of printed."],
+    ["seaborn", "countplot"]),
+
+  VP("seaborn", "Medium", 224, "sns-hue-legend", "One Argument, One Legend", "hue_legend",
+    `\`hue=\` is the argument that replaces a loop: seaborn splits the rows by that column, gives each group a colour, and builds the legend itself.\n\nWrite a function \`hue_legend(records, x, y, cat)\` that draws \`sns.scatterplot\` of \`x\` against \`y\` coloured by \`cat\`, and returns the legend's labels as a list of strings — read them off the chart with \`ax.get_legend()\`, do not build the list from the records.\n\n${REC}`,
+    [{ input: 'records=[{"bill":10,"tip":1,"day":"Fri"},{"bill":20,"tip":2,"day":"Sat"}], x="bill", y="tip", cat="day"', output: '["Fri", "Sat"]' }],
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef hue_legend(records, x, y, cat):\n    pass\n",
+    "import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\ndef hue_legend(records, x, y, cat):\n    df = pd.DataFrame(records)\n    fig, ax = plt.subplots()\n    sns.scatterplot(data=df, x=x, y=y, hue=cat, ax=ax)\n    return [t.get_text() for t in ax.get_legend().get_texts()]\n",
+    [
+      { args: [[{ bill: 10, tip: 1, day: "Fri" }, { bill: 20, tip: 2, day: "Sat" }, { bill: 30, tip: 3, day: "Sun" }], "bill", "tip", "day"], expected: ["Fri", "Sat", "Sun"] },
+      { args: [[{ bill: 10, tip: 1, day: "Fri" }, { bill: 20, tip: 2, day: "Fri" }], "bill", "tip", "day"], expected: ["Fri"] },
+    ],
+    ["`hue=cat` is the whole trick — no loop, no `label=`, no call to `ax.legend()`.", "`ax.get_legend()` returns the legend object; `.get_texts()` gives its label objects.", "`t.get_text()` turns each label object into a plain string."],
+    ["seaborn", "hue", "legend"]),
 ];
 
 export { vizProblems };
