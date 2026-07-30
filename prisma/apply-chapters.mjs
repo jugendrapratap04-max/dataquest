@@ -30,6 +30,21 @@ const PLANS = {
     { slug: "py-standard-library", title: "The standard library", upto: 35, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
     { slug: "py-shipping-code", title: "Shipping code", upto: 39, summary: "Testing, debugging and logging, clean code, project structure and git." },
   ],
+  // Being written now, chapter by chapter, so the plan grows with it. `upto` is a
+  // lesson order that does not exist yet for the later chapters — the applier
+  // simply finds no lessons for them, which is why they are safe to declare
+  // ahead of time and gives the roadmap the real shape of the course.
+  microprocessor: [
+    { slug: "mp-foundations", title: "Foundations", upto: 4, summary: "What a microprocessor is, how it evolved, what is inside the chip, and the three buses that connect it to everything else." },
+    { slug: "mp-architecture", title: "8085 architecture", upto: 9, summary: "The register set, the flags, the pins and signals, memory organization, and the instruction cycle measured in T-states." },
+    { slug: "mp-instruction-set", title: "Instruction set and addressing", upto: 15, summary: "Every instruction group, the addressing modes, and the stack and subroutine mechanism." },
+    { slug: "mp-programming", title: "Assembly programming", upto: 18, summary: "Real programs: blocks, sorting, counters, delay loops and code conversion." },
+    { slug: "mp-interrupts", title: "Interrupts and DMA", upto: 21, summary: "How a processor is interrupted, how it prioritises, and how data moves without it." },
+    { slug: "mp-interfacing", title: "Interfacing peripherals", upto: 26, summary: "Memory and I/O interfacing, the 8255, the 8253 timer, the 8259 controller, and ADC/DAC." },
+    { slug: "mp-communication", title: "Communication", upto: 28, summary: "Serial and parallel communication, and the 8251." },
+    { slug: "mp-8086-and-modern", title: "8086 and modern processors", upto: 31, summary: "BIU and EU, segmentation, pipelining, and what changed on the way to the chip in your laptop." },
+    { slug: "mp-exam-prep", title: "Exam and interview preparation", upto: 33, summary: "The question patterns that repeat, worked numericals, and a final revision pass." },
+  ],
 };
 
 const titleOf = (t) => t.title.split(" — ").pop() ?? t.title;

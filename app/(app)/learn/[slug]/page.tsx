@@ -148,6 +148,31 @@ function Block({ b }: { b: any }) {
           <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.sql) }} />
         </div>
       );
+    // The bytes an 8085 lesson's examples read, and where they live.
+    //
+    // Shown rather than hidden for the same two reasons `sqlsetup` is: the student
+    // cannot check a program's answer without knowing what was in memory, and
+    // having the addresses on the page means they can key the same values into a
+    // trainer kit in the lab. verify:lesson preloads exactly these bytes before
+    // every snippet in the lesson, so what the page claims is what the processor
+    // actually produced.
+    case "memsetup":
+      return (
+        <div className="code">
+          <div className="bar">
+            <span className="dot" style={{ background: "#FF5F57" }} />
+            <span className="dot" style={{ background: "#FEBC2E" }} />
+            <span className="dot" style={{ background: "#28C840" }} />
+            <span className="fn">memory these examples read</span>
+          </div>
+          <pre>
+            {b.bytes.map((byte: number, i: number) =>
+              `${(b.at + i).toString(16).toUpperCase().padStart(4, "0")}H:  ${byte.toString(16).toUpperCase().padStart(2, "0")}H`
+            ).join("\n")}
+          </pre>
+          {b.note && <div className="out" dangerouslySetInnerHTML={{ __html: b.note }} />}
+        </div>
+      );
     case "note":
       return (
         <div className={`note ${b.variant}`}>

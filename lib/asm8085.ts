@@ -617,8 +617,13 @@ export type RunOptions = {
   origin?: number;
   /** Initial stack pointer. Programs that PUSH without LXI SP rely on this. */
   sp?: number;
-  /** Safety net for a loop that never ends. */
+  /** Safety net for a loop that never ends. Hitting it is an ERROR. */
   maxSteps?: number;
+  /** Stop cleanly after this many instructions, without HLT and without an error.
+   *  This is how the lab steps: it re-runs from the start with a bigger number
+   *  each time, so every state it displays is reproducible from the source alone
+   *  and cannot drift from what verify:lesson checked. */
+  stopAfter?: number;
   /** What IN reads from each port. Anything not listed reads as 00. */
   inputs?: Record<number, number>;
 };
@@ -673,6 +678,7 @@ export function run(src: string, opts: RunOptions = {}): RunResult {
   let line: number | undefined;
 
   while (!st.halted) {
+    if (opts.stopAfter !== undefined && steps >= opts.stopAfter) break;
     const ins = asm.instrs.get(st.PC);
     if (!ins) {
       error = `there is no instruction at address ${st.PC.toString(16).toUpperCase().padStart(4, "0")}H — execution ran past the end of the program (did you forget HLT?)`;
@@ -730,7 +736,11 @@ export const hex4 = (v: number) => (v & 0xffff).toString(16).toUpperCase().padSt
  *    STEPS              instructions run     -> STEPS=12
  *    M:2060             a byte of memory     -> [2060]=F0
  *    M:2050-2054        a run of memory      -> [2050..2054]=10 20 30 40 50
+ *    CODE:2000-2003     the assembled bytes  -> CODE=3E 42 47 76
  *    OUT                everything OUT wrote -> OUT 01=7F
+ *
+ *  CODE is there so a lesson can teach "a program is just bytes" and have the
+ *  claim checked, instead of asking the student to take the opcode table on trust.
  */
 export function formatState(r: RunResult, show: string[]): string {
   if (!r.ok) return `ERROR${r.line ? ` (line ${r.line})` : ""}: ${r.error}`;
@@ -749,6 +759,14 @@ export function formatState(r: RunResult, show: string[]): string {
     if (k === "T") return `T=${r.tStates}`;
     if (k === "STEPS") return `STEPS=${r.steps}`;
     if (k === "OUT") return r.ports.length ? r.ports.map(([p, v]) => `OUT ${hex2(p)}=${hex2(v)}`).join(" ") : "OUT none";
+    const codeRange = k.match(/^CODE:([0-9A-F]+)-([0-9A-F]+)$/);
+    if (codeRange) {
+      const from = parseInt(codeRange[1], 16);
+      const to = parseInt(codeRange[2], 16);
+      const cells: string[] = [];
+      for (let a = from; a <= to; a++) cells.push(hex2(r.code[a] ?? 0));
+      return `CODE=${cells.join(" ")}`;
+    }
     const range = k.match(/^M:([0-9A-F]+)-([0-9A-F]+)$/);
     if (range) {
       const from = parseInt(range[1], 16);

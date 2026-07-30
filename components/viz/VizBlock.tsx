@@ -67,6 +67,7 @@ import { AnscombeLab } from "./AnscombeLab";
 import { SeabornLab } from "./SeabornLab";
 import { ChartChoiceLab } from "./ChartChoiceLab";
 import { EdaWalkthroughLab } from "./EdaWalkthroughLab";
+import { Asm8085Lab } from "./Asm8085Lab";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -131,6 +132,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "seaborn-lab": SeabornLab,
   "chart-choice-lab": ChartChoiceLab,
   "eda-walkthrough-lab": EdaWalkthroughLab,
+  "asm8085-lab": Asm8085Lab,
   "test-lab": TestLab,
   "spread-lab": SpreadLab,
   "probability-lab": ProbabilityLab,

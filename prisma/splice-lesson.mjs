@@ -64,7 +64,16 @@ if (at < 0) {
   process.exit(1);
 }
 const from = at + startMarker.length;
-const to = src.indexOf(endMarker, from);
+// Search from one character BEFORE the body, not from the body itself.
+//
+// An empty array is written `const X = [\n];`, so its closing bracket sits
+// immediately at `from` with its leading newline already eaten by startMarker.
+// Searching from `from` therefore skipped it and matched the NEXT `\n];\n` in the
+// file — which, when a fresh subject was scaffolded, silently deleted the array
+// declaration that followed and left seed.mjs referencing an undefined name.
+// Backing up one character makes the empty case match its own bracket, and
+// changes nothing for a non-empty array.
+const to = src.indexOf(endMarker, from - 1);
 if (to < 0) {
   console.error(`✗ could not find the end of ${target}`);
   process.exit(1);

@@ -145,7 +145,7 @@ const PLAIN = {
 const HTML = {
   objectives: ["items[]"], hook: ["q", "why"], think: ["q", "a"], def: ["hi"], analogy: ["html"],
   mistakes: ["items[].why"], interview: ["items[].q", "items[].a"],
-  p: ["html"], psoft: ["html"], note: ["html"], recap: ["items[]"],
+  p: ["html"], psoft: ["html"], note: ["html"], recap: ["items[]"], memsetup: ["note"],
   quiz: ["items[].q", "items[].why"],
   drills: ["intro", "items[].task"],
   worked: ["goal", "steps[].why"],
