@@ -784,6 +784,81 @@ export function formatState(r: RunResult, show: string[]): string {
   }).join(" ");
 }
 
+/* ----------------------------------------------------------- disassembly --- */
+
+const REG_NAME = ["B", "C", "D", "E", "H", "L", "M", "A"];
+const RP_NAME = ["B", "D", "H", "SP"];
+const RP_PUSH_NAME = ["B", "D", "H", "PSW"];
+const CC_NAME = ["NZ", "Z", "NC", "C", "PO", "PE", "P", "M"];
+const ALU_NAME = ["ADD", "ADC", "SUB", "SBB", "ANA", "XRA", "ORA", "CMP"];
+const NO_ARG_NAME: Record<number, string> = {
+  0x00: "NOP", 0x07: "RLC", 0x0f: "RRC", 0x17: "RAL", 0x1f: "RAR", 0x20: "RIM",
+  0x27: "DAA", 0x2f: "CMA", 0x30: "SIM", 0x37: "STC", 0x3f: "CMC", 0x76: "HLT",
+  0xc9: "RET", 0xe3: "XTHL", 0xe9: "PCHL", 0xeb: "XCHG", 0xf3: "DI", 0xf9: "SPHL", 0xfb: "EI",
+};
+const IMM_NAME: Record<number, string> = {
+  0xc6: "ADI", 0xce: "ACI", 0xd6: "SUI", 0xde: "SBI", 0xe6: "ANI", 0xee: "XRI", 0xf6: "ORI", 0xfe: "CPI",
+};
+
+/** Turn bytes back into an instruction — the inverse of the encoder above.
+ *
+ *  Built from the same formulas rather than a 256-entry table, so the two cannot
+ *  drift apart, and round-trip tested against the assembler in test-asm8085.mjs.
+ *
+ *  It exists because "a program is just bytes" is a claim a student should be
+ *  able to press on rather than accept: point the reader at a different byte and
+ *  the very same memory decodes into a different program. That is the stored-
+ *  program idea, and it needs a decoder to demonstrate.
+ *
+ *  Returns the text and how many bytes it consumed, so a caller can walk. */
+export function disassemble(bytes: number[], at = 0): { text: string; length: number } {
+  const op = bytes[at] & 0xff;
+  const b1 = bytes[at + 1];
+  const b2 = bytes[at + 2];
+  // Emit hex the ASSEMBLER would accept: a literal starting with a letter has to
+  // be padded with a leading zero, or FFH reads as a label. Without this the
+  // decoder printed text that this very file refuses to assemble, which the
+  // round-trip test caught on `MVI M, 0FFH`.
+  const lit = (s: string) => `${/^[A-F]/.test(s) ? "0" : ""}${s}H`;
+  const d8 = () => (b1 === undefined ? "??" : lit(hex2(b1)));
+  const d16 = () => (b1 === undefined || b2 === undefined ? "????" : lit(hex4((b2 << 8) | b1)));
+
+  if (op in NO_ARG_NAME) return { text: NO_ARG_NAME[op], length: 1 };
+  if (op >= 0x40 && op <= 0x7f) {
+    return { text: `MOV ${REG_NAME[(op >> 3) & 7]}, ${REG_NAME[op & 7]}`, length: 1 };
+  }
+  if (op >= 0x80 && op <= 0xbf) {
+    return { text: `${ALU_NAME[(op >> 3) & 7]} ${REG_NAME[op & 7]}`, length: 1 };
+  }
+  if (op in IMM_NAME) return { text: `${IMM_NAME[op]} ${d8()}`, length: 2 };
+  if ((op & 0xc7) === 0x06) return { text: `MVI ${REG_NAME[(op >> 3) & 7]}, ${d8()}`, length: 2 };
+  if ((op & 0xc7) === 0x04) return { text: `INR ${REG_NAME[(op >> 3) & 7]}`, length: 1 };
+  if ((op & 0xc7) === 0x05) return { text: `DCR ${REG_NAME[(op >> 3) & 7]}`, length: 1 };
+  if ((op & 0xcf) === 0x01) return { text: `LXI ${RP_NAME[(op >> 4) & 3]}, ${d16()}`, length: 3 };
+  if ((op & 0xcf) === 0x03) return { text: `INX ${RP_NAME[(op >> 4) & 3]}`, length: 1 };
+  if ((op & 0xcf) === 0x0b) return { text: `DCX ${RP_NAME[(op >> 4) & 3]}`, length: 1 };
+  if ((op & 0xcf) === 0x09) return { text: `DAD ${RP_NAME[(op >> 4) & 3]}`, length: 1 };
+  if ((op & 0xcf) === 0xc5) return { text: `PUSH ${RP_PUSH_NAME[(op >> 4) & 3]}`, length: 1 };
+  if ((op & 0xcf) === 0xc1) return { text: `POP ${RP_PUSH_NAME[(op >> 4) & 3]}`, length: 1 };
+  if (op === 0x02 || op === 0x12) return { text: `STAX ${RP_NAME[(op >> 4) & 3]}`, length: 1 };
+  if (op === 0x0a || op === 0x1a) return { text: `LDAX ${RP_NAME[(op >> 4) & 3]}`, length: 1 };
+  if (op === 0x32) return { text: `STA ${d16()}`, length: 3 };
+  if (op === 0x3a) return { text: `LDA ${d16()}`, length: 3 };
+  if (op === 0x22) return { text: `SHLD ${d16()}`, length: 3 };
+  if (op === 0x2a) return { text: `LHLD ${d16()}`, length: 3 };
+  if (op === 0xc3) return { text: `JMP ${d16()}`, length: 3 };
+  if (op === 0xcd) return { text: `CALL ${d16()}`, length: 3 };
+  if ((op & 0xc7) === 0xc2) return { text: `J${CC_NAME[(op >> 3) & 7]} ${d16()}`, length: 3 };
+  if ((op & 0xc7) === 0xc4) return { text: `C${CC_NAME[(op >> 3) & 7]} ${d16()}`, length: 3 };
+  if ((op & 0xc7) === 0xc0) return { text: `R${CC_NAME[(op >> 3) & 7]}`, length: 1 };
+  if ((op & 0xc7) === 0xc7) return { text: `RST ${(op >> 3) & 7}`, length: 1 };
+  if (op === 0xdb) return { text: `IN ${d8()}`, length: 2 };
+  if (op === 0xd3) return { text: `OUT ${d8()}`, length: 2 };
+  // A handful of codes are genuinely unused on the 8085. Saying so is more honest
+  // than inventing an instruction for them.
+  return { text: `??? (${hex2(op)}H is not an instruction)`, length: 1 };
+}
+
 /* ----------------------------------------------------------------- grading --- */
 
 /** One test for an assembly problem: what is in memory before it runs, and which

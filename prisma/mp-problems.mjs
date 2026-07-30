@@ -166,7 +166,61 @@ const mpProblems = [
       "If you get 63H you walked one step too few; if you get 00H you walked too far."],
     ["8085", "memory", "pointers"]),
 
-  /* ============== 3. Evolution — What Actually Changed ============== */
+  /* ============== 3. What a Program Actually Is ============== */
+  MP("mp-what-is-a-program", "Easy", 296, "mp-store-16bit", "Store a Number That Needs Two Boxes",
+    "The number **5678H** is too big for one box, so it takes two — boxes **2050H** and **2051H**.\n\nThe 8085's rule is **low byte first**: the small half goes in the lower address. So 2050H gets 78H and 2051H gets 56H.\n\nStore it that way.",
+    [{ input: "(both boxes start empty)", output: "2050H = 78H, 2051H = 56H" }],
+    "        LXI H, 2050H\n        ; store 5678H across the two boxes, low half first\n" + HALT,
+    "        LXI H, 2050H\n        MVI M, 78H\n        INX H\n        MVI M, 56H\n        HLT\n",
+    [{ memory: {}, check: ["M:2050", "M:2051"] }],
+    ["5678H splits into 56H (the high half) and 78H (the low half).",
+      "Low byte goes in the LOWER address — 2050H gets 78H.",
+      "`INX H` walks to the next box between the two writes."],
+    ["8085", "memory", "16-bit"]),
+
+  MP("mp-what-is-a-program", "Easy", 297, "mp-read-16bit", "Read Two Boxes as One Number",
+    "Boxes **2050H** and **2051H** hold a 16-bit number, low byte first. Read the pair into HL as a single number.\n\n`LHLD` does it in one instruction: it takes the byte at the address into **L** and the next one into **H**.\n\nCheck the answer against the two bytes — if you get the digits swapped, you have loaded them the wrong way round.",
+    [{ input: "2050H = 34H, 2051H = 12H", output: "HL = 1234H" }],
+    "        ; read the 16-bit number at 2050H into HL\n" + HALT,
+    "        LHLD 2050H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12 }, check: ["HL", "H", "L"] },
+      { memory: { [A50]: 0xcd, [A50 + 1]: 0xab }, check: ["HL", "H", "L"] },
+    ],
+    ["`LHLD 2050H` is a single three-byte instruction that loads both halves.",
+      "The byte at 2050H goes into L, and the byte at 2051H goes into H.",
+      "So the bytes 34H and 12H come back as 1234H, not 3412H."],
+    ["8085", "16-bit", "memory"]),
+
+  MP("mp-what-is-a-program", "Medium", 298, "mp-split-16bit", "Take a Number Apart Again",
+    "The 16-bit number at **2050H** needs to be split back into two separate bytes and stored at **2060H** and **2061H** — low half at 2060H, high half at 2061H.\n\nLoad it as one number, then write out each half. `MOV A, L` gets the low half and `MOV A, H` gets the high half.\n\nThis is the reverse of the previous problem, and it is what every \"convert a 16-bit result\" question is really asking.",
+    [{ input: "2050H = 34H, 2051H = 12H  (the number 1234H)", output: "2060H = 34H, 2061H = 12H" }],
+    "        LHLD 2050H\n        ; write the low half to 2060H and the high half to 2061H\n" + HALT,
+    "        LHLD 2050H\n        MOV A, L\n        STA 2060H\n        MOV A, H\n        STA 2061H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12 }, check: ["M:2060", "M:2061"] },
+      { memory: { [A50]: 0xff, [A50 + 1]: 0x0f }, check: ["M:2060", "M:2061"] },
+    ],
+    ["`LHLD` loads both halves at once — L gets the low byte, H the high byte.",
+      "`STA` writes the accumulator to an address written into the instruction, so HL stays free.",
+      "Do the low half first, or you will overwrite A before you have stored it."],
+    ["8085", "16-bit", "memory"]),
+
+  MP("mp-what-is-a-program", "Medium", 299, "mp-copy-16bit", "Move a 16-Bit Number Somewhere Else",
+    "Copy the 16-bit number at **2050H** to **2060H**, keeping the byte order intact.\n\nTwo instructions is enough: `LHLD` reads a pair, `SHLD` writes one back. Both follow the low-byte-first rule, so the copy comes out identical without you having to think about which half is which.\n\nThe original must still be there afterwards — this is a copy, not a move.",
+    [{ input: "2050H = 34H, 2051H = 12H", output: "2060H = 34H, 2061H = 12H" }],
+    "        ; copy the 16-bit number at 2050H to 2060H\n" + HALT,
+    "        LHLD 2050H\n        SHLD 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12 }, check: ["M:2060", "M:2061", "HL"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x80 }, check: ["M:2060", "M:2061", "HL"] },
+    ],
+    ["`LHLD` reads a 16-bit value from an address; `SHLD` writes one back.",
+      "Both use the same byte order, so you never have to swap anything.",
+      "Two instructions and a HLT is the whole program."],
+    ["8085", "16-bit", "memory"]),
+
+  /* ============== 4. Evolution — What Actually Changed ============== */
   MP("mp-evolution", "Medium", 311, "mp-overflow-catch", "Keep the Ninth Bit",
     "Add the bytes at **2050H** and **2051H** and give the **full** answer, not the eight bits that fit.\n\nPut the low byte of the sum in **L** and the carry — 0 or 1 — in **H**. So 200 + 200 gives H=01, L=90, which read together is 190H = 400.\n\nThe trick is `ACI 00H`: add zero *with carry*, which turns the carry flag into a number.",
     [{ input: "2050H = C8H, 2051H = C8H  (200 + 200)", output: "H=01 L=90" }, { input: "2050H = 10H, 2051H = 20H", output: "H=00 L=30" }],

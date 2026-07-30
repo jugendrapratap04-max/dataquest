@@ -71,6 +71,7 @@ import { Asm8085Lab } from "./Asm8085Lab";
 import { CpuEvolutionLab } from "./CpuEvolutionLab";
 import { Arch8085Lab } from "./Arch8085Lab";
 import { MemoryStreetLab, MemoryRwLab, AddressWidthLab } from "./MemoryLabs";
+import { ProgramBytesLab, InstructionBytesLab, ByteOrderLab } from "./ProgramBytesLab";
 import { BitSwitchLab, DoublingLab, HexLab } from "./BitBasicsLab";
 
 const REGISTRY: Record<string, React.ComponentType> = {
@@ -142,6 +143,9 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,
+  "instruction-bytes-lab": InstructionBytesLab,
+  "program-bytes-lab": ProgramBytesLab,
+  "byte-order-lab": ByteOrderLab,
   "bit-switch-lab": BitSwitchLab,
   "doubling-lab": DoublingLab,
   "hex-lab": HexLab,

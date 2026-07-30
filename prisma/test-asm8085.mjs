@@ -9,7 +9,7 @@
 // alone, INX touching nothing, DAD touching only CY, ANA setting AC, CY meaning
 // BORROW after a subtract.
 
-import { run, assemble, hex2, hex4 } from "../lib/asm8085.ts";
+import { run, assemble, disassemble, hex2, hex4 } from "../lib/asm8085.ts";
 
 let pass = 0;
 const fails = [];
@@ -64,6 +64,15 @@ function prog(what, src, want, opts = {}) {
     const a = assemble(src + "\nHLT");
     const got = want.map((_, i) => a.code.get(0x2000 + i));
     check(`opcode ${src}`, got.map(hex2), want.map(hex2));
+  }
+
+  // Round-trip: assemble it, decode the bytes back, and the text must be what we
+  // started with. This is the real check on the disassembler — it shares no table
+  // with the assembler, only the same encoding formulas, so agreeing across all
+  // sixty-odd forms means both are reading the 8085's opcode map the same way.
+  for (const [src, want] of cases) {
+    const d = disassemble(want, 0);
+    check(`round-trip ${src}`, [d.text, d.length], [src, want.length]);
   }
 }
 

@@ -6652,6 +6652,85 @@ const MP0 = [
 // Orders 1-4 are Chapter 1, "Before the processor" — the ground floor, which
 // assumes no background at all. The processor itself starts at order 5.
 // docs/MICROPROCESSOR-SYLLABUS.md has the full plan.
+const MPP = [
+  { t: "objectives", items: [
+    "See a program for what it is: <b>numbers in the boxes</b> from lesson 2",
+    "Take one instruction apart into its <b>1, 2 or 3 bytes</b>",
+    "Understand why <b>nothing marks a byte as data or instruction</b>",
+    "Store a number too big for one box — <b>low byte first</b>, and why",
+  ]},
+  { t: "hook", q: "Lesson 2 said every box holds one byte and nothing else. But a program has to live somewhere too. So where is it — and what is it made of?", why: "In the same boxes, made of the same bytes.<br/><br/>That is not a simplification. There is no separate place for programs and no special kind of byte for instructions. A program is numbers in memory, and the processor reads them one after another and does what each one means.<br/><br/>Which raises a question worth sitting with for a moment: if a program is bytes and data is bytes, <b>how does the processor tell them apart?</b>" },
+  { t: "def", term: "Opcode", en: "The byte that says WHICH instruction. 3EH means \"load the accumulator with the next byte\"; 76H means \"stop\". The processor has a fixed list of these built into it.", hi: "Some instructions need more than the opcode — a number to load, or an address to go to. Those extra bytes follow it in memory, which is why an instruction can be <b>one, two or three bytes</b> long." },
+  { t: "note", variant: "key", html: "📌 The answer to the hook, and the most important sentence in this chapter: <b>it cannot tell them apart, and it does not try.</b> A byte is an instruction if the processor reads it as one. Where it starts reading is the only thing that decides." },
+
+  { t: "h2", n: "1", text: "One instruction, in bytes" },
+  { t: "p", html: "Start small. Pick an instruction and see exactly what it becomes in memory." },
+  { t: "viz", name: "instruction-bytes-lab" },
+  { t: "p", html: "The first byte is always the <b>opcode</b> — which instruction this is. Anything after it is what that instruction needed: a number to load, or an address to reach.<br/><br/>Notice that <code>MOV B, A</code> is a single byte. Which two registers to use is packed inside the opcode itself, which is why there are so many MOV opcodes and only seven registers." },
+  { t: "code", file: "bytes.asm", lang: "asm8085", show: ["CODE:2000-2003", "A", "B"], code: "        MVI A, 42H\n        MOV B, A\n        HLT\n", output: "CODE=3E 42 47 76 A=42 B=42" },
+  { t: "p", html: "Four bytes for the whole program. <b>3E</b> is \"load A with what comes next\", <b>42</b> is that next thing, <b>47</b> is the entire <code>MOV B, A</code>, and <b>76</b> is <code>HLT</code>." },
+
+  { t: "h2", n: "2", text: "So which bytes are the data?" },
+  { t: "p", html: "In <code>3E 42</code>, the 42 is data. But look at the byte itself — there is nothing about it that says so. Move the reading point and find out what that costs." },
+  { t: "viz", name: "program-bytes-lab" },
+  { t: "p", html: "Start at <b>2000</b> and you get the program somebody wrote. Start at <b>2001</b> and the byte that was data a second ago is now <code>MOV B, D</code> — a real instruction, which the processor will carry out without hesitating.<br/><br/>The bytes never changed. Only where the reading began. That is what \"stored-program computer\" means, and it is why a jump to the wrong address does not produce an error — it produces a different program." },
+
+  { t: "h2", n: "3", text: "A number too big for one box" },
+  { t: "p", html: "A box holds 0 to 255. An address like 2050H needs two boxes — so which half goes in the first one?" },
+  { t: "viz", name: "byte-order-lab" },
+  { t: "p", html: "The 8085 always puts the <b>low byte first</b>, in the lower address. Flip the order and the same two bytes read back as 3412H instead of 1234H — nothing broke, the two sides simply disagreed about the arrangement.<br/><br/>You can see it in the machine code too: <code>LXI H, 2050H</code> assembles to <b>21 50 20</b>. The 50 comes before the 20." },
+  { t: "code", file: "order.asm", lang: "asm8085", show: ["HL", "M:2050", "M:2051"], code: "        LXI H, 2050H\n        MVI M, 34H      ; low byte into the lower box\n        INX H\n        MVI M, 12H      ; high byte into the next one\n        LHLD 2050H      ; read the pair back as one number\n        HLT\n", output: "HL=1234 [2050]=34 [2051]=12" },
+  { t: "p", html: "Two boxes holding 34 and 12, and <code>LHLD</code> reads them back as <b>1234H</b> — because it expects the low byte first, exactly as they were written." },
+
+  { t: "think", q: "If a byte can be data or an instruction, what stops a program from running its own data by accident?", a: "Nothing built into the memory. It is entirely the program's own doing.<br/><br/>The processor keeps one number — the <b>program counter</b> — saying where to read next. Fetch an instruction and it advances by that instruction's length, so it naturally lands on the next opcode. As long as it only ever moves that way, it never meets a data byte in the wrong role.<br/><br/>What breaks it is anything that changes the program counter by hand: a jump, a call, a return. Send it to an address that is not the start of an instruction and the processor starts decoding from the middle of something. It will not complain, because from where it is standing those bytes look exactly like any others.<br/><br/>So programmers keep data somewhere execution never reaches — after the <code>HLT</code>, or in a separate block entirely. That separation is a habit, not a rule the hardware enforces.<br/><br/>Later machines did add enforcement, marking regions of memory as \"may not be executed\". It is worth noticing what that tells you: the problem was real enough that hardware was eventually changed to prevent it." },
+  { t: "analogy", concept: "A program as bytes", real: "A recipe written in the same notebook as the shopping list", html: "One notebook, one kind of paper, one kind of handwriting. On one page: <i>heat the oil, add the onions</i>. On another: <i>2 onions, 500g rice</i>.<br/><br/>Nothing about the paper says which page is instructions and which is a list. You know because of where you started reading and what you expected to find.<br/><br/>Open the notebook at the wrong page and start following it as a recipe, and you will try to \"heat 500g rice\" — a perfectly readable sentence that is not what anyone meant. The notebook is not broken and the handwriting is fine. You just started in the wrong place.<br/><br/>That is precisely what a processor does with a bad jump address, and precisely why nothing warns you." },
+
+  { t: "trace", intro: "Three instructions. Work out what each register holds — write the values as two hex digits.", code: "        MVI A, 07H\n        MVI B, 03H\n        ADD B\n        HLT\n", steps: [
+    { q: "After line 1, <code>A</code> is", answer: "07", accept: ["7", "07h"], why: "<code>MVI</code> is two bytes — the opcode 3E, then the 07 that goes into A. The 07 was sitting in the program itself." },
+    { q: "After line 2, <code>B</code> is", answer: "03", accept: ["3", "03h"], why: "Same shape, different register. The opcode changes to 06 because it encodes which register; the data byte 03 follows it." },
+    { q: "After line 3, <code>A</code> is", answer: "0A", accept: ["a", "0ah"], why: "7 + 3 = 10, which is <b>0A</b> in hex. <code>ADD B</code> is one byte — it needs no data, because both registers are named inside the opcode." },
+  ]},
+
+  { t: "drills", intro: "Eleven on how instructions become bytes. Predict the bytes, then open the answer.", items: [
+    { task: "How many bytes is an MVI?", code: "MVI A, 25H\nHLT", show: ["CODE:2000-2002"], out: "CODE=3E 25 76" },
+    { task: "How many bytes is a MOV?", code: "MOV B, A\nHLT", show: ["CODE:2000-2001"], out: "CODE=47 76" },
+    { task: "How many bytes is an LXI?", code: "LXI H, 2050H\nHLT", show: ["CODE:2000-2003"], out: "CODE=21 50 20 76" },
+    { task: "And HLT on its own.", code: "HLT", show: ["CODE:2000-2000"], out: "CODE=76" },
+    { task: "Where does the data byte sit?", code: "MVI C, 7FH\nHLT", show: ["CODE:2000-2002"], out: "CODE=0E 7F 76" },
+    { task: "Which half of an address is written first?", code: "LXI H, 1234H\nHLT", show: ["CODE:2000-2003"], out: "CODE=21 34 12 76" },
+    { task: "Two instructions — how many bytes altogether?", code: "MVI A, 01H\nMVI B, 02H\nHLT", show: ["CODE:2000-2004"], out: "CODE=3E 01 06 02 76" },
+    { task: "Where does the program counter finish?", code: "MVI A, 01H\nMOV B, A\nHLT", show: ["PC"], out: "PC=2004" },
+    { task: "Store an opcode as if it were data, then read it back.", code: "LXI H, 2060H\nMVI M, 3EH\nMOV A, M\nHLT", show: ["A", "M:2060"], out: "A=3E [2060]=3E" },
+    { task: "Low byte then high — what number comes back?", code: "LXI H, 2050H\nMVI M, 34H\nINX H\nMVI M, 12H\nLHLD 2050H\nHLT", show: ["HL"], out: "HL=1234" },
+    { task: "The same two bytes the other way round.", code: "LXI H, 2050H\nMVI M, 12H\nINX H\nMVI M, 34H\nLHLD 2050H\nHLT", show: ["HL"], out: "HL=3412" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; \"instructions live in one place and data in another\"", why: "They live in the same memory, made of the same bytes. Keeping them apart is a habit programmers follow, not something the hardware provides — which is exactly why a bad jump address is dangerous.", fix: "; one memory, and the program counter decides what is what" },
+    { bad: "MVI A, 300", why: "An instruction's data byte is one box, so it holds 0 to 255. 300 has no way of fitting, and the assembler will not take it.", fix: "MVI A, 0FFH   ; 255 is the largest one byte holds" },
+    { bad: "LXI H, 2050H\nMVI M, 12H\nINX H\nMVI M, 34H\n; \"stored 1234H\"", why: "That stores 12 then 34, which the 8085 reads back as <b>3412H</b>. It always takes the low byte from the lower address, whatever order you wrote them in.", fix: "MVI M, 34H\nINX H\nMVI M, 12H   ; low byte first" },
+    { bad: "MVI A, 05H\n; data goes here, before HLT", why: "Execution runs straight on into whatever comes next. Data placed where the processor will reach it gets decoded as instructions, and it will not complain.", fix: "MVI A, 05H\nHLT\n; data after the HLT, where execution never arrives" },
+  ]},
+
+  { t: "debug", intro: "This stores the number 1234H across two boxes and reads it back. It runs cleanly and HL comes out as 3412H. Read it before you open the fix.", show: ["HL"], code: "        LXI H, 2050H\n        MVI M, 12H      ; the 12 half\n        INX H\n        MVI M, 34H      ; the 34 half\n        LHLD 2050H      ; read them back as one number\n        HLT\n", symptom: "HL comes out as 3412H when the number stored was 1234H - the two halves are the right bytes in the wrong places", q: "Both bytes are correct and both were stored. So what did LHLD expect to find first?", fix: "        LXI H, 2050H\n        MVI M, 34H      ; LOW half first\n        INX H\n        MVI M, 12H      ; then the high half\n        LHLD 2050H      ; read them back as one number\n        HLT\n", why: "The 8085 stores 16-bit values <b>low byte first</b> — the small half goes in the lower address. This program wrote the high half first, so <code>LHLD</code>, which always takes the lower address as the low byte, built the number the other way round.<br/><br/>Nothing failed. Both bytes went exactly where they were sent, and <code>LHLD</code> did exactly what it always does. The two sides simply disagreed about the arrangement, and only the program was wrong about it.<br/><br/>What makes this hard to spot is that <b>the digits are all correct</b>. 3412 and 1234 use the same four digits, so it reads as a typo rather than a rule you broke — and on a number like 1122H it would look right and still be wrong.<br/><br/>The check that catches it: look at the machine code the assembler produces for an address. <code>LXI H, 2050H</code> is <b>21 50 20</b>, with the 50 before the 20. The processor writes addresses that way, so your data has to be stored that way too." },
+
+  { t: "recap", items: [
+    "A program is <b>bytes in the same boxes</b> as data. There is no separate place and no special kind of byte",
+    "The first byte of an instruction is the <b>opcode</b>; any bytes after it are the number or address it needs",
+    "Instructions are <b>one, two or three bytes</b> — never more",
+    "<b>Nothing marks a byte as data.</b> Where the processor starts reading is the only thing that decides",
+    "A 16-bit value takes two boxes, <b>low byte first</b> — so 1234H is stored as 34 then 12",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is an opcode?", a: "The byte that identifies which instruction it is. The processor has a fixed set of them built in — 3EH means load the accumulator with the next byte, 76H means halt. Any bytes following the opcode are the data or address that instruction needs." },
+    { level: "beginner", q: "How long is an 8085 instruction?", a: "One, two or three bytes. One byte when everything it needs is encoded in the opcode, like MOV B, A. Two when it carries an 8-bit value, like MVI A, 42H. Three when it carries a 16-bit address, like LXI or STA." },
+    { level: "intermediate", q: "How does the processor know which bytes are instructions and which are data?", a: "It does not. Nothing in a byte marks it either way — the distinction is positional, decided by where the program counter is pointing and what the previous opcode said to expect. In 3E 42 the 42 is data only because 3E consumes the byte after it. Start reading one byte later and that same 42 becomes an instruction." },
+    { level: "intermediate", q: "In what order does the 8085 store a 16-bit value in memory?", a: "Low byte in the lower address, high byte in the next one — so 1234H is stored as 34 then 12. Storing and loading both follow it, so LHLD reads back what SHLD wrote. It shows up in machine code too: LXI H, 2050H assembles to 21 50 20." },
+    { level: "advanced", q: "Why is the stored-program idea both the machine's great strength and a security problem?", a: "The strength is that behaviour lives in memory rather than in wiring, so the same hardware does a different job when you load different bytes — that is the whole invention. The problem is the same property: since nothing distinguishes instruction from data, anything that can get bytes into memory and redirect the program counter can get them executed. Buffer overflows are exactly that. Later architectures added protection bits marking regions as non-executable, which is the hardware admitting the software habit was not enough on its own." },
+  ]},
+];
+
 const MPM = [
   { t: "objectives", items: [
     "Tell a box's <b>number</b> from what is <b>inside</b> it — the one confusion everything later depends on",
@@ -6744,6 +6823,7 @@ const MPM = [
 const mpLessons = [
   { slug: "mp-switches-and-numbers", order: 1, title: "Switches, and How They Become Numbers", minutes: 12, problems: [], content: MP0 },
   { slug: "mp-memory-street", order: 2, title: "Memory — a Street of Numbered Boxes", minutes: 13, problems: [], content: MPM },
+  { slug: "mp-what-is-a-program", order: 3, title: "What a Program Actually Is", minutes: 13, problems: [], content: MPP },
   { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
 ];
@@ -7050,6 +7130,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-what-is-a-program": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Where does a program live?", options: ["In the same memory boxes as the data, as bytes", "In a special program-only memory", "Inside the processor's registers", "On the address bus"], correct: 0, why: "Same memory, same kind of byte. There is no separate place for programs — that is what \"stored-program computer\" means." },
+    { level: "easy", q: "What is the FIRST byte of an instruction called?", options: ["The operand", "The address", "The opcode", "The data"], correct: 2, why: "It says which instruction this is. Anything after it is what that instruction needed — a number to load, or an address to reach." },
+    { level: "easy", q: "How many bytes long can one 8085 instruction be?", options: ["Always one", "One, two or three", "Always two", "Any length"], correct: 1, why: "One when everything fits in the opcode, two when it carries a value, three when it carries a 16-bit address." },
+    // Medium — apply it
+    { level: "medium", q: "<code>MVI A, 42H</code> becomes the bytes <code>3E 42</code>. What is the 42?", options: ["A second opcode", "The address to load from", "Data, sitting inside the program", "The number of T-states"], correct: 2, why: "It is data only because 3EH is an opcode that consumes the byte after it. Nothing about the byte 42H itself says so." },
+    { level: "medium", q: "The bytes <code>3E 42 47 76</code> are read starting from the SECOND byte instead of the first. What happens?", options: ["The processor reports an error", "It skips to the next valid instruction", "It decodes a different, still valid program", "It halts immediately"], correct: 2, why: "42H is a real opcode — MOV B, D. The processor cannot tell that it was meant to be data, so it simply obeys it. Same bytes, different program." },
+    { level: "medium", q: "In what order does the 8085 store the 16-bit value 1234H in memory?", options: ["34H then 12H", "12H then 34H", "Either — it works out which is which", "As a single 16-bit box"], correct: 0, why: "Low byte in the lower address. You can see it in machine code too: LXI H, 2050H assembles to 21 50 20." },
+    { level: "medium", q: "<code>MOV B, A</code> is a single byte. How does the processor know WHICH registers?", options: ["From a second byte that follows", "The registers are packed inside the opcode itself", "It always uses B and A", "From the previous instruction"], correct: 1, why: "That is why there are so many MOV opcodes for only seven registers — every destination-and-source pair gets its own number." },
+    // Hard — the edges
+    { level: "hard", q: "A program stores 12H then 34H and reads the pair back with <code>LHLD</code>. What is in HL?", options: ["1234H", "3412H", "Nothing — LHLD fails", "1200H"], correct: 1, why: "LHLD always takes the lower address as the LOW byte. The bytes were stored the other way round, so the number comes back reversed — and all four digits look right, which is what makes it hard to spot." },
+    { level: "hard", q: "What stops a program from accidentally executing its own data?", options: ["The assembler marks data bytes", "Memory refuses to execute data", "Nothing in the hardware - only the program counter moving instruction by instruction, and the programmer keeping data out of the way", "Data is stored in a different chip"], correct: 2, why: "Fetching advances the program counter by the instruction's own length, so it lands on the next opcode naturally. It is jumps, calls and returns that can drop it into the middle of something." },
+    { level: "hard", q: "Why is the stored-program idea a security problem as well as an invention?", options: ["Because memory can fail", "Because programs are too large", "Because nothing distinguishes instruction from data, so anything that writes memory and redirects the program counter can get bytes executed", "Because bytes can hold only 255"], correct: 2, why: "Buffer overflows are exactly this. Later architectures added bits marking memory as non-executable — the hardware admitting that keeping data out of the way by habit was not enough." },
+  ],
   "mp-memory-street": [
     // Easy — did the core idea land?
     { level: "easy", q: "Box 2050H holds the byte 07H. Which number is the <b>address</b>?", options: ["07H", "2050H", "Both of them", "Neither — an address is decimal"], correct: 1, why: "The address says WHICH box; the contents say WHAT is in it. 2050H is painted on the door, 07H is the family inside." },
