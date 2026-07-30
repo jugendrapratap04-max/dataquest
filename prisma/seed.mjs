@@ -6652,8 +6652,98 @@ const MP0 = [
 // Orders 1-4 are Chapter 1, "Before the processor" — the ground floor, which
 // assumes no background at all. The processor itself starts at order 5.
 // docs/MICROPROCESSOR-SYLLABUS.md has the full plan.
+const MPM = [
+  { t: "objectives", items: [
+    "Tell a box's <b>number</b> from what is <b>inside</b> it — the one confusion everything later depends on",
+    "Say why every box holds exactly <b>one byte</b>, never more",
+    "Know that <b>reading copies</b> and <b>writing destroys</b>",
+    "Work out why an 8085 stops at <b>65,536 boxes</b>, from the switches up",
+  ]},
+  { t: "hook", q: "A processor has seven little boxes inside it. Your phone holds a photo with millions of numbers in it. Where do all the others live?", why: "Outside the chip, in <b>memory</b> — and memory is not a mysterious thing. It is a very long street of numbered boxes, each one holding exactly one byte.<br/><br/>That is the whole idea. The rest of this lesson is about one confusion that trips up almost everybody, and it is worth naming before you meet it: <b>a box's number and what is inside it are two different numbers</b>." },
+  { t: "def", term: "Address", en: "The number that says WHICH box. It is written on the box, not inside it, and it never changes — box 2050 is box 2050 forever.", hi: "The other number is the <b>contents</b>: the one byte sitting in that box, which a program can change whenever it wants. Address is where; contents is what." },
+  { t: "note", variant: "key", html: "📌 If you remember one sentence from this lesson: <b>the house number is not the family living in it.</b> Every pointer, every array, and half the bugs you will ever write come from mixing those two up." },
+
+  { t: "memsetup", at: 8272, bytes: [7, 99, 255, 0, 65, 156, 16, 42, 128, 5, 187, 63], note: "The twelve boxes this lesson works on. These are the same bytes the panel below shows, so anything you read here you can point at up there." },
+
+  { t: "h2", n: "1", text: "A street of numbered boxes" },
+  { t: "p", html: "Here is a piece of memory. Twelve boxes, side by side. Click one." },
+  { t: "viz", name: "memory-street-lab" },
+  { t: "p", html: "Two numbers, two colours, and they have nothing to do with each other. Box <b>2050H</b> happens to hold <b>07H</b> today. Tomorrow it might hold <b>FFH</b>, and it will still be box 2050H.<br/><br/>Notice the boxes are numbered in hex, and they run 2050, 2051, 2052 — the next box along is the next number up. That is all \"next\" means in memory." },
+
+  { t: "h2", n: "2", text: "One box, one byte" },
+  { t: "p", html: "A box is not a container that stretches. It is eight switches, exactly like the byte you built in lesson 1 — so it holds a number from 0 to 255 and not one more." },
+  { t: "code", file: "one-box.asm", lang: "asm8085", show: ["HL", "A", "B"], code: "        LXI H, 2050H    ; go to box 2050\n        MVI M, 99H      ; put 99 IN the box\n        MOV A, L        ; the box NUMBER's low half\n        MOV B, M        ; what is IN the box\n        HLT\n", output: "HL=2050 A=50 B=99" },
+  { t: "p", html: "Read the last two lines together, because this is the confusion made visible. <code>MOV A, L</code> took <b>50</b> — part of the box's <i>number</i>. <code>MOV B, M</code> took <b>99</b> — what is <i>inside</i> it. Same box, two completely different answers.<br/><br/><code>M</code> is how assembly says \"the box HL is pointing at\". Change HL and <code>M</code> means a different box, without a single other instruction changing." },
+
+  { t: "h2", n: "3", text: "Reading copies. Writing destroys." },
+  { t: "p", html: "These sound like opposites and they are not. Press Read a few times, then press Write once." },
+  { t: "viz", name: "memory-rw-lab" },
+  { t: "p", html: "Reading is like reading a house number — you can do it all day and nothing about the house changes. Writing is like moving a new family in: whoever was there is gone.<br/><br/>The processor will not stop you and will not warn you. A byte you overwrote is simply not there any more." },
+  { t: "code", file: "read-write.asm", lang: "asm8085", show: ["A", "B", "C", "M:2050"], code: "        LXI H, 2050H\n        MVI M, 42H      ; write 42 into the box\n        MOV A, M        ; read it\n        MOV B, M        ; read it again\n        MOV C, M        ; and again\n        HLT\n", output: "A=42 B=42 C=42 [2050]=42" },
+  { t: "p", html: "Three reads, three copies, and the box still holds 42H at the end. Nothing was used up." },
+
+  { t: "h2", n: "4", text: "Walking down the street" },
+  { t: "p", html: "Boxes next to each other have numbers next to each other, so \"go to the next one\" is just \"add one to the address\". <code>INX H</code> does exactly that." },
+  { t: "code", file: "walk.asm", lang: "asm8085", show: ["A", "B", "C", "HL"], code: "        LXI H, 2050H\n        MOV A, M        ; box 2050\n        INX H           ; walk one box along\n        MOV B, M        ; box 2051\n        INX H\n        MOV C, M        ; box 2052\n        HLT\n", output: "A=07 B=63 C=FF HL=2052" },
+  { t: "p", html: "Three boxes, three different bytes, and the only thing that changed between them was the address in HL. This is how every loop over a list works, for the rest of the course and for the rest of programming." },
+
+  { t: "h2", n: "5", text: "How long can the street be?" },
+  { t: "p", html: "Every box needs its own number, and that number is written with switches too — so the same doubling from lesson 1 decides how much memory a processor can even name." },
+  { t: "viz", name: "address-width-lab" },
+  { t: "p", html: "Drag it all the way to <b>16</b>. That is the 8085: <b>65,536 boxes</b>, one byte each, which is <b>64 KB</b>.<br/><br/>Nobody chose that number as a limit — it is simply what sixteen switches count to. Reaching further needs a seventeenth wire, and the chip does not have one. That is why the address in <code>LXI H, 2050H</code> is four hex digits and never five." },
+
+  { t: "think", q: "Why can't a box just hold a bigger number when you need one?", a: "Because a box is not a bag — it is eight physical switches, and there is no room for a ninth.<br/><br/>Memory is built as a fixed grid: the same eight switches per box, repeated millions of times. That sameness is what makes it cheap and fast, and it is what lets an address point at any box without the processor needing to know how big that box is. Every box is the same size, so box 2051 is always one step past box 2050.<br/><br/>So what happens when you need a number bigger than 255? You use <b>two boxes</b>, and agree between yourself which one holds which half. That agreement is not something the memory knows about — the boxes are still just eight switches each. It exists entirely in the program.<br/><br/>That is why <code>LXI H, 2050H</code> loads a 16-bit address into <i>two</i> registers, H and L. Same trick, one level up: when one container is not enough, use two and remember the order." },
+  { t: "analogy", concept: "Address and contents", real: "House numbers on a street", html: "A street of houses, each with a number painted on the door and a family living inside.<br/><br/>The <b>number</b> is the address. It never moves — house 2050 is house 2050 whether anyone lives there or not.<br/><br/>The <b>family</b> is the contents. They can move out and someone else can move in, and the number on the door does not change.<br/><br/>A postman with the number 2050 knows exactly where to go and nothing at all about who lives there. That is precisely what a processor knows when it holds an address, and it is why <code>MOV A, L</code> and <code>MOV A, M</code> give different answers." },
+
+  { t: "trace", intro: "Five lines. Work out what each name holds after its line has run — write the values as hex digits.", code: "        LXI H, 2050H\n        MVI M, 08H\n        MOV A, M\n        INX H\n        MOV B, M\n        HLT\n", steps: [
+    { q: "After line 1, <code>HL</code> is", answer: "2050", accept: ["2050h"], why: "<code>LXI</code> loads an address into a pair. Nothing has been read yet — HL is only pointing." },
+    { q: "After line 3, <code>A</code> is", answer: "08", accept: ["8", "08h"], why: "Line 2 wrote 08 into the box, line 3 read it back. The box still holds 08 as well — reading copies." },
+    { q: "After line 5, <code>B</code> is", answer: "63", accept: ["63h"], why: "<code>INX H</code> moved to box 2051, which holds 63H. Nothing about the instruction changed — only the address it was pointing at." },
+  ]},
+
+  { t: "drills", intro: "Eleven small ones. Predict, then open — and any of these runs in the 8085 Lab.", items: [
+    { task: "Point at box 2050 without reading it.", code: "LXI H, 2050H\nHLT", show: ["HL"], out: "HL=2050" },
+    { task: "Read what is inside that box.", code: "LXI H, 2050H\nMOV A, M\nHLT", show: ["A"], out: "A=07" },
+    { task: "Write 55H into box 2060.", code: "LXI H, 2060H\nMVI M, 55H\nHLT", show: ["M:2060"], out: "[2060]=55" },
+    { task: "Read the same box twice. Is it still there?", code: "LXI H, 2050H\nMOV A, M\nMOV B, M\nHLT", show: ["A", "B", "M:2050"], out: "A=07 B=07 [2050]=07" },
+    { task: "Write twice to one box. What survives?", code: "LXI H, 2060H\nMVI M, 11H\nMVI M, 22H\nHLT", show: ["M:2060"], out: "[2060]=22" },
+    { task: "Walk one box along and read it.", code: "LXI H, 2050H\nINX H\nMOV A, M\nHLT", show: ["HL", "A"], out: "HL=2051 A=63" },
+    { task: "Walk back two boxes from 2052.", code: "LXI H, 2052H\nDCX H\nDCX H\nMOV A, M\nHLT", show: ["HL", "A"], out: "HL=2050 A=07" },
+    { task: "An address is two bytes. Which half is which?", code: "LXI H, 2050H\nHLT", show: ["H", "L"], out: "H=20 L=50" },
+    { task: "Copy the byte from one box into another.", code: "LXI H, 2050H\nMOV A, M\nLXI H, 2060H\nMOV M, A\nHLT", show: ["M:2060"], out: "[2060]=07" },
+    { task: "The very last box on the street.", code: "LXI H, 0FFFFH\nHLT", show: ["HL"], out: "HL=FFFF" },
+    { task: "Ask for one box past the end.", code: "LXI H, 0FFFFH\nINX H\nHLT", show: ["HL"], out: "HL=0000" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MOV A, H   ; \"read the box\"", why: "That reads <b>H</b>, which is half of the box's <i>number</i>. To read what is inside the box you need <code>M</code> — the box HL points at.", fix: "MOV A, M   ; the contents" },
+    { bad: "MVI M, 42H   ; without setting HL first", why: "<code>M</code> means \"wherever HL is pointing\", and at the start of a program HL is 0000. So this writes into box 0000 — a box you did not choose and probably cannot use.", fix: "LXI H, 2050H\nMVI M, 42H" },
+    { bad: "MVI M, 300", why: "A box is eight switches. 300 does not fit in eight switches, so it cannot be stored — the assembler will not take it. Anything above 255 needs two boxes.", fix: "MVI M, 0FFH   ; 255 is the most one box holds" },
+    { bad: "LXI H, 2050H\nMVI M, 42H\nMVI M, 99H\n; \"both are saved\"", why: "One box holds one byte. The second write replaced the first, and 42H is gone. Two values need two boxes.", fix: "LXI H, 2050H\nMVI M, 42H\nINX H\nMVI M, 99H" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to put 42H into box 2050H. It runs cleanly and 2050H is untouched. Read it before you open the fix.", show: ["M:2050", "M:2051"], code: "        LXI H, 2050H    ; point at box 2050\n        INX H           ; ...\n        MVI M, 42H      ; write 42\n        HLT\n", symptom: "box 2050H still holds 07H and the 42H turned up in box 2051H instead - one box further along than intended", q: "The write worked. So which box was HL pointing at when it happened?", fix: "        LXI H, 2050H    ; point at box 2050\n        MVI M, 42H      ; write 42 THERE\n        INX H           ; then move on\n        HLT\n", why: "<code>INX H</code> ran <b>before</b> the write, so by the time <code>MVI M, 42H</code> happened, HL was pointing at 2051 — and that is where the 42 went.<br/><br/>The order is the whole bug. Write first, then walk. Doing it the other way round means every value lands one box past where you meant.<br/><br/>What makes this one nasty is that <b>nothing is wrong with either instruction</b>. Both did exactly their job, and memory did exactly as it was told. Off-by-one errors survive because every individual step is correct.<br/><br/>The tell is the pattern, not the crash: the value you wanted is <i>somewhere</i>, just one box off. Whenever data turns up next door to where you expected it, check whether the pointer moved before or after the write." },
+
+  { t: "recap", items: [
+    "Memory is a street of <b>numbered boxes</b>. The number is the <b>address</b>; the byte inside is the <b>contents</b>",
+    "Every box holds <b>exactly one byte</b> — 0 to 255. Bigger numbers take two boxes and an agreement",
+    "<b>Reading copies</b> and leaves the box alone. <b>Writing destroys</b> what was there, silently",
+    "<code>M</code> means \"the box HL is pointing at\", so <code>INX H</code> is how you walk to the next one",
+    "<b>16 switches → 65,536 boxes → 64 KB.</b> Not a rule somebody chose, just what 16 switches count to",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between an address and the contents of a memory location?", a: "The address is the number identifying which location it is — it is fixed and it is how you find the place. The contents are the one byte stored there, which any program can change. A house number versus the family living in it." },
+    { level: "beginner", q: "How much can one memory location hold?", a: "Exactly one byte, so 0 to 255. Memory is a uniform grid of 8-bit cells, which is what makes addressing simple — every location is the same size, so the next address is always one step along. Anything larger is spread over consecutive locations by agreement in the program." },
+    { level: "intermediate", q: "What does <code>M</code> mean in an 8085 instruction?", a: "The memory location whose address is currently in the HL pair. It turns HL into a pointer, so MOV A, M reads a different byte as HL changes — which is what makes a loop over a block possible. It is also why forgetting to load HL writes to location 0000." },
+    { level: "intermediate", q: "Why does an 8085 have exactly 64 KB of address space?", a: "Because the address bus is 16 bits wide, and 2 to the power 16 is 65,536. Each location holds one byte, so that is 64 KB. It is arithmetic rather than a design decision — reaching further would need a seventeenth address line, which the chip does not have." },
+    { level: "advanced", q: "A program writes a value and later reads back something different. What would you check?", a: "First, whether something else wrote to that address in between — the classic case being a pointer that moved before the write rather than after, so the value landed one location off and something else overwrote the original. Second, whether the address was ever set at all; an uninitialised pointer writes to 0000 quite happily. Third, whether the value needed more than one byte and only one was stored, so the read is picking up half of it. All three run cleanly and none of them raises anything — memory does exactly as it is told, which is why off-by-one bugs survive review." },
+  ]},
+];
+
 const mpLessons = [
   { slug: "mp-switches-and-numbers", order: 1, title: "Switches, and How They Become Numbers", minutes: 12, problems: [], content: MP0 },
+  { slug: "mp-memory-street", order: 2, title: "Memory — a Street of Numbered Boxes", minutes: 13, problems: [], content: MPM },
   { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
 ];
@@ -6960,6 +7050,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-memory-street": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Box 2050H holds the byte 07H. Which number is the <b>address</b>?", options: ["07H", "2050H", "Both of them", "Neither — an address is decimal"], correct: 1, why: "The address says WHICH box; the contents say WHAT is in it. 2050H is painted on the door, 07H is the family inside." },
+    { level: "easy", q: "How much can one memory location hold?", options: ["Exactly one byte, 0 to 255", "As much as you put in it", "Two bytes", "One bit"], correct: 0, why: "A location is eight switches, the same eight every time. That sameness is what makes the next address always one step along." },
+    { level: "easy", q: "You read a memory location three times. What is in it afterwards?", options: ["Nothing — reading empties it", "The same byte it always held", "Zero", "Whatever was read last"], correct: 1, why: "Reading copies, like reading a house number off a door. It is writing that destroys what was there." },
+    // Medium — apply it
+    { level: "medium", q: "<code>LXI H, 2050H</code> then <code>MVI M, 99H</code> then <code>MOV A, L</code>. What is in A?", options: ["99H", "2050H", "50H", "20H"], correct: 2, why: "L is the low half of the ADDRESS, not the contents. Reading what is inside the box needs M — this is the whole confusion the lesson is about." },
+    { level: "medium", q: "What does <code>M</code> refer to in <code>MOV A, M</code>?", options: ["A register called M", "The memory location HL is pointing at", "The most recent address used", "The middle of memory"], correct: 1, why: "It makes HL a pointer, which is what lets one instruction read a different byte each time round a loop. Forget to set HL and it points at 0000." },
+    { level: "medium", q: "A program writes 42H to a location, then writes 99H to the same location. What is stored there?", options: ["42H", "Both, in order", "99H — the first one is gone", "An error"], correct: 2, why: "One location, one byte. The second write replaced the first and nothing warned you. Two values need two locations." },
+    { level: "medium", q: "<code>LXI H, 2050H</code>, then <code>INX H</code>, then <code>MVI M, 42H</code>. Where does 42H land?", options: ["2051H", "2050H", "Both locations", "0000H"], correct: 0, why: "INX H moved the pointer before the write happened, so the value lands one location past where it was meant to. Write first, then walk." },
+    // Hard — the edges
+    { level: "hard", q: "Why does an 8085 stop at 65,536 memory locations?", options: ["Memory chips were expensive", "It was a licensing limit", "Because 2 to the power 16 is 65,536, and the address bus is 16 bits", "Because a byte holds 255"], correct: 2, why: "It is arithmetic, not a decision. Sixteen switches count to 65,536 and no further — reaching past it needs a seventeenth address line the chip does not have." },
+    { level: "hard", q: "A program needs to store the number 1000. What has to happen?", options: ["Use a bigger location", "Store it across two locations, with the program remembering the order", "Round it down to 255", "Store it in a register instead, which has no limit"], correct: 1, why: "Every location is eight switches — there is no bigger one. The memory knows nothing about the pairing; that agreement lives entirely in the program, which is the same trick H and L use for an address." },
+    { level: "hard", q: "A value is written and read back later as something else. Which is NOT a likely cause?", options: ["The pointer moved before the write, so it landed one location off", "HL was never set, so the write went to 0000", "Reading the location wore the value out", "The value needed two locations and only one was stored"], correct: 2, why: "Reading never changes what is stored — that is the difference between reading and writing. The other three all run perfectly cleanly, which is exactly why they survive review." },
+  ],
   "mp-switches-and-numbers": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is a bit?", options: ["Eight switches together", "One switch — off or on", "A hex symbol", "A number from 0 to 255"], correct: 1, why: "One switch, written 0 or 1. Eight of them together are a byte, which is where 0 to 255 comes from." },
