@@ -1,0 +1,162 @@
+// Microprocessor practice problems — shared by the full seed and the additive
+// applier (apply-problems.mjs), so both stay in sync from one source.
+//
+// HOW AN ASSEMBLY PROBLEM IS GRADED, because it is not like the other two tracks.
+//
+// A Python problem returns a value and a SQL problem returns rows. An 8085 program
+// returns nothing — it leaves the machine in a state. So each test says what to put
+// in memory beforehand and which parts of the machine are being judged afterwards:
+//
+//   { memory: { 8272: 0x10, ... }, check: ["A", "M:2060"] }
+//
+// Grading then runs the student's program AND the reference on identical memory and
+// diffs only the named state. That is the same rule the SQL verifier uses, for the
+// same reason: a student who sums a block with register B where the reference used C
+// is not wrong, and a grader that says otherwise teaches the wrong lesson.
+//
+// Two rules for writing these:
+//   * Give every problem MORE THAN ONE test, with different values. One test can be
+//     passed by a program that hardcodes the answer.
+//   * Never let a test's checked state come out all zeros — an empty program would
+//     pass it. `db:check` fails the build on this.
+//
+// Addresses are decimal here because JSON is: 8272 = 2050H, 8288 = 2060H.
+
+const A50 = 8272;  // 2050H — where input blocks live, as in every lesson
+const A60 = 8288;  // 2060H — where answers are stored
+
+const MP = (lessonSlug, difficulty, order, slug, title, desc, examples, starter, solution, tests, hints, tags) => ({
+  lessonSlug, order, slug, title, difficulty, kind: "asm8085",
+  // There is no function to call, but the column is not nullable. Naming the
+  // program is more useful than an empty string when a slug appears in a log.
+  functionName: slug.replace(/^mp-/, "").replace(/-/g, "_"),
+  descriptionMd: desc, tagsCsv: tags.join(","),
+  examplesJson: JSON.stringify(examples),
+  starterCode: starter, solutionCode: solution, testsJson: JSON.stringify(tests),
+  hintsJson: JSON.stringify(hints), sqlSetup: "",
+  xp: difficulty === "Easy" ? 20 : difficulty === "Medium" ? 30 : 40,
+});
+
+const HALT = "\n        HLT\n";
+
+const mpProblems = [
+  /* ============== 1. What a Microprocessor Really Is ============== */
+  MP("mp-what-is-a-microprocessor", "Easy", 301, "mp-load-and-copy", "Load It, Then Copy It",
+    "The two instructions every 8085 program starts with. `MVI` puts a value **into** a register; `MOV` **copies** one register to another.\n\nWrite a program that puts `25H` into the accumulator, then copies it into **B** and into **C**. End with `HLT`.\n\nRemember that `MOV` copies rather than moves — A still holds 25H at the end.",
+    [{ input: "(nothing in memory)", output: "A=25 B=25 C=25" }],
+    "        ; put 25H into A, then copy it to B and C\n" + HALT,
+    "        MVI A, 25H\n        MOV B, A\n        MOV C, A\n        HLT\n",
+    [{ memory: {}, check: ["A", "B", "C"] }],
+    ["`MVI A, 25H` loads the accumulator. Note the H — it means hexadecimal.",
+      "`MOV B, A` copies A into B. Destination first, source second.",
+      "A hex value must start with a digit: 0FFH, not FFH. 25H is fine as it is."],
+    ["8085", "data-transfer"]),
+
+  MP("mp-what-is-a-microprocessor", "Easy", 302, "mp-add-two", "Add Two Bytes From Memory",
+    "Two numbers are waiting at **2050H** and **2051H**. Add them and store the answer at **2060H**.\n\nUse `HL` as a pointer: `LXI H, 2050H` points it at the first byte, `MOV A, M` reads the byte it points at, and `INX H` moves it on by one.\n\nYour program is tested on three different pairs — including one that overflows — so it has to add whatever is there rather than a number you typed.",
+    [{ input: "2050H = 12H, 2051H = 34H", output: "2060H = 46H" }, { input: "2050H = F0H, 2051H = 20H", output: "2060H = 10H, with CY set" }],
+    "        LXI H, 2050H\n        ; read both bytes, add them, store at 2060H\n" + HALT,
+    "        LXI H, 2050H\n        MOV A, M\n        INX H\n        ADD M\n        STA 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x12, [A50 + 1]: 0x34 }, check: ["A", "M:2060", "CY"] },
+      { memory: { [A50]: 0xf0, [A50 + 1]: 0x20 }, check: ["A", "M:2060", "CY"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02 }, check: ["A", "M:2060", "CY"] },
+    ],
+    ["`MOV A, M` reads the byte HL points at into the accumulator.",
+      "`INX H` adds one to the HL pair, so M now means the next byte.",
+      "`ADD M` adds the byte HL points at to A. Then `STA 2060H` writes A out.",
+      "The second test overflows: A holds 10H and the ninth bit is in CY. That is the correct answer, not a bug."],
+    ["8085", "arithmetic", "pointers"]),
+
+  MP("mp-what-is-a-microprocessor", "Medium", 303, "mp-swap-bytes", "Swap Two Bytes In Memory",
+    "Swap the bytes at **2050H** and **2051H** — whatever is in the first should end up in the second and the other way round.\n\nThis is the first program where you have to hold something while you overwrite the place it came from, which is what registers are for.\n\n`DCX H` decrements the HL pair, the way `INX H` increments it.",
+    [{ input: "2050H = AAH, 2051H = BBH", output: "2050H = BBH, 2051H = AAH" }],
+    "        LXI H, 2050H\n        ; swap the two bytes\n" + HALT,
+    "        LXI H, 2050H\n        MOV A, M\n        INX H\n        MOV B, M\n        MOV M, A\n        DCX H\n        MOV M, B\n        HLT\n",
+    [
+      { memory: { [A50]: 0xaa, [A50 + 1]: 0xbb }, check: ["M:2050", "M:2051"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0xff }, check: ["M:2050", "M:2051"] },
+    ],
+    ["Read the first byte into A before you overwrite anything.",
+      "You need a second register for the other byte — B will do.",
+      "`MOV M, A` writes A to wherever HL points, so move HL between the two writes.",
+      "`DCX H` takes HL back down by one."],
+    ["8085", "data-transfer", "pointers"]),
+
+  MP("mp-what-is-a-microprocessor", "Medium", 304, "mp-sum-block", "Add Up Five Bytes",
+    "Five bytes start at **2050H**. Add all five and store the total at **2060H**.\n\nThis needs a loop, and a counted loop over memory has **two** moving parts: something that counts down, and something that walks the pointer along. Leaving out the second one is the classic bug — it adds the first byte five times.\n\nStart the total at zero with `XRA A`, which is how assembly programmers clear the accumulator.",
+    [{ input: "2050H..2054H = 10H 20H 30H 40H 50H", output: "2060H = F0H" }],
+    "        LXI H, 2050H\n        MVI C, 05H\n        XRA A\nLOOP:   ; add, advance, count down, repeat\n" + HALT,
+    "        LXI H, 2050H\n        MVI C, 05H\n        XRA A\nLOOP:   ADD M\n        INX H\n        DCR C\n        JNZ LOOP\n        STA 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x10, [A50 + 1]: 0x20, [A50 + 2]: 0x30, [A50 + 3]: 0x40, [A50 + 4]: 0x50 }, check: ["A", "M:2060"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04, [A50 + 4]: 0x05 }, check: ["A", "M:2060"] },
+    ],
+    ["`XRA A` exclusive-ORs A with itself, which always gives zero — and clears CY too.",
+      "Inside the loop: `ADD M` to add, `INX H` to advance, `DCR C` to count.",
+      "`JNZ LOOP` jumps back while the zero flag is clear, so the loop ends when C reaches 0.",
+      "If your total is a round multiple of the first byte, the pointer never moved."],
+    ["8085", "loops", "arithmetic"]),
+
+  /* ============== 2. Evolution — What Actually Changed ============== */
+  MP("mp-evolution", "Medium", 311, "mp-overflow-catch", "Keep the Ninth Bit",
+    "Add the bytes at **2050H** and **2051H** and give the **full** answer, not the eight bits that fit.\n\nPut the low byte of the sum in **L** and the carry — 0 or 1 — in **H**. So 200 + 200 gives H=01, L=90, which read together is 190H = 400.\n\nThe trick is `ACI 00H`: add zero *with carry*, which turns the carry flag into a number.",
+    [{ input: "2050H = C8H, 2051H = C8H  (200 + 200)", output: "H=01 L=90" }, { input: "2050H = 10H, 2051H = 20H", output: "H=00 L=30" }],
+    "        LXI H, 2050H\n        ; add the two bytes, keep the carry as the high byte\n" + HALT,
+    "        LXI H, 2050H\n        MOV A, M\n        INX H\n        ADD M\n        MOV L, A\n        MVI A, 00H\n        ACI 00H\n        MOV H, A\n        HLT\n",
+    [
+      { memory: { [A50]: 0xc8, [A50 + 1]: 0xc8 }, check: ["H", "L"] },
+      { memory: { [A50]: 0x10, [A50 + 1]: 0x20 }, check: ["H", "L"] },
+      { memory: { [A50]: 0xff, [A50 + 1]: 0x01 }, check: ["H", "L"] },
+    ],
+    ["Add the two bytes first, then save the low byte into L before you touch A again.",
+      "`MVI A, 00H` does NOT affect the flags, so the carry from the addition survives it.",
+      "`ACI 00H` adds 0 plus the carry, so A becomes 1 if it carried and 0 if it did not.",
+      "Order matters: save L before you reload A, or you lose the sum."],
+    ["8085", "carry", "arithmetic"]),
+
+  MP("mp-evolution", "Medium", 312, "mp-add16", "Add Two 16-Bit Numbers",
+    "Two 16-bit numbers are stored at **2050H** and **2052H**, each **low byte first** — so 1234H is stored as 34H then 12H.\n\nAdd them and store the 16-bit answer at **2060H**, in the same low-byte-first order.\n\n`LHLD` loads HL from an address in one instruction, `DAD` adds a register pair to HL, and `SHLD` stores HL back. `XCHG` swaps HL with DE when you need to keep one while loading the other.",
+    [{ input: "2050H = 34H 12H (1234H), 2052H = FFH 0FH (0FFFH)", output: "2060H = 33H 22H (2233H)" }],
+    "        ; load both 16-bit values, add them, store the result at 2060H\n" + HALT,
+    "        LHLD 2050H\n        XCHG\n        LHLD 2052H\n        DAD D\n        SHLD 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12, [A50 + 2]: 0xff, [A50 + 3]: 0x0f }, check: ["HL", "M:2060", "M:2061", "CY"] },
+      { memory: { [A50]: 0xff, [A50 + 1]: 0xff, [A50 + 2]: 0x01, [A50 + 3]: 0x00 }, check: ["HL", "M:2060", "M:2061", "CY"] },
+    ],
+    ["`LHLD 2050H` puts the low byte in L and the high byte in H — one instruction for both.",
+      "`XCHG` swaps HL and DE, which parks the first number in DE while you load the second.",
+      "`DAD D` adds DE to HL and affects only the carry flag.",
+      "`SHLD 2060H` writes L then H, so the answer comes out low byte first like the inputs.",
+      "The second test wraps past FFFFH: HL is 0000 and CY is 1. That is the right answer."],
+    ["8085", "16-bit", "arithmetic"]),
+
+  MP("mp-evolution", "Easy", 313, "mp-count-down", "Count a Loop, and Count Its Cost",
+    "Load **08H** into register C and count it down to zero with a loop.\n\nThe point is the **T-state counter**, not the loop: it tells you exactly how many clock cycles the loop cost, which is the number every \"design a delay of X milliseconds\" question is built from.\n\nWork it out by hand first — 7 for the `MVI`, 4 for each `DCR`, 10 for each `JNZ` that jumps and 7 for the one that does not, 5 for the `HLT` — then run it and check.",
+    [{ input: "(nothing in memory)", output: "C=00, and 121 T-states" }],
+    "        MVI C, 08H\nLOOP:   ; count down to zero\n" + HALT,
+    "        MVI C, 08H\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n",
+    [{ memory: {}, check: ["C", "T", "Z"] }],
+    ["`DCR C` subtracts one from C and sets the zero flag when it reaches 0.",
+      "`JNZ LOOP` jumps back while the zero flag is clear.",
+      "The T-states must come out at 121. If yours differs, count again: the JNZ costs 10 when it jumps and 7 on the last pass when it does not."],
+    ["8085", "loops", "t-states"]),
+
+  MP("mp-evolution", "Hard", 314, "mp-largest", "Find the Largest Byte",
+    "A block at **2050H** starts with a **count**, followed by that many bytes. Find the largest of them and store it at **2060H**.\n\n`CMP M` is a subtraction whose answer is thrown away — only the flags survive. After it, `CY = 1` means the accumulator was **smaller** than the byte in memory.\n\nThe count is in the data, so your program has to read it rather than assume five. Three different blocks are tested, one of them only three bytes long.",
+    [{ input: "2050H = 04H, then 05H 09H 03H 07H", output: "2060H = 09H" }],
+    "        LXI H, 2050H\n        MOV C, M        ; the count\n        ; keep the biggest byte in A, then store it\n" + HALT,
+    "        LXI H, 2050H\n        MOV C, M\n        DCR C\n        INX H\n        MOV A, M\nLOOP:   INX H\n        CMP M\n        JNC SKIP\n        MOV A, M\nSKIP:   DCR C\n        JNZ LOOP\n        STA 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x04, [A50 + 1]: 0x05, [A50 + 2]: 0x09, [A50 + 3]: 0x03, [A50 + 4]: 0x07 }, check: ["A", "M:2060"] },
+      { memory: { [A50]: 0x04, [A50 + 1]: 0xf0, [A50 + 2]: 0x11, [A50 + 3]: 0x22, [A50 + 4]: 0x33 }, check: ["A", "M:2060"] },
+      { memory: { [A50]: 0x03, [A50 + 1]: 0x01, [A50 + 2]: 0x01, [A50 + 3]: 0x02 }, check: ["A", "M:2060"] },
+    ],
+    ["Take the first number into A, then compare the rest against it — so the loop runs count-1 times, which is why the reference does `DCR C` early.",
+      "`CMP M` leaves A alone and sets the flags. `JNC` skips ahead when A was already the bigger one.",
+      "When A is smaller, `MOV A, M` takes the new leader.",
+      "The second test has the largest byte first — a program that assumes the answer is later in the block fails it."],
+    ["8085", "loops", "compare"]),
+];
+
+export { mpProblems };

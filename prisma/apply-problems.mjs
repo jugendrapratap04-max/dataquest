@@ -10,6 +10,7 @@ import { PrismaClient } from "@prisma/client";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
+import { mpProblems } from "./mp-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
@@ -19,6 +20,7 @@ const SETS = [
   ["SQL", sqlProblems],
   ["pandas/numpy", pandasProblems],
   ["viz/EDA", vizProblems],
+  ["microprocessor", mpProblems],
   ["topic gaps", topicProblems],
 ];
 
@@ -74,7 +76,7 @@ async function apply(label, problems) {
   for (const { lessonSlug, ...data } of problems) {
     const lesson = await prisma.lesson.findUnique({ where: { slug: lessonSlug } });
     if (!lesson) {
-      missing.push(`${data.slug} -> lesson "${lessonSlug}" nahi mila`);
+      missing.push(`${data.slug} -> no lesson "${lessonSlug}" in the database`);
       continue;
     }
     const existing = await prisma.problem.findUnique({ where: { slug: data.slug } });
@@ -113,9 +115,15 @@ async function main() {
   for (const [label, problems] of SETS) await apply(label, problems);
   await syncSeedProblems();
 
+  // Counted per kind rather than "everything that is not SQL", which quietly
+  // reported the 8085 problems as Python the moment a third runtime existed.
   const total = await prisma.problem.count();
-  const sql = await prisma.problem.count({ where: { kind: "sql" } });
-  console.log(`\n   total problems: ${total} (sql: ${sql}, python: ${total - sql})`);
+  const byKind = await prisma.problem.groupBy({ by: ["kind"], _count: { _all: true } });
+  const parts = byKind
+    .sort((a, b) => b._count._all - a._count._all)
+    .map((k) => `${k.kind}: ${k._count._all}`)
+    .join(", ");
+  console.log(`\n   total problems: ${total} (${parts})`);
 }
 
 main()

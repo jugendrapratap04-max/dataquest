@@ -288,10 +288,49 @@ async function verifySql(problem: ProblemLike, code: string): Promise<VerifyResu
   return { passed: true };
 }
 
+/** 8085 assembly. Cheapest of the three by a wide margin — no WASM to load, no
+ *  subprocess: the simulator is a few hundred lines of TypeScript that both the
+ *  browser and this run directly, so student and server literally share the
+ *  grader (lib/asm8085.ts `grade`). There is nothing here for the two to disagree
+ *  about, which is the failure mode the other two verifiers work hard to avoid.
+ *
+ *  It also needs no sandboxing. Submitted assembly cannot reach the filesystem or
+ *  the environment because the simulated machine has neither — the whole world it
+ *  can touch is a 64 KB Uint8Array. */
+async function verifyAsm8085(problem: ProblemLike, code: string): Promise<VerifyResult> {
+  if (!problem.solutionCode?.trim()) {
+    return { passed: false, reason: "This problem has no reference program." };
+  }
+  let tests: unknown[];
+  try {
+    tests = JSON.parse(problem.testsJson || "[]");
+  } catch {
+    return { passed: false, reason: "This problem's tests could not be read." };
+  }
+  if (!Array.isArray(tests) || tests.length === 0) {
+    return { passed: false, reason: "This problem has no test cases." };
+  }
+
+  const { grade } = await import("./asm8085");
+  const r = grade(code, problem.solutionCode, tests as Parameters<typeof grade>[2]);
+  if (r.referenceBroken) {
+    return { passed: false, reason: "This problem's own reference program is broken." };
+  }
+  if (!r.compiled) {
+    return { passed: false, reason: `The program did not assemble: ${r.error}` };
+  }
+  if (r.passed !== r.total) {
+    return { passed: false, reason: "Re-run on the server: not every test passed." };
+  }
+  return { passed: true };
+}
+
 export async function verifySolution(problem: ProblemLike, code: string): Promise<VerifyResult> {
   if (!code.trim()) return { passed: false, reason: "No code was submitted." };
   try {
-    return problem.kind === "sql" ? await verifySql(problem, code) : await verifyPython(problem, code);
+    if (problem.kind === "sql") return await verifySql(problem, code);
+    if (problem.kind === "asm8085") return await verifyAsm8085(problem, code);
+    return await verifyPython(problem, code);
   } catch (e: any) {
     // A broken verifier must not hand out XP — but it also shouldn't look like
     // the student's fault.

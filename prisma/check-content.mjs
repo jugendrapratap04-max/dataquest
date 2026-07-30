@@ -52,6 +52,50 @@ const problems = await prisma.problem.findMany({
 });
 const sqlProblems = problems.filter((p) => p.kind === "sql");
 const pyProblems = problems.filter((p) => p.kind === "python");
+const asmProblems = problems.filter((p) => p.kind === "asm8085");
+
+// 8085: the reference program must assemble, run, and — this is the part worth
+// checking — actually SATISFY its own tests. Grading diffs a student's answer
+// against the reference, so a reference that crashes or that leaves the checked
+// state untouched makes the problem unsolvable in a way nothing else would catch.
+if (asmProblems.length) {
+  const { grade } = await import("../lib/asm8085.ts");
+  for (const p of asmProblems) {
+    let tests;
+    try { tests = JSON.parse(p.testsJson || "[]"); }
+    catch { fails.push(`[asm8085] ${p.slug}: testsJson is not valid JSON`); continue; }
+    if (!Array.isArray(tests) || !tests.length) { fails.push(`[asm8085] ${p.slug}: no test cases`); continue; }
+    if (!tests.every((t) => Array.isArray(t.check) && t.check.length)) {
+      fails.push(`[asm8085] ${p.slug}: every test needs a non-empty "check" list saying what to compare`);
+      continue;
+    }
+    if (!p.solutionCode?.trim()) { fails.push(`[asm8085] ${p.slug}: no reference program`); continue; }
+    const r = grade(p.solutionCode, p.solutionCode, tests);
+    if (r.referenceBroken) { fails.push(`[asm8085] ${p.slug}: reference does not run — ${r.referenceBroken}`); continue; }
+    if (!r.compiled) { fails.push(`[asm8085] ${p.slug}: reference does not assemble — ${r.error}`); continue; }
+    if (r.passed !== r.total) { fails.push(`[asm8085] ${p.slug}: reference fails its own tests (${r.passed}/${r.total})`); continue; }
+    // A test whose checked state is ALL ZEROS would pass for an empty program, so
+    // it is not testing anything. Usually it means the check names the wrong
+    // register.
+    //
+    // Pull out only the VALUES — everything after each "=" — because the names
+    // beside them contain hex letters of their own. The first version of this
+    // guard compared the whole string and could therefore never fire: "CY=1"
+    // survives having [1-9A-F] stripped as "Y=", which is never equal to itself.
+    for (const [i, t] of tests.entries()) {
+      const c = r.cases[i];
+      if (!c || !c.want) continue;
+      // Strip the NAMES (everything up to each "="), keep the values. Matching the
+      // values directly does not work: a value pattern loose enough to cover the
+      // memory-range form "[2050..2054]=10 20 30" also swallows the first letters
+      // of the next name, so "A=00 Z=0 CY=0" came out holding a "C" and escaped.
+      const values = c.want.replace(/[A-Z0-9_.:[\]]+=/g, "").replace(/\s/g, "");
+      if (values && /^0+$/.test(values)) {
+        fails.push(`[asm8085] ${p.slug}: test ${i + 1} checks ${JSON.stringify(t.check)} and the reference leaves it all zero — an empty program would pass`);
+      }
+    }
+  }
+}
 
 // SQL: diffing the reference against itself is tautological, so check what can
 // actually break — the setup runs, the query runs, and it returns something.
@@ -226,7 +270,7 @@ if (quizQs >= 40) seen.forEach((c, i) => {
 });
 
 // ------------------------------------------------------------------ report ---
-console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql)`);
+console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql, ${asmProblems.length} asm8085)`);
 console.log(`lessons:  ${lessons.length} (${blocks} blocks)`);
 console.log(`quizzes:  ${quizQs} questions, answers at ${JSON.stringify(seen)} across A/B/C/D`);
 if (fails.length === 0) {

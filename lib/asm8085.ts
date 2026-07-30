@@ -784,6 +784,92 @@ export function formatState(r: RunResult, show: string[]): string {
   }).join(" ");
 }
 
+/* ----------------------------------------------------------------- grading --- */
+
+/** One test for an assembly problem: what is in memory before it runs, and which
+ *  parts of the machine are being judged afterwards. */
+export type AsmTest = {
+  /** Bytes to place before the program starts, address -> value. */
+  memory?: Record<number, number>;
+  /** Which state to compare, in `formatState` syntax: ["A", "M:2060"]. */
+  check: string[];
+  /** Initial stack pointer, for problems that use the stack. */
+  sp?: number;
+};
+
+export type AsmCase = {
+  pass: boolean;
+  check: string[];
+  /** What the student's program left behind. */
+  got: string;
+  /** What the reference program left behind. */
+  want: string;
+  error?: string;
+};
+
+export type GradeResult = {
+  /** False when the student's source did not assemble at all. */
+  compiled: boolean;
+  error?: string;
+  line?: number;
+  /** Set when the PROBLEM is broken — its own reference does not run. */
+  referenceBroken?: string;
+  cases: AsmCase[];
+  passed: number;
+  total: number;
+  /** The student's last run, so a workbench can show registers and T-states. */
+  last?: RunResult;
+};
+
+/** Grade an assembly answer by DIFFING it against the problem's own reference
+ *  program on identical memory — the same rule the SQL verifier uses, and for the
+ *  same reason: any correct program should pass, not one blessed spelling. A
+ *  student who sums a block with DAD instead of ADD is not wrong.
+ *
+ *  Only the state each test names is compared. A problem that asks for a total at
+ *  2060H does not care what the student left in D and E. */
+export function grade(studentSrc: string, referenceSrc: string, tests: AsmTest[]): GradeResult {
+  const out: GradeResult = { compiled: true, cases: [], passed: 0, total: tests.length };
+  if (!tests.length) {
+    out.compiled = false;
+    out.error = "This problem has no test cases.";
+    return out;
+  }
+
+  // Assemble the student's source once, so a syntax error is reported as a syntax
+  // error rather than as five failed tests.
+  const probe = run(studentSrc, { memory: {} });
+  if (!probe.ok && !probe.halted && probe.steps === 0 && probe.error && !/no instruction at address/.test(probe.error)) {
+    out.compiled = false;
+    out.error = probe.error;
+    out.line = probe.line;
+    return out;
+  }
+
+  for (const t of tests) {
+    const opts = { memory: { ...(t.memory ?? {}) }, sp: t.sp };
+    const mine = run(studentSrc, opts);
+    const ref = run(referenceSrc, opts);
+    out.last = mine;
+
+    if (!ref.ok) {
+      out.referenceBroken = `${ref.error}${ref.line ? ` (line ${ref.line})` : ""}`;
+      out.cases.push({ pass: false, check: t.check, got: "", want: "", error: "this problem's own reference program is broken" });
+      continue;
+    }
+    const want = formatState(ref, t.check);
+    if (!mine.ok) {
+      out.cases.push({ pass: false, check: t.check, got: "", want, error: `${mine.line ? `line ${mine.line}: ` : ""}${mine.error}` });
+      continue;
+    }
+    const got = formatState(mine, t.check);
+    const pass = got === want;
+    if (pass) out.passed++;
+    out.cases.push({ pass, check: t.check, got, want });
+  }
+  return out;
+}
+
 /** The one-line summary a lesson claims and verify:lesson checks. */
 export function summarise(r: RunResult): string {
   if (!r.ok) return `ERROR${r.line ? ` (line ${r.line})` : ""}: ${r.error}`;

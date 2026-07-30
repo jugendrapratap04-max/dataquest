@@ -124,8 +124,14 @@ DOUBLE: ADD A           ; A = A + A
 
 const FLAGS = ["S", "Z", "AC", "P", "CY"] as const;
 
-/** One register cell, highlighted when it changed on the last step. */
-function Cell({ name, value, wide, changed }: { name: string; value: number; wide?: boolean; changed: boolean }) {
+/** One register or flag cell, highlighted when it changed on the last step.
+ *
+ *  `as` matters: a flag is one bit and must read 0 or 1. Formatting it as a byte
+ *  printed the flags as "00" and "01", which is wrong on the page and actively
+ *  confusing next to the registers beside them. */
+function Cell({ name, value, as = "byte", changed }: { name: string; value: number; as?: "byte" | "word" | "bit"; changed: boolean }) {
+  const wide = as === "word";
+  const text = as === "word" ? hex4(value) : as === "bit" ? String(value) : hex2(value);
   return (
     <div
       style={{
@@ -138,7 +144,7 @@ function Cell({ name, value, wide, changed }: { name: string; value: number; wid
     >
       <span style={{ fontSize: 9.5, letterSpacing: ".06em", color: "var(--ink-faint)", fontFamily: "var(--mono)" }}>{name}</span>
       <span style={{ fontSize: 13, fontWeight: 700, fontFamily: "var(--mono)", color: changed ? "var(--accent-2)" : "var(--ink)" }}>
-        {wide ? hex4(value) : hex2(value)}
+        {text}
       </span>
     </div>
   );
@@ -278,13 +284,13 @@ export function Asm8085Lab() {
             <Cell name="E" value={now.regs.E} changed={changed("E")} />
             <Cell name="H" value={now.regs.H} changed={changed("H")} />
             <Cell name="L" value={now.regs.L} changed={changed("L")} />
-            <Cell name="SP" value={now.regs.SP} wide changed={changed("SP")} />
-            <Cell name="PC" value={now.regs.PC} wide changed={changed("PC")} />
+            <Cell name="SP" value={now.regs.SP} as="word" changed={changed("SP")} />
+            <Cell name="PC" value={now.regs.PC} as="word" changed={changed("PC")} />
           </div>
 
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
             {FLAGS.map((f) => (
-              <Cell key={f} name={f} value={now.flags[f] ? 1 : 0} changed={flagChanged(f)} />
+              <Cell key={f} name={f} value={now.flags[f] ? 1 : 0} as="bit" changed={flagChanged(f)} />
             ))}
             <div
               style={{

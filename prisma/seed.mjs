@@ -3,6 +3,7 @@ import { pathToFileURL } from "url";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
+import { mpProblems } from "./mp-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
 import { scryptSync, randomBytes } from "crypto";
 const prisma = new PrismaClient();
@@ -6847,7 +6848,7 @@ async function main() {
   // difference was invisible until a lesson's practice button pointed at nothing.
   // Every module belongs in both places; the applier is for adding to a live
   // database, not for holding content the seed does not know about.
-  for (const ep of [...extraProblems, ...sqlProblems, ...pandasProblems, ...vizProblems, ...topicProblems]) {
+  for (const ep of [...extraProblems, ...sqlProblems, ...pandasProblems, ...vizProblems, ...mpProblems, ...topicProblems]) {
     const lid = lessonBySlug[ep.lessonSlug];
     if (!lid) continue;
     const { lessonSlug, ...data } = ep;

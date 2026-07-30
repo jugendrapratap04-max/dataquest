@@ -23,6 +23,9 @@ export type Language = {
 export const LANGUAGES: Record<string, Language> = {
   python: { monaco: "python", label: "Python 3", name: "Python", runnable: true },
   sql: { monaco: "sql", label: "SQL", name: "SQL", runnable: true },
+  // Monaco has no 8085 mode, and "asm" is close enough that labels, numbers and
+  // comments highlight correctly. The runtime is ours: lib/asm8085.ts.
+  asm8085: { monaco: "asm", label: "8085 Assembly", name: "8085 Assembly", runnable: true },
   // Ready for the subjects nearest to hand. JavaScript needs no new runtime at
   // all; the rest are content-only until their runtime exists, and marking that
   // honestly here is better than shipping a Run button that cannot run.

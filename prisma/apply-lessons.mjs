@@ -17,16 +17,27 @@ async function main() {
   // Track blurbs are content too — they're what the roadmap page reads. Same
   // rule as lessons: editing the copy must never mean re-seeding the database.
   let tracksUpdated = 0;
+  let tracksCreated = 0;
   for (const t of tracks) {
-    const existing = await prisma.track.findUnique({ where: { slug: t.slug } });
-    if (!existing) continue;
     // The seed objects already use the model's own field names, so this stays
     // correct if a column is ever added — no second list to keep in step.
     const { slug, ...fields } = t;
-    await prisma.track.update({ where: { slug }, data: fields });
-    tracksUpdated++;
+    const existing = await prisma.track.findUnique({ where: { slug } });
+    if (existing) {
+      await prisma.track.update({ where: { slug }, data: fields });
+      tracksUpdated++;
+      continue;
+    }
+    // A NEW subject used to be unreachable without a destructive re-seed: this
+    // loop skipped tracks it did not find, and the lesson loop below then skipped
+    // every lesson belonging to them. So adding a subject to a live database meant
+    // wiping every student's progress to do it. Creating is additive — nothing is
+    // deleted and no existing row is touched — so there is no reason to withhold it.
+    await prisma.track.create({ data: { slug, ...fields } });
+    tracksCreated++;
+    console.log(`   + new subject: ${slug}`);
   }
-  console.log(`✅ tracks refreshed: ${tracksUpdated}`);
+  console.log(`✅ tracks refreshed: ${tracksUpdated}${tracksCreated ? `, created: ${tracksCreated}` : ""}`);
 
   let updated = 0;
   const missing = [];

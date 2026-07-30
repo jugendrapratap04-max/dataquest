@@ -75,6 +75,20 @@ const CHIPS: Chip[] = [
   },
 ];
 
+/** The largest value n bits can hold, exactly.
+ *
+ *  This has to be BigInt. `Math.pow(2, 64) - 1` in a double comes out as
+ *  18,446,744,073,709,552,000 — the true value is ...551,615, and a course that
+ *  prints a wrong number on a page about precision has lost the argument.
+ *
+ *  Written as BigInt(1) rather than the `1n` literal on purpose: this project
+ *  compiles to ES2017, where the literal syntax is a build error. The constructor
+ *  is available at any target. */
+function maxValue(bits: number): string {
+  const one = BigInt(1);
+  return ((one << BigInt(bits)) - one).toLocaleString("en-IN");
+}
+
 /** 2^n bytes, written the way a human would say it. */
 function addressSpace(lines: number): string {
   const bytes = Math.pow(2, lines);
@@ -135,7 +149,7 @@ export function CpuEvolutionLab() {
           ))}
         </div>
         <div style={{ fontSize: 11.5, color: "var(--ink-faint)", fontFamily: "var(--mono)", marginBottom: 14 }}>
-          {c.bits} bits in one register — holds 0 to {(Math.pow(2, c.bits) - 1).toLocaleString("en-IN")}
+          {c.bits} bits in one register — holds 0 to {maxValue(c.bits)}
         </div>
 
         <div style={{ display: "flex", gap: 2, marginBottom: 6 }}>
