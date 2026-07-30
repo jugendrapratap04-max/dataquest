@@ -53,7 +53,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
   const [elapsed, setElapsed] = useState(0);
   const [bestSeconds, setBestSeconds] = useState<number | null>(p.bestSeconds ?? null);
   const [result, setResult] = useState<RunResult | null>(null);
-  const [resTab, setResTab] = useState<"tests" | "console">("tests");
+  const [resTab, setResTab] = useState<"tests" | "console" | "chart">("tests");
   const [busy, setBusy] = useState<null | "run" | "submit">(null);
   const [celebrate, setCelebrate] = useState<number | null>(null);
   const [noPaste, setNoPaste] = useState(false);
@@ -240,6 +240,13 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
             <div className="res-tabs">
               <button className={`res-tab${resTab === "tests" ? " active" : ""}`} onClick={() => setResTab("tests")}>Test Cases</button>
               <button className={`res-tab${resTab === "console" ? " active" : ""}`} onClick={() => setResTab("console")}>Console</button>
+              {/* Only for problems that drew something. A visualization problem is
+                  still graded on values — heights, limits, the label it set — because
+                  those are what can be compared; the picture is here so the student
+                  is not writing a chart they never get to look at. */}
+              {result?.figure && (
+                <button className={`res-tab${resTab === "chart" ? " active" : ""}`} onClick={() => setResTab("chart")}>📊 Chart</button>
+              )}
             </div>
             <div className="res-body">
               {needsLogin && (
@@ -275,6 +282,14 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               )}
               {resTab === "console" && (
                 <div className="console-out">{result?.stdout ? result.stdout : "// output from print() appears here…"}</div>
+              )}
+              {resTab === "chart" && (
+                result?.figure
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  ? <img className="fig-out" src={result.figure} alt="The chart your code drew" />
+                  // The tab can outlive the figure: the student edits the code so it
+                  // no longer plots, presses Run, and this pane is the one open.
+                  : <div className="res-empty">This run drew no figure — nothing called a plotting function.</div>
               )}
             </div>
           </div>

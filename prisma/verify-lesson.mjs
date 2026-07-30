@@ -66,7 +66,19 @@ const runPy = (code) => {
   try {
     // Canned stdin so snippets that demonstrate input() actually run instead of
     // dying on EOF. Anything claiming output must match what these lines produce.
-    return { ok: true, out: execFileSync("python", [f], { encoding: "utf8", input: "Aarav\n21\n85\n", stdio: ["pipe", "pipe", "pipe"] }).replace(/\r\n/g, "\n").trimEnd() };
+    // cwd is the throwaway directory, not the repo.
+    //
+    // Snippets legitimately write files — a file-handling lesson has to, and a
+    // visualization lesson calling fig.savefig("chart.png") has to. With the
+    // default cwd every one of those lands in the project root and gets committed
+    // by whoever runs `git add -A` next. The temp directory is deleted with the run.
+    //
+    // MPLBACKEND is here for the same reason: matplotlib's default on this machine
+    // is an interactive backend, so a snippet that draws would try to open a window
+    // from a child process with nowhere to put it. AGG draws to memory, which is
+    // also what Pyodide does when it hands the figure back as a PNG — so the
+    // verifier and the student's browser render through the same code path.
+    return { ok: true, out: execFileSync("python", [f], { cwd: dir, env: { ...process.env, MPLBACKEND: "AGG" }, encoding: "utf8", input: "Aarav\n21\n85\n", stdio: ["pipe", "pipe", "pipe"] }).replace(/\r\n/g, "\n").trimEnd() };
   } catch (e) {
     const err = (e.stderr || "").replace(/\r\n/g, "\n").trimEnd();
     return { ok: false, out: err.split("\n").filter(Boolean).pop() ?? "" };

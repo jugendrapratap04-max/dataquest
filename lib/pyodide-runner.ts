@@ -10,7 +10,57 @@ export type RunResult = {
   cases: CaseResult[];
   passed: number;
   total: number;
+  /** A PNG data URI of the matplotlib figure the code left behind, if any. */
+  figure?: string;
 };
+
+/** Hand back whatever matplotlib figure the run produced, as a PNG data URI.
+ *
+ *  A visualization problem is graded on values — bar heights, axis limits, the
+ *  label it set — because that is what can be compared. But a student writing a
+ *  chart and never seeing the chart is being taught to fly on instruments, so the
+ *  figure comes back alongside the verdict.
+ *
+ *  Reads sys.modules rather than importing anything: on the 150 problems that
+ *  have nothing to do with plotting this must cost nothing, and importing
+ *  matplotlib to discover it was never wanted would cost seven megabytes.
+ *
+ *  It also closes every figure. pyplot keeps a module-level registry that
+ *  outlives one run, so without the close a chart from the previous press of Run
+ *  is still sitting there and gets reported as this run's output. */
+const FIGURE_PROBE = `
+def __dq_fig():
+    import sys
+    plt = sys.modules.get("matplotlib.pyplot")
+    if plt is None:
+        return ""
+    nums = plt.get_fignums()
+    if not nums:
+        return ""
+    import base64, io
+    buf = io.BytesIO()
+    try:
+        plt.figure(nums[-1]).savefig(buf, format="png", dpi=96, bbox_inches="tight", facecolor="white")
+    except Exception:
+        return ""
+    finally:
+        plt.close("all")
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
+
+__dq_fig()
+`;
+
+async function captureFigure(py: any): Promise<string | undefined> {
+  const probe = py.globals.get("dict")();
+  try {
+    const uri = await py.runPythonAsync(FIGURE_PROBE, { globals: probe });
+    return typeof uri === "string" && uri.length > 0 ? uri : undefined;
+  } catch {
+    return undefined;
+  } finally {
+    try { probe.destroy(); } catch {}
+  }
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
@@ -91,6 +141,12 @@ export async function runPython(code: string): Promise<{ stdout: string; error?:
   }
 }
 
+/** Same, plus the figure it drew — for a console that has somewhere to show one. */
+export async function runPythonWithFigure(code: string): Promise<{ stdout: string; error?: string; figure?: string }> {
+  const r = await runPython(code);
+  return { ...r, figure: await captureFigure(await getPyodide()) };
+}
+
 /** Define the user's code, then call `functionName` for every test case. */
 export async function runTests(
   userCode: string,
@@ -141,7 +197,9 @@ export async function runTests(
       cases.push({ pass, got, expected: t.expected, args: t.args, error });
     }
 
-    return { compiled: true, stdout, cases, passed, total: tests.length };
+    // After the cases, not before: on a plotting problem the figure is built
+    // inside the function, so there is nothing to capture until it has been called.
+    return { compiled: true, stdout, cases, passed, total: tests.length, figure: await captureFigure(py) };
   } finally {
     try { ns.destroy(); } catch {}
   }
