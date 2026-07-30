@@ -1969,3 +1969,67 @@ select.inp { cursor:pointer; }
    no new rule here either. */
 .phase.subject-tint { border-left:3px solid var(--sub-fg); }
 .ic.tinted { background:var(--sub-bg); color:var(--sub-fg); }
+
+/* ---------------------------------------------------------- reading width ---
+ * The lesson pages are read, not skimmed, and on a 1136px laptop the left nav
+ * (232px) plus the module rail (280px + 28px gap) plus the page padding left the
+ * lesson itself about 536px wide — under half the screen, and worst on the long
+ * explanations and the wide interactive panels. `data-reading` on <html> folds
+ * both panels away and hands that space back.
+ *
+ * The width is capped rather than filled. An unlimited line on a wide screen is
+ * its own reading problem — the eye loses the start of the next line — so the
+ * cap lands around 95 characters, which is nearly 60% more text per line than
+ * before without going past what is comfortable.
+ *
+ * Set by app/layout.tsx before first paint and toggled by ReadingToggle. */
+html[data-reading="1"] .app { grid-template-columns: minmax(0, 1fr); }
+html[data-reading="1"] .side,
+html[data-reading="1"] .side-backdrop,
+html[data-reading="1"] .learn-side { display: none; }
+/* The cap is on the LESSON layout, not on .wrap.
+ *
+ * Capping .wrap looked right and measured wrong: on the practice page the split
+ * went from 844px to 840px, because the 900px cap ate exactly the room that
+ * hiding the nav had just freed. A code workbench is not prose and wants every
+ * pixel, so only the reading column is capped and every other page gets the
+ * full width. */
+html[data-reading="1"] .learn-layout {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Wide media, narrow text — and the split is measured, not guessed.
+ *
+ * The obvious move was to let the paragraphs fill the freed width. Measuring
+ * killed it: at 13.5px the average character is 6.12px, so a 866px paragraph is
+ * 142 characters a line, where comfortable is 60 to 90. The paragraphs were
+ * never the problem — at 482px they were already 79 characters. What was cramped
+ * was everything else: an architecture diagram in 465px, code blocks wrapping,
+ * and the general feeling of reading down a corridor.
+ *
+ * So the text column stays close to its comfortable measure and gets a size bump,
+ * while the visuals, code and exercise cards take the whole 860px. */
+html[data-reading="1"] .prose > p,
+html[data-reading="1"] .prose > h2,
+html[data-reading="1"] .prose > .note,
+html[data-reading="1"] .prose > .def,
+html[data-reading="1"] .prose > .hook,
+html[data-reading="1"] .prose > .analogy,
+html[data-reading="1"] .prose > details.think {
+  max-width: 660px;
+  margin-inline: auto;
+}
+html[data-reading="1"] .prose > p { font-size: 15px; line-height: 1.72; }
+
+.read-fab { position:fixed; left:20px; bottom:20px; z-index:70; display:inline-flex; align-items:center; gap:7px;
+  background:var(--panel); color:var(--ink-soft); border:1px solid var(--line); border-radius:999px;
+  padding:9px 15px; font-size:12.5px; font-weight:600; cursor:pointer; box-shadow:0 8px 22px -10px rgba(0,0,0,.45);
+  transition:border-color .15s, color .15s, background .15s; }
+.read-fab:hover { border-color:var(--accent); color:var(--ink); }
+.read-fab[aria-pressed="true"] { border-color:var(--accent); color:var(--accent-2); background:var(--accent-soft); }
+.read-fab svg { flex:none; }
+/* On a phone the rail is already hidden and the nav is a drawer, so the button
+ * would only be taking up thumb space next to the nav toggle. */
+@media (max-width:1000px) { .read-fab { display:none; } }

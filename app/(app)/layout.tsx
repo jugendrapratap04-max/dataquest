@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { Topbar } from "@/components/Topbar";
 import { ActivityPing } from "@/components/ActivityPing";
 import { FeedbackButton } from "@/components/FeedbackButton";
+import { ReadingToggle } from "@/components/ReadingToggle";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak } from "@/lib/progress";
 import { prisma } from "@/lib/prisma";
@@ -42,6 +43,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           feedback is tied to an account we can reply to. */}
       {user && <ActivityPing />}
       {user && <FeedbackButton />}
+      {/* Not gated on `user`: reading is free, and the reader who most needs the
+          width is the one who has not signed up yet. */}
+      <ReadingToggle />
       <Sidebar user={user ? { name: user.name, role: user.role } : null} roadmapPct={roadmapPct} />
       <main className="main">
         <div className="wrap">
