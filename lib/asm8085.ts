@@ -717,6 +717,55 @@ export function run(src: string, opts: RunOptions = {}): RunResult {
 export const hex2 = (v: number) => (v & 0xff).toString(16).toUpperCase().padStart(2, "0");
 export const hex4 = (v: number) => (v & 0xffff).toString(16).toUpperCase().padStart(4, "0");
 
+/** Format exactly the parts of the machine a lesson is talking about.
+ *
+ *  A snippet that teaches DCR should claim "B=00 Z=1", not a dump of all seven
+ *  registers — the noise is what stops a student noticing the one value that
+ *  matters. So a code block names what it wants and this prints that, in order:
+ *
+ *    A B C D E H L      one byte, hex        -> A=0A
+ *    BC DE HL SP PC     two bytes, hex       -> HL=2050
+ *    S Z AC P CY        one bit              -> CY=1
+ *    T                  total T-states       -> T=79
+ *    STEPS              instructions run     -> STEPS=12
+ *    M:2060             a byte of memory     -> [2060]=F0
+ *    M:2050-2054        a run of memory      -> [2050..2054]=10 20 30 40 50
+ *    OUT                everything OUT wrote -> OUT 01=7F
+ */
+export function formatState(r: RunResult, show: string[]): string {
+  if (!r.ok) return `ERROR${r.line ? ` (line ${r.line})` : ""}: ${r.error}`;
+  const one: Record<string, number> = { A: r.regs.A, B: r.regs.B, C: r.regs.C, D: r.regs.D, E: r.regs.E, H: r.regs.H, L: r.regs.L };
+  const pair: Record<string, number> = {
+    BC: (r.regs.B << 8) | r.regs.C, DE: (r.regs.D << 8) | r.regs.E,
+    HL: (r.regs.H << 8) | r.regs.L, SP: r.regs.SP, PC: r.regs.PC,
+  };
+  const bit: Record<string, boolean> = { S: r.flags.S, Z: r.flags.Z, AC: r.flags.AC, P: r.flags.P, CY: r.flags.CY };
+
+  return show.map((raw) => {
+    const k = raw.trim().toUpperCase();
+    if (k in one) return `${k}=${hex2(one[k])}`;
+    if (k in pair) return `${k}=${hex4(pair[k])}`;
+    if (k in bit) return `${k}=${bit[k] ? 1 : 0}`;
+    if (k === "T") return `T=${r.tStates}`;
+    if (k === "STEPS") return `STEPS=${r.steps}`;
+    if (k === "OUT") return r.ports.length ? r.ports.map(([p, v]) => `OUT ${hex2(p)}=${hex2(v)}`).join(" ") : "OUT none";
+    const range = k.match(/^M:([0-9A-F]+)-([0-9A-F]+)$/);
+    if (range) {
+      const from = parseInt(range[1], 16);
+      const to = parseInt(range[2], 16);
+      const cells: string[] = [];
+      for (let a = from; a <= to; a++) cells.push(hex2(r.memory[a] ?? 0));
+      return `[${hex4(from)}..${hex4(to)}]=${cells.join(" ")}`;
+    }
+    const cell = k.match(/^M:([0-9A-F]+)$/);
+    if (cell) {
+      const a = parseInt(cell[1], 16);
+      return `[${hex4(a)}]=${hex2(r.memory[a] ?? 0)}`;
+    }
+    return `?${raw}`;
+  }).join(" ");
+}
+
 /** The one-line summary a lesson claims and verify:lesson checks. */
 export function summarise(r: RunResult): string {
   if (!r.ok) return `ERROR${r.line ? ` (line ${r.line})` : ""}: ${r.error}`;

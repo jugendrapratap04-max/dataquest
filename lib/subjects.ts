@@ -21,6 +21,7 @@ const HUES: Record<string, number> = {
   ml: 148, // green
   dl: 284, // purple
   deploy: 196, // cyan
+  microprocessor: 88, // lime — the first subject that is not data science
 };
 
 /** A stable hue (0-359) for any subject slug, pinned for the ones that exist. */
@@ -58,6 +59,7 @@ const SHORT: Record<string, string> = {
   ml: "Machine Learning",
   dl: "Deep Learning",
   deploy: "Deployment",
+  microprocessor: "Microprocessor",
 };
 
 /** A short label for a subject: the pinned one, else derived from the title.

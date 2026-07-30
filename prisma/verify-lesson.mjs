@@ -59,6 +59,31 @@ if (sqlSetupBlock) {
   };
 }
 
+// An 8085 lesson is one whose snippets are assembly rather than Python. It says
+// so by carrying a `memsetup` block — the bytes its examples read, shown on the
+// page so the student can key the same values into a trainer kit — or by marking
+// a code block `lang: "asm8085"` when it needs no preloaded memory.
+//
+// Same arrangement as SQL: the verifier runs the snippets through the very engine
+// the student's browser will use (lib/asm8085.ts), so a claimed register value is
+// one they can reproduce rather than the author's word for it.
+const memSetup = lesson.content.find((b) => b.t === "memsetup");
+const isAsm = !!memSetup || lesson.content.some((b) => b.t === "code" && b.lang === "asm8085");
+let runAsm = null;
+if (isAsm) {
+  const { run: run8085, formatState } = await import("../lib/asm8085.ts");
+  // Memory is reloaded for every snippet. Examples must not depend on the order
+  // the lesson happens to run them in — the same rule the SQL verifier follows by
+  // opening a fresh database per query.
+  const preset = {};
+  if (memSetup) memSetup.bytes.forEach((b, i) => { preset[memSetup.at + i] = b; });
+  const DEFAULT_SHOW = ["A", "B", "C", "D", "E", "H", "L", "CY", "Z"];
+  runAsm = (code, show) => {
+    const r = run8085(code, { memory: { ...preset } });
+    return { ok: r.ok, out: formatState(r, show ?? DEFAULT_SHOW) };
+  };
+}
+
 const dir = mkdtempSync(join(tmpdir(), "lesson-"));
 const runPy = (code) => {
   const f = join(dir, "s.py");
@@ -85,13 +110,14 @@ const runPy = (code) => {
   }
 };
 
-/** Whichever engine this lesson is written in. */
-const run = runSql ?? runPy;
+/** Whichever engine this lesson is written in. A case may carry a `show` list,
+ *  which only the 8085 engine reads — the other two ignore the second argument. */
+const run = runAsm ?? runSql ?? runPy;
 
 const cases = [];
 for (const b of lesson.content) {
-  if (b.t === "code") cases.push({ what: `code ${b.file}`, code: b.code, claim: b.output ?? null });
-  if (b.t === "drills") b.items.forEach((d, i) => cases.push({ what: `drill ${i + 1}`, code: d.code, claim: d.out ?? null }));
+  if (b.t === "code") cases.push({ what: `code ${b.file}`, code: b.code, claim: b.output ?? null, show: b.show });
+  if (b.t === "drills") b.items.forEach((d, i) => cases.push({ what: `drill ${i + 1}`, code: d.code, claim: d.out ?? null, show: d.show }));
   if (b.t === "worked") {
     cases.push({ what: `worked "${b.title}" (full)`, code: b.full, claim: b.output ?? null });
     cases.push({ what: `worked "${b.title}" (steps joined)`, code: b.steps.map((s) => s.code).join("\n"), claim: b.output ?? null });
@@ -131,7 +157,27 @@ for (const b of lesson.content) {
       });
     });
   }
-  if (b.t === "trace" && !runSql) {
+  // An 8085 trace asks the same question the Python one does — "after line 4,
+  // what is in C?" — except the thing holding the value is a register. Assemble
+  // the first N lines, append HLT so the program terminates, and read it back.
+  if (b.t === "trace" && runAsm) {
+    b.steps.forEach((s, i) => {
+      const m = s.q.match(/line (\d+)/i);
+      const v = s.q.match(/<code>([A-Za-z]{1,2})<\/code>/);
+      if (!m || !v) { cases.push({ what: `trace step ${i + 1} (unparseable question)`, code: "BAD", claim: "" }); return; }
+      const upto = b.code.split("\n").slice(0, Number(m[1])).join("\n");
+      cases.push({
+        what: `trace: after line ${m[1]}, ${v[1]}`,
+        code: `${upto}\nHLT`,
+        claim: s.answer,
+        accept: s.accept ?? [],
+        show: [v[1]],
+        // formatState prints "C=00"; the student types "00", so drop the label.
+        strip: true,
+      });
+    });
+  }
+  if (b.t === "trace" && !runSql && !runAsm) {
     b.steps.forEach((s, i) => {
       const m = s.q.match(/line (\d+)/i);
       const v = s.q.match(/<code>(\w+)<\/code>/);
@@ -149,6 +195,15 @@ for (const b of lesson.content) {
   if (b.t === "debug") {
     const broken = b.code.replace(/input\([^)]*\)/g, '"21"');
     const fixed = b.fix.replace(/input\([^)]*\)/g, '"21"');
+    if (runAsm) {
+      // An assembly bug is a silent bug by definition — a processor has no
+      // exceptions to raise. So there is only one shape to check: both halves
+      // run, and they disagree about the state they leave the machine in.
+      cases.push({ what: "debug: broken code runs (a silent bug, not a crash)", code: broken, claim: null, show: b.show });
+      cases.push({ what: "debug: broken state differs from the fix", code: broken, claim: `__DIFFERS__${fixed}`, show: b.show });
+      cases.push({ what: "debug: the fix runs clean", code: fixed, claim: null, show: b.show });
+      continue;
+    }
     // A bug does not have to crash. The most dangerous ones run perfectly and
     // return the wrong answer, so a symptom that isn't an exception is checked
     // differently: the broken code must run, and must disagree with the fix.
@@ -165,11 +220,11 @@ for (const b of lesson.content) {
 let bad = 0;
 const fail = (c, msg) => { bad++; console.log(` FAIL  ${c.what}\n        ${msg}`); };
 for (const c of cases) {
-  const r = run(c.code);
+  const r = run(c.code, c.show);
   if (c.claim === null) {                       // must simply run without error
     r.ok ? console.log(`  ok   ${c.what} (runs clean)`) : fail(c, `crashed: ${r.out}`);
   } else if (String(c.claim).startsWith("__DIFFERS__")) {  // must run, and disagree with the fix
-    const fixedRun = run(String(c.claim).slice("__DIFFERS__".length));
+    const fixedRun = run(String(c.claim).slice("__DIFFERS__".length), c.show);
     if (!r.ok) fail(c, `the broken code crashed: ${r.out}`);
     else if (!fixedRun.ok) fail(c, `the fix crashed: ${fixedRun.out}`);
     else if (r.out === fixedRun.out) fail(c, `broken and fixed print the same thing (${JSON.stringify(r.out)}) — then there is no bug to find`);
@@ -187,6 +242,9 @@ for (const c of cases) {
     else console.log(`  ok   ${c.what}`);
   } else {
     const norm = (x) => String(x).replace(/\r\n/g, "\n").trimEnd();
+    // An 8085 trace asks for a value, not "C=00" — drop the label the formatter
+    // adds, so the claimed answer is what a student would actually write down.
+    if (c.strip && r.ok) r.out = r.out.replace(/^[A-Z]{1,2}=/, "");
     // Drop the traced program's own output; keep only what follows our marker.
     if (c.sentinel && r.ok && r.out.includes(SENTINEL)) {
       r.out = r.out.slice(r.out.lastIndexOf(SENTINEL) + SENTINEL.length).replace(/^\n/, "").trimEnd();
