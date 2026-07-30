@@ -175,7 +175,8 @@ The runtime problem is separate from the writing problem:
 | JavaScript | Nothing — the browser runs it | **Free** |
 | Web Development | A sandboxed live preview | Easy |
 | SQL | Already running (sql.js) | **Done** |
-| Machine Learning | scikit-learn wheels, as pandas was added | Medium |
+| Data Visualization | matplotlib + seaborn vendored into Pyodide | **Done** |
+| Machine Learning | `node scripts/vendor-wheels.mjs scikit-learn` | **Easy now** |
 | C / C++ | clang compiled to WASM, ~10-20 MB | Hard |
 | Java | A JVM in WASM; licensing needs checking | Hardest |
 | Cloud, Cyber Security, DevOps, System Design, Career | Cannot be practised in a browser — content, quizzes and projects instead | — |

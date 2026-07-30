@@ -12,15 +12,15 @@ either in this file or in the repo.
 > standing brief and they override any assumption you would otherwise make.
 >
 > **Job:** rebuild the remaining stub lessons to the full standard, one at a
-> time, in the order listed in `docs/HANDOFF.md` §3. Four subjects are already
-> finished — Python (39/39), Statistics (11/11), Pandas (6/6) and SQL (6/6).
-> The platform is 62 of 83 lessons at the full standard.
+> time, in the order listed in `docs/HANDOFF.md` §3. Five subjects are already
+> finished — Python (39/39), Statistics (11/11), Pandas (6/6), SQL (6/6) and
+> Data Visualization (5/5). The platform is 67 of 83 lessons at the full standard.
 >
-> The five that remain are viz (5), bi (3), ml (6), dl (3) and deploy (4). None
-> of them runs in the browser today and all five have **zero practice problems**,
-> so read §3 before choosing — this is a decision about what to teach, not about
-> which is cheapest to verify. Ask Jugendra which subject he wants next rather
-> than assuming.
+> The four that remain are bi (3), ml (6), dl (3) and deploy (4). ml can run in
+> the browser for one command's worth of work now that the wheel tooling exists;
+> the other three have no runtime at all. Read §3 before choosing — this is a
+> decision about what to teach, not about which is cheapest to verify. Ask
+> Jugendra which subject he wants next rather than assuming.
 >
 > Work autonomously and do not stop to ask which lesson is next — the order is
 > written down. For each lesson: write it, verify it, commit it, deploy it, then
@@ -112,18 +112,60 @@ departments, ten employees, eight sales), so lessons and practice query the same
 tables. **SQLite drops trailing zeros** — `ROUND(x, 2)` prints `12.3`, not
 `12.30`, and a claimed output has to match.
 
+### Data Visualization & EDA — done ✅
+
+All 5 topics at the full standard, 20 practice problems (4 per topic).
+`prisma/viz-problems.mjs` is a new module, wired into **both** apply-problems.mjs
+and the seed. Five new visuals: `anscombe-lab`, `chart-lab`, `seaborn-lab`,
+`chart-choice-lab`, `eda-walkthrough-lab`.
+
+**matplotlib and seaborn now run in the browser.** This is the part that carries
+over to ml, so read it before doing wheel work again:
+
+- `node scripts/vendor-wheels.mjs <package>` resolves a package's dependencies
+  out of `public/pyodide/pyodide-lock.json` — which ships the whole
+  distribution's index, 354 packages, even though only a handful of wheels are
+  kept — downloads the missing ones and checks each against the sha256 the lock
+  already states. `matplotlib` meant eight wheels and 9.1 MB. `--list` shows
+  what is vendored. **For ml, `scikit-learn` should be one command.**
+- A package the distribution does not ship at all needs
+  `--pypi <name>==<version> --depends a,b,c`, which vendors a **pure-Python**
+  wheel from PyPI and splices an entry into our copy of the lock file. That is
+  how seaborn works offline without micropip. Anything compiled cannot be added
+  this way — it has to be built against this exact Emscripten ABI.
+- **Commit the wheels.** Vercel needs them for `lib/verify.ts`, and `db:check`
+  runs every python problem's reference solution through the same folder — which
+  is the gate that proves a plotting problem agrees across runtimes.
+
+Three things about writing a plotting lesson:
+
+- **A chart is graded on its numbers, not its pixels.** Two PNGs cannot be
+  diffed meaningfully, so a problem returns what the figure is *made of* —
+  `ax.patches` heights, `ax.get_ylim()`, `ax.get_title()`, the bin counts. Those
+  are exactly what a wrong chart gets wrong. The practice editor grew a **Chart
+  tab** that shows whatever figure the run left behind, so the student still sees
+  the picture.
+- **Never `plt.show()`.** Pyodide's default backend is `webagg` and would try to
+  serve a window. `verify:lesson` sets `MPLBACKEND=AGG` and runs snippets in its
+  temp directory, so `fig.savefig("chart.png")` is safe in a lesson and does not
+  land in the repo root.
+- **Always cast out of numpy.** `p.get_height()` is a NumPy float and a list of
+  them prints as `[np.float64(3.0)]`. `float()` / `int()` on the way out, or the
+  claimed output is wrong on a repr you did not check.
+
 ### What is left
 
 `npm run syllabus` prints the honest state of every subject. The remaining stub
-subjects are viz (5), bi (3), ml (6), dl (3), deploy (4).
+subjects are bi (3), ml (6), dl (3), deploy (4).
 `docs/IMPROVEMENTS.md` §H has the recommended order and the reasoning.
 
-None of them can be practised in the browser today: viz needs matplotlib, ml
-needs scikit-learn (both are wheel-download work like pandas was), and bi, dl
-and deploy are content-and-quiz subjects with no runtime at all. So the next
-one is a judgement call about what to teach rather than what is cheapest to
-verify — and all five currently have **zero practice problems**, which the
-unlock gate needs before any of them can be finished.
+**ml is now the cheapest of the four to make runnable**, because the wheel
+tooling and the "grade a figure on its numbers" pattern both exist: `scikit-learn`
+is one `vendor-wheels.mjs` command, and matplotlib is already there for the
+regression and evaluation lessons that need plots. bi, dl and deploy have no
+runtime at all and are content-and-quiz subjects — which is a decision about what
+to teach, not about what is cheapest to verify. All four still have **zero
+practice problems** except ml's 3, which the unlock gate needs.
 
 Confirm an array name before editing it — **the number does not match the lesson
 order** (`L3` is *conditionals*, not lesson 3):
@@ -200,6 +242,21 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
   **this class of bug needs data to appear**: the scoreboard only formats a
   duration once somebody has recorded one, so every signed-out check passed and
   it broke the first time a real student finished a challenge.
+- **A Python dict answer used to fail every test.** `toJs()` turns a dict into a
+  **Map**, and `JSON.stringify(new Map(...))` is `"{}"`, so the comparison was
+  empty-object against expected. Fixed with `dict_converter` — in all **three**
+  copies (`lib/pyodide-runner.ts`, `lib/verify.ts`, `prisma/check-content.mjs`),
+  which have to agree or the browser accepts what the server rejects. Even so,
+  prefer lists: a dict's **key order** survives the comparison, so a correct
+  answer built in a different order is still marked wrong.
+- **`loadPackagesFromImports` narrates to stderr** — "Loading pandas, numpy", "No
+  new packages to load" — and both runners route stderr into the console pane.
+  The streams are silenced for the package load now; if you add a third runner,
+  do the same or the student's own output arrives under three lines of Pyodide
+  bookkeeping.
+- **`prefer-const` is not the only compiler rule.** A running accumulator inside
+  a `.map()` in a component body fails with "Cannot reassign variable after
+  render completes". Move the loop into a module-level helper.
 - **A guest check is not a logged-in check.** Several features render different
   branches for a signed-in user, and those branches are the ones carrying real
   data. When you cannot log in, find a path that exercises the same branch —
