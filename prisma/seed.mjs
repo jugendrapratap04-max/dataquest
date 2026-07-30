@@ -6570,9 +6570,92 @@ const MP2 = [
   ]},
 ];
 
+const MP0 = [
+  { t: "objectives", items: [
+    "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
+    "Read <b>eight switches</b> as an ordinary number, from 0 to 255",
+    "Read and write <b>hex</b>: why 66 is written <code>42H</code> and why <code>10H</code> means sixteen",
+    "Know what a <b>byte</b> is, well enough that the rest of this course never confuses you",
+  ]},
+  { t: "hook", q: "A light switch has two positions. On, and off. There is no half-on. Everything a computer has ever done is built out of that one fact — so how do you get from a switch to a number?", why: "By using more than one switch.<br/><br/>That is genuinely the whole trick, and this lesson is about nothing else. A processor has no idea what a number is. It has millions of tiny switches, and it can only ever ask each one \"are you on?\"<br/><br/>You do not need any background to follow this. If you have turned on a light, you already have the only idea required." },
+  { t: "def", term: "Bit", en: "One switch. It is either off or on, which we write as 0 or 1. That is all a bit is, and it is the smallest thing a computer can hold.", hi: "The word is short for <b>bi</b>nary digi<b>t</b>. Eight of them together are called a <b>byte</b>, and a byte is the size the 8085 does all its work in — which is why this whole course is full of pairs of hex digits." },
+  { t: "note", variant: "key", html: "📌 <b>Read this one before you go on.</b> Nothing later in this course will make sense without hex — every address, every value, every answer is written in it. It is not hard and it is not mathematics. It is a shorter way of writing eight switches, and by the end of this page you will be reading it without thinking." },
+
+  { t: "h2", n: "1", text: "One switch gives two answers. Two switches give four." },
+  { t: "p", html: "With one switch you can say two things: off, or on. Add a second switch and each of those two splits in two — off-off, off-on, on-off, on-on. Four. Add a third and it doubles again to eight." },
+  { t: "viz", name: "doubling-lab" },
+  { t: "p", html: "Slide it up and stop at <b>8</b>. That gives <b>256</b> patterns, and eight switches together are called a <b>byte</b>. Then stop at <b>16</b>: that gives 65,536, and this is the number a processor uses to name a place in memory. You will meet it again as <b>64 KB</b>." },
+
+  { t: "h2", n: "2", text: "Eight switches, read as a number" },
+  { t: "p", html: "Eight switches is a byte, but how do eight on-and-offs turn into a number like 66? By giving each switch a <b>worth</b>. The rightmost is worth 1, the next 2, then 4, 8, 16, 32, 64, 128 — each one double the last. Add up the ones that are on." },
+  { t: "viz", name: "bit-switch-lab" },
+  { t: "p", html: "Press <b>all on</b> and read the number: <b>255</b>. Not 256 — because \"all off\" is also a pattern and that one means zero, so the 256 patterns are the numbers 0 to 255.<br/><br/>That is the ceiling of a byte, and it is the reason this course keeps talking about what happens when a number does not fit." },
+
+  { t: "h2", n: "3", text: "Nobody writes out eight switches. They use hex." },
+  { t: "p", html: "Writing <code>0100 0010</code> every time is slow and easy to get wrong. So the eight switches get split into <b>two groups of four</b>. Four switches can only add up to 0 through 15 — sixteen possible totals — and each of those sixteen gets one short symbol." },
+  { t: "viz", name: "hex-lab" },
+  { t: "p", html: "The first ten totals use the digits we already have, 0 to 9. The last six had no digit of their own, so they borrowed letters: <b>A B C D E F</b>. So A means ten, and F means fifteen.<br/><br/>This is why a byte is always written as <b>exactly two symbols and an H</b>. Four switches, one symbol. Eight switches, two symbols. <code>FF</code>H is every switch on; <code>00</code>H is every switch off." },
+  { t: "note", variant: "warn", html: "⚠️ <b>The one trap.</b> <code>10H</code> is <b>sixteen</b>, not ten. The H changes what the number means, so it is never optional. Ten is written <code>0A</code>H. Getting these two the wrong way round is the most common mistake a beginner makes here, and §Find the bug is exactly that mistake." },
+
+  { t: "h2", n: "4", text: "And the machine really does hold it like this" },
+  { t: "p", html: "Here is the first program in this course. It puts three bytes into three of the processor's own boxes, and each byte is one you just built with switches. Do not worry about the words yet — <code>MVI</code> just means \"put this value in\". Read the answer." },
+  { t: "code", file: "bytes.asm", lang: "asm8085", show: ["A", "B", "C"], code: "        MVI A, 42H      ; the letter B: 0100 0010\n        MVI B, 0FFH     ; every switch on\n        MVI C, 10H      ; sixteen, not ten\n        HLT\n", output: "A=42 B=FF C=10" },
+  { t: "p", html: "Three boxes, three bytes, and every one of them shown as two hex symbols — because that is what a byte is. <b>A</b>, <b>B</b> and <b>C</b> are called <b>registers</b>, and they are the processor's own switches. The next lesson is about them.<br/><br/>One thing to notice: <code>0FFH</code> has a zero in front. A hex number has to start with a digit, because otherwise the machine would read <code>FFH</code> as somebody's name." },
+
+  { t: "think", q: "Why do computers use switches at all? Would ten positions per switch not be easier?", a: "It would be easier to read and far harder to build.<br/><br/>A switch is off or on because that is what electricity is good at: current flowing, or not. Telling those two apart is easy and stays reliable even when the voltage wobbles a little.<br/><br/>Ten positions would mean ten different voltage levels in every single wire, and the machine would have to tell 3 volts from 3.3 volts millions of times a second, in a warm box, for years. It has been tried. Two states won because two states almost never get misread.<br/><br/>So binary is not a design choice somebody made — it is what you get when you build a counting machine out of electricity." },
+  { t: "analogy", concept: "A byte", real: "A row of eight light switches on a wall", html: "Picture eight light switches in a row. Each one is up or down. Nothing in between.<br/><br/>Now agree with a friend that the switches have <b>worths</b> — the last one 1, then 2, 4, 8, and so on to 128. Flip a few and you can send them a number just by which lights are on. That row of eight is a byte.<br/><br/>The analogy keeps working. Eight switches can send 256 different messages and no more, so the biggest number is 255 — and to send anything bigger you need a second row. That is exactly what the processor does, and it is why big numbers take two steps in this course." },
+
+  { t: "trace", intro: "Two bytes, and one added to each. Write the answer the way the machine shows it — two hex symbols.", code: "        MVI A, 0FH\n        INR A\n        MVI B, 0FFH\n        INR B\n        HLT\n", steps: [
+    { q: "After line 1, <code>A</code> is", answer: "0F", accept: ["f", "0fh", "fh"], why: "0F is fifteen: the left four switches all off, the right four all on. A byte is always shown as two symbols, so fifteen is written 0F and not just F." },
+    { q: "After line 2, <code>A</code> is", answer: "10", accept: ["10h"], why: "Fifteen plus one is sixteen, and sixteen is written <b>10</b>H. This is the trap from §3: it looks like ten and it is not. The right four switches were full, so they rolled over to zero and the left group ticked up by one — exactly like 9 becoming 10 in ordinary counting." },
+    { q: "After line 4, <code>B</code> is", answer: "00", accept: ["0", "00h"], why: "255 is every switch on, so adding one has nowhere to go. All eight switches roll over to zero. The byte is full, and the machine does not complain — it just starts again at 00." },
+  ]},
+
+  { t: "drills", intro: "Nine tiny programs. Guess the answer in hex first, then open it. If you are unsure, build the number on the switches above.", items: [
+    { task: "Hold 255 — every switch on.", code: "MVI A, 0FFH\nHLT", show: ["A"], out: "A=FF" },
+    { task: "Hold sixteen.", code: "MVI A, 10H\nHLT", show: ["A"], out: "A=10" },
+    { task: "Hold ten. Careful — it is not 10H.", code: "MVI A, 0AH\nHLT", show: ["A"], out: "A=0A" },
+    { task: "Hold zero.", code: "MVI A, 00H\nHLT", show: ["A"], out: "A=00" },
+    { task: "Turn on only the left four switches.", code: "MVI A, 0F0H\nHLT", show: ["A"], out: "A=F0" },
+    { task: "Hold the letter B.", code: "MVI A, 42H\nHLT", show: ["A"], out: "A=42" },
+    { task: "Add one to fifteen.", code: "MVI A, 0FH\nINR A\nHLT", show: ["A"], out: "A=10" },
+    { task: "Add one to 255. Where does it go?", code: "MVI A, 0FFH\nINR A\nHLT", show: ["A", "Z"], out: "A=00 Z=1" },
+    { task: "Copy a byte from one box to another.", code: "MVI A, 7FH\nMOV B, A\nHLT", show: ["B"], out: "B=7F" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; eight switches can hold 0 to 256", why: "They hold <b>0 to 255</b>. There are 256 patterns, and one of them is zero — so the largest is 255. Counting the patterns and counting the largest value are two different questions with two different answers.", fix: "; eight switches: 256 patterns, values 0 to 255" },
+    { bad: "MVI C, 10H      ; count down from ten", why: "<code>10H</code> is sixteen. The loop would run six extra times and nothing would warn you, because sixteen is a perfectly valid count.", fix: "MVI C, 0AH      ; ten" },
+    { bad: "MVI A, FFH", why: "A hex number must start with a digit, or the machine reads it as a name instead of a value. This is the very first error message most people see.", fix: "MVI A, 0FFH" },
+    { bad: "; a bit and a byte are about the same thing", why: "A <b>bit</b> is one switch. A <b>byte</b> is eight of them. The difference is a factor of eight, and it matters everywhere — a bus that is 8 bits wide carries one byte at a time.", fix: "; 1 bit = one switch · 8 bits = 1 byte" },
+  ]},
+
+  { t: "debug", intro: "This should count down from ten and stop. It runs perfectly and counts down from sixteen instead — six times too many. Nothing goes wrong on screen. Read it before you open the fix.", show: ["C", "T", "STEPS"], code: "        MVI C, 10H      ; count down from ten\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n", symptom: "the loop runs 16 times when it was meant to run 10, and nothing on screen says so", q: "The number 10 is right there in the program. So why does it count sixteen?", fix: "        MVI C, 0AH      ; ten\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n", why: "Because of the <b>H</b>. <code>10H</code> is a hex number, and in hex the symbol after 9 is A — so counting goes 8, 9, A, B, C, D, E, F, and only <i>then</i> 10. By the time you write 10H you have already counted sixteen things.<br/><br/>Ten is written <code>0A</code>H. Change that one symbol and the loop runs the ten times it was meant to.<br/><br/>What makes this dangerous is that <b>nothing breaks</b>. Sixteen is a fine number to count to, the loop finishes, the program stops. Look at the step counts: the broken one runs 34 instructions and the fix runs 22. Both look like a working program.<br/><br/>The habit that catches it forever: <b>if it has an H, read it as hex</b>, and if you meant an ordinary number below sixteen, write the leading zero — <code>0A</code>H for ten, <code>0B</code>H for eleven. Any hex number below 10H needs that zero anyway." },
+
+  { t: "recap", items: [
+    "A <b>bit</b> is one switch: off or on, 0 or 1. Electricity is only reliably good at two states, which is why",
+    "Each switch you add <b>doubles</b> the patterns: 1 switch is 2, 8 switches is 256, 16 switches is 65,536",
+    "Eight switches are a <b>byte</b>. The patterns are 256 and the values are <b>0 to 255</b>",
+    "<b>Hex</b> is four switches per symbol, so a byte is always two symbols: 0-9 then A-F, where A is ten and F is fifteen",
+    "<code>10H</code> is <b>sixteen</b>. Ten is <code>0A</code>H. And a hex number must start with a digit — <code>0FFH</code>, never <code>FFH</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is a bit and what is a byte?", a: "A bit is a single switch — off or on, written 0 or 1. A byte is eight bits together. Eight bits can be arranged 256 different ways, which means a byte holds a value from 0 to 255." },
+    { level: "beginner", q: "Why do computers use binary rather than the ten digits we count with?", a: "Because they are built out of electricity, and electricity is reliably good at two states: current flowing or not. Ten states would mean telling ten voltage levels apart in every wire, millions of times a second, which is far harder to keep accurate. Two states almost never get misread." },
+    { level: "beginner", q: "What is the largest value one byte can hold?", a: "255. There are 256 patterns, but one of them is all-switches-off, which is zero — so the values run 0 to 255. Answering 256 is the classic slip, and it comes from counting the patterns instead of the largest value." },
+    { level: "intermediate", q: "Why is hexadecimal used instead of writing out binary?", a: "Because four bits map to exactly one hex symbol, so eight bits — one byte — is always exactly two symbols. That makes it short to write and easy to convert back in your head, which decimal is not: there is no clean relationship between a decimal digit and a group of bits." },
+    { level: "intermediate", q: "What is 10H in decimal, and why does that catch people out?", a: "Sixteen. In hex the symbols after 9 are A to F, so ten through fifteen are single symbols and the two-symbol numbers only start at sixteen. It catches people because 10H looks exactly like the decimal ten, and a program that loads it as a loop count runs six extra times without any error." },
+  ]},
+];
+
+// Orders 1-4 are Chapter 1, "Before the processor" — the ground floor, which
+// assumes no background at all. The processor itself starts at order 5.
+// docs/MICROPROCESSOR-SYLLABUS.md has the full plan.
 const mpLessons = [
-  { slug: "mp-what-is-a-microprocessor", order: 1, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
-  { slug: "mp-evolution", order: 2, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
+  { slug: "mp-switches-and-numbers", order: 1, title: "Switches, and How They Become Numbers", minutes: 12, problems: [], content: MP0 },
+  { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
+  { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -6877,6 +6960,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-switches-and-numbers": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is a bit?", options: ["Eight switches together", "One switch — off or on", "A hex symbol", "A number from 0 to 255"], correct: 1, why: "One switch, written 0 or 1. Eight of them together are a byte, which is where 0 to 255 comes from." },
+    { level: "easy", q: "How many switches are in a byte?", options: ["Four", "Sixteen", "Two", "Eight"], correct: 3, why: "Eight, which is why a byte is written as exactly two hex symbols — four switches per symbol." },
+    { level: "easy", q: "You add one more switch to a row. What happens to how many patterns you can make?", options: ["It doubles", "It goes up by one", "It stays the same", "It goes up by eight"], correct: 0, why: "Every pattern you already had splits in two — the new switch can be off or on for each of them. That doubling is why 8 switches give 256 and 16 give 65,536." },
+    // Medium — apply it
+    { level: "medium", q: "What is the largest value one byte can hold?", options: ["256", "128", "255", "99"], correct: 2, why: "There are 256 patterns, but one of them is all-off, which is zero. So the values run 0 to 255. Counting the patterns and naming the largest value are two different questions." },
+    { level: "medium", q: "In hex, what does the symbol <b>A</b> mean?", options: ["One", "Ten", "Eleven", "Fifteen"], correct: 1, why: "The first ten totals use 0 to 9. Ten to fifteen had no digits left, so they borrowed A to F — A is ten and F is fifteen." },
+    { level: "medium", q: "What is <code>10H</code> in ordinary numbers?", options: ["Sixteen", "Ten", "Two", "One hundred"], correct: 0, why: "In hex the symbols after 9 are A to F, so two-symbol numbers only begin at sixteen. Ten is written 0AH. This one catches almost everybody once." },
+    { level: "medium", q: "Why is a byte always written as exactly two hex symbols?", options: ["Because hex only has two digits", "Because eight is an even number", "Because four switches make one symbol, and a byte has eight switches", "Because the processor has two registers"], correct: 2, why: "Four bits map to exactly one hex symbol. That clean split is the whole reason hex is used rather than decimal, where no digit lines up with a group of bits." },
+    // Hard — the edges
+    { level: "hard", q: "A byte holds 255 and you add one. What happens?", options: ["It becomes 256", "All eight switches roll over to zero", "The program stops with an error", "It stays at 255"], correct: 1, why: "Every switch was already on, so there is nowhere for the extra one to go — the byte rolls over to 00 and the machine says nothing about it. That silence is why the carry flag exists." },
+    { level: "hard", q: "Why can't <code>FFH</code> be written without the leading zero?", options: ["Hex only allows two symbols", "Because a value starting with a letter is read as a name, not a number", "FF is not a valid byte", "The H must come first"], correct: 1, why: "Anything starting with a letter looks like a label to the assembler. Writing 0FFH keeps it a number. Every hex value that starts with A to F needs that zero." },
+    { level: "hard", q: "Why do computers use two states per wire rather than ten?", options: ["Two is faster to calculate with", "Because binary uses less memory", "Because ten was never tried", "Telling two voltage levels apart stays reliable; telling ten apart does not"], correct: 3, why: "It is an engineering answer, not a mathematical one. Current flowing or not is easy to distinguish millions of times a second in a warm box for years; ten levels is not. Binary is what you get when you build a counting machine out of electricity." },
+  ],
   "mp-evolution": [
     // Easy — did the core idea land?
     { level: "easy", q: "The 8085 is an 8-bit processor with a 16-bit address bus. How much memory can it address?", options: ["256 bytes", "64 KB", "1 MB", "8 KB"], correct: 1, why: "2 to the power 16 is 65,536 bytes. The 8 in \"8-bit\" is the data width, not the address width — answering 256 bytes is the single most common mistake in this subject." },

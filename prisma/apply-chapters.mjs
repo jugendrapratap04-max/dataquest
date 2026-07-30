@@ -30,26 +30,23 @@ const PLANS = {
     { slug: "py-standard-library", title: "The standard library", upto: 35, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
     { slug: "py-shipping-code", title: "Shipping code", upto: 39, summary: "Testing, debugging and logging, clean code, project structure and git." },
   ],
-  // Being written now, chapter by chapter, so the plan grows with it. `upto` is a
-  // lesson order that does not exist yet for the later chapters — the applier
-  // simply finds no lessons for them, which is why they are safe to declare
-  // ahead of time and gives the roadmap the real shape of the course.
-  // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 38 lessons, decided in one
+  // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at
   // lesson orders that mostly do not exist yet; the applier finds no lessons for
   // them, which is why they are safe to declare ahead and gives the roadmap the
   // real shape of the course from the first lesson.
   microprocessor: [
-    { slug: "mp-foundations", title: "Foundations", upto: 4, summary: "What a microprocessor is, how it evolved, what is inside the chip, and the three buses that connect it to everything else." },
-    { slug: "mp-architecture", title: "8085 architecture", upto: 9, summary: "The register set, the flags, the 40 pins, memory decoding, and the instruction cycle measured in T-states." },
-    { slug: "mp-instruction-set", title: "Instruction set and addressing", upto: 15, summary: "All five instruction groups, the addressing modes, and the stack and subroutine mechanism." },
-    { slug: "mp-programming", title: "Assembly programming", upto: 20, summary: "Delay loops, block operations, sorting, code conversion and subroutines that pass parameters properly." },
-    { slug: "mp-interrupts", title: "Interrupts and DMA", upto: 23, summary: "The 8085's five interrupts, masking and priority, writing an ISR, and how DMA moves data without the processor." },
-    { slug: "mp-interfacing", title: "Interfacing", upto: 29, summary: "Memory-mapped versus I/O-mapped, the 8255, the 8253 timer, the 8259 controller, ADC/DAC, and real devices." },
-    { slug: "mp-communication", title: "Communication", upto: 31, summary: "Serial and parallel communication, framing and baud rate, the 8251, and handshaking." },
-    { slug: "mp-8086-and-modern", title: "8086 and modern processors", upto: 35, summary: "BIU and EU, segmentation, the 8086 instruction set, and what became cache, pipelining and multicore." },
-    { slug: "mp-microcontrollers", title: "Microcontrollers", upto: 37, summary: "Where a microcontroller belongs instead of a microprocessor, and the 8051." },
-    { slug: "mp-exam-prep", title: "Exam and interview preparation", upto: 38, summary: "The question patterns that repeat every year, each worked end to end, plus a one-page revision per chapter." },
+    { slug: "mp-before-the-processor", title: "Before the processor", upto: 4, summary: "The ground floor, assuming no background at all: switches and bits, hex, memory as numbered boxes, and what a program actually is." },
+    { slug: "mp-foundations", title: "Foundations", upto: 8, summary: "What a microprocessor is, how it evolved, what is inside the chip, and the three buses that connect it to everything else." },
+    { slug: "mp-architecture", title: "8085 architecture", upto: 13, summary: "The register set, the flags, the 40 pins, memory decoding, and the instruction cycle measured in T-states." },
+    { slug: "mp-instruction-set", title: "Instruction set and addressing", upto: 19, summary: "All five instruction groups, the addressing modes, and the stack and subroutine mechanism." },
+    { slug: "mp-programming", title: "Assembly programming", upto: 24, summary: "Delay loops, block operations, sorting, code conversion and subroutines that pass parameters properly." },
+    { slug: "mp-interrupts", title: "Interrupts and DMA", upto: 27, summary: "The 8085's five interrupts, masking and priority, writing an ISR, and how DMA moves data without the processor." },
+    { slug: "mp-interfacing", title: "Interfacing", upto: 33, summary: "Memory-mapped versus I/O-mapped, the 8255, the 8253 timer, the 8259 controller, ADC/DAC, and real devices." },
+    { slug: "mp-communication", title: "Communication", upto: 35, summary: "Serial and parallel communication, framing and baud rate, the 8251, and handshaking." },
+    { slug: "mp-8086-and-modern", title: "8086 and modern processors", upto: 39, summary: "BIU and EU, segmentation, the 8086 instruction set, and what became cache, pipelining and multicore." },
+    { slug: "mp-microcontrollers", title: "Microcontrollers", upto: 41, summary: "Where a microcontroller belongs instead of a microprocessor, and the 8051." },
+    { slug: "mp-exam-prep", title: "Exam and interview preparation", upto: 42, summary: "The question patterns that repeat every year, each worked end to end, plus a one-page revision per chapter." },
   ],
 };
 

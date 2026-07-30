@@ -7,9 +7,10 @@ Indian engineering syllabi examine, what the standard textbooks cover, and what 
 embedded interview actually asks — decided here so nothing has to be guessed
 lesson by lesson.
 
-**38 lessons, 10 chapters.** The same size as the Python track. That is the honest
-cost of "nothing left out" on a subject that covers two processors, a
-microcontroller, six peripheral ICs and a modern-architecture unit.
+**42 lessons, 11 chapters.** Slightly larger than the Python track. That is the
+honest cost of "nothing left out" on a subject that covers two processors, a
+microcontroller, six peripheral ICs and a modern-architecture unit — plus four
+lessons of ground floor, added after the first draft failed the test that matters.
 
 Sources synthesised, not copied: Gaonkar (8085, the Indian standard), Douglas Hall
 and Brey (8086), Ray & Bhurchandi (interfacing), Stallings and Patterson &
@@ -33,93 +34,116 @@ generated diagrams get them wrong constantly.
 
 ---
 
-## Chapter 1 — Foundations (4 lessons)
+## Why there is a Chapter 1 before the processor
+
+The first draft started at "what is a microprocessor" and opened its first code
+block with `MVI A, 42H`, output `A=0C`. Jugendra read it and said he could not
+relate to it — *"mera base hi sahi nahi hai"*, and that it was too much theory to
+hold his interest. Both were true, and measurable: **3,652 words of prose against
+two visuals**, with hex, bytes and registers all assumed rather than taught.
+
+So the course now starts one floor lower. Chapter 1 assumes **nothing** — a reader
+who has only ever used a light switch can follow it — and it is built out of
+things you press rather than paragraphs you accept. The format changed with it:
+short sections, one interactive panel every screen or two, and one short paragraph
+after each rather than three.
+
+## Chapter 1 — Before the processor (4 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 1 | What a Microprocessor Really Is ✅ | Programmability, fetch–decode–execute, registers vs memory, a program as bytes | `asm8085-lab` |
-| 2 | Evolution: what actually changed | 4004 → 8085 → 8086 → modern; word length, address space, clock; why 8-bit hurts; microprocessor vs microcontroller vs microcomputer | `cpu-evolution-lab` |
-| 3 | Inside the chip | ALU, accumulator, temp register, instruction register and decoder, timing and control unit; von Neumann vs Harvard | `cpu-block-lab` |
-| 4 | The three buses | Address, data, control; why 16 address lines is exactly 64 KB; bus contention; tri-state | `bus-lab` |
+| 1 | Switches, and How They Become Numbers ✅ | A bit as a switch; each switch doubles the patterns; a byte is 8 switches and 0–255; hex as four switches per symbol; why `10H` is sixteen | `doubling-lab`, `bit-switch-lab`, `hex-lab` |
+| 2 | Memory — a Street of Numbered Boxes | Address versus contents; why every box holds exactly one byte; reading and writing; why an address needs 16 switches | `memory-street-lab` |
+| 3 | What a Program Actually Is | Instructions as bytes in those boxes; the same byte as data or instruction depending only on where you start reading | `program-bytes-lab` |
+| 4 | Counting, Carrying and Running Out of Room | Adding by hand in binary; what a carry is; why 255 + 1 is 0; the flags as answers to questions | `carry-lab` |
 
-## Chapter 2 — 8085 architecture (5 lessons)
-
-| # | Lesson | Covers | Visual |
-|---|---|---|---|
-| 5 | The register set | A, B–C, D–E, H–L, SP, PC, W–Z; register pairs as 16-bit; why seven | `register-lab` |
-| 6 | The flag register, bit by bit | S, Z, AC, P, CY and their bit positions; which instructions affect which; the INR/INX/DAD exceptions | `flag-lab` |
-| 7 | Pins and signals | The 40 pins by group; AD0–AD7 multiplexing and ALE; demultiplexing with a latch; generating MEMR/MEMW/IOR/IOW from IO/M, RD, WR | `pin-lab` |
-| 8 | Memory organization and decoding | Memory map; absolute vs partial decoding; 74LS138; chip select; foldback and why a wrong decode aliases | `decode-lab` |
-| 9 | Machine cycles, T-states, timing diagrams | Instruction cycle vs machine cycle vs T-state; opcode fetch, memory read/write, I/O read/write; drawing a timing diagram; wait states and READY | `timing-lab` |
-
-## Chapter 3 — Instruction set and addressing (6 lessons)
+## Chapter 2 — Foundations (4 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 10 | The instruction set, classified | Five groups; 1/2/3-byte instructions; opcode format; hand-assembling to hex | `opcode-lab` |
-| 11 | Addressing modes | Immediate, register, direct, register indirect, implied — with the same job done five ways | `addressing-lab` |
-| 12 | Data transfer instructions | MOV, MVI, LXI, LDA/STA, LHLD/SHLD, LDAX/STAX, XCHG, IN/OUT; what none of them touch (flags) | `asm8085-lab` |
-| 13 | Arithmetic and the flags | ADD/ADC/SUB/SBB, immediates, INR/DCR, INX/DCX, DAD, DAA; 16-bit arithmetic through the carry | `asm8085-lab` |
-| 14 | Logical, compare and rotate | ANA/ORA/XRA, CMA/CMC/STC, CMP/CPI, RLC/RRC/RAL/RAR; masking and bit manipulation | `bitwise-lab` (reused) |
-| 15 | Branching, the stack and subroutines | JMP and all eight conditions, CALL/RET, PUSH/POP, PSW, SP behaviour, nesting | `stack-lab` |
+| 5 | What a Microprocessor Really Is ✅ | Programmability, fetch–decode–execute, registers vs memory, a program as bytes | `asm8085-lab` |
+| 6 | Evolution: what actually changed | 4004 → 8085 → 8086 → modern; word length, address space, clock; why 8-bit hurts; microprocessor vs microcontroller vs microcomputer | `cpu-evolution-lab` |
+| 7 | Inside the chip | ALU, accumulator, temp register, instruction register and decoder, timing and control unit; von Neumann vs Harvard | `cpu-block-lab` |
+| 8 | The three buses | Address, data, control; why 16 address lines is exactly 64 KB; bus contention; tri-state | `bus-lab` |
 
-## Chapter 4 — Assembly programming (5 lessons)
+## Chapter 3 — 8085 architecture (5 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 16 | Counters and delay loops | Up/down counters; single and nested delay loops; T-state arithmetic; designing a delay for a given clock | `delay-lab` |
-| 17 | Block operations | Block transfer, block exchange, largest, smallest, sum, average, counting occurrences | `asm8085-lab` |
-| 18 | Sorting and searching | Bubble sort ascending and descending; linear search; why sorting is the classic exam program | `sort-lab` |
-| 19 | Code conversion | BCD ↔ binary, BCD ↔ ASCII, ASCII ↔ hex, packed/unpacked BCD, 7-segment codes; DAA in anger | `convert-lab` |
-| 20 | Subroutines done properly | Parameter passing (register, memory, stack), nesting, look-up tables, reentrancy, why recursion needs care | `stack-lab` |
+| 9 | The register set | A, B–C, D–E, H–L, SP, PC, W–Z; register pairs as 16-bit; why seven | `register-lab` |
+| 10 | The flag register, bit by bit | S, Z, AC, P, CY and their bit positions; which instructions affect which; the INR/INX/DAD exceptions | `flag-lab` |
+| 11 | Pins and signals | The 40 pins by group; AD0–AD7 multiplexing and ALE; demultiplexing with a latch; generating MEMR/MEMW/IOR/IOW from IO/M, RD, WR | `pin-lab` |
+| 12 | Memory organization and decoding | Memory map; absolute vs partial decoding; 74LS138; chip select; foldback and why a wrong decode aliases | `decode-lab` |
+| 13 | Machine cycles, T-states, timing diagrams | Instruction cycle vs machine cycle vs T-state; opcode fetch, memory read/write, I/O read/write; drawing a timing diagram; wait states and READY | `timing-lab` |
 
-## Chapter 5 — Interrupts and DMA (3 lessons)
-
-| # | Lesson | Covers | Visual |
-|---|---|---|---|
-| 21 | Interrupts: why, and the 8085's five | Polling vs interrupt; INTR, RST 5.5/6.5/7.5, TRAP; vectored vs non-vectored, maskable vs non-maskable; vector addresses; software RST 0–7 | `interrupt-lab` |
-| 22 | Masking, priority and writing an ISR | EI/DI, SIM and RIM bit by bit; priority order; latency and response time; saving context; multiple interrupts | `interrupt-lab` |
-| 23 | DMA — giving the buses away | Why DMA; HOLD/HLDA; 8257 registers and channels; cycle stealing, burst and block modes; why it beats the processor copying | `dma-lab` |
-
-## Chapter 6 — Interfacing (6 lessons)
+## Chapter 4 — Instruction set and addressing (6 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 24 | Memory-mapped vs I/O-mapped I/O | The two schemes compared honestly; interfacing RAM and ROM; address ranges; the trade | `decode-lab` |
-| 25 | The 8255 PPI | Ports A/B/C, modes 0/1/2, BSR mode, control word construction, handshaking signals | `ppi-lab` |
-| 26 | The 8253/8254 timer | Six modes, count registers, programming a frequency, square-wave generation | `timer-lab` |
-| 27 | The 8259 PIC | Why you need one; ICW1–4 and OCW1–3; cascading for more than eight; priority schemes | `pic-lab` |
-| 28 | ADC and DAC interfacing | ADC 0808/0809 with SOC/EOC, DAC 0800, resolution and step size, waveform generation | `adc-lab` |
-| 29 | Real devices | 8279 keyboard/display, 7-segment multiplexing, LCD, stepper motor, relay, LED; traffic-light and temperature-controller patterns | `device-lab` |
+| 14 | The instruction set, classified | Five groups; 1/2/3-byte instructions; opcode format; hand-assembling to hex | `opcode-lab` |
+| 15 | Addressing modes | Immediate, register, direct, register indirect, implied — with the same job done five ways | `addressing-lab` |
+| 16 | Data transfer instructions | MOV, MVI, LXI, LDA/STA, LHLD/SHLD, LDAX/STAX, XCHG, IN/OUT; what none of them touch (flags) | `asm8085-lab` |
+| 17 | Arithmetic and the flags | ADD/ADC/SUB/SBB, immediates, INR/DCR, INX/DCX, DAD, DAA; 16-bit arithmetic through the carry | `asm8085-lab` |
+| 18 | Logical, compare and rotate | ANA/ORA/XRA, CMA/CMC/STC, CMP/CPI, RLC/RRC/RAL/RAR; masking and bit manipulation | `bitwise-lab` (reused) |
+| 19 | Branching, the stack and subroutines | JMP and all eight conditions, CALL/RET, PUSH/POP, PSW, SP behaviour, nesting | `stack-lab` |
 
-## Chapter 7 — Communication (2 lessons)
-
-| # | Lesson | Covers | Visual |
-|---|---|---|---|
-| 30 | Serial communication | Synchronous vs asynchronous, simplex/half/full duplex, framing, baud rate, RS-232, the 8085's own SID/SOD via SIM/RIM, the 8251 USART | `serial-lab` |
-| 31 | Parallel communication and handshaking | Parallel vs serial trade; strobe and handshake protocols; Centronics; why serial won | `serial-lab` |
-
-## Chapter 8 — 8086 and modern processors (4 lessons)
+## Chapter 5 — Assembly programming (5 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 32 | 8086 architecture | BIU and EU, the instruction queue, pipelining, why it is faster than a clock bump would explain; 8086 vs 8088 vs 8085 | `bus-lab` |
-| 33 | Segmentation | Segment registers, offset, physical address generation, overlapping segments, the 1 MB space, min/max mode | `segment-lab` |
-| 34 | 8086 addressing modes and instructions | All addressing modes, string instructions, the interrupt vector table, assembler basics | `addressing-lab` |
-| 35 | Modern processors | Deep pipelines and hazards, cache and locality, RISC vs CISC, superscalar, branch prediction, multicore, virtual memory — and which 8085 ideas survived unchanged | `modern-cpu-lab` |
+| 20 | Counters and delay loops | Up/down counters; single and nested delay loops; T-state arithmetic; designing a delay for a given clock | `delay-lab` |
+| 21 | Block operations | Block transfer, block exchange, largest, smallest, sum, average, counting occurrences | `asm8085-lab` |
+| 22 | Sorting and searching | Bubble sort ascending and descending; linear search; why sorting is the classic exam program | `sort-lab` |
+| 23 | Code conversion | BCD ↔ binary, BCD ↔ ASCII, ASCII ↔ hex, packed/unpacked BCD, 7-segment codes; DAA in anger | `convert-lab` |
+| 24 | Subroutines done properly | Parameter passing (register, memory, stack), nesting, look-up tables, reentrancy, why recursion needs care | `stack-lab` |
 
-## Chapter 9 — Microcontrollers (2 lessons)
-
-| # | Lesson | Covers | Visual |
-|---|---|---|---|
-| 36 | Microcontroller vs microprocessor, and the 8051 | Where each belongs; 8051 architecture, SFRs, ports, memory organization | `mcu-lab` |
-| 37 | 8051 essentials | Timers/counters, interrupts, serial port, and how 8085 habits transfer | `mcu-lab` |
-
-## Chapter 10 — Exam and interview (1 lesson)
+## Chapter 6 — Interrupts and DMA (3 lessons)
 
 | # | Lesson | Covers | Visual |
 |---|---|---|---|
-| 38 | The patterns that repeat | The question types that appear every year — timing diagrams, delay calculation, decoding, flag traces, mode words — each worked end to end; plus a one-page revision per chapter | `asm8085-lab` |
+| 25 | Interrupts: why, and the 8085's five | Polling vs interrupt; INTR, RST 5.5/6.5/7.5, TRAP; vectored vs non-vectored, maskable vs non-maskable; vector addresses; software RST 0–7 | `interrupt-lab` |
+| 26 | Masking, priority and writing an ISR | EI/DI, SIM and RIM bit by bit; priority order; latency and response time; saving context; multiple interrupts | `interrupt-lab` |
+| 27 | DMA — giving the buses away | Why DMA; HOLD/HLDA; 8257 registers and channels; cycle stealing, burst and block modes; why it beats the processor copying | `dma-lab` |
+
+## Chapter 7 — Interfacing (6 lessons)
+
+| # | Lesson | Covers | Visual |
+|---|---|---|---|
+| 28 | Memory-mapped vs I/O-mapped I/O | The two schemes compared honestly; interfacing RAM and ROM; address ranges; the trade | `decode-lab` |
+| 29 | The 8255 PPI | Ports A/B/C, modes 0/1/2, BSR mode, control word construction, handshaking signals | `ppi-lab` |
+| 30 | The 8253/8254 timer | Six modes, count registers, programming a frequency, square-wave generation | `timer-lab` |
+| 31 | The 8259 PIC | Why you need one; ICW1–4 and OCW1–3; cascading for more than eight; priority schemes | `pic-lab` |
+| 32 | ADC and DAC interfacing | ADC 0808/0809 with SOC/EOC, DAC 0800, resolution and step size, waveform generation | `adc-lab` |
+| 33 | Real devices | 8279 keyboard/display, 7-segment multiplexing, LCD, stepper motor, relay, LED; traffic-light and temperature-controller patterns | `device-lab` |
+
+## Chapter 8 — Communication (2 lessons)
+
+| # | Lesson | Covers | Visual |
+|---|---|---|---|
+| 34 | Serial communication | Synchronous vs asynchronous, simplex/half/full duplex, framing, baud rate, RS-232, the 8085's own SID/SOD via SIM/RIM, the 8251 USART | `serial-lab` |
+| 35 | Parallel communication and handshaking | Parallel vs serial trade; strobe and handshake protocols; Centronics; why serial won | `serial-lab` |
+
+## Chapter 9 — 8086 and modern processors (4 lessons)
+
+| # | Lesson | Covers | Visual |
+|---|---|---|---|
+| 36 | 8086 architecture | BIU and EU, the instruction queue, pipelining, why it is faster than a clock bump would explain; 8086 vs 8088 vs 8085 | `bus-lab` |
+| 37 | Segmentation | Segment registers, offset, physical address generation, overlapping segments, the 1 MB space, min/max mode | `segment-lab` |
+| 38 | 8086 addressing modes and instructions | All addressing modes, string instructions, the interrupt vector table, assembler basics | `addressing-lab` |
+| 39 | Modern processors | Deep pipelines and hazards, cache and locality, RISC vs CISC, superscalar, branch prediction, multicore, virtual memory — and which 8085 ideas survived unchanged | `modern-cpu-lab` |
+
+## Chapter 10 — Microcontrollers (2 lessons)
+
+| # | Lesson | Covers | Visual |
+|---|---|---|---|
+| 40 | Microcontroller vs microprocessor, and the 8051 | Where each belongs; 8051 architecture, SFRs, ports, memory organization | `mcu-lab` |
+| 41 | 8051 essentials | Timers/counters, interrupts, serial port, and how 8085 habits transfer | `mcu-lab` |
+
+## Chapter 11 — Exam and interview (1 lesson)
+
+| # | Lesson | Covers | Visual |
+|---|---|---|---|
+| 42 | The patterns that repeat | The question types that appear every year — timing diagrams, delay calculation, decoding, flag traces, mode words — each worked end to end; plus a one-page revision per chapter | `asm8085-lab` |
 
 ---
 
