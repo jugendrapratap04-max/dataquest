@@ -239,6 +239,59 @@ const vizProblems = [
     ],
     ["Two separate figures — a second `plt.subplots()` for the bar chart, or the line is still on it.", "`ax.bar` needs labels for the x axis; `[str(i) for i in range(len(values))]` will do.", "179 is not arbitrary: matplotlib leaves a 5% margin below the smallest value, and 5% of the range 180-200 is 1."],
     ["charts", "matplotlib", "axis"]),
+
+  /* ================= 5. eda-storytelling — the numbers a report is made of ======== */
+  VP("eda-storytelling", "Easy", 241, "eda-growth-percent", "Percentage Change, the Right Way Round", "growth_percent",
+    "Percentage change is measured against where you **started**. Divide by the new value instead and 100 to 140 comes out as 28.6% rather than 40% — a smaller number, which is why the mistake reads as cautious and survives review.\n\nWrite a function `growth_percent(old, new)` that returns the percentage change from `old` to `new`, rounded to 1 decimal. A fall is negative.",
+    [{ input: "old=100, new=140", output: "40.0" }, { input: "old=200, new=150", output: "-25.0" }],
+    "def growth_percent(old, new):\n    pass\n",
+    "def growth_percent(old, new):\n    return round((new - old) / old * 100, 1)\n",
+    [
+      { args: [100, 140], expected: 40 },
+      { args: [100, 200], expected: 100 },
+      { args: [200, 150], expected: -25 },
+      { args: [40, 118], expected: 195 },
+    ],
+    ["The change is `new - old`; the base is `old`.", "Multiply by 100 before rounding, not after.", "Sanity check the formula on the second test: a doubling has to give exactly 100.0. Any formula that disagrees is wrong."],
+    ["eda", "reporting"]),
+
+  VP("eda-storytelling", "Medium", 242, "eda-top-driver", "Which Group Drove It", "top_driver",
+    "A headline number becomes a finding when you split it and find out who caused it. In the lesson's data, 78 of 80 extra orders came from the app.\n\nWrite a function `top_driver(rows)` where `rows` is a list of `[name, before, after]`. Return the **name** of the group whose absolute increase (`after - before`) is the largest.\n\nAbsolute, not percentage: a group going 5 → 30 gained 25 orders, and a group going 100 → 101 gained 1, even though the second is a bigger business.",
+    [{ input: 'rows=[["app", 40, 118], ["web", 60, 62]]', output: '"app"' }],
+    "def top_driver(rows):\n    pass\n",
+    "def top_driver(rows):\n    return max(rows, key=lambda r: r[2] - r[1])[0]\n",
+    [
+      { args: [[["app", 40, 118], ["web", 60, 62]]], expected: "app" },
+      { args: [[["a", 10, 12], ["b", 5, 30], ["c", 100, 101]]], expected: "b" },
+      { args: [[["only", 3, 9]]], expected: "only" },
+    ],
+    ["`max(rows, key=...)` finds the whole row; you want its first element.", "The key is `r[2] - r[1]` — after minus before.", "Do not sort by `after` alone: the biggest group is not necessarily the one that grew."],
+    ["eda", "groupby", "reporting"]),
+
+  VP("eda-storytelling", "Easy", 243, "eda-mean-with-count", "An Average Never Travels Alone", "mean_with_count",
+    "4.35 from ten ratings and 4.35 from ten thousand are different claims, and nothing on a chart says which one you have. So report the count beside the mean, always.\n\nWrite a function `mean_with_count(values)` that ignores the `None` entries and returns `[mean, count]` — the mean of the values that exist rounded to 2 decimals, and how many there were.",
+    [{ input: "values=[4.4, None, 4.2, None]", output: "[4.3, 2]" }],
+    "def mean_with_count(values):\n    pass\n",
+    "def mean_with_count(values):\n    present = [v for v in values if v is not None]\n    return [round(sum(present) / len(present), 2), len(present)]\n",
+    [
+      { args: [[4.4, null, 4.2, null]], expected: [4.3, 2] },
+      { args: [[1, 2, 3]], expected: [2, 3] },
+      { args: [[4.4, 4.3, 4.4, 4.2, 4.3, null, 4.5, 4.2, 4.4, 4.1, 4.5, null]], expected: [4.33, 10] },
+    ],
+    ["Filter first: `[v for v in values if v is not None]`.", "Use `is not None`, not a plain truthiness test — a rating of 0 is a real rating.", "The count is the length of what survived the filter, not of the original list."],
+    ["eda", "missing-data", "reporting"]),
+
+  VP("eda-storytelling", "Medium", 244, "eda-survives-without-last", "Does It Hold Without the Last Month?", "survives_without_last",
+    "The most common way an honest analyst publishes a wrong number: a trend that exists only because of a final period that is not over yet.\n\nWrite a function `survives_without_last(values)` that returns `[full, shortened]` — the percentage growth from the first value to the last, and from the first value to the **second to last**, each rounded to 1 decimal.\n\nOn the lesson's data that is `[80.0, 56.0]`: smaller, and the same story. On `[100, 101, 102, 500]` it is `[400.0, 2.0]`, which is a different story entirely.",
+    [{ input: "values=[100, 110, 120, 135, 156, 180]", output: "[80.0, 56.0]" }],
+    "def survives_without_last(values):\n    pass\n",
+    "def survives_without_last(values):\n    return [round((values[-1] - values[0]) / values[0] * 100, 1),\n            round((values[-2] - values[0]) / values[0] * 100, 1)]\n",
+    [
+      { args: [[100, 110, 120, 135, 156, 180]], expected: [80, 56] },
+      { args: [[100, 101, 102, 500]], expected: [400, 2] },
+    ],
+    ["`values[-1]` is the last, `values[-2]` the one before it, and `values[0]` is the base for both.", "The base never changes — both percentages are measured from the first value.", "The second test is the case worth understanding: 400% collapses to 2% when one period is removed."],
+    ["eda", "reporting", "robustness"]),
 ];
 
 export { vizProblems };
