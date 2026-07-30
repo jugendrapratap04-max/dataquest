@@ -187,6 +187,58 @@ const vizProblems = [
     ],
     ["`hue=cat` is the whole trick — no loop, no `label=`, no call to `ax.legend()`.", "`ax.get_legend()` returns the legend object; `.get_texts()` gives its label objects.", "`t.get_text()` turns each label object into a plain string."],
     ["seaborn", "hue", "legend"]),
+
+  /* ================= 4. choosing-charts — the arithmetic behind the advice ======== */
+  VP("choosing-charts", "Easy", 231, "chart-slice-degrees", "How Big Is That Slice?", "slice_degrees",
+    "The case against pie charts is not taste, it is arithmetic: a value becomes an **angle**, and angles are read far less accurately than lengths.\n\nWrite a function `slice_degrees(values, index)` that returns how many degrees of the circle the value at `index` would take, rounded to 1 decimal.",
+    [{ input: "values=[340, 512, 198, 260], index=1", output: "140.7" }],
+    "def slice_degrees(values, index):\n    pass\n",
+    "def slice_degrees(values, index):\n    return round(values[index] / sum(values) * 360, 1)\n",
+    [
+      { args: [[340, 512, 198, 260], 1], expected: 140.7 },
+      { args: [[340, 512, 198, 260], 2], expected: 54.4 },
+      { args: [[1, 1, 1, 1], 0], expected: 90 },
+    ],
+    ["A slice's share is its value divided by the total of all of them.", "A full circle is 360 degrees, so multiply the share by 360.", "`sum(values)` gives the total — do not hardcode it."],
+    ["charts", "pie"]),
+
+  VP("choosing-charts", "Medium", 232, "chart-exaggeration", "How Much Does a Cut Axis Lie?", "exaggeration",
+    "A bar chart of 198 against 512 shows a real gap of 2.59x. Start the y-axis at 190 and the bars become 8 and 322 units tall, so the picture shows 40.25x — while every printed number stays correct.\n\nWrite a function `exaggeration(small, big, bottom)` that returns **how many times over** the drawn ratio overstates the true one, rounded to 2 decimals. A baseline of 0 must give exactly 1.0, because nothing is exaggerated.",
+    [{ input: "small=198, big=512, bottom=190", output: "15.57" }, { input: "small=198, big=512, bottom=0", output: "1.0" }],
+    "def exaggeration(small, big, bottom):\n    pass\n",
+    "def exaggeration(small, big, bottom):\n    return round(((big - bottom) / (small - bottom)) / (big / small), 2)\n",
+    [
+      { args: [198, 512, 190], expected: 15.57 },
+      { args: [198, 512, 0], expected: 1 },
+      { args: [100, 110, 90], expected: 1.82 },
+    ],
+    ["The true ratio is `big / small`. The drawn ratio uses the bar heights, which are each value minus the baseline.", "The answer is drawn divided by true.", "Check your formula against `bottom=0`: it has to come out at exactly 1.0."],
+    ["charts", "axis", "misleading"]),
+
+  VP("choosing-charts", "Medium", 233, "chart-top-n-other", "Top N, and an Honest Other", "top_n_with_other",
+    "Forty bars is not a chart. Keep the biggest few and sum the rest into one bar — but sort by **value**, not by name, or your \"top five\" is just the first five alphabetically.\n\nWrite a function `top_n_with_other(counts, n)` where `counts` is a list of `[name, value]` pairs. Return the top `n` by value, biggest first, each still as a `[name, value]` pair, followed by `[\"Other\", rest]` where `rest` is the total of everything left. If nothing is left over, do **not** append an Other entry.",
+    [{ input: 'counts=[["a", 5], ["b", 40], ["c", 12]], n=2', output: '[["b", 40], ["c", 12], ["Other", 5]]' }],
+    "def top_n_with_other(counts, n):\n    pass\n",
+    "def top_n_with_other(counts, n):\n    ranked = sorted(counts, key=lambda pair: -pair[1])\n    kept = [[name, value] for name, value in ranked[:n]]\n    rest = sum(value for _, value in ranked[n:])\n    if rest:\n        kept.append([\"Other\", rest])\n    return kept\n",
+    [
+      { args: [[["a", 5], ["b", 40], ["c", 12]], 2], expected: [["b", 40], ["c", 12], ["Other", 5]] },
+      { args: [[["Delhi", 512], ["Mumbai", 480], ["Pune", 260], ["Jaipur", 198], ["Kochi", 41], ["Indore", 33]], 3], expected: [["Delhi", 512], ["Mumbai", 480], ["Pune", 260], ["Other", 272]] },
+      { args: [[["a", 5], ["b", 40]], 2], expected: [["b", 40], ["a", 5]] },
+    ],
+    ["`sorted(counts, key=lambda pair: -pair[1])` puts the biggest first.", "`ranked[:n]` is what you keep; `ranked[n:]` is what gets summed.", "The third test has nothing left over — appending `[\"Other\", 0]` there would be wrong."],
+    ["charts", "long-tail", "sorting"]),
+
+  VP("choosing-charts", "Medium", 234, "chart-baselines", "Two Charts, Two Baselines", "baselines",
+    "The zero-baseline rule is not universal — it comes from a bar being read as a **length**. A line is read as a **slope**, so matplotlib does not start it at zero, and forcing it there often flattens the trend away.\n\nWrite a function `baselines(values)` that draws the same numbers twice — once with `ax.plot` and once with `ax.bar` — and returns `[line_bottom, bar_bottom]`: the bottom of each chart's y-axis, rounded to 2 decimals. Set neither one yourself; the point is what matplotlib chooses.",
+    [{ input: "values=[180, 190, 200]", output: "[179.0, 0.0]" }],
+    "import matplotlib.pyplot as plt\n\ndef baselines(values):\n    pass\n",
+    "import matplotlib.pyplot as plt\n\ndef baselines(values):\n    fig, ax = plt.subplots()\n    ax.plot(values)\n    line_bottom = round(float(ax.get_ylim()[0]), 2)\n    fig2, ax2 = plt.subplots()\n    ax2.bar([str(i) for i in range(len(values))], values)\n    bar_bottom = round(float(ax2.get_ylim()[0]), 2)\n    return [line_bottom, bar_bottom]\n",
+    [
+      { args: [[180, 190, 200]], expected: [179, 0] },
+      { args: [[10, 20, 30]], expected: [9, 0] },
+    ],
+    ["Two separate figures — a second `plt.subplots()` for the bar chart, or the line is still on it.", "`ax.bar` needs labels for the x axis; `[str(i) for i in range(len(values))]` will do.", "179 is not arbitrary: matplotlib leaves a 5% margin below the smallest value, and 5% of the range 180-200 is 1."],
+    ["charts", "matplotlib", "axis"]),
 ];
 
 export { vizProblems };
