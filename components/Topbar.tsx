@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { MODE_KEY, THEME_KEY, themeNow, scheduleHint } from "@/lib/theme-schedule";
 
 const titles: Record<string, [string, string]> = {
   "/dashboard": ["{greeting}, {name}", "Today's target — read one topic, then solve five problems."],
@@ -50,7 +51,12 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   // has no XP, so free themes only.
   const xp = user?.xp ?? 0;
 
+  // Two pieces of state, not one, and that is the whole of the auto feature:
+  // `theme` is what is applied right now, `auto` is what was chosen. They differ
+  // for the entire time the clock is driving, which is why one boolean would not
+  // have been enough to draw the menu correctly.
   const [theme, setTheme] = useState<string>("light");
+  const [auto, setAuto] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toast, setToast] = useState<{ name: string; need: number } | null>(null);
   const themeRef = useRef<HTMLDivElement>(null);
@@ -65,18 +71,50 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   // has to setTheme, because the menu renders a tick next to the active one.
   useEffect(() => {
     let saved: string | null = null;
-    try { saved = localStorage.getItem("dq-theme"); } catch {}
+    let mode: string | null = null;
+    try {
+      saved = localStorage.getItem(THEME_KEY);
+      mode = localStorage.getItem(MODE_KEY);
+    } catch {}
     // Only honour a saved theme this account has actually unlocked. Otherwise a
     // locked theme left in localStorage by a higher-XP account on the same
     // browser would apply — and show as both active and 🔒 in the menu.
     const savedT = THEMES.find((t) => t.id === saved);
-    const cur = (savedT && xp >= savedT.xp) ? savedT.id
-      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    // Auto is the default. A student who has never opened this menu has no mode
+    // key at all, so the clock decides — the same rule the pre-paint script in
+    // app/layout.tsx follows, which is why the page does not flash.
+    const isAuto = mode !== "manual" || !savedT || xp < savedT.xp;
+    const cur = isAuto ? themeNow() : savedT.id;
     document.documentElement.setAttribute("data-theme", cur);
-    if (cur !== saved) { try { localStorage.setItem("dq-theme", cur); } catch {} }
+    if (cur !== saved) { try { localStorage.setItem(THEME_KEY, cur); } catch {} }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(cur);
+    setAuto(isAuto);
   }, [xp]);
+
+  // While the clock is driving, keep watching it. A minute is fine — nothing on
+  // this schedule moves faster than that, and somebody studying from 4pm to 9pm
+  // should see it change under them rather than on the next reload.
+  //
+  // The media query is watched for the same reason: `prefers-color-scheme` is a
+  // veto on the light theme, so flipping the system to dark at 2pm has to take
+  // effect now, not at the next boundary.
+  useEffect(() => {
+    if (!auto) return;
+    const tick = () => {
+      const next = themeNow();
+      setTheme((prev) => {
+        if (prev === next) return prev;
+        document.documentElement.setAttribute("data-theme", next);
+        try { localStorage.setItem(THEME_KEY, next); } catch {}
+        return next;
+      });
+    };
+    const id = window.setInterval(tick, 60_000);
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    mq.addEventListener("change", tick);
+    return () => { window.clearInterval(id); mq.removeEventListener("change", tick); };
+  }, [auto]);
 
   useEffect(() => {
     const onDoc = (e: MouseEvent) => {
@@ -97,10 +135,29 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
+  // Picking a theme turns auto off. That is the rule the whole feature rests on:
+  // the clock may choose for somebody who has not chosen, and never for somebody
+  // who has. The way back is the Auto entry in the same menu.
   const applyTheme = (id: string) => {
     document.documentElement.setAttribute("data-theme", id);
-    try { localStorage.setItem("dq-theme", id); } catch {}
+    try {
+      localStorage.setItem(THEME_KEY, id);
+      localStorage.setItem(MODE_KEY, "manual");
+    } catch {}
     setTheme(id);
+    setAuto(false);
+    setMenuOpen(false);
+  };
+
+  const applyAuto = () => {
+    const id = themeNow();
+    document.documentElement.setAttribute("data-theme", id);
+    try {
+      localStorage.setItem(THEME_KEY, id);
+      localStorage.removeItem(MODE_KEY);
+    } catch {}
+    setTheme(id);
+    setAuto(true);
     setMenuOpen(false);
   };
 
@@ -168,9 +225,26 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
           {menuOpen && (
             <div className="theme-menu" role="menu">
               <div className="tm-h"><span>Theme</span><span className="coins">🪙 {xp.toLocaleString()}</span></div>
+              <button
+                className={`theme-opt${auto ? " active" : ""}`}
+                onClick={applyAuto}
+                role="menuitemradio"
+                aria-checked={auto}
+              >
+                <span className="theme-sw" style={{ background: "linear-gradient(135deg,#F1EDE4 0%,#FF9E5A 52%,#0E1119 100%)" }} />
+                <span className="theme-txt">
+                  <span className="theme-nm">Auto</span>
+                  <span className="theme-sub">{scheduleHint()}</span>
+                </span>
+                <span className="theme-meta">{auto ? <span className="theme-check">✓</span> : null}</span>
+              </button>
               {THEMES.map((t) => {
                 const locked = xp < t.xp;
-                const active = theme === t.id;
+                // Two states, drawn separately: the tick follows the CHOICE, and
+                // the "now" pill follows what the clock has applied. They are the
+                // same row only when auto is off.
+                const active = !auto && theme === t.id;
+                const showing = auto && theme === t.id;
                 return (
                   <button
                     key={t.id}
@@ -187,8 +261,9 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
                     </span>
                     <span className="theme-meta">
                       {active ? <span className="theme-check">✓</span>
-                        : locked ? <span className="theme-lock">🔒 {t.xp}</span>
-                          : null}
+                        : showing ? <span className="theme-now">now</span>
+                          : locked ? <span className="theme-lock">🔒 {t.xp}</span>
+                            : null}
                     </span>
                   </button>
                 );

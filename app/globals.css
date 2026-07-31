@@ -1602,7 +1602,7 @@ select.inp { cursor:pointer; }
 
 /* ---- Theme picker (light/dark free + unlockable themes) ---- */
 .theme-wrap { position:relative; }
-.theme-menu { position:absolute; top:calc(100% + 8px); right:0; z-index:50; width:236px;
+.theme-menu { position:absolute; top:calc(100% + 8px); right:0; z-index:50; width:250px;
   background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:6px; }
 .theme-menu .tm-h { font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-faint); font-weight:600; padding:7px 8px 5px; display:flex; align-items:center; justify-content:space-between; }
 .theme-menu .tm-h .coins { font-family:var(--mono); color:var(--accent-2); }
@@ -1619,6 +1619,11 @@ select.inp { cursor:pointer; }
 .theme-meta { margin-left:auto; flex:none; }
 .theme-check { color:var(--accent-2); font-size:14px; font-weight:700; }
 .theme-lock { font-size:10px; color:var(--ink-faint); font-family:var(--mono); display:inline-flex; align-items:center; gap:3px; white-space:nowrap; }
+/* What the clock has applied, when Auto is the chosen option. The tick marks the
+   CHOICE and this marks what is on screen — they are different rows all the time
+   auto is driving, which is the one thing this menu has to make obvious. */
+.theme-now { font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; font-family:var(--mono);
+  color:var(--accent-2); background:var(--accent-soft); border-radius:5px; padding:2px 5px; white-space:nowrap; }
 .theme-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); z-index:90;
   background:var(--panel); border:1px solid color-mix(in srgb,var(--accent) 40%,transparent); color:var(--ink);
   border-radius:12px; padding:11px 16px; font-size:13px; box-shadow:var(--shadow); display:flex; align-items:center; gap:9px; }

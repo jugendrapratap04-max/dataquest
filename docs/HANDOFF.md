@@ -359,11 +359,13 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 
 ---
 
-## 4a. Planned, designed, not built: the theme that follows the clock
+## 4a. The theme that follows the clock — time half built, weather half not
 
-Jugendra's idea, and the design is settled — only the building is left. Do not
-re-litigate the decisions below; he pushed back on the first sketch and these are
-the answers that survived.
+Jugendra's idea, and the design is settled. Do not re-litigate the decisions
+below; he pushed back on the first sketch and these are the answers that
+survived. **The free time-of-day half is now built and live**; the premium
+weather half is still design only, and the warning at the end of this section is
+the thing to read before starting it.
 
 **It is platform-wide**, not per-subject. The theme system is already global
 (`data-theme` on `<html>`, four themes, picker in the Topbar), so nothing extra is
@@ -407,9 +409,44 @@ what happens when the API is slow or down — the theme should simply stay as it
 and the page must never wait on it. This would be the platform's **first
 dependency on an outside service**.
 
-A first attempt at the time half was written and then reverted deliberately, to
-avoid leaving half-wired code in the tree. Nothing of it remains; the design above
-is the whole of what it knew.
+**What was built, and where it lives:**
+
+- **`lib/theme-schedule.ts`** — the schedule, the two localStorage keys, and
+  `themeForHour(hour, prefersDark)`. It is a plain module with no `"use client"`,
+  which is what lets the server-rendered `app/layout.tsx` import it. The boundary
+  hours are written **once**, here.
+- **`app/layout.tsx`** builds the pre-paint script by interpolating
+  `SCHEDULE`, so the numbers cannot drift out of step with the module. Auto is
+  the default: no `dq-theme-mode` key means the clock decides, and the script
+  resolves it before first paint.
+- **`components/Topbar.tsx`** carries the two states — `theme` (applied) and
+  `auto` (chosen) — an **Auto** entry at the top of the menu, a one-minute
+  interval and a `prefers-color-scheme` listener while auto is on. Picking any
+  theme writes `dq-theme-mode = "manual"` and the clock stops being consulted.
+- The menu draws both states at once: the **✓** follows the choice, and a small
+  **now** pill (`.theme-now`) marks whichever theme the clock has applied. They
+  sit on different rows for the whole time auto is driving, which is the one
+  thing this menu has to make obvious.
+
+Two keys, not one, and the reason is migration: `dq-theme` still holds a concrete
+theme id exactly as before, so nothing else that reads it had to change, and the
+new `dq-theme-mode` is what distinguishes a real choice from a value the old code
+wrote on somebody's first visit. Everybody who never opened the menu therefore
+lands on auto, which is what the design asks for.
+
+**One thing left unresolved on purpose.** All four themes are `xp: 0` today
+(beta), so auto can apply Sunset to anybody. If the coin locks are restored — the
+comment in `Topbar.tsx` says how — the 17:00 step would hand a locked theme to a
+student who has not unlocked it, and the pre-paint script cannot know their XP
+because that is a server fact. Decide it then: either auto stops at free themes,
+or Sunset stops being locked.
+
+**What could not be verified locally:** the live change-over. The harness cannot
+move the clock, and Chrome's emulated `prefers-color-scheme` changes what
+`matchMedia().matches` returns **without dispatching a `change` event** — a probe
+listener recorded nothing across a light↔dark flip. So the resolution was proven
+instead: `themeForHour` across all 24 hours and both preferences, and the applied
+theme after a reload under each emulated scheme.
 
 ## 4b. Features shipped alongside the lessons
 
