@@ -273,8 +273,9 @@ export function ProgramBytesLab() {
             <>
               <b>This is the program somebody wrote.</b> Put 42H in A, copy it to B, put 09H in C,
               add C, store the answer at 2060H, stop. Notice that <b>42H and 09H are marked
-              &ldquo;data&rdquo;</b> — not because anything in those bytes says so, but because the
-              opcode before each one said &ldquo;the next byte is a number, not an instruction&rdquo;.
+              &ldquo;data&rdquo;</b>{" "}
+              — not because anything in those bytes says so, but because the opcode before each one
+              said &ldquo;the next byte is a number, not an instruction&rdquo;.
             </>
           ) : (
             <>

@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**12 written, 45 problems.** Read that file before touching this subject.
+**13 written, 49 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,11 +194,11 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Chapter 2 is finished and Chapter 3 is four lessons in** — lessons 5 to 12 are
-all at that standard, so the whole subject is in one shape and **lesson 13
-("Machine cycles, T-states, timing diagrams") is next — the last of Chapter 3**.
-Nineteen panels were built across those eight lessons, and what they teach is the
-part worth copying: each one carries an idea that prose was previously asserting.
+**Chapters 2 and 3 are both finished** — lessons 5 to 13 are all at that
+standard, so the whole subject is in one shape and **lesson 14 ("The instruction
+set, classified") opens Chapter 4**. Twenty-two panels were built across those
+nine lessons, and what they teach is the part worth copying: each one carries an
+idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -262,6 +262,20 @@ asked about the address bus rather than a street of boxes.
 - **`foldback-lab`** (lesson 12) — a slider for how many lines the decoder
   bothers to check, and the copies appear as you take lines away. 2^ignored, made
   visible.
+
+- **`machine-cycle-lab`** (lesson 13) — one instruction split into machine cycles
+  whose T-states add up to the number the simulator prints. The 6-state fetch on
+  `INX`, `DCX`, `PUSH` and `CALL` is where the odd totals come from.
+- **`timing-lab`** (lesson 13) — a timing diagram drawn as the table it actually
+  is: one row per pin, one column per T-state. Far easier to reproduce in an exam
+  than waveforms, and the memory-write / I/O-write pair differs by one row.
+- **`wait-state-lab`** (lesson 13) — READY, and what slow memory costs. The one
+  panel in the subject whose number changes a wall-clock answer.
+
+Lesson 13 is where the simulator and the topic finally agree: **T-state totals
+come from `lib/asm8085.ts`**, and every drill on that page is one instruction
+plus `HLT` with its total checked. The *split* into machine cycles is from the
+standard references and is the part that cannot be verified.
 
 **Lesson 11 is the first lesson where nothing executes.** `lib/asm8085.ts`
 simulates registers and memory, not pin timing, so those three panels are models
@@ -373,14 +387,17 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
   `Arch8085Lab`. **Sweep for it after any component edit**, because it survives
   lint, the build and a passing `db:check`:
   ```
-  curl -s http://localhost:3000/learn/<slug> | grep -o '</b>[A-Za-z0-9]\{2,14\}\|</code>[A-Za-z0-9]\{2,14\}'
+  curl -s http://localhost:3000/learn/<slug> | grep -o '</b>[A-Za-z0-9—–][^ <]\{0,12\}\|</code>[A-Za-z0-9—–][^ <]\{0,12\}\|</i>[A-Za-z0-9—–][^ <]\{0,12\}'
   ```
-  Run it over every slug; a hit like `</b>attaches` is the bug, while
-  `</b>nary` (from `<b>bi</b>nary`) is deliberate. **Include `0-9` in the class**
-  — the first version of this sweep used `[a-zA-Z]` and silently missed
-  `</b>08H` in lesson 10's DAA panel, because the next character was a digit.
-  Sweeping all 93 pages takes several minutes; do it in two halves so the shell
-  does not time out.
+  Run it over every slug; a hit like `</b>attaches` or `</b>—` is the bug, while
+  `</b>nary` (from `<b>bi</b>nary`) and `</b>H` are deliberate. **The character
+  class matters and has been widened twice.** `[a-zA-Z]` missed `</b>08H` in
+  lesson 10's DAA panel because the next character was a digit; `[A-Za-z0-9]`
+  then missed `</b>—` in three places, including two that had been live since
+  Chapter 1. Do not narrow it back, and do not use `[^ <]` alone — ordinary
+  punctuation after a tag (`</b>,` `</b>.` `</b>:`) is correct and drowns the
+  signal. Sweeping all 96 pages takes several minutes; do it in halves so the
+  shell does not time out.
 - **A component declared inside another component's body is a lint error.**
   `react-hooks/static-components` — a `const Cell = (...) => …` helper written
   during render is a new type every render, so React remounts its subtree. Move

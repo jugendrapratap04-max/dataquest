@@ -82,6 +82,7 @@ import { RegisterLab, PairLab, OpcodeBitsLab } from "./RegisterLabs";
 import { FlagLab, FlagEffectsLab, DaaLab } from "./FlagLabs";
 import { PinLab, AleLab, ControlSignalLab } from "./PinLabs";
 import { DecodeLab, Decoder138Lab, FoldbackLab } from "./DecodeLabs";
+import { MachineCycleLab, TimingLab, WaitStateLab } from "./TimingLabs";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -168,6 +169,9 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "decode-lab": DecodeLab,
   "decoder-138-lab": Decoder138Lab,
   "foldback-lab": FoldbackLab,
+  "machine-cycle-lab": MachineCycleLab,
+  "timing-lab": TimingLab,
+  "wait-state-lab": WaitStateLab,
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,

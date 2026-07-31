@@ -7100,6 +7100,90 @@ const MP8 = [
   ]},
 ];
 
+const MP9 = [
+  { t: "objectives", items: [
+    "Tell an <b>instruction cycle</b> from a <b>machine cycle</b> from a <b>T-state</b>",
+    "Break any instruction into its machine cycles and add the T-states back up",
+    "Draw the <b>timing diagram</b> for an opcode fetch, a memory read, a write and an I/O cycle",
+    "Say what a <b>wait state</b> is, what asks for one, and what it costs",
+  ]},
+  { t: "hook", q: "<code>MOV B, A</code> takes 4 T-states. <code>MOV A, M</code> takes 7. They are both one-byte instructions that copy one byte into the accumulator's neighbourhood. Where do the extra three go?", why: "On a trip to memory.<br/><br/>Time on this processor is not spent thinking — the arithmetic is nearly free. It is spent <b>going out to the bus</b>, and every instruction costs four T-states to fetch plus three more for each extra byte it has to reach for. <code>MOV B, A</code> never leaves the chip. <code>MOV A, M</code> goes out once.<br/><br/>Once you see instructions that way, every T-state number in the tables stops being something to memorise. You can derive them, which is what this lesson is for — and it is also the lesson that finally makes \"design a delay of 5 ms\" a calculation rather than a guess." },
+  { t: "def", term: "Machine cycle", en: "One trip over the bus: the processor puts an address out, and reads or writes one byte. An instruction cycle is made of one or more machine cycles, and each machine cycle is made of clock periods called T-states — four for an opcode fetch, three for an ordinary read or write.", hi: "The three words are a hierarchy and exams check that you know which is which. <b>Instruction cycle</b> is the whole instruction. <b>Machine cycle</b> is one bus access inside it. <b>T-state</b> is one tick of the clock, and it is the only one of the three with a fixed duration." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"draw the timing diagram of the <code>STA 2060H</code> instruction\" is a full-marks question in almost every paper, and it is four machine cycles drawn one after another. The other guaranteed one is the delay calculation — count the T-states, multiply by the clock period — which appears in Chapter 5 and is built on this page." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H. The examples read them, and reading is what costs the T-states." },
+
+  { t: "h2", n: "1", text: "Three words, three different sizes" },
+  { t: "p", html: "An instruction is made of bus trips, and a bus trip is made of clock ticks. Pick an instruction apart and the parts add up to a number you can check." },
+  { t: "viz", name: "machine-cycle-lab" },
+  { t: "p", html: "The pattern is <b>4 for the fetch, 3 for every extra byte</b>. <code>LDA</code> touches three more bytes — two of address and one of data — so 4 + 3 + 3 + 3 = 13. A few instructions have a <b>six</b>-state fetch instead, which is where <code>INX</code>'s 6 and <code>PUSH</code>'s 12 come from." },
+  { t: "code", file: "cycles.asm", lang: "asm8085", show: ["A", "T", "STEPS"], code: "        MOV B, A        ; 4 T  — 1 machine cycle\n        LXI H, 2050H    ; 10 T — 3 machine cycles\n        MOV A, M        ; 7 T  — 2 machine cycles\n        HLT             ; 5 T\n", output: "A=5A T=26 STEPS=4" },
+  { t: "p", html: "Four instructions, ten machine cycles, <b>26</b> T-states — and 4 + 10 + 7 + 5 is exactly that. <code>STEPS</code> counts instructions and <code>T</code> counts clock ticks, and the gap between those two numbers is the whole subject of this lesson." },
+
+  { t: "h2", n: "2", text: "What one machine cycle looks like on the pins" },
+  { t: "p", html: "A timing diagram is not a drawing exercise. It is a table of what each pin does in each T-state, and there are only four tables to know." },
+  { t: "viz", name: "timing-lab" },
+  { t: "p", html: "Read the <b>memory read</b> first, because the other three are edits of it. A write swaps <code>RD</code> for <code>WR</code> and keeps the processor driving the data pins. An I/O cycle changes <code>IO/M</code> and nothing else. And an opcode fetch is a read with a <b>fourth</b> T-state on the end, where the decoder works out what arrived." },
+
+  { t: "h2", n: "3", text: "What a T-state is worth" },
+  { t: "p", html: "T-states are ticks, not time. What a tick is worth comes from the crystal, and the 8085 halves it: a 6 MHz crystal makes a 3 MHz processor, so one T-state is <b>0.333 µs</b>." },
+  { t: "code", file: "loop.asm", lang: "asm8085", show: ["C", "T", "STEPS"], code: "        MVI C, 10H      ; count down from 16\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n", output: "C=00 T=233 STEPS=34" },
+  { t: "p", html: "Check it by hand, because the paper will ask you to: 7 for the <code>MVI</code>, then <code>DCR</code> sixteen times at 4 (64), then <code>JNZ</code> — <b>taken</b> fifteen times at 10 and falling through once at 7 (157) — and 5 for the <code>HLT</code>. That is 233.<br/><br/>At 3 MHz it takes 233 × 0.333 µs ≈ <b>78 µs</b>. The conditional jump costing 10 when taken and 7 when not is the detail that makes hand-counted delays come out wrong." },
+
+  { t: "h2", n: "4", text: "When memory cannot keep up" },
+  { t: "p", html: "Everything above assumes memory answers within the cycle. When it cannot, it says so on the <b>READY</b> pin and the processor waits." },
+  { t: "viz", name: "wait-state-lab" },
+  { t: "p", html: "A wait state is a whole extra T-state inserted with the address and control lines frozen, so the memory gets another clock period to respond. Nothing in the program changes and nothing reports it — the instruction simply costs more, which means <b>every delay calculated from T-states is wrong by that proportion</b> on a board with slow memory." },
+
+  { t: "think", q: "Why is an opcode fetch four T-states when an ordinary memory read is three?", a: "Because it does one more thing, and that thing needs no bus.<br/><br/>The first three states are an ordinary read: address out in T1, the byte arriving in T2 and T3. That is enough to have the opcode in the instruction register. But the processor cannot start the next machine cycle until it knows <i>what the instruction is</i> — how many bytes it needs, whether the next cycle is a read or a write, which internal paths to open. T4 is where the decoder does that, and no pins move during it.<br/><br/>So the extra state buys the decode, and it is worth noticing that it is nearly free: the bus is idle in T4, so a system with more than one bus master could be using it. That idea is a whole architecture away, but it is where DMA and pipelining start.<br/><br/>A few instructions need <b>six</b> instead of four, and the reason is the same kind: <code>INX</code>, <code>DCX</code>, <code>PUSH</code> and <code>CALL</code> all have 16-bit work to do before any bus access can happen, and the two extra states are where the incrementer or the stack pointer does it. That is why <code>INX H</code> costs 6 T-states while <code>INR A</code> costs 4 — the difference is not the addition, it is the width." },
+  { t: "analogy", concept: "Instruction cycle, machine cycle, T-state", real: "A shopping trip", html: "You are cooking one dish. That is the <b>instruction cycle</b> — the whole job, start to finish.<br/><br/>To do it you make several trips to the shop, one item at a time, because you can only carry one thing. Each trip is a <b>machine cycle</b>: go, fetch, come back. A dish needing four ingredients takes four trips whether or not the cooking itself is quick.<br/><br/>And each trip takes a fixed number of <b>minutes</b>. Those are the <b>T-states</b> — the only unit of the three that measures anything, because a trip is always the same length and a dish is however many trips it needs.<br/><br/>Now the shop is slow today and you queue at the counter. The trip is longer, you are doing exactly the same errands, and the dish takes more minutes. That is a <b>wait state</b>, and it is why the recipe cannot promise a time without knowing the shop." },
+
+  { t: "trace", intro: "A short countdown loop. Follow the counter as the prefix runs — the loop runs to completion when the whole thing is executed.", code: "        MVI C, 04H\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n", steps: [
+    { q: "After line 1, <code>C</code> is", answer: "04", accept: ["4", "04h"], why: "The count is loaded. <code>MVI</code> is 7 T-states — a four-state fetch plus one memory read for the byte that follows the opcode." },
+    { q: "After line 2, <code>C</code> is", answer: "03", accept: ["3", "03h"], why: "One decrement. <code>DCR</code> is 4 T-states and needs no bus access at all, which is why it is the cheapest thing a delay loop can do." },
+    { q: "After line 3, <code>C</code> is", answer: "00", accept: ["0", "00h"], why: "With the <code>JNZ</code> in place the loop runs to completion, so the counter lands on zero — which is the only value that lets the jump fall through." },
+  ]},
+
+  { t: "drills", intro: "Eleven instructions, each with a HLT after it. Predict the T-state total, then open. The HLT is always 5.", items: [
+    { task: "A register-to-register move. No bus trip after the fetch.", code: "MOV B, A\nHLT", show: ["T"], out: "T=9" },
+    { task: "An immediate load — one extra byte to fetch.", code: "MVI A, 42H\nHLT", show: ["T"], out: "T=12" },
+    { task: "A three-byte load into a register pair.", code: "LXI H, 2050H\nHLT", show: ["T"], out: "T=15" },
+    { task: "Read a byte from a named address.", code: "LDA 2050H\nHLT", show: ["A", "T"], out: "A=5A T=18" },
+    { task: "Read two bytes from a named address.", code: "LHLD 2050H\nHLT", show: ["HL", "T"], out: "HL=2C5A T=21" },
+    { task: "An I/O read — three machine cycles.", code: "IN 80H\nHLT", show: ["A", "T"], out: "A=00 T=15" },
+    { task: "Add a register. Arithmetic is the cheap part.", code: "ADD B\nHLT", show: ["T"], out: "T=9" },
+    { task: "Increment a byte, then a pair. Why do they differ?", code: "INR A\nHLT", show: ["T"], out: "T=9" },
+    { task: "The 16-bit version of the same idea.", code: "INX H\nHLT", show: ["T"], out: "T=11" },
+    { task: "A 16-bit addition — one machine cycle and two idle ones.", code: "DAD B\nHLT", show: ["T"], out: "T=15" },
+    { task: "Push a pair: a six-state fetch and two writes.", code: "LXI SP, 2400H\nPUSH H\nHLT", show: ["T"], out: "T=27" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; \"every machine cycle is 3 T-states\"", why: "An ordinary read or write is three, but the <b>opcode fetch is four</b> — and six for <code>INX</code>, <code>DCX</code>, <code>PUSH</code>, <code>CALL</code> and the conditional returns. Assuming three everywhere gets almost every total wrong by at least one.", fix: "; fetch = 4 (or 6); read/write = 3" },
+    { bad: "; \"JNZ costs 10 T-states\"", why: "Only when it <b>jumps</b>. When the condition fails it does not fetch the address bytes, so it costs <b>7</b>. A hand-counted delay loop that uses 10 for every pass is over by 3 T-states — small, and enough to matter in a calibrated delay.", fix: "; JNZ: 10 taken, 7 not taken" },
+    { bad: "; \"T-states are microseconds\"", why: "A T-state is one clock period, and what it is worth depends on the crystal. At 3 MHz it is 0.333 µs; at 5 MHz it is 0.2 µs. The T-state count is a property of the program, and the time is not.", fix: "; time = T-states x clock period" },
+    { bad: "; \"a wait state means the program halted\"", why: "The program is unaffected and unaware. A wait state freezes the clock's effect for one period so a slow chip can answer — the instruction completes normally, just later. <code>HLT</code> is the one that stops.", fix: "; READY low -> Tw inserted -> the cycle finishes late" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to be a delay whose length is set by the byte in C, and here C is zero, so it should take almost no time at all. It runs cleanly — and it takes 3,593 T-states. Read it before you open the fix.", show: ["C", "T"], code: "        MVI C, 00H      ; no delay wanted\nLOOP:   DCR C\n        JNZ LOOP\n        HLT\n", symptom: "takes 3593 T-states for a count of zero, which is the same as a count of 256 would take", q: "The loop decrements first and tests afterwards. What does C become on the very first pass?", fix: "        MVI C, 00H      ; no delay wanted\n        MOV A, C\n        ORA A           ; is the count already zero?\n        JZ DONE\nLOOP:   DCR C\n        JNZ LOOP\nDONE:   HLT\n", why: "<code>DCR C</code> runs <b>before</b> anything is tested, so a count of 00H becomes FFH on the first pass and the loop then counts all the way back down. Zero and 256 are the same program here, which is why the delay came out at the maximum instead of the minimum.<br/><br/>This is the shape of every decrement-then-test loop, in any language: it runs <b>at least once</b>. The fix is to ask the question before entering — <code>ORA A</code> sets the zero flag from the accumulator without changing it, so <code>JZ</code> can skip the loop entirely.<br/><br/>The reason it is worth catching here rather than later: a delay routine is normally called with a count somebody else chose, and zero is exactly the value a caller passes when they want no delay. The bug is invisible for 255 of the 256 possible inputs.<br/><br/>The tell is the number. <b>3,593 T-states</b> is 7 + 256 × 4 + 255 × 10 + 7 + 5 — a full 256 passes. When a loop's cost matches its maximum rather than its argument, look at what happens on the first pass." },
+
+  { t: "recap", items: [
+    "<b>Instruction cycle</b> → <b>machine cycles</b> → <b>T-states</b>: whole instruction, one bus trip, one clock tick",
+    "Opcode fetch is <b>4</b> T-states (6 for <code>INX</code>, <code>DCX</code>, <code>PUSH</code>, <code>CALL</code>); an ordinary read or write is <b>3</b>",
+    "So most instructions cost <b>4 + 3 per extra byte touched</b> — <code>LDA</code> is 4+3+3+3 = 13",
+    "A timing diagram is a table: address, AD, ALE, RD, WR, IO/M and the status lines, per T-state",
+    "<b>READY</b> low inserts wait states, freezing the cycle — the program cannot tell, but every T-state delay is now longer",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between an instruction cycle, a machine cycle and a T-state?", a: "An instruction cycle is the whole execution of one instruction. A machine cycle is one trip over the bus inside it — one address out, one byte in or out. A T-state is one clock period, and it is the only one of the three with a fixed duration. An instruction cycle is one or more machine cycles, and a machine cycle is three or more T-states." },
+    { level: "beginner", q: "How many T-states does <code>LDA 2050H</code> take, and why?", a: "Thirteen. Four for the opcode fetch, then three machine cycles of three each: two to read the address bytes that follow the opcode, and one to fetch the data from that address. The general pattern is four for the fetch plus three for every extra byte the instruction has to touch." },
+    { level: "intermediate", q: "Why is an opcode fetch four T-states rather than three?", a: "The first three are an ordinary memory read, which puts the opcode in the instruction register. The fourth is where the decoder works out what that opcode means — how many bytes it needs and what the following machine cycles will be — and no bus activity happens during it. A few instructions extend it to six, because they have 16-bit work to do before any bus access can start: INX, DCX, PUSH, CALL and the conditional returns." },
+    { level: "intermediate", q: "What is a wait state and what causes one?", a: "An extra T-state inserted into a machine cycle with the address and control signals held steady, so a slow memory or peripheral has another clock period to respond. It is requested by the device pulling the READY pin low. The program is unaffected and cannot detect it — the instruction simply takes longer, which is why any delay calculated from T-states has to state the wait-state count alongside the clock frequency." },
+    { level: "advanced", q: "You hand-count a delay loop at 1 ms and measure 1.4 ms on the board. What would you check?", a: "Three things, in order of likelihood. First, the conditional jump: JNZ costs 10 T-states when it jumps and 7 when it falls through, and a count that uses 10 for every pass is wrong — although that error is small and in the other direction. Second, wait states: if the memory holding the loop is slow, every fetch stretches, and since a tight loop is almost entirely fetches the proportional error is large. That fits a 40 percent overrun well. Third, the clock: the 8085 divides its crystal by two, so a board with a 6 MHz crystal runs at 3 MHz, and confusing the two gives exactly a factor of two rather than 1.4. I would measure the CLK OUT pin first because it settles the third possibility in seconds, then look at the wait-state logic. It is also worth checking whether an interrupt is firing during the loop, which adds time that no amount of instruction counting will explain." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7449,6 +7533,7 @@ const mpLessons = [
   { slug: "mp-flag-register", order: 10, title: "The Flag Register, Bit by Bit", minutes: 14, problems: [], content: MP6 },
   { slug: "mp-pins-and-signals", order: 11, title: "Pins and Signals", minutes: 14, problems: [], content: MP7 },
   { slug: "mp-memory-decoding", order: 12, title: "Memory Organization and Decoding", minutes: 14, problems: [], content: MP8 },
+  { slug: "mp-timing-diagrams", order: 13, title: "Machine Cycles, T-States and Timing Diagrams", minutes: 15, problems: [], content: MP9 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7753,6 +7838,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-timing-diagrams": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is a machine cycle?", options: ["One trip over the bus — one address out, one byte in or out", "One complete instruction", "One tick of the clock", "One pass through a loop"], correct: 0, why: "An instruction cycle is made of machine cycles, and each machine cycle is made of T-states. Knowing which of the three words means which is itself an exam question." },
+    { level: "easy", q: "How many T-states does an opcode fetch normally take?", options: ["3", "4", "6", "1"], correct: 1, why: "Three of them are an ordinary memory read; the fourth is where the decoder works out what arrived, with no bus activity at all. A few instructions extend it to six." },
+    { level: "easy", q: "How many T-states does an ordinary memory read or write take?", options: ["1", "4", "3", "6"], correct: 2, why: "Address out in T1, the byte moving in T2 and T3. This is the shape every other machine cycle is a variation on." },
+    // Medium — apply it
+    { level: "medium", q: "How many T-states does <code>LDA 2050H</code> take?", options: ["7", "10", "16", "13"], correct: 3, why: "Four for the fetch, then three machine cycles of three: two address bytes and the data. Four plus three for every extra byte touched is the pattern behind almost every total." },
+    { level: "medium", q: "Why does <code>INX H</code> cost 6 T-states when <code>INR A</code> costs 4?", options: ["Its opcode fetch is six states, because 16-bit work happens before any bus access", "It makes an extra memory read", "It updates more flags", "It is a three-byte instruction"], correct: 0, why: "INX, DCX, PUSH, CALL and the conditional returns all have a longer fetch for the same reason. The difference is the width of the work, not the arithmetic." },
+    { level: "medium", q: "How many T-states does <code>JNZ</code> take when the condition is false?", options: ["10, always", "7 — it does not fetch the address bytes", "4", "13"], correct: 1, why: "Ten when it jumps, seven when it falls through. A hand-counted delay loop that assumes ten on every pass comes out slightly long." },
+    { level: "medium", q: "An 8085 runs at 3 MHz. How long is one T-state?", options: ["3 µs", "1 µs", "0.333 µs", "0.1 µs"], correct: 2, why: "One over three million seconds. Note that the chip halves its crystal, so 0.333 µs is what a 6 MHz crystal gives you — confusing the two is a factor-of-two error." },
+    // Hard — the edges
+    { level: "hard", q: "A memory chip holds READY low during a read. What happens?", options: ["The instruction is abandoned", "An interrupt is raised", "The processor reads whatever is on the bus", "Wait states are inserted with the address and control lines frozen, and the program never knows"], correct: 3, why: "The instruction completes normally, just later. That is why a delay specified in T-states also has to state the clock frequency and the wait-state count." },
+    { level: "hard", q: "<code>MOV B, A</code> is 4 T-states and <code>MOV A, M</code> is 7. Both are one-byte instructions. Where do the extra three go?", options: ["On a memory read — M is a trip out to the bus, B is not", "On updating the flags", "On decoding a longer opcode", "On the 16-bit incrementer"], correct: 0, why: "Time on this processor is spent going out to the bus, not thinking. Arithmetic and register moves are nearly free; every byte fetched from memory costs three T-states." },
+    { level: "hard", q: "In a timing diagram, what single signal distinguishes a memory write from an I/O write?", options: ["ALE", "IO/M", "WR", "The status lines S1 and S0"], correct: 1, why: "Row by row the two cycles are identical — same ALE, same WR going low, same data driven by the processor. Only IO/M differs, which is the same fact the buses lesson and the pins lesson each arrived at from their own direction." },
+  ],
   "mp-memory-decoding": [
     // Easy — did the core idea land?
     { level: "easy", q: "How many address lines does a 4 KB memory chip need?", options: ["12", "4", "16", "8"], correct: 0, why: "4 KB is 2 to the power 12, so twelve pins, A0 to A11. The four lines above them mean nothing to the chip and go to the decoder instead." },

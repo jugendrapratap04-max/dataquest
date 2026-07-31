@@ -319,8 +319,9 @@ export function Asm8085Lab() {
             </div>
             <p style={{ fontSize: 12, color: "var(--ink-faint)", marginTop: 8 }}>
               These are the bytes you would key into a trainer kit, and the bytes an exam asks you to
-              hand-assemble. <code>MVI A, 42H</code> is <code>3E 42</code> — one byte saying
-              &ldquo;load the accumulator with what comes next&rdquo;, then the 42H itself.
+              hand-assemble. <code>MVI A, 42H</code> is <code>3E 42</code>{" "}
+              — one byte saying &ldquo;load the accumulator with what comes next&rdquo;, then the 42H
+              itself.
             </p>
           </details>
         </>
