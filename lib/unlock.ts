@@ -16,6 +16,7 @@
 //    student can start any subject without finishing another first.
 
 import { prisma } from "@/lib/prisma";
+import { EXPLORE_MODE } from "@/lib/gates";
 
 export type LockState =
   | { locked: false }
@@ -37,6 +38,8 @@ export async function lockStateFor(
   lessonId: string,
   userId: string | null
 ): Promise<LockState> {
+  // Explore mode (lib/gates.ts) — every topic open, for reviewing the platform.
+  if (EXPLORE_MODE) return { locked: false };
   if (!userId) return { locked: false };
 
   const lesson = await prisma.lesson.findUnique({

@@ -11,6 +11,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { requiredFor } from "@/lib/unlock";
+import { EXPLORE_MODE } from "@/lib/gates";
 
 export type ChapterGate = {
   allowed: boolean;
@@ -36,6 +37,10 @@ export async function chapterGate(chapterId: string, userId: string | null): Pro
     problemsSolved: 0,
   };
 
+  // Explore mode (lib/gates.ts) — every chapter downloadable, for reviewing the
+  // notes as a student would receive them. The counts below stay honest, so the
+  // page still reports how much has actually been read.
+  if (EXPLORE_MODE) return { ...base, allowed: true, needsAccount: false };
   if (!userId) return { ...base, allowed: false, needsAccount: true };
   if (!lessons.length) return { ...base, allowed: true, needsAccount: false };
 

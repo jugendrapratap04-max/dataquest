@@ -551,6 +551,30 @@ listener recorded nothing across a light↔dark flip. So the resolution was prov
 instead: `themeForHour` across all 24 hours and both preferences, and the applied
 theme after a reload under each emulated scheme.
 
+## 4c. Explore mode is ON — turn it off before students arrive
+
+`lib/gates.ts` exports **`EXPLORE_MODE`**, and it is currently `true`. Jugendra
+asked for it on 31 July 2026 so he could walk the whole platform looking for
+problems instead of being stopped by rules working as designed.
+
+It suspends three things, and each one reads the flag in exactly one place:
+
+| gate | file | what it normally does |
+|---|---|---|
+| topic progression | `lib/unlock.ts` | stops a signed-in reader opening a topic before finishing the previous one |
+| chapter download | `lib/chapter-gate.ts` | the 🔒 on `/book` chapter PDFs |
+| subject readiness | `lib/progress.ts` | the "coming soon" 🔒 on subjects whose lessons are still stubs |
+
+**It is global, not per-account** — the gates run server-side for whoever asks,
+so while it is true the live site is open to everyone. That is fine for a beta
+with one reader and wrong the moment there are students. Setting it back to
+`false` restores all three; nothing else has to change.
+
+It does **not** touch authentication (`/notes`, `/focus`, `/rooms`, `/welcome`
+and `/feedback` still need an account) and it does not add subjects to the
+challenge picker, which follows whether lessons carry quiz blocks rather than
+any gate.
+
 ## 4b. Features shipped alongside the lessons
 
 Not lesson work, but you will meet them and they change what "done" means.

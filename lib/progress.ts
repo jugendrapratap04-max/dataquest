@@ -8,6 +8,7 @@
 
 import { cache } from "react";
 import { prisma } from "./prisma";
+import { EXPLORE_MODE } from "./gates";
 
 export type SkillState = [name: string, done: boolean];
 export type TrackStatus = "done" | "now" | "locked";
@@ -114,7 +115,12 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     // So the lock now reports content readiness, and it updates itself: finish a
     // subject to the standard and it opens on the next page load, with no flag
     // to remember to flip.
-    const status: TrackStatus = !r.ready ? "locked" : r.pct === 100 ? "done" : "now";
+    //
+    // Explore mode (lib/gates.ts) suspends the readiness half of this so every
+    // subject can be walked, stubs included — which is the point, since the
+    // stubs are exactly what a review is looking for.
+    const status: TrackStatus =
+      !r.ready && !EXPLORE_MODE ? "locked" : r.pct === 100 ? "done" : "now";
 
     // Nothing in the data maps a skill to the lessons that teach it, so a skill counts
     // as mastered once the matching share of the track's lessons is done. Lessons are
