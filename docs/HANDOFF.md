@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**6 written, 21 problems.** Read that file before touching this subject.
+**7 written, 25 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,10 +194,10 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Lessons 5 and 6 are rewritten to that standard**, so all six existing lessons
-are now in one shape and **lesson 7 (Chapter 2, "Inside the chip") is next**.
-Three panels were added for the rewrite, and what they teach is the part worth
-copying: each one carries an idea that prose was previously asserting.
+**Lessons 5, 6 and 7 are all at that standard**, so the subject is in one shape
+throughout and **lesson 8 ("The three buses") is next**. Five panels were built
+for those three lessons, and what they teach is the part worth copying: each one
+carries an idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -209,6 +209,19 @@ copying: each one carries an idea that prose was previously asserting.
   why this bug survives testing.
 - **`micro-family-lab`** (lesson 6) — processor / controller / computer as one
   dashed chip boundary with the parts moving across it.
+- **`alu-path-lab`** (lesson 7) — `ADD B` in four stages through the temp
+  register and the ALU, with an `ADD`/`CMP` switch. Stage 4 is the whole lesson:
+  same wires, same subtraction, and the only difference is whether the result is
+  written back — which is also this lesson's debug task.
+- **`memory-model-lab`** (lesson 7) — von Neumann against Harvard. The claim is
+  about *simultaneity*, so a block diagram cannot make it; the timeline can.
+
+Adding a lesson that does not exist yet needs four things, in this order:
+an empty `const MP<n> = [\n];` in `seed.mjs` for `splice-lesson.mjs` to replace
+(it replaces, it never creates), an entry in `mpLessons`, `npm run db:lessons`
+(which reports `created: 1`), and `npm run db:chapters` to place it — the
+chapter ranges in `apply-chapters.mjs` are by lesson order and already cover all
+42. Problems go in `prisma/mp-problems.mjs` and ship with `npm run db:content`.
 
 To keep a rewrite honest, measure it rather than eyeballing it: strip the tags
 from `JSON.stringify` of each block and total the ones a student actually reads

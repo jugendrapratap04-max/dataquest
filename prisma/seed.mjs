@@ -6579,6 +6579,93 @@ const MP2 = [
   ]},
 ];
 
+const MP3 = [
+  { t: "objectives", items: [
+    "Name the blocks inside the chip and say what each one is for",
+    "Follow a single <code>ADD</code> through the <b>temp register</b>, the <b>ALU</b> and back",
+    "Say why <b>INX</b> sets no flags, from where it happens rather than as a rule",
+    "Tell <b>von Neumann</b> from <b>Harvard</b>, and say which the 8085 is",
+  ]},
+  { t: "hook", q: "You have watched the 8085 add two numbers. But when <code>ADD B</code> runs, what inside the chip actually does the adding — and where does B's byte go on the way?", why: "There is a block for it, and B does not reach it directly. Almost everything surprising about this instruction set — why the accumulator is special, why <code>INX</code> leaves the flags alone, why <code>CMP</code> does not change anything — stops being a rule to memorise once you know which block did the work.<br/><br/>So this lesson opens the lid. Four or five boxes, one wire joining them, and every oddity in the last two lessons explained by where things sit." },
+  { t: "def", term: "Instruction decoder", en: "The block that turns an opcode into actions. Given the byte 80H it works out that this is ADD B, how many bytes the instruction needs, how many clock cycles it will take, and which internal paths must open — then hands that plan to the timing and control unit, which drives the pins.", hi: "This is the block that makes a processor <b>programmable</b> rather than wired. Everything the chip can do already exists in silicon; the decoder is what chooses, byte by byte, which parts of it to switch on." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"draw the block diagram of the 8085\" is worth marks every year, and it is usually answered as a memorised picture. The follow-up is what separates answers: <i>why is the accumulator drawn next to the ALU</i>, <i>what is the temp register for</i>, <i>which block does INX use</i>. All three come from this one page." },
+
+  { t: "memsetup", at: 8272, bytes: [48, 18], note: "Two bytes at 2050H and 2051H — 30H and 12H. The debug task reads both of them." },
+
+  { t: "h2", n: "1", text: "One bus, and everything hanging off it" },
+  { t: "p", html: "The chip is a handful of blocks joined by a single 8-bit wire — the <b>internal data bus</b>. Anything travelling from one block to another goes along it, one byte at a time." },
+  { t: "viz", name: "arch-8085-lab" },
+  { t: "p", html: "Click the blocks on the left first: the <b>accumulator</b>, the <b>temp register</b>, the <b>ALU</b> and the <b>flag flip-flops</b> are one group, and they sit together because they work together. The <b>instruction register</b> and <b>decoder</b> are a second group, and the <b>timing and control unit</b> underneath is what turns their plan into pin movements." },
+
+  { t: "h2", n: "2", text: "What one ADD actually costs in machinery" },
+  { t: "p", html: "One instruction, and it needs three blocks plus the bus. Here is the sum the next panel walks through." },
+  { t: "code", file: "add.asm", lang: "asm8085", show: ["A", "B", "S", "Z", "CY", "P"], code: "        MVI A, 2AH      ; 42\n        MVI B, 16H      ; 22\n        ADD B           ; 64\n        HLT\n", output: "A=40 B=16 S=0 Z=0 CY=0 P=0" },
+  { t: "p", html: "B still holds 16H afterwards, and the answer is in A. Step through why that is the only place it could have gone." },
+  { t: "viz", name: "alu-path-lab" },
+  { t: "p", html: "Two things there are worth keeping. The <b>temp register</b> exists because the ALU has two inputs and only one of them is the accumulator — so the second operand needs somewhere to wait, and no instruction can name that place. And the ALU's output is wired to A, which is the real reason <code>ADD B, C</code> does not exist." },
+  { t: "code", file: "cmp.asm", lang: "asm8085", show: ["A", "Z", "CY"], code: "        MVI A, 05H\n        CPI 05H         ; compare A with 5\n        HLT\n", output: "A=05 Z=1 CY=0" },
+  { t: "p", html: "A comparison is a subtraction whose answer is thrown away. The ALU computed 05H − 05H and the flags kept the verdict — <code>Z=1</code>, they were equal — while the accumulator was left untouched. Switch the panel to <code>CMP</code> and the fourth stage is exactly this." },
+
+  { t: "h2", n: "3", text: "The block no instruction can name" },
+  { t: "p", html: "There is a second piece of arithmetic hardware: a 16-bit <b>incrementer / decrementer</b>, separate from the ALU. It steps the program counter after every fetch, and it is what <code>INX</code> and <code>DCX</code> use." },
+  { t: "code", file: "inx.asm", lang: "asm8085", show: ["HL", "Z", "CY"], code: "        LXI H, 0FFFFH\n        INX H           ; wraps to 0000\n        HLT\n", output: "HL=0000 Z=0 CY=0" },
+  { t: "code", file: "dcr.asm", lang: "asm8085", show: ["C", "Z"], code: "        MVI C, 01H\n        DCR C           ; down to zero\n        HLT\n", output: "C=00 Z=1" },
+  { t: "p", html: "Both results are zero and only one flag moved. <code>DCR</code> goes through the <b>ALU</b>, which produces flags as a side effect of every operation, so <code>Z</code> comes on. <code>INX</code> goes through the <b>incrementer</b>, which is not the ALU and has nothing wired to the flag flip-flops at all.<br/><br/>That is the rule you were asked to remember in lesson 4, now with a reason: a flag is set by <i>where</i> the arithmetic happened." },
+
+  { t: "h2", n: "4", text: "One memory, or two" },
+  { t: "p", html: "Outside the chip there is one more choice, and it decides whether a fetch and a data read can happen at the same moment." },
+  { t: "viz", name: "memory-model-lab" },
+  { t: "p", html: "The 8085 is <b>von Neumann</b>: one memory, one bus, and instructions and data queueing behind each other. That is what makes a program loadable like any other file — and it is the same property that lets a wrong jump address execute your data, which lesson 3 showed you." },
+
+  { t: "think", q: "Why does the ALU produce flags on every operation, instead of only when you ask for them?", a: "Because there is nothing to ask with, and nothing to save by waiting.<br/><br/>The flags are not computed. They are <b>read off</b> the result as it comes out of the ALU: is the top bit on, are all eight bits zero, did a ninth bit fall out. Each is a wire, and the wire is already there — the answer arrives at the same instant as the answer itself, so there is no work to skip.<br/><br/>Making them optional would cost more than it saves. Every arithmetic opcode would need a bit saying \"flags please\", which is exactly the opcode space the 8085 could not spare — and the decoder would need a second path for the version that does not.<br/><br/>The cost lands on you rather than the chip, and it is why flag questions are examined so heavily: <b>the flags are always the last instruction's</b>. Anything between your arithmetic and your jump can quietly overwrite them, which is why the instructions that deliberately leave them alone — <code>INX</code>, <code>DCX</code>, <code>MVI</code>, <code>MOV</code> — are worth knowing by name." },
+  { t: "analogy", concept: "The blocks inside the chip", real: "A kitchen with one counter", html: "The <b>accumulator</b> is the mixing bowl. Everything you make ends up in it, and it is always one of the two things you are combining.<br/><br/>The <b>temp register</b> is the small dish you tip the second ingredient into before it goes in. You never ask for that dish by name — it is simply where the second thing waits, because you only have two hands and one of them is holding the bowl.<br/><br/>The <b>ALU</b> is the person doing the mixing, and the <b>flags</b> are the note they leave: it was empty, it overflowed, it came out odd. They write that note every single time, whether anyone reads it or not.<br/><br/>And the <b>counter</b> along the wall is the one wire everything travels along. Nothing moves between two parts of that kitchen without going across it, which is why an 8-bit bus makes a 16-bit value two trips." },
+
+  { t: "trace", intro: "Four instructions, and the last one is the interesting one. Write each value as two hex digits, or 0 and 1 for a flag.", code: "        MVI A, 2AH\n        MVI B, 16H\n        ADD B\n        CMP A\n        HLT\n", steps: [
+    { q: "After line 3, <code>A</code> is", answer: "40", accept: ["40h"], why: "2AH is 42 and 16H is 22, so the sum is 64 — <b>40H</b>. It went into the accumulator because that is where the ALU's output is wired." },
+    { q: "After line 4, <code>A</code> is", answer: "40", accept: ["40h"], why: "Unchanged. <code>CMP A</code> subtracted A from itself inside the ALU and threw the result away — comparing is a subtraction you do not keep." },
+    { q: "After line 4, <code>Z</code> is", answer: "1", accept: ["1", "set", "true"], why: "40H − 40H is zero, so the zero flag comes on. That is the whole verdict of the comparison: the flags survived, the answer did not." },
+  ]},
+
+  { t: "drills", intro: "Eleven small programs about which block did the work. Predict the result and the flags, then open.", items: [
+    { task: "The ALU adds, and the accumulator keeps it.", code: "MVI A, 2AH\nMVI B, 16H\nADD B\nHLT", show: ["A", "B"], out: "A=40 B=16" },
+    { task: "Compare a value without destroying it.", code: "MVI A, 05H\nCPI 05H\nHLT", show: ["A", "Z"], out: "A=05 Z=1" },
+    { task: "A comparison that finds A is the smaller one.", code: "MVI A, 05H\nMVI B, 09H\nCMP B\nHLT", show: ["A", "CY", "Z"], out: "A=05 CY=1 Z=0" },
+    { task: "Subtract a register from itself.", code: "MVI A, 77H\nSUB A\nHLT", show: ["A", "Z", "CY"], out: "A=00 Z=1 CY=0" },
+    { task: "Sixteen bits wrap. Does any flag notice?", code: "LXI H, 0FFFFH\nINX H\nHLT", show: ["HL", "Z", "CY"], out: "HL=0000 Z=0 CY=0" },
+    { task: "The same for the other direction.", code: "LXI B, 0001H\nDCX B\nHLT", show: ["BC", "Z"], out: "BC=0000 Z=0" },
+    { task: "Now the eight-bit version, which does go through the ALU.", code: "MVI C, 01H\nDCR C\nHLT", show: ["C", "Z"], out: "C=00 Z=1" },
+    { task: "And incrementing past the top of a byte.", code: "MVI D, 0FFH\nINR D\nHLT", show: ["D", "Z", "CY"], out: "D=00 Z=1 CY=0" },
+    { task: "Complement every bit. Which flags move?", code: "MVI A, 0AAH\nCMA\nHLT", show: ["A", "Z", "CY"], out: "A=55 Z=0 CY=0" },
+    { task: "The 8085's odd one: ANA always sets AC and clears CY.", code: "MVI A, 0F0H\nMVI B, 3CH\nANA B\nHLT", show: ["A", "CY", "AC"], out: "A=30 CY=0 AC=1" },
+    { task: "Clear the accumulator, and read the parity flag.", code: "MVI A, 0FFH\nXRA A\nHLT", show: ["A", "Z", "CY", "P"], out: "A=00 Z=1 CY=0 P=1" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MOV A, TEMP     ; read the ALU's second input", why: "There is no such register name. The temp register is real hardware and it is filled by the instruction itself — <code>ADD B</code> puts B there on its way past. Nothing in the instruction set can reach it, which is why it never appears in a program listing.", fix: "MVI A, 2AH\nMVI B, 16H\nADD B           ; B goes through temp by itself" },
+    { bad: "ADD B, C        ; add B into C", why: "Every arithmetic instruction has the accumulator as one operand, because the accumulator is physically wired to one ALU input. There is no path from B to the other one and back to C.", fix: "MOV A, C\nADD B\nMOV C, A" },
+    { bad: "MVI A, 09H\nCMP B\n; A now holds the difference", why: "<code>CMP</code> is a subtraction whose answer is discarded. The ALU did the work, the flags recorded the verdict, and the accumulator was never written. If you want the difference, keep it.", fix: "MVI A, 09H\nSUB B           ; SUB keeps the answer" },
+    { bad: "LXI H, 0FFFFH\nINX H\nJZ WRAPPED", why: "<code>INX</code> uses the 16-bit incrementer, not the ALU, and the incrementer has nothing wired to the flag flip-flops. The zero flag is still showing whatever the last ALU instruction left there.", fix: "LXI H, 0FFFFH\nINX H\nMOV A, H\nORA L           ; ORA goes through the ALU, so Z is real\nJZ WRAPPED" },
+  ]},
+
+  { t: "debug", intro: "This reads the two bytes at 2050H and 2051H — 30H and 12H — and stores their difference at 2060H, so the answer should be 1EH. It runs cleanly and stores 30H. Read it before you open the fix.", show: ["A", "M:2060"], code: "        LXI H, 2050H    ; point at the first byte\n        MOV A, M        ; 30H into the accumulator\n        INX H           ; move on to the second\n        CMP M           ; subtract it\n        STA 2060H       ; store the difference\n        HLT\n", symptom: "stores 30H, which is simply the first byte, when 30H minus 12H is 1EH", q: "The subtraction did happen, and the flags prove it. So where did the answer go?", fix: "        LXI H, 2050H    ; point at the first byte\n        MOV A, M        ; 30H into the accumulator\n        INX H           ; move on to the second\n        SUB M           ; subtract it AND keep the answer\n        STA 2060H       ; store the difference\n        HLT\n", why: "<code>CMP</code> and <code>SUB</code> are the same operation inside the ALU. The only difference is the last step: <code>SUB</code> writes the result back into the accumulator and <code>CMP</code> does not. So the difference was computed, used to set the flags, and dropped — and <code>STA</code> stored the byte that was still sitting in A, which was the original 30H.<br/><br/>This is stage 4 of the panel in section 2, met in the wild. Same wires, same subtraction, and the whole bug is whether the output is written back.<br/><br/>The tell is that the stored answer is <b>one of the inputs</b>. Whenever a result turns out to be exactly a value you loaded earlier, suspect an instruction that computed something and kept only the flags — <code>CMP</code>, <code>CPI</code>, and the bit-test idiom <code>ANA</code> with a mask you meant to keep." },
+
+  { t: "recap", items: [
+    "The chip is a few blocks joined by one <b>8-bit internal data bus</b>; nothing moves between them any other way",
+    "<code>ADD B</code> sends B through the bus into the <b>temp register</b>, because the ALU has two inputs and one is always the accumulator",
+    "The ALU's output is wired back to <b>A</b> — that is why <code>ADD B, C</code> cannot exist",
+    "<code>CMP</code> is a subtraction whose answer is discarded: the <b>flags survive, the result does not</b>",
+    "<code>INX</code> and <code>DCX</code> use the <b>16-bit incrementer</b>, not the ALU, so they set no flags at all",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the temp register on the 8085, and why can no instruction name it?", a: "It holds the second operand while the ALU works. The ALU has two inputs, one of which is permanently the accumulator, so the other operand has to be staged somewhere — that is the temp register. No instruction names it because no instruction needs to: the operation itself moves the value there as part of its execution." },
+    { level: "beginner", q: "Why is the accumulator drawn next to the ALU rather than with the other registers?", a: "Because it is not really one of them. It is hard-wired as one ALU input and as the destination of the ALU's output, so almost every arithmetic and logic instruction reads and writes it. Drawing it in the register array would hide the single most important fact about the instruction set." },
+    { level: "intermediate", q: "What is the difference between CMP and SUB?", a: "Nothing, until the last step. Both send the operand through the temp register, both make the ALU subtract, and both set all five flags identically. SUB writes the result back to the accumulator; CMP discards it. That is why CMP is how you test a value without destroying it, and why a program that expects CMP to leave the difference in A gets the original value instead." },
+    { level: "intermediate", q: "Why does INX affect no flags when INR does?", a: "They use different hardware. INR is an 8-bit operation through the ALU, and the ALU produces the flag bits as a side effect of everything it does. INX is a 16-bit operation through the separate incrementer/decrementer that also steps the program counter, and that block has no connection to the flag flip-flops. It is a consequence of the layout rather than a rule somebody chose, and it is what makes INX safe inside a loop whose exit depends on the zero flag." },
+    { level: "advanced", q: "The 8085 is a von Neumann machine. What would change if it were Harvard?", a: "Instructions and data would live in separate memories on separate buses, so an opcode fetch and a data access could happen in the same cycle instead of queueing — which is most of the speed argument for it — and a runaway pointer could not overwrite code, which is most of the safety argument. What you would lose is flexibility: a program could no longer be loaded into memory as ordinary data, and self-modifying code and simple loaders become impossible. That trade is why general-purpose machines stayed von Neumann and microcontrollers like the 8051 went Harvard. Modern processors have it both ways — one address space, but separate instruction and data caches, so the fast path behaves like Harvard while the memory model stays von Neumann." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -6922,6 +7009,7 @@ const mpLessons = [
   { slug: "mp-carry-and-flags", order: 4, title: "Counting, Carrying and Running Out of Room", minutes: 13, problems: [], content: MPC },
   { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
+  { slug: "mp-inside-the-chip", order: 7, title: "Inside the Chip", minutes: 14, problems: [], content: MP3 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7226,6 +7314,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-inside-the-chip": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is the 8085's temp register for?", options: ["Holding the second operand while the ALU works", "Storing the last result before it is written to memory", "Keeping a copy of the program counter", "Buffering bytes on their way to the address pins"], correct: 0, why: "The ALU has two inputs and one of them is permanently the accumulator, so the other operand has to wait somewhere. No instruction can name that place — the operation itself puts the value there." },
+    { level: "easy", q: "Which block turns an opcode byte into a set of actions?", options: ["The ALU", "The instruction decoder", "The accumulator", "The address buffer"], correct: 1, why: "Given 80H it works out that this is ADD B, how many bytes and cycles it needs, and which internal paths to open — then hands that plan to the timing and control unit." },
+    { level: "easy", q: "How wide is the internal data bus inside the 8085?", options: ["16 bits", "4 bits", "8 bits", "20 bits"], correct: 2, why: "Eight bits, which is why anything 16-bit wide takes two trips across it. Every block on the chip hangs off this one wire." },
+    // Medium — apply it
+    { level: "medium", q: "<code>MVI A, 05H</code> then <code>CPI 05H</code>. What does A hold afterwards?", options: ["00H, because 5 minus 5 is zero", "FFH", "It is undefined", "05H — unchanged"], correct: 3, why: "A comparison is a subtraction whose answer is thrown away. The ALU did the work and the flags kept the verdict (Z=1, they were equal), but nothing was written back to the accumulator." },
+    { level: "medium", q: "Why is there no <code>ADD B, C</code> instruction?", options: ["The accumulator is wired to one ALU input and to its output, so it is always involved", "Because two-operand instructions would be three bytes long", "Because B and C are a register pair and cannot be used separately", "It exists, but only on the 8086"], correct: 0, why: "It is a wiring fact, not a naming choice. The ALU's other input comes from the temp register and its output goes back to A, so there is no path that puts an answer into C." },
+    { level: "medium", q: "<code>LXI H, 0FFFFH</code> then <code>INX H</code> gives HL = 0000. What is the zero flag?", options: ["Set, because the result is zero", "Whatever the last ALU instruction left there — INX sets no flags", "Cleared, because the value wrapped", "Set, and the carry flag too"], correct: 1, why: "INX uses the 16-bit incrementer, which is separate from the ALU and has nothing wired to the flag flip-flops. A flag is set by where the arithmetic happened, not by what the answer was." },
+    { level: "medium", q: "The 8085 keeps instructions and data in one memory reached over one bus. What is that called?", options: ["Harvard architecture", "Pipelined architecture", "von Neumann architecture", "Segmented architecture"], correct: 2, why: "One memory for both, so a fetch and a data access take turns. It is also what lets a program be loaded like any other file — and what lets a wrong jump address execute your data." },
+    // Hard — the edges
+    { level: "hard", q: "What is the difference between <code>CMP B</code> and <code>SUB B</code>?", options: ["CMP is faster", "CMP sets only the carry flag", "SUB affects the flags and CMP does not", "SUB writes the result back to A; CMP discards it"], correct: 3, why: "Everything before the last step is identical — same temp register, same ALU subtraction, same five flags. Only the write-back differs, which is exactly why CMP can test a value without destroying it." },
+    { level: "hard", q: "A program reads 30H and 12H from memory, subtracts, and stores 30H instead of 1EH. What is wrong?", options: ["It used CMP, which computes the difference but never keeps it", "The pointer was never advanced", "The carry flag was set before the subtraction", "STA stored the wrong register"], correct: 0, why: "The tell is that the stored answer is one of the inputs. Whenever a result turns out to be a value you loaded earlier, suspect an instruction that computed something and kept only the flags." },
+    { level: "hard", q: "What would change if the 8085 were a Harvard machine instead?", options: ["It could address more than 64 KB", "An opcode fetch and a data access could happen in the same cycle", "The accumulator would no longer be special", "Instructions would become one byte shorter"], correct: 1, why: "Separate memories on separate buses means the two accesses stop queueing — that is most of the speed argument, and not overwriting code is most of the safety argument. What you lose is loading a program as ordinary data, which is why general machines stayed von Neumann." },
+  ],
   "mp-carry-and-flags": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is a carry?", options: ["An error the processor reports", "A bit with no room in its column, passed to the left", "A spare register", "The largest value a byte holds"], correct: 1, why: "Exactly what you do in decimal when 7 + 5 gives 12: write the 2, carry the 1. Binary has only two symbols, so it happens far more often." },
