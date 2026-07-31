@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**11 written, 41 problems.** Read that file before touching this subject.
+**12 written, 45 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,11 +194,11 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Chapter 2 is finished and Chapter 3 is three lessons in** — lessons 5 to 11 are
-all at that standard, so the whole subject is in one shape and **lesson 12
-("Memory organization and decoding") is next**. Sixteen panels were built across
-those seven lessons, and what they teach is the part worth copying: each one
-carries an idea that prose was previously asserting.
+**Chapter 2 is finished and Chapter 3 is four lessons in** — lessons 5 to 12 are
+all at that standard, so the whole subject is in one shape and **lesson 13
+("Machine cycles, T-states, timing diagrams") is next — the last of Chapter 3**.
+Nineteen panels were built across those eight lessons, and what they teach is the
+part worth copying: each one carries an idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -252,6 +252,16 @@ asked about the address bus rather than a street of boxes.
 - **`control-signal-lab`** (lesson 11) — MEMR/MEMW/IOR/IOW built from IO/M, RD
   and WR. Three switches, four outputs, including the combination the processor
   never produces.
+
+- **`decode-lab`** (lesson 12) — chip size and position in, address range and the
+  chip/decoder line split out. The whole exam calculation, run live and in both
+  directions.
+- **`decoder-138-lab`** (lesson 12) — three inputs, eight 8 KB blocks, one output
+  low. Also shows that the *block size* comes from the lines the decoder was not
+  given.
+- **`foldback-lab`** (lesson 12) — a slider for how many lines the decoder
+  bothers to check, and the copies appear as you take lines away. 2^ignored, made
+  visible.
 
 **Lesson 11 is the first lesson where nothing executes.** `lib/asm8085.ts`
 simulates registers and memory, not pin timing, so those three panels are models

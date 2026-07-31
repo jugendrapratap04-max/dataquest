@@ -7012,6 +7012,94 @@ const MP7 = [
   ]},
 ];
 
+const MP8 = [
+  { t: "objectives", items: [
+    "Work out a chip's <b>address range</b> from its size and where it sits",
+    "Split the 16 address lines into the ones the <b>chip</b> uses and the ones the <b>decoder</b> checks",
+    "Use a <b>74LS138</b> to turn three address lines into eight chip selects",
+    "Explain <b>foldback</b>: why partial decoding makes one chip appear several times",
+  ]},
+  { t: "hook", q: "You solder a 2 KB memory chip onto an 8085 board. Its address pins are wired to A0 to A10, and the processor has sixteen address lines. So what are the other five doing?", why: "Deciding whether this chip should answer at all.<br/><br/>The chip cannot tell 0000H from 0800H — both look like address 000H to its own eleven pins. Something outside it has to watch the five lines the chip cannot see and pull its <b>chip select</b> low only when they match. That something is the decoder, and it is the whole subject of this lesson.<br/><br/>Get it right and each chip owns one range. Get it lazy and the chip answers at eight different addresses, all of them the same 2 KB of silicon wearing different names — which is a real thing that happens, has a name, and is examined." },
+  { t: "def", term: "Address decoding", en: "The logic outside the processor that decides which chip answers a given address. A memory chip of 2^n bytes uses the lowest n address lines to pick a byte inside itself; the remaining 16 - n lines mean nothing to it, so a decoder compares them against a fixed pattern and drives the chip's chip-select pin.", hi: "Two ways to do it. <b>Absolute decoding</b> checks every one of the leftover lines, so the chip answers at exactly one range. <b>Partial decoding</b> checks only some, which needs fewer gates and makes the chip appear at several addresses at once." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"design a memory system with 8 KB of ROM at 0000H and 8 KB of RAM at 8000H, and draw the decoding\" is a standard long question. It is three calculations — size to address lines, base to the pattern the decoder checks, and the range each chip ends up with — and all three are on this page." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H. The examples here mostly compute addresses rather than read them." },
+
+  { t: "h2", n: "1", text: "The chip takes the low lines; the decoder takes the rest" },
+  { t: "p", html: "A chip's own address pins always start at A0, and how many it has is decided by its size: 2<sup>n</sup> bytes needs n pins." },
+  { t: "viz", name: "decode-lab" },
+  { t: "p", html: "Slide it and two things stay true. The range is always the chip's own size long, and it always <b>starts on a multiple of that size</b> — because the lines below the boundary are exactly the ones the chip is using to count.<br/><br/>The lines above the boundary are the ones that identify <i>this chip rather than another</i>, and the pattern they must match is just the base address written in binary." },
+  { t: "code", file: "ends.asm", lang: "asm8085", show: ["M:0000", "M:07FF"], code: "        MVI A, 11H\n        STA 0000H       ; first byte of a 2 KB chip at 0000H\n        MVI A, 22H\n        STA 07FFH       ; last byte of the same chip\n        HLT\n", output: "[0000]=11 [07FF]=22" },
+  { t: "p", html: "0000H to 07FFH is 2048 bytes — one chip's worth. The next address, 0800H, is the first byte of whatever sits next, and nothing in the program says so. Only the wiring does." },
+
+  { t: "h2", n: "2", text: "Turning address lines into chip selects" },
+  { t: "p", html: "A board with several chips needs one select line each, and exactly one of them low at any moment. That is what a decoder IC is for." },
+  { t: "viz", name: "decoder-138-lab" },
+  { t: "p", html: "Three lines in, eight outputs, one low at a time — and the block size is decided by the lines you did <b>not</b> give it. Feed A15, A14 and A13 and the thirteen lines below make each block 2<sup>13</sup> = 8 KB." },
+  { t: "code", file: "last.asm", lang: "asm8085", show: ["HL", "CY"], code: "        LXI H, 2000H    ; base of a 4 KB chip\n        LXI D, 0FFFH    ; size minus one\n        DAD D\n        HLT\n", output: "HL=2FFF CY=0" },
+  { t: "p", html: "The last address of a block is <b>base + size − 1</b>, and the minus one is where marks are lost. A 4 KB chip at 2000H ends at <b>2FFFH</b>; 3000H already belongs to the next chip." },
+
+  { t: "h2", n: "3", text: "What a lazy decoder costs" },
+  { t: "p", html: "Checking every leftover line takes gates. Checking only some takes fewer — and the chip starts answering in places you did not put it." },
+  { t: "viz", name: "foldback-lab" },
+  { t: "p", html: "Every line the decoder ignores <b>doubles</b> the number of addresses the chip answers to, so ignoring three gives eight copies of the same 2 KB. This is called <b>foldback</b>, and the copies are not extra memory — writing to one changes the byte in all of them, because they are one physical cell." },
+  { t: "code", file: "alias.asm", lang: "asm8085", show: ["A", "M:0000", "M:0800"], code: "        MVI A, 11H\n        STA 0000H\n        MVI A, 99H\n        STA 0800H       ; 2 KB higher up\n        LDA 0000H\n        HLT\n", output: "A=11 [0000]=11 [0800]=99" },
+  { t: "p", html: "Here they are two separate bytes, because <b>this simulator has a flat 64 KB and no decoding at all</b> — every address is its own cell. On a board that ignored A11, the second <code>STA</code> would have overwritten the first and <code>LDA 0000H</code> would return 99H." },
+
+  { t: "h2", n: "4", text: "Reading a memory map backwards" },
+  { t: "p", html: "The exam usually gives you a range and asks for the chip. That is the same arithmetic run in reverse." },
+  { t: "code", file: "span.asm", lang: "asm8085", show: ["HL", "CY"], code: "        LXI H, 8000H    ; base\n        LXI D, 1FFFH    ; 8 KB minus one\n        DAD D\n        HLT\n", output: "HL=9FFF CY=0" },
+  { t: "p", html: "8000H to 9FFFH spans 2000H bytes, which is 8192, which is 2<sup>13</sup> — so a 13-pin chip, leaving A13, A14 and A15 for the decoder, which must see 100 to select it.<br/><br/>Three numbers, one calculation, and it works in whichever direction the question is asked." },
+
+  { t: "think", q: "If partial decoding causes foldback, why does anybody use it?", a: "Because gates cost money and address space often does not.<br/><br/>Absolute decoding means comparing every leftover line, which is a comparator or a decoder plus gates on every chip select. Partial decoding might be a single inverter. On a board that will only ever hold one ROM and one RAM, the difference is real money per unit and the wasted address space costs nothing at all — nobody was going to use those addresses.<br/><br/>So it is a trade, not a mistake: <b>address space for parts</b>. Cheap fixed-function boards take it deliberately, and the foldback is documented rather than discovered.<br/><br/>It becomes a bug at exactly one moment — when somebody adds a third chip. The new chip is given a range that looks free on the map, the old chip has been quietly answering there all along, and now two devices drive the data bus in the same cycle. That is the contention from lesson 8, arriving from the direction nobody checks, and it is why a memory map drawn from the schematic rather than from intentions is worth having." },
+  { t: "analogy", concept: "Address decoding", real: "A street of flats, and how much of the address you read", html: "A parcel is addressed to <b>Flat 3, Block B, 14 Mill Road</b>. The person sorting at the door of Block B does not care about the flat number — that is for the resident. They only check the block letter.<br/><br/>That is the split. The <b>flat number</b> is the low address lines, which the chip uses to find a byte inside itself. The <b>block letter</b> is the high lines, which the decoder checks to work out whether this chip is the right one at all.<br/><br/>Now suppose the sorter is lazy and only glances at the street number, never the block letter. Everything for 14 Mill Road goes into Block B, whichever block it was meant for. Block B is not bigger — it just receives parcels addressed to A, C and D as well, and they land on top of the same three flats.<br/><br/>That is <b>foldback</b>: not extra rooms, the same rooms answering to more names. And it stays invisible until Block C is built and both blocks start claiming the same delivery." },
+
+  { t: "trace", intro: "Working out where a 4 KB chip at 2000H ends, and storing the answer. Write each value the way the processor holds it.", code: "        LXI H, 2000H\n        LXI D, 0FFFH\n        DAD D\n        SHLD 2060H\n        HLT\n", steps: [
+    { q: "After line 1, <code>HL</code> is", answer: "2000", accept: ["2000h"], why: "The base address of the chip, loaded straight from the instruction's own bytes." },
+    { q: "After line 3, <code>HL</code> is", answer: "2FFF", accept: ["2fffh", "2fff"], why: "Base plus size minus one. A 4 KB chip covers 1000H bytes, so it ends at 2FFFH — and 3000H is already the next chip's first byte." },
+    { q: "After line 3, <code>CY</code> is", answer: "0", accept: ["0", "clear", "false"], why: "The sum stayed inside 64 KB, so nothing carried out of the sixteen bits. A chip placed high enough that base plus size passes FFFFH is a design error, and this is the flag that would show it." },
+  ]},
+
+  { t: "drills", intro: "Eleven address calculations and writes. Predict, then open.", items: [
+    { task: "Write to the first byte of the map.", code: "MVI A, 11H\nSTA 0000H\nHLT", show: ["M:0000"], out: "[0000]=11" },
+    { task: "And the last one.", code: "MVI A, 22H\nSTA 0FFFFH\nHLT", show: ["M:FFFF"], out: "[FFFF]=22" },
+    { task: "Where does a 4 KB chip at 2000H end?", code: "LXI H, 2000H\nLXI D, 0FFFH\nDAD D\nHLT", show: ["HL"], out: "HL=2FFF" },
+    { task: "And a 2 KB chip at 0000H?", code: "LXI H, 0000H\nLXI D, 07FFH\nDAD D\nHLT", show: ["HL"], out: "HL=07FF" },
+    { task: "An 8 KB chip at 8000H.", code: "LXI H, 8000H\nLXI D, 1FFFH\nDAD D\nHLT", show: ["HL"], out: "HL=9FFF" },
+    { task: "The first byte of the second 1 KB page.", code: "MVI A, 33H\nSTA 0400H\nHLT", show: ["M:0400"], out: "[0400]=33" },
+    { task: "Adding the size instead of size minus one — where does it land?", code: "LXI H, 2000H\nLXI D, 1000H\nDAD D\nHLT", show: ["HL"], out: "HL=3000" },
+    { task: "A 16 KB chip at C000H. Does it fit?", code: "LXI H, 0C000H\nLXI D, 3FFFH\nDAD D\nHLT", show: ["HL", "CY"], out: "HL=FFFF CY=0" },
+    { task: "Store a computed end address, low byte first.", code: "LXI H, 2FFFH\nSHLD 2060H\nHLT", show: ["M:2060-2061"], out: "[2060..2061]=FF 2F" },
+    { task: "One past the top of the map.", code: "LXI H, 0FFFFH\nLXI D, 0001H\nDAD D\nHLT", show: ["HL", "CY"], out: "HL=0000 CY=1" },
+    { task: "Write through a pointer to a high address.", code: "MVI A, 44H\nLXI H, 0BFFFH\nMOV M, A\nHLT", show: ["M:BFFF"], out: "[BFFF]=44" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; \"a 4 KB chip at 2000H covers 2000H to 3000H\"", why: "It covers 2000H to <b>2FFFH</b>. A range of 1000H bytes starting at 2000H ends one below 3000H, and 3000H is the first byte of the next chip. Off-by-one here puts two chips on the same address.", fix: "; 2000H to 2FFFH, which is 1000H = 4096 bytes" },
+    { bad: "; \"put the 2 KB RAM at 0500H\"", why: "A chip of 2<sup>n</sup> bytes can only start on a multiple of its own size, because the low n lines are the ones counting inside it. 0500H is not a multiple of 800H, so no pattern of the upper lines can select exactly that range.", fix: "; 0000H, 0800H, 1000H ... any multiple of 800H" },
+    { bad: "; \"more address lines to the chip means more memory\"", why: "The chip's pin count is fixed by the chip. Giving the <b>decoder</b> fewer lines does not enlarge anything — it just stops the decoder distinguishing addresses, so the same chip answers in more places.", fix: "; ignored lines -> copies, not capacity" },
+    { bad: "; \"the foldback copies are spare memory\"", why: "They are the same cells. Writing to a copy changes the original, because there is one chip and it cannot tell the addresses apart. Treating a copy as free storage corrupts whatever was using the range.", fix: "; 8 copies of 2 KB is still 2 KB" },
+  ]},
+
+  { t: "debug", intro: "This works out the last address of a 4 KB chip based at 2000H and stores it at 2060H. The right answer is 2FFFH. It runs cleanly and stores 3000H. Read it before you open the fix.", show: ["HL", "M:2060-2061"], code: "        LXI H, 2000H    ; the chip's base address\n        LXI D, 1000H    ; 4 KB\n        DAD D           ; base + size\n        SHLD 2060H\n        HLT\n", symptom: "stores 3000H when the chip's last byte is 2FFFH - one address too far, which belongs to the next chip", q: "The addition is correct. So is 'base plus size' the right thing to be calculating?", fix: "        LXI H, 2000H    ; the chip's base address\n        LXI D, 0FFFH    ; 4 KB minus one\n        DAD D           ; base + size - 1\n        SHLD 2060H\n        HLT\n", why: "A chip of 1000H bytes starting at 2000H occupies 2000H, 2001H … up to <b>2FFFH</b>. Count them: the first byte is at the base, so the last is at base + size <b>minus one</b>. Base plus size is the byte <i>after</i> the chip.<br/><br/>Only the constant changed — 1000H became 0FFFH — and that is the shape of the mistake. The arithmetic was right and the question was wrong.<br/><br/>Why it matters more here than in ordinary code: 3000H is not a harmless address, it is the <b>first byte of whatever chip sits next</b>. A memory map built with this error gives two chips one address in common, and on a real board both of them answer it — which is bus contention, produced by a spreadsheet rather than by a wiring fault.<br/><br/>The habit that catches it: a range is always <b>size</b> bytes long, so subtract one whenever you convert a size into a last address, and sanity-check that the last address ends in all ones — 2FFFH, 9FFFH, FFFFH. A chip range ending in a round 000H is almost always this bug." },
+
+  { t: "recap", items: [
+    "A chip of <b>2<sup>n</sup> bytes</b> uses A0 to A(n−1); the <b>16 − n</b> lines above it are the decoder's job",
+    "A chip can only start on a <b>multiple of its own size</b>, and its last address is base + size − 1",
+    "A <b>74LS138</b> turns 3 lines into 8 selects; the block size comes from the 13 lines it does not see",
+    "<b>Absolute decoding</b> checks every leftover line — one range, more gates",
+    "<b>Partial decoding</b> ignores some: each ignored line <b>doubles</b> the copies, and that is foldback",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "How many address lines does a 4 KB memory chip need, and what happens to the rest?", a: "Twelve, A0 to A11, because 4 KB is 2 to the power 12. The remaining four lines, A12 to A15, mean nothing to the chip — they go to a decoder outside it, which compares them against a fixed pattern and drives the chip-select pin when they match." },
+    { level: "beginner", q: "A chip answers from 8000H to 9FFFH. How big is it?", a: "8 KB. The range spans 2000H bytes, which is 8192, which is 2 to the power 13 — so the chip has thirteen address pins, A0 to A12, and A13 to A15 are decoded. Working a size out of a range is the same calculation as working a range out of a size, run backwards." },
+    { level: "intermediate", q: "What is the difference between absolute and partial decoding?", a: "Absolute decoding checks every address line the chip does not use, so the chip answers at exactly one range and the rest of the map stays free. Partial decoding checks only some of them, which needs fewer gates but leaves the chip responding at several addresses at once. The number of copies is 2 to the power of the number of ignored lines." },
+    { level: "intermediate", q: "What is foldback, and why is it not extra memory?", a: "It is the same chip appearing at more than one address range because the decoder ignored some address lines. It is not extra memory because there is only one set of cells — writing to an address in one copy changes the byte read from every other copy. A 2 KB chip with three ignored lines occupies 16 KB of the map and still holds 2 KB." },
+    { level: "advanced", q: "A board works fine, then a third memory chip is added at an address that looks free, and the system becomes unreliable. What would you suspect?", a: "Partial decoding on one of the original chips, folding back into the range the new chip was given. Both devices now see their select asserted for the same addresses, so both drive the data bus in the same cycle — contention, which produces undefined data and heat rather than a clean failure. The symptom is characteristically intermittent, because it only shows up on accesses to the overlapping range. The way to confirm it is to derive the memory map from the schematic rather than from what the map was supposed to be: work out, for each chip, exactly which address lines reach its select logic, and expand every ignored line into the copies it creates. The fix is to decode absolutely, which usually means one more gate or a spare output on a decoder that is already there." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7360,6 +7448,7 @@ const mpLessons = [
   { slug: "mp-register-set", order: 9, title: "The Register Set", minutes: 14, problems: [], content: MP5 },
   { slug: "mp-flag-register", order: 10, title: "The Flag Register, Bit by Bit", minutes: 14, problems: [], content: MP6 },
   { slug: "mp-pins-and-signals", order: 11, title: "Pins and Signals", minutes: 14, problems: [], content: MP7 },
+  { slug: "mp-memory-decoding", order: 12, title: "Memory Organization and Decoding", minutes: 14, problems: [], content: MP8 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7664,6 +7753,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-memory-decoding": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How many address lines does a 4 KB memory chip need?", options: ["12", "4", "16", "8"], correct: 0, why: "4 KB is 2 to the power 12, so twelve pins, A0 to A11. The four lines above them mean nothing to the chip and go to the decoder instead." },
+    { level: "easy", q: "A 2 KB chip is placed at 0000H. What is its last address?", options: ["0800H", "07FFH", "1000H", "0FFFH"], correct: 1, why: "Base plus size minus one. The first byte is at the base, so 2048 bytes starting at 0000H end at 07FFH — and 0800H is already the next chip." },
+    { level: "easy", q: "What does a 74LS138 do on an 8085 board?", options: ["Latches the low address byte", "Generates the clock", "Turns three address lines into eight chip selects, one active at a time", "Buffers the data bus"], correct: 2, why: "One output low at a time is the whole point: it guarantees exactly one chip is ever selected, which is what stops two of them driving the data bus together." },
+    // Medium — apply it
+    { level: "medium", q: "A chip answers from 8000H to 9FFFH. How big is it?", options: ["2 KB", "4 KB", "16 KB", "8 KB"], correct: 3, why: "The range spans 2000H bytes, which is 8192 — 2 to the power 13. So thirteen address pins, and A13 to A15 are left for decoding." },
+    { level: "medium", q: "Can a 2 KB chip be placed at 0500H?", options: ["No — it can only start on a multiple of its own size", "Yes, any address works", "Only if the decoder is partial", "Only with a 74LS138"], correct: 0, why: "The low eleven lines are the ones counting inside the chip, so the boundary between chip lines and decoder lines falls at a multiple of 800H. No pattern of the upper lines can select a range that starts anywhere else." },
+    { level: "medium", q: "What is the difference between absolute and partial decoding?", options: ["Absolute is faster", "Absolute checks every leftover address line; partial checks only some", "Partial uses a 74LS138 and absolute does not", "Absolute is for ROM and partial is for RAM"], correct: 1, why: "Absolute costs more gates and gives the chip exactly one range. Partial costs fewer and leaves the chip answering at several addresses at once." },
+    { level: "medium", q: "A decoder ignores 3 of the address lines it could have checked. How many addresses does the chip answer to?", options: ["3", "6", "8", "1"], correct: 2, why: "Each ignored line doubles the copies, so 2 to the power 3. A 2 KB chip with three ignored lines occupies 16 KB of the map and still holds 2 KB." },
+    // Hard — the edges
+    { level: "hard", q: "A 2 KB chip folds back into eight copies. How much usable memory is there?", options: ["16 KB", "8 KB", "4 KB", "2 KB — they are all the same cells"], correct: 3, why: "There is one chip. Writing to any copy changes the byte read from every other one, because the chip cannot tell those addresses apart. The copies waste address space; they do not add storage." },
+    { level: "hard", q: "A15, A14 and A13 are wired into a 74LS138. What decides that each output covers 8 KB?", options: ["The thirteen lines that were NOT given to the decoder", "The 138 itself, which always divides by eight", "The size of the chips connected to it", "The number of outputs on the decoder"], correct: 0, why: "A13 lines below the decoder means 2 to the 13 addresses inside each block. Give the decoder A12 as well, using a 4-to-16 decoder, and you get sixteen blocks of 4 KB instead." },
+    { level: "hard", q: "A working board gets a third memory chip at an address that looks free on the map, and turns unreliable. What is the likely cause?", options: ["The new chip is faulty", "An older chip decodes partially and folds back into that range, so two devices now answer together", "The 8085 cannot address three chips", "The clock is too fast for the new chip"], correct: 1, why: "Both selects assert for the same addresses and both chips drive the data bus in the same cycle — contention, which gives undefined data rather than a clean failure. Derive the map from the schematic, not from what it was meant to be." },
+  ],
   "mp-pins-and-signals": [
     // Easy — did the core idea land?
     { level: "easy", q: "How many pins does the 8085 have?", options: ["40", "28", "64", "16"], correct: 0, why: "Forty, in a standard dual in-line package — and fitting sixteen address lines, eight data lines and everything else into them is exactly why eight of the pins had to do two jobs." },
