@@ -88,6 +88,7 @@ import { AddressingLab, IndirectLab } from "./AddressingLabs";
 import { TransferMapLab, PairMoveLab } from "./TransferLabs";
 import { SubBorrowLab, SignedLab } from "./ArithmeticLabs";
 import { MaskLab, RotateLab, CompareLab } from "./LogicalLabs";
+import { StackLab, CallReturnLab, ConditionLab } from "./StackLabs";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -188,6 +189,9 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "mask-lab": MaskLab,
   "rotate-lab": RotateLab,
   "compare-lab": CompareLab,
+  "stack-lab": StackLab,
+  "call-return-lab": CallReturnLab,
+  "condition-lab": ConditionLab,
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,

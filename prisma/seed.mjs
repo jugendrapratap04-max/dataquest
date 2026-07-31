@@ -7627,6 +7627,94 @@ const MP14 = [
   ]},
 ];
 
+const MP15 = [
+  { t: "objectives", items: [
+    "Use all <b>eight conditions</b>, and say which flag each one reads",
+    "Explain what <code>PUSH</code> and <code>POP</code> do to the <b>stack pointer</b>, and which way it moves",
+    "Say where <code>CALL</code> puts the return address and where <code>RET</code> finds it",
+    "Write a subroutine that <b>does not destroy</b> its caller's registers",
+  ]},
+  { t: "hook", q: "<code>RET</code> takes no operand. It does not say where to return to. So how does it know?", why: "It does not know. It goes wherever the top of the stack says.<br/><br/>When <code>CALL</code> runs, the first thing it does — before jumping anywhere — is push the address of the <b>next</b> instruction onto the stack. <code>RET</code> pops two bytes into the program counter, and whatever those two bytes are is where execution continues.<br/><br/>That is the whole mechanism, and it explains both the good and the bad. Calls <b>nest automatically</b>, because a second call just puts a second address on top. And a subroutine that pushes something and forgets to pop it sends the program to a completely arbitrary address, because <code>RET</code> will faithfully use whatever it finds." },
+  { t: "def", term: "Stack", en: "A region of memory used last-in-first-out, addressed by the stack pointer. PUSH stores two bytes and moves the pointer down by two; POP reads two bytes and moves it back up. Nothing marks a stack out from ordinary memory — it is a stack because the stack pointer points at it.", hi: "It grows <b>downwards</b>, from high addresses to low. That is why the stack pointer is set near the top of RAM: programs load from the bottom upwards, so the two only meet when memory is genuinely full." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"explain the stack and the stack pointer with PUSH and POP\" is a standard question, and the marks are in the direction — down on PUSH, up on POP — and in what CALL and RET use it for. The interview version is different and more useful: <i>why must a subroutine save the registers it uses</i>." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44, 51, 145, 8], note: "Five bytes at 2050H onwards. The subroutine examples read them through a pointer the caller sets up." },
+
+  { t: "h2", n: "1", text: "Eight conditions, and every one is spoken for" },
+  { t: "p", html: "A conditional instruction picks its condition with three bits of the opcode, so there are exactly eight — and each comes as a jump, a call and a return." },
+  { t: "viz", name: "condition-lab" },
+  { t: "p", html: "Two things worth taking away. <b>All eight codes are used</b>, which is why there is no jump on the auxiliary carry. And <code>JP</code> means <b>jump on plus</b>, not parity — parity is <code>JPE</code> and <code>JPO</code>, and mixing them up is a rite of passage." },
+  { t: "code", file: "cond.asm", lang: "asm8085", show: ["A"], code: "        MVI A, 3CH\n        CPI 4AH         ; 60 against 74\n        JC SMALLER\n        MVI A, 11H\n        HLT\nSMALLER: MVI A, 22H\n        HLT\n", output: "A=22" },
+  { t: "p", html: "The compare found the accumulator smaller, so it borrowed, so <code>CY</code> came on and <code>JC</code> fired. Every conditional instruction works exactly like this: the <b>instruction before it</b> sets the flag, and the jump only reads." },
+
+  { t: "h2", n: "2", text: "The stack, and which way it goes" },
+  { t: "p", html: "<code>PUSH</code> and <code>POP</code> move two bytes at a time, and the pointer moves with them." },
+  { t: "viz", name: "stack-lab" },
+  { t: "p", html: "Down on the way in, up on the way out. Notice that <code>POP</code> <b>erases nothing</b> — it only moves the pointer, so the bytes are still sitting in memory, just no longer protected from the next push." },
+  { t: "code", file: "push.asm", lang: "asm8085", show: ["SP", "M:23FC-23FF"], code: "        LXI SP, 2400H\n        LXI H, 1234H\n        LXI B, 0ABCDH\n        PUSH H\n        PUSH B\n        HLT\n", output: "SP=23FC [23FC..23FF]=CD AB 34 12" },
+  { t: "p", html: "Four bytes stored, SP down by four. Read the memory right to left and you can see the order: 1234H went in first and sits higher up, ABCDH went in second and sits below it — closest to the pointer, and the first thing a <code>POP</code> would take." },
+
+  { t: "h2", n: "3", text: "What CALL actually does" },
+  { t: "p", html: "A call is a jump that leaves a note. The note is the address of the instruction after it." },
+  { t: "viz", name: "call-return-lab" },
+  { t: "p", html: "So <code>RET</code> needs no operand — it pops two bytes into the program counter and goes there. That is also why calls nest without any extra machinery: a second call simply puts a second address on top of the first." },
+  { t: "code", file: "callstack.asm", lang: "asm8085", show: ["SP", "M:23FE-23FF"], code: "        LXI SP, 2400H\n        CALL SUB        ; three bytes, at 2003H\n        HLT             ; so the return address is 2006H\nSUB:    HLT\n", output: "SP=23FE [23FE..23FF]=06 20" },
+  { t: "p", html: "There is the return address in memory: <b>06 20</b>, which is 2006H stored low byte first like every other 16-bit value. The subroutine halts before returning, so it is still sitting there." },
+
+  { t: "h2", n: "4", text: "A subroutine has to give the registers back" },
+  { t: "p", html: "Nothing protects the caller. If a subroutine uses HL, the caller's HL is gone — unless the subroutine saves it." },
+  { t: "code", file: "nested.asm", lang: "asm8085", show: ["A", "SP"], code: "        LXI SP, 2400H\n        CALL OUTER\n        HLT\nOUTER:  CALL INNER      ; a call inside a call\n        RET\nINNER:  MVI A, 55H\n        RET\n", output: "A=55 SP=2400" },
+  { t: "p", html: "Two levels deep and the stack pointer finishes exactly where it started — which is the check that every <code>PUSH</code> found its <code>POP</code> and every <code>CALL</code> found its <code>RET</code>.<br/><br/><b>SP back where it began is the fastest way to tell a routine is balanced.</b> If it is not, something is still on the stack and the next <code>RET</code> will use it as an address." },
+
+  { t: "think", q: "Why does the return address go on the stack rather than into a register?", a: "Because a register can hold one address, and a stack can hold as many as memory allows.<br/><br/>Put the return address in a register and the first thing a subroutine does when it calls another is destroy it. You would have to save it somewhere before every nested call — which means writing, by hand, exactly the mechanism the stack already is.<br/><br/>The stack makes nesting free. Each call pushes its own return address on top of the previous one, each <code>RET</code> takes the most recent, and the depth is limited only by how much memory you gave the stack. No instruction has to know how deep it is.<br/><br/>It also makes <b>recursion</b> possible, which is the same argument taken to its conclusion: a routine that calls itself needs a separate return address for every level, and only a stack can provide an unknown number of them. The cost is that the stack is ordinary memory with no protection — run it into your data and nothing warns you, which is what the whole discipline of balancing pushes with pops exists to prevent." },
+  { t: "analogy", concept: "The stack and return addresses", real: "A pile of bookmarks", html: "You are reading, and something sends you off to look at another page. Before you go, you drop a <b>bookmark</b> in your current page and put it on top of a pile.<br/><br/>On that page, something sends you off again. Another bookmark, on top of the first. When you finish, you take the <b>top</b> bookmark — the most recent one — and go back there. Then the next, and you are where you started.<br/><br/>Nobody has to remember how many levels deep they went. The pile knows, and the rule is always the same: take the top one.<br/><br/>And this is why a subroutine must clean up after itself. If it drops something else on the pile and forgets to remove it, the next person to take a bookmark gets that instead — and they will go to it, because nothing on a bookmark says what kind of bookmark it is." },
+
+  { t: "trace", intro: "Two bytes pushed and popped through a different register pair. Write each value the way the processor holds it.", code: "        LXI SP, 2400H\n        LXI H, 1234H\n        PUSH H\n        LXI H, 0ABCDH\n        POP H\n        HLT\n", steps: [
+    { q: "After line 3, <code>SP</code> is", answer: "23FE", accept: ["23feh"], why: "<code>PUSH</code> stores two bytes and moves the pointer down by two, from 2400H to 23FEH. The stack grows towards lower addresses." },
+    { q: "After line 4, <code>HL</code> is", answer: "ABCD", accept: ["abcdh"], why: "The pushed value is safe on the stack, so HL can be reused for anything. This is what makes PUSH useful — it is a place to put something you still need." },
+    { q: "After line 5, <code>HL</code> is", answer: "1234", accept: ["1234h"], why: "<code>POP</code> takes the two bytes back and the pointer returns to 2400H. Note the value came back into HL, but it could have gone into any pair — the stack does not remember where it came from." },
+  ]},
+
+  { t: "drills", intro: "Eleven programs about jumps, the stack and subroutines. Predict, then open.", items: [
+    { task: "Push a pair. Which way does SP move?", code: "LXI SP, 2400H\nLXI H, 1234H\nPUSH H\nHLT", show: ["SP", "M:23FE-23FF"], out: "SP=23FE [23FE..23FF]=34 12" },
+    { task: "Push it and take it back.", code: "LXI SP, 2400H\nLXI H, 1234H\nPUSH H\nLXI H, 0\nPOP H\nHLT", show: ["HL", "SP"], out: "HL=1234 SP=2400" },
+    { task: "Save the accumulator AND the flags across an operation.", code: "LXI SP, 2400H\nMVI A, 05H\nSUI 09H\nPUSH PSW\nXRA A\nPOP PSW\nHLT", show: ["A", "CY"], out: "A=FC CY=1" },
+    { task: "Jump when the accumulator is the smaller one.", code: "MVI A, 3CH\nCPI 4AH\nJC L1\nMVI A, 11H\nHLT\nL1: MVI A, 22H\nHLT", show: ["A"], out: "A=22" },
+    { task: "And when it is not.", code: "MVI A, 4AH\nCPI 3CH\nJNC L1\nMVI A, 11H\nHLT\nL1: MVI A, 22H\nHLT", show: ["A"], out: "A=22" },
+    { task: "Jump on zero.", code: "XRA A\nJZ L1\nMVI A, 11H\nHLT\nL1: MVI A, 22H\nHLT", show: ["A"], out: "A=22" },
+    { task: "Jump on minus — the top bit, not parity.", code: "MVI A, 80H\nORA A\nJM L1\nMVI A, 11H\nHLT\nL1: MVI A, 22H\nHLT", show: ["A"], out: "A=22" },
+    { task: "Jump on even parity. 03H has two bits set.", code: "MVI A, 03H\nORA A\nJPE L1\nMVI A, 11H\nHLT\nL1: MVI A, 22H\nHLT", show: ["A"], out: "A=22" },
+    { task: "A call and a return. Where does SP finish?", code: "LXI SP, 2400H\nCALL S\nHLT\nS: MVI A, 77H\nRET", show: ["A", "SP"], out: "A=77 SP=2400" },
+    { task: "Exchange HL with the top of the stack.", code: "LXI SP, 2400H\nLXI H, 1234H\nPUSH H\nLXI H, 0ABCDH\nXTHL\nHLT", show: ["HL", "M:23FE-23FF"], out: "HL=1234 [23FE..23FF]=CD AB" },
+    { task: "A conditional return that reads a stale flag.", code: "LXI SP, 2400H\nCALL S\nHLT\nS: MVI A, 77H\nRZ\nMVI A, 88H\nRET", show: ["A"], out: "A=88" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "SUB:    LXI H, 2070H\n        MVI M, 99H\n        RET", why: "The caller's HL is gone. Nothing protects a register across a call — a subroutine that uses one has to save it, or every caller has to know which registers it eats.", fix: "SUB:    PUSH H\n        LXI H, 2070H\n        MVI M, 99H\n        POP H\n        RET" },
+    { bad: "SUB:    PUSH H\n        ...\n        RET", why: "A push with no matching pop leaves two bytes on the stack, so <code>RET</code> takes <b>those</b> as the return address instead of the real one. The program jumps somewhere arbitrary and nothing reports why.", fix: "SUB:    PUSH H\n        ...\n        POP H\n        RET" },
+    { bad: "CALL SUB\n; SUB never sets up SP", why: "<code>CALL</code> pushes to wherever the stack pointer happens to be, and at reset that is undefined. Every 8085 program sets <code>LXI SP</code> before its first call or push — usually as the very first instruction.", fix: "LXI SP, 2400H\nCALL SUB" },
+    { bad: "MVI A, 77H\nJP POSITIVE      ; \"jump if parity\"", why: "<code>JP</code> is <b>jump on plus</b> — it reads the sign flag. Parity is <code>JPE</code> and <code>JPO</code>. And <code>MVI</code> sets no flags at all, so this is testing something from earlier anyway.", fix: "MVI A, 77H\nORA A\nJP POSITIVE" },
+  ]},
+
+  { t: "debug", intro: "The caller points HL at 2050H, calls a subroutine, then reads the byte through that pointer — which should be 5AH. It runs cleanly and stores 99H instead. Read it before you open the fix.", show: ["A", "HL", "M:2060"], code: "        LXI SP, 2400H\n        LXI H, 2050H    ; the caller's pointer\n        CALL SUB\n        MOV A, M        ; read through it\n        STA 2060H\n        HLT\nSUB:    LXI H, 2070H    ; the subroutine needs a pointer too\n        MVI M, 99H\n        RET\n", symptom: "stores 99H, which is the byte the subroutine wrote at its own address, not the one at 2050H", q: "Both the caller and the subroutine used HL. Which one still owns it when the subroutine returns?", fix: "        LXI SP, 2400H\n        LXI H, 2050H    ; the caller's pointer\n        CALL SUB\n        MOV A, M        ; read through it\n        STA 2060H\n        HLT\nSUB:    PUSH H          ; borrow HL, and give it back\n        LXI H, 2070H\n        MVI M, 99H\n        POP H\n        RET\n", why: "Nothing on this processor protects a register across a <code>CALL</code>. The subroutine loaded HL with its own address and returned, and the caller carried on using HL as though it still held 2050H — it held 2070H.<br/><br/>The fix is two instructions: <code>PUSH H</code> on the way in and <code>POP H</code> on the way out. That is the standard shape of a subroutine that touches anything the caller might care about, and it is why real routines often begin with a row of pushes and end with the same registers popped in reverse order.<br/><br/>What makes this class of bug expensive is that <b>the subroutine is correct</b>. It did exactly what it was written to do, and the failure appears in the caller, several lines later, in code that has not changed. The two are only connected by a register neither of them mentions.<br/><br/>The tell is that the wrong value is <b>something the subroutine touched</b>. When a caller reads a byte it never asked for, look at what the last routine it called was using — and remember that <code>POP</code> order is the reverse of <code>PUSH</code> order." },
+
+  { t: "recap", items: [
+    "<b>Eight conditions</b>, each with a jump, a call and a return — and all eight opcode patterns are used",
+    "<code>JP</code> is <b>plus</b>, not parity. Parity is <code>JPE</code> and <code>JPO</code>",
+    "The stack grows <b>downwards</b>: <code>PUSH</code> takes two off SP, <code>POP</code> puts two back",
+    "<code>CALL</code> pushes the address of the <b>next</b> instruction; <code>RET</code> pops it into PC — which is why calls nest for free",
+    "A subroutine must <b>save and restore</b> anything it uses, and SP finishing where it started is the check",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What do <code>PUSH</code> and <code>POP</code> do to the stack pointer?", a: "PUSH stores two bytes and decrements the stack pointer by two; POP reads two bytes and increments it by two. The stack grows downwards, from high addresses towards low ones, which is why the stack pointer is normally initialised near the top of RAM — programs load upwards from the bottom, so the two only meet when memory is genuinely full." },
+    { level: "beginner", q: "How does <code>RET</code> know where to return to?", a: "It does not know — it pops two bytes off the stack into the program counter and goes there. CALL put them there: before jumping, it pushes the address of the instruction following it. That is also why a subroutine that pushes without popping sends the program to an arbitrary address, because RET will use whatever is on top." },
+    { level: "intermediate", q: "Why must a subroutine save the registers it uses?", a: "Because nothing else does. There is no automatic saving on this processor, so a subroutine that loads HL destroys whatever the caller had there. The convention is to PUSH the registers you will use at the start and POP them in reverse order before RET. It matters more than it looks because the failure appears in the caller, in code that has not changed, and the two are connected only by a register neither of them mentions." },
+    { level: "intermediate", q: "What is <code>PUSH PSW</code>, and when would you use it?", a: "It pushes the accumulator and the flag byte together as one 16-bit value. You use it when something must survive an operation that would destroy it — most often at the start of an interrupt service routine, because the interrupted program may have been between a compare and the jump that reads its verdict. POP PSW restores both." },
+    { level: "advanced", q: "A program works until a subroutine is called from inside another subroutine, then jumps somewhere impossible. What would you look for?", a: "An unbalanced stack in the inner routine — a PUSH without a matching POP, or a conditional return that skips a POP on one path. At one level deep it often survives, because the corrupted return address may still land somewhere harmless; nested, the damage compounds and the second RET takes something that was never an address. The way to confirm it is to check that the stack pointer has the same value before the call and after it, which is the single cheapest invariant in 8085 programming. The other candidate is the stack colliding with data: if SP was initialised too low, or a routine recurses deeper than expected, pushes start overwriting variables and the symptom is the same kind of impossible jump." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7982,6 +8070,7 @@ const mpLessons = [
   { slug: "mp-data-transfer", order: 16, title: "Data Transfer Instructions", minutes: 14, problems: [], content: MP12 },
   { slug: "mp-arithmetic", order: 17, title: "Arithmetic and the Flags", minutes: 14, problems: [], content: MP13 },
   { slug: "mp-logical", order: 18, title: "Logical, Compare and Rotate", minutes: 14, problems: [], content: MP14 },
+  { slug: "mp-branching-stack", order: 19, title: "Branching, the Stack and Subroutines", minutes: 15, problems: [], content: MP15 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -8286,6 +8375,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-branching-stack": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which way does the 8085 stack grow?", options: ["Downwards — PUSH decrements the stack pointer", "Upwards", "It depends on the instruction", "It does not move; SP stays fixed"], correct: 0, why: "Programs load from the bottom of memory upwards, so putting the stack at the top and growing it down means the two only meet when memory is genuinely full." },
+    { level: "easy", q: "How many bytes does one <code>PUSH</code> store?", options: ["One", "Two — a whole register pair", "Four", "As many as the pair holds"], correct: 1, why: "PUSH and POP always move a 16-bit value, which is why they name a pair rather than a register, and why SP moves by two each time." },
+    { level: "easy", q: "Where does <code>CALL</code> put the return address?", options: ["In the HL pair", "In a dedicated return register", "On the stack", "In the instruction itself"], correct: 2, why: "It pushes the address of the instruction after the CALL, before jumping anywhere. RET pops it back into the program counter." },
+    // Medium — apply it
+    { level: "medium", q: "How does <code>RET</code> know where to return to?", options: ["From a return-address register", "It pops two bytes off the stack into the program counter", "The assembler fills in the address", "It returns to the last label"], correct: 1, why: "It does not know — it goes wherever the top of the stack says. That is why an unmatched PUSH sends the program somewhere arbitrary, and why calls nest without any extra machinery." },
+    { level: "medium", q: "What does <code>JP</code> test?", options: ["Parity", "The carry flag", "The sign flag — P is for plus", "The zero flag"], correct: 2, why: "Parity is JPE and JPO. Mixing them up is a rite of passage, and it is why the condition list is worth reading once with the flags beside it." },
+    { level: "medium", q: "A subroutine loads HL for its own use and returns. What happens to the caller's HL?", options: ["It is automatically restored", "It is destroyed — nothing protects a register across a call", "The assembler warns about it", "It is saved in the PSW"], correct: 1, why: "The convention is PUSH the registers you use at the start and POP them in reverse order before RET. The failure shows up in the caller, in code that has not changed." },
+    { level: "medium", q: "After a balanced subroutine returns, where should the stack pointer be?", options: ["Two bytes lower than before the call", "Two bytes higher", "Exactly where it was before the call", "At the top of RAM"], correct: 2, why: "It is the cheapest invariant in 8085 programming: if SP does not come back, some PUSH lost its POP and the next RET will use it as an address." },
+    // Hard — the edges
+    { level: "hard", q: "Why is there no conditional jump on the auxiliary carry?", options: ["AC is not stored", "All eight three-bit condition codes are already used", "It would be too slow", "AC is cleared before every jump"], correct: 1, why: "Three bits choose the condition, giving eight, and every one is taken — not-zero, zero, no-carry, carry, parity odd, parity even, plus and minus. DAA reads AC directly instead." },
+    { level: "hard", q: "What does <code>PUSH PSW</code> save?", options: ["The program counter and the stack pointer", "The accumulator and the flag byte", "All the registers", "Only the flags"], correct: 1, why: "Which is why it is the first thing an interrupt service routine does: the interrupted program may have been sitting between a compare and the jump that reads its verdict." },
+    { level: "hard", q: "A program works with one level of subroutine and jumps somewhere impossible when calls are nested. What is the likely cause?", options: ["An unbalanced PUSH in the inner routine, so RET takes the wrong bytes", "Too many registers in use", "The stack pointer was set too high", "Conditional returns cannot be nested"], correct: 0, why: "At one level a corrupted return address may still land somewhere harmless. Nested, the damage compounds and the second RET takes something that was never an address at all." },
+  ],
   "mp-logical": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which logical operation is used to <b>clear</b> chosen bits?", options: ["AND, with zeros in the mask where you want clearing", "OR", "XOR", "CMA"], correct: 0, why: "AND gives a 1 only when both bits are 1, so a zero in the mask forces that column to zero and a one lets the original through untouched." },

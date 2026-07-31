@@ -1104,6 +1104,68 @@ const mpProblems = [
       "`DCR C` and `JNZ` close the loop; C counts the eight bits.",
       "Eight `RLC` rotations return the accumulator to its starting value."],
     ["8085", "logical", "loops"]),
+
+  /* ============== 19. Branching, the Stack and Subroutines ============== */
+  MP("mp-branching-stack", "Easy", 363, "mp-polite-subroutine", "A Subroutine That Gives HL Back",
+    "The caller points **HL** at 2050H, calls a subroutine, and then reads the byte through that pointer and stores it at **2060H**.\n\nThe subroutine needs HL for its own purpose — it writes 99H to 2070H — so it must **borrow and return** the register. `PUSH H` on the way in, `POP H` on the way out.\n\nWithout that, the caller reads through the subroutine's pointer and gets the wrong byte entirely.",
+    [{ input: "2050H = 5AH", output: "2060H = 5AH, and HL still 2050H" }],
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        CALL SUB\n        MOV A, M\n        STA 2060H\n        HLT\nSUB:    ; use HL for 2070H, but give it back\n        LXI H, 2070H\n        MVI M, 99H\n        RET\n",
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        CALL SUB\n        MOV A, M\n        STA 2060H\n        HLT\nSUB:    PUSH H\n        LXI H, 2070H\n        MVI M, 99H\n        POP H\n        RET\n",
+    [
+      { memory: { [A50]: 0x5a }, check: ["A", "HL", "M:2060"] },
+      { memory: { [A50]: 0x77 }, check: ["A", "HL", "M:2060"] },
+    ],
+    ["`LXI SP` has to come first — CALL pushes to wherever the stack pointer is.",
+      "`PUSH H` at the start of the subroutine and `POP H` just before `RET`.",
+      "The pop has to happen before the return, or `RET` takes the saved HL as its address.",
+      "HL is checked as well as the stored byte, so the register really must come back."],
+    ["8085", "stack", "subroutines"]),
+
+  MP("mp-branching-stack", "Easy", 364, "mp-classify-bytes", "Sort Five Bytes Into Two Counts",
+    "Five bytes start at **2050H**. Count how many are **50H or more** and store that at **2060H**; count how many are **below 50H** and store that at **2061H**.\n\n`CPI 50H` compares without destroying the accumulator, and `JC` fires when the accumulator is the **smaller** one — which is the direction people reverse.\n\nOne test has no low bytes at all, so one of the two counts must come out as zero.",
+    [{ input: "10H 60H 50H 4FH F0H", output: "2060H = 03H, 2061H = 02H" }],
+    "        LXI H, 2050H\n        MVI C, 05H\n        MVI B, 00H\n        MVI D, 00H\n        ; count high in B and low in D\n" + HALT,
+    "        LXI H, 2050H\n        MVI C, 05H\n        MVI B, 00H\n        MVI D, 00H\nLOOP:   MOV A, M\n        CPI 50H\n        JC LOW\n        INR B\n        JMP NEXT\nLOW:    INR D\nNEXT:   INX H\n        DCR C\n        JNZ LOOP\n        MOV A, B\n        STA 2060H\n        MOV A, D\n        STA 2061H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x10, [A50 + 1]: 0x60, [A50 + 2]: 0x50, [A50 + 3]: 0x4f, [A50 + 4]: 0xf0 }, check: ["M:2060", "M:2061"] },
+      { memory: { [A50]: 0x60, [A50 + 1]: 0x70, [A50 + 2]: 0x80, [A50 + 3]: 0x90, [A50 + 4]: 0xa0 }, check: ["M:2060", "M:2061"] },
+    ],
+    ["`CPI 50H` sets the carry when the accumulator is below 50H.",
+      "Remember to jump past the other branch — without the `JMP NEXT` every byte counts twice.",
+      "50H itself is not below 50H, so it belongs in the high count.",
+      "`INR` does not disturb the carry, but the compare has already been read by then anyway."],
+    ["8085", "branching", "compare"]),
+
+  MP("mp-branching-stack", "Medium", 365, "mp-sum-subroutine", "Move the Loop Into a Subroutine",
+    "The caller sets **HL** to 2050H, **C** to 5 and clears the accumulator, then calls a subroutine that adds the five bytes and returns the total in **A**. The caller stores it at **2060H**.\n\nThe subroutine uses HL and C, so it has to save both — `PUSH B` saves the BC pair, which is where C lives.\n\nThe accumulator is the **return value**, so it is the one thing that must *not* be restored.",
+    [{ input: "10H 20H 30H 40H 50H", output: "2060H = F0H, and HL back at 2050H" }],
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        MVI C, 05H\n        XRA A\n        CALL ADDUP\n        STA 2060H\n        HLT\nADDUP:  ; add C bytes from HL into A, and give the registers back\n" + HALT,
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        MVI C, 05H\n        XRA A\n        CALL ADDUP\n        STA 2060H\n        HLT\nADDUP:  PUSH H\n        PUSH B\nL1:     ADD M\n        INX H\n        DCR C\n        JNZ L1\n        POP B\n        POP H\n        RET\n",
+    [
+      { memory: { [A50]: 0x10, [A50 + 1]: 0x20, [A50 + 2]: 0x30, [A50 + 3]: 0x40, [A50 + 4]: 0x50 }, check: ["A", "HL", "M:2060"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04, [A50 + 4]: 0x05 }, check: ["A", "HL", "M:2060"] },
+    ],
+    ["`PUSH B` saves the BC pair, which is how you save C.",
+      "Pop in the reverse order of the pushes — B was pushed last, so it comes back first.",
+      "Do not touch the accumulator on the way out; it is the answer.",
+      "HL is checked, so the caller's pointer really has to come back at 2050H."],
+    ["8085", "stack", "subroutines"]),
+
+  MP("mp-branching-stack", "Medium", 366, "mp-largest-subroutine", "The Largest Byte, as a Subroutine",
+    "The caller points **HL** at a five-byte block at 2050H and calls a subroutine that returns the **largest** byte in **A**. The caller stores it at **2060H**.\n\nThe subroutine takes the first byte as the leader and compares the other four against it with `CMP M`, which leaves the accumulator alone. `JNC` skips the update when the leader is already bigger.\n\nBoth HL and BC have to come back untouched — only A carries the answer out.",
+    [{ input: "05H 09H 03H 07H 01H", output: "2060H = 09H, and HL back at 2050H" }],
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        CALL BIGGEST\n        STA 2060H\n        HLT\nBIGGEST: ; return the largest of five bytes in A\n" + HALT,
+    "        LXI SP, 2400H\n        LXI H, 2050H\n        CALL BIGGEST\n        STA 2060H\n        HLT\nBIGGEST: PUSH H\n        PUSH B\n        MOV A, M\n        MVI C, 04H\nL2:     INX H\n        CMP M\n        JNC S1\n        MOV A, M\nS1:     DCR C\n        JNZ L2\n        POP B\n        POP H\n        RET\n",
+    [
+      { memory: { [A50]: 0x05, [A50 + 1]: 0x09, [A50 + 2]: 0x03, [A50 + 3]: 0x07, [A50 + 4]: 0x01 }, check: ["A", "HL", "M:2060"] },
+      { memory: { [A50]: 0xf0, [A50 + 1]: 0x11, [A50 + 2]: 0x22, [A50 + 3]: 0x33, [A50 + 4]: 0x44 }, check: ["A", "HL", "M:2060"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04, [A50 + 4]: 0x05 }, check: ["A", "HL", "M:2060"] },
+    ],
+    ["Push HL and BC first, and pop them in reverse order at the end.",
+      "Take the first byte into A before the loop, then compare the remaining four.",
+      "`CMP M` leaves A alone — that is what lets it hold the running leader.",
+      "The second test has the largest byte first and the third has it last, so neither assumption survives."],
+    ["8085", "stack", "subroutines"]),
 ];
 
 export { mpProblems };
