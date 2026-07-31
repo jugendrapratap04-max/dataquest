@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**10 written, 37 problems.** Read that file before touching this subject.
+**11 written, 41 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,11 +194,11 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Chapter 2 is finished and Chapter 3 is two lessons in** — lessons 5 to 10 are
-all at that standard, so the whole subject is in one shape and **lesson 11 ("Pins
-and signals") is next**. Thirteen panels were built across those six lessons, and
-what they teach is the part worth copying: each one carries an idea that prose
-was previously asserting.
+**Chapter 2 is finished and Chapter 3 is three lessons in** — lessons 5 to 11 are
+all at that standard, so the whole subject is in one shape and **lesson 12
+("Memory organization and decoding") is next**. Sixteen panels were built across
+those seven lessons, and what they teach is the part worth copying: each one
+carries an idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -243,6 +243,23 @@ asked about the address bus rather than a street of boxes.
 - **`daa-lab`** (lesson 10) — why AC exists at all. The `08 + 09` case is the
   one that earns the panel: the raw sum 11H looks like valid BCD, so nothing but
   AC reveals that the low digit overflowed.
+
+- **`pin-lab`** (lesson 11) — the 40 pins as nine groups. Nobody memorises forty
+  of anything; the groups are what makes the diagram reconstructable.
+- **`ale-lab`** (lesson 11) — one memory read in four steps, with the AD7–AD0 row
+  changing meaning halfway through and a latch row that explains why that is
+  survivable. A static timing diagram actively hides this.
+- **`control-signal-lab`** (lesson 11) — MEMR/MEMW/IOR/IOW built from IO/M, RD
+  and WR. Three switches, four outputs, including the combination the processor
+  never produces.
+
+**Lesson 11 is the first lesson where nothing executes.** `lib/asm8085.ts`
+simulates registers and memory, not pin timing, so those three panels are models
+and the lesson says so on the page rather than implying otherwise. What it *can*
+verify is bus traffic seen from the program's side: T-state counts, `OUT` port
+writes, memory cells. Machine-cycle counts are stated from the standard tables
+and are the one class of number on that page `verify:lesson` cannot check — the
+same will be true of lessons 13, 27 and 29–33.
 
 `flag-lab` re-implements the ALU's flag rules in TypeScript rather than calling
 the simulator, so the two could drift. They were checked against each other

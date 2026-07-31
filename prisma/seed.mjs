@@ -6926,6 +6926,92 @@ const MP6 = [
   ]},
 ];
 
+const MP7 = [
+  { t: "objectives", items: [
+    "Group the <b>40 pins</b> so the diagram is nine things rather than forty",
+    "Explain <b>multiplexing</b>: why AD7–AD0 carry an address and then data",
+    "Say what <b>ALE</b> is for and what an external <b>latch</b> does with it",
+    "Build <b>MEMR, MEMW, IOR and IOW</b> out of <code>IO/M</code>, <code>RD</code> and <code>WR</code>",
+  ]},
+  { t: "hook", q: "The 8085 needs 16 address lines and 8 data lines. That is 24 before you count read, write, clock, reset, interrupts and power — and the chip has 40 pins in total. How does it fit?", why: "It does not fit, so eight pins were made to do two jobs. The low half of the address and the whole data bus share one set of eight pins: the address goes out first, and a few hundred nanoseconds later the same wires carry the data.<br/><br/>That trick is called <b>multiplexing</b>, and it costs something. Every 8085 board needs an extra chip outside the processor to remember the address after the pins have moved on — and one pin, <b>ALE</b>, exists purely to say when to remember it.<br/><br/>This is the lesson where the chip stops being a diagram and becomes something you could wire up." },
+  { t: "def", term: "Multiplexed bus", en: "One set of wires carrying two different things at different moments. On the 8085 the pins AD7 to AD0 carry the low byte of the address during the first clock state of every machine cycle, and the data byte for the rest of it. Which one is present is decided by time, not by the wires.", hi: "The cost is an external <b>latch</b> — usually a 74LS373 — which copies those eight pins the instant the address is valid and holds the value for the rest of the cycle. Without it the low half of the address would vanish before memory had finished using it." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"draw and explain the pin diagram\" is a full-marks question every year, and it is answered by groups rather than by pin numbers. The two follow-ups worth more than the drawing are <i>why is a latch needed and what clocks it</i>, and <i>how are MEMR, MEMW, IOR and IOW generated</i>. Both are panels on this page." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H — 5AH and 2CH. The examples below fetch them, which is what puts an address on the pins." },
+
+  { t: "h2", n: "1", text: "Forty pins, nine groups" },
+  { t: "p", html: "Nobody learns forty pins. They learn nine groups, and then the diagram is something you can reconstruct rather than recall." },
+  { t: "viz", name: "pin-lab" },
+  { t: "p", html: "Two groups do the heavy lifting and they are not symmetrical. <b>A15–A8</b> only ever carry address, one way, so nothing outside the chip has to help them. <b>AD7–AD0</b> carry address <i>and</i> data, in both directions — and everything awkward about an 8085 board comes from that one line of the table." },
+
+  { t: "h2", n: "2", text: "The same eight pins, twice" },
+  { t: "p", html: "Here is one memory read, four steps. The address goes out, the pins change job, and the data comes back on the wires the address left." },
+  { t: "viz", name: "ale-lab" },
+  { t: "p", html: "<b>ALE</b> is the whole mechanism. It is high only while AD7–AD0 are carrying an address, and its <b>falling edge</b> is what tells the latch to copy those eight bits and hold them. After that the processor can release the pins and memory can drive them, while the full address 2050H is still standing — half on A15–A8 and half on the latch." },
+  { t: "code", file: "read.asm", lang: "asm8085", show: ["A", "T"], code: "        LDA 2050H       ; four machine cycles\n        HLT\n", output: "A=5A T=18" },
+  { t: "p", html: "That <code>LDA</code> made <b>four</b> trips over the bus — one to fetch the opcode, two to fetch the address bytes inside it, one to fetch the data — and the whole ALE-and-latch dance above happened on every single one." },
+
+  { t: "h2", n: "3", text: "Four control signals out of three pins" },
+  { t: "p", html: "The 8085 has no MEMR, MEMW, IOR or IOW pins. A board makes all four from three that it does have." },
+  { t: "viz", name: "control-signal-lab" },
+  { t: "p", html: "<code>IO/M</code> chooses memory or device, and <code>RD</code> or <code>WR</code> chooses the direction — so two bits select one of four, which is a decoder. All four are <b>active low</b>, which is why they are drawn with a bar and built from NAND gates." },
+  { t: "code", file: "signals.asm", lang: "asm8085", show: ["OUT", "M:2060"], code: "        MVI A, 7FH\n        STA 2060H       ; IO/M low  + WR -> MEMW\n        OUT 80H         ; IO/M high + WR -> IOW\n        HLT\n", output: "OUT 80=7F [2060]=7F" },
+  { t: "p", html: "The same byte went to two places because two different control signals were asserted. Nothing about the address pins or the data pins distinguished those two instructions." },
+
+  { t: "h2", n: "4", text: "The pins nobody draws, and what they are for" },
+  { t: "p", html: "A few of the forty are easy to skip past and each answers a question you would otherwise have to ask." },
+  { t: "code", file: "io.asm", lang: "asm8085", show: ["A", "T"], code: "        IN 80H          ; nothing is connected to port 80H\n        HLT\n", output: "A=00 T=15" },
+  { t: "p", html: "The read happened — <code>IOR</code> went active, the pins did their work — and nothing answered, so the accumulator took whatever the floating bus offered. On this simulator that is 00H; on a real board it is whatever charge was left on the wires.<br/><br/>The other quiet pins matter for the same kind of reason. <b>READY</b> lets a slow memory hold the processor still. <b>RESET IN</b> clears the program counter to 0000H, which is why every 8085 system starts at address zero. And <b>X1, X2</b> take a crystal that the chip divides by two — a 6 MHz crystal makes a 3 MHz processor." },
+
+  { t: "think", q: "Why multiplex the address and data pins rather than just making a bigger chip?", a: "Because in 1976 pins were the expensive part, not transistors.<br/><br/>A 40-pin dual in-line package was the standard, cheap, widely tooled part. Going past it meant a larger package, a larger board footprint and a higher price on every unit — for a chip whose whole selling point was needing less around it than the 8080.<br/><br/>So the designers spent an external latch, which costs one small and very cheap chip on the board, to save eight pins on every processor ever made. That is a good trade when the processor is the expensive item and the latch is not.<br/><br/>It is worth seeing what it cost besides the latch, though, because the answer is <b>time</b>. The low address byte has to be sent and held before the data can move, so a memory read cannot be shorter than three T-states. A non-multiplexed design could overlap those. That is a real speed penalty, paid on every single bus cycle, in exchange for a cheaper package — and it is exactly the sort of trade that stops being worth it as soon as packaging gets cheap, which is why later processors abandoned it." },
+  { t: "analogy", concept: "Multiplexing and the latch", real: "Saying a phone number once", html: "You call out a house number to somebody across a noisy room, and then immediately start describing the parcel. You say the number <b>once</b>.<br/><br/>If the listener has not written it down by the time you move on, it is gone — you are already talking about something else on the same channel, and there is no way to tell your two sentences apart afterwards.<br/><br/>So they keep a notepad. The moment you say the number they write it down, and it stays on the pad for as long as they need it, while your voice carries on with the parcel. That notepad is the <b>latch</b>.<br/><br/>And the signal to write is not the number itself — it is you raising your hand as you say it. That is <b>ALE</b>: not the information, just the moment. Which is why the falling edge matters and not the level: the note is taken when your hand comes down." },
+
+  { t: "trace", intro: "One byte sent to a port, then a port read on top of it. Write each value as two hex digits.", code: "        MVI A, 7FH\n        OUT 80H\n        MVI A, 00H\n        IN 80H\n        HLT\n", steps: [
+    { q: "After line 1, <code>A</code> is", answer: "7F", accept: ["7fh"], why: "An ordinary immediate load — two machine cycles, no I/O pin involved yet." },
+    { q: "After line 2, <code>A</code> is", answer: "7F", accept: ["7fh"], why: "<code>OUT</code> puts a copy of the accumulator on the data pins with <code>IOW</code> active. Writing to the bus does not consume the byte, so A is unchanged." },
+    { q: "After line 4, <code>A</code> is", answer: "00", accept: ["0", "00h"], why: "<code>IN</code> reads a port into the accumulator, overwriting it. Nothing is connected to port 80H here, so the byte that came back is 00H — and whatever A held before is gone." },
+  ]},
+
+  { t: "drills", intro: "Eleven programs, read for their bus traffic. The T-state count is what the trips cost.", items: [
+    { task: "An immediate load — the byte is inside the instruction.", code: "MVI A, 42H\nHLT", show: ["A", "T"], out: "A=42 T=12" },
+    { task: "The same byte from memory, named directly.", code: "LDA 2050H\nHLT", show: ["A", "T"], out: "A=5A T=18" },
+    { task: "A register-to-register move — no bus trip after the fetch.", code: "MOV B, A\nHLT", show: ["T"], out: "T=9" },
+    { task: "A memory write.", code: "MVI A, 7FH\nSTA 2060H\nHLT", show: ["M:2060", "T"], out: "[2060]=7F T=25" },
+    { task: "An I/O write — same pins, different control line.", code: "MVI A, 7FH\nOUT 80H\nHLT", show: ["OUT", "T"], out: "OUT 80=7F T=22" },
+    { task: "An I/O read from a port with nothing on it.", code: "IN 80H\nHLT", show: ["A", "T"], out: "A=00 T=15" },
+    { task: "Reading through a pointer costs the LXI as well.", code: "LXI H, 2050H\nMOV A, M\nHLT", show: ["A", "T"], out: "A=5A T=22" },
+    { task: "A three-byte instruction with no data access.", code: "LXI H, 2050H\nHLT", show: ["T"], out: "T=15" },
+    { task: "Two bytes stored — how many memory writes?", code: "LXI H, 1234H\nSHLD 2060H\nHLT", show: ["M:2060-2061", "T"], out: "[2060..2061]=34 12 T=31" },
+    { task: "And two bytes read back.", code: "LHLD 2050H\nHLT", show: ["HL", "T"], out: "HL=2C5A T=21" },
+    { task: "An immediate load plus a register move.", code: "MVI A, 01H\nMOV B, A\nHLT", show: ["T"], out: "T=16" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; \"AD7-AD0 are the data bus\"", why: "They are the data bus for part of a machine cycle and the <b>low half of the address bus</b> for the rest of it. Calling them the data bus loses the entire reason the latch exists, which is what the question is usually really asking about.", fix: "; AD7-AD0: low address first, then data" },
+    { bad: "; \"ALE tells memory to read\"", why: "<code>RD</code> tells memory to read. <b>ALE</b> only says that the address/data pins are carrying an address right now — it is a signal about the pins, not about the memory, and the latch is the only thing that acts on it.", fix: "; ALE latches the address; RD does the reading" },
+    { bad: "; \"the latch is inside the 8085\"", why: "It is outside, on the board — usually a 74LS373. If it were inside there would be no reason to multiplex the pins in the first place, because the whole point was to send the address out on fewer wires.", fix: "; external latch, clocked by the falling edge of ALE" },
+    { bad: "; \"IO/M high means an I/O read\"", why: "<code>IO/M</code> chooses memory or device and says nothing about direction. It takes <b>two</b> signals to name one of the four operations, which is why the board decodes IO/M together with RD or WR.", fix: "; IO/M high + RD = IOR; IO/M high + WR = IOW" },
+  ]},
+
+  { t: "debug", intro: "A device on port 80H should receive 7FH, and so should a second device on port 82H. In between, the program reads a status port. It runs cleanly — and port 82H receives 00H. Read it before you open the fix.", show: ["A", "OUT"], code: "        MVI A, 7FH\n        OUT 80H         ; send it to the first device\n        IN 81H          ; check the status port\n        OUT 82H         ; send the same byte to the second device\n        HLT\n", symptom: "port 82H receives 00H when it should have received the same 7FH that port 80H got", q: "Both OUT instructions send the accumulator. So what changed the accumulator between them?", fix: "        MVI A, 7FH\n        MOV B, A        ; keep a copy\n        OUT 80H         ; send it to the first device\n        IN 81H          ; check the status port\n        MOV A, B        ; put it back\n        OUT 82H         ; send the same byte to the second device\n        HLT\n", why: "<code>IN</code> reads a port <b>into the accumulator</b>. There is no other destination — the 8085 has one accumulator and every I/O instruction goes through it — so the status byte from port 81H landed on top of the 7FH that had not been sent yet.<br/><br/>The fix is a copy: park the value in B before the input, and restore it afterwards. Any free register would do.<br/><br/>What makes this easy to miss is that <code>IN 81H</code> looks like it is <i>reading</i> something, and reads feel harmless. On this processor an input is also a write — to A — and so are <code>LDA</code>, <code>MOV A, M</code>, <code>POP PSW</code> and every arithmetic instruction. The accumulator is the busiest register on the chip and almost nothing leaves it alone.<br/><br/>The tell is that the wrong value is <b>whatever the port returned</b>, not garbage. When an output sends something that plainly came from somewhere else in the program, look for what wrote A between the two." },
+
+  { t: "recap", items: [
+    "Forty pins in nine groups: address, address/data, control and status, interrupts, serial, DMA, reset, clock, power",
+    "<b>A15–A8</b> carry address only, one way. <b>AD7–AD0</b> carry the low address <i>then</i> data, both ways",
+    "<b>ALE</b> is high only while an address is on those pins, and its <b>falling edge</b> clocks the external latch",
+    "The latch is <b>outside</b> the chip — typically a 74LS373 — and its outputs are A7–A0",
+    "<code>IO/M</code> with <code>RD</code> or <code>WR</code> decodes into <b>MEMR, MEMW, IOR, IOW</b>, all active low",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Why are the AD7–AD0 pins called address/data lines?", a: "Because they carry both, at different moments in the same machine cycle. During the first clock state they hold the low byte of the address; for the rest of the cycle they carry the data byte. Sharing them is how a 16-bit address, an 8-bit data path and everything else fit into a 40-pin package." },
+    { level: "beginner", q: "What is ALE and why is it needed?", a: "Address Latch Enable. It goes high while AD7–AD0 are carrying an address, and its falling edge tells an external latch to capture those eight bits and hold them for the rest of the machine cycle. Without it the low half of the address would disappear the moment the pins switched to carrying data, and memory would never see a complete address." },
+    { level: "intermediate", q: "How are MEMR, MEMW, IOR and IOW generated on an 8085 board?", a: "By decoding IO/M with RD and WR. IO/M low with RD active gives MEMR, IO/M low with WR gives MEMW, IO/M high with RD gives IOR and IO/M high with WR gives IOW. Two bits selecting one of four is a decoder, and all four outputs are active low, so it is normally built from NAND gates or a small decoder IC." },
+    { level: "intermediate", q: "Which 8085 pin is an input that makes the processor wait, and why would you use it?", a: "READY. If it is held low at the right point in a machine cycle the processor inserts wait states and holds the address and control signals steady until it goes high again. It exists because memory and peripherals are not all as fast as the processor — a slow EPROM can pull READY low to buy itself another clock period rather than forcing the whole system to run at its speed." },
+    { level: "advanced", q: "What would change if the 8085 had not multiplexed its bus?", a: "It would need eight more pins, so a larger and more expensive package, and every board would lose the external latch. It would also be faster: a memory read could not be shorter than three T-states largely because the address has to be sent and held before data can move, and a non-multiplexed design can overlap those. So the trade was a permanent speed cost on every bus cycle in exchange for a cheaper package — sensible when the package was the expensive part and the processor was sold on needing few support chips. It stopped being sensible as packaging got cheaper, which is why later processors dropped it, and it is a good example of an architectural decision that is right for its decade rather than right in general." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7273,6 +7359,7 @@ const mpLessons = [
   { slug: "mp-three-buses", order: 8, title: "The Three Buses", minutes: 14, problems: [], content: MP4 },
   { slug: "mp-register-set", order: 9, title: "The Register Set", minutes: 14, problems: [], content: MP5 },
   { slug: "mp-flag-register", order: 10, title: "The Flag Register, Bit by Bit", minutes: 14, problems: [], content: MP6 },
+  { slug: "mp-pins-and-signals", order: 11, title: "Pins and Signals", minutes: 14, problems: [], content: MP7 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7577,6 +7664,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-pins-and-signals": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How many pins does the 8085 have?", options: ["40", "28", "64", "16"], correct: 0, why: "Forty, in a standard dual in-line package — and fitting sixteen address lines, eight data lines and everything else into them is exactly why eight of the pins had to do two jobs." },
+    { level: "easy", q: "Which pins of the 8085 are multiplexed?", options: ["A15 to A8", "AD7 to AD0", "S0 and S1", "X1 and X2"], correct: 1, why: "They carry the low byte of the address at the start of a machine cycle and the data byte for the rest of it. A15 to A8 carry address only and stay steady the whole cycle." },
+    { level: "easy", q: "What does ALE tell the rest of the board?", options: ["That memory should read", "That an interrupt is pending", "That AD7 to AD0 are carrying an address right now", "That the processor is halted"], correct: 2, why: "It says nothing about reading or writing — RD and WR do that. ALE is purely an announcement about what the address/data pins are carrying at this moment." },
+    // Medium — apply it
+    { level: "medium", q: "What captures the low byte of the address, and when?", options: ["The processor, at the end of the cycle", "Memory, on the rising edge of RD", "Nothing — the address stays on the pins", "An external latch, on the falling edge of ALE"], correct: 3, why: "The falling edge is the moment the address is guaranteed valid and about to disappear. A 74LS373 copies those eight bits and holds them as A7 to A0 for the rest of the machine cycle." },
+    { level: "medium", q: "Where does the address latch physically sit?", options: ["Outside the 8085, on the board", "Inside the 8085, next to the register array", "Inside the memory chip", "It is part of the clock generator"], correct: 0, why: "Outside. If it were on the chip there would have been no reason to multiplex the pins in the first place — the whole aim was to send the address out over fewer wires." },
+    { level: "medium", q: "<code>IO/M</code> is high and <code>WR</code> is active. Which control signal does the board produce?", options: ["MEMW", "IOW", "MEMR", "IOR"], correct: 1, why: "IO/M chooses memory or device and WR chooses the direction. Two bits selecting one of four is a decoder, and all four outputs are active low." },
+    { level: "medium", q: "Why do the A15 to A8 pins need no external latch?", options: ["They are slower than the other pins", "They are latched inside memory", "They carry the address only, in one direction, for the whole machine cycle", "They are not used during a memory read"], correct: 2, why: "Nothing else ever appears on them and nothing outside drives them, so whatever the processor puts there is still there when memory needs it. Only the shared pins need help." },
+    // Hard — the edges
+    { level: "hard", q: "A slow memory chip holds the READY pin low. What does the 8085 do?", options: ["Raises an interrupt", "Repeats the machine cycle from the start", "Ignores it and reads whatever is there", "Inserts wait states and holds the address and control signals steady"], correct: 3, why: "It is the mechanism that lets fast processors work with slow parts: the peripheral buys itself extra clock periods instead of forcing the whole system to run at its speed." },
+    { level: "hard", q: "Why was the bus multiplexed at all?", options: ["Pins and packaging were the expensive part, and a latch on the board is cheaper", "It makes memory access faster", "It was needed for 16-bit addressing", "To reduce power consumption"], correct: 0, why: "A 40-pin package was the cheap standard part. Eight pins were saved on every processor ever made in exchange for one small chip on each board — a good trade in 1976, and one that stopped making sense as packaging got cheaper." },
+    { level: "hard", q: "A program sends a byte to port 40H, then does <code>IN 41H</code>, then sends the same byte to port 42H — and port 42H gets the wrong value. Why?", options: ["OUT clears the accumulator after sending", "IN reads the port into the accumulator, overwriting the byte", "Two OUT instructions cannot use the same value", "Port 42H needs its own address latch"], correct: 1, why: "The 8085 has one accumulator and every I/O instruction goes through it. An input looks harmless because it is a read, but on this processor it is also a write — to A. Save the byte in another register first." },
+  ],
   "mp-flag-register": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which bit of the flag byte is the carry flag?", options: ["Bit 0", "Bit 7", "Bit 4", "Bit 1"], correct: 0, why: "Carry sits at the bottom, sign at the top (bit 7), zero at bit 6, auxiliary carry at bit 4 and parity at bit 2. Bits 5, 3 and 1 are not flags at all." },
