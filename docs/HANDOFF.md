@@ -187,12 +187,33 @@ is, then carrying — and the shape changed with it:
 | | visible prose | visuals |
 |---|---|---|
 | Chapter 1 (lessons 1–4) | ~700–850 words | **3 each** |
-| Lessons 5–6 (old format) | 1,683 and 1,549 | 2 and 1 |
+| Lessons 5–6, before the rewrite | 1,683 and 1,549 | 2 and 1 |
+| Lessons 5–6, now | ~985 and ~1,040 | **3 each** |
 
-**Lessons 5 and 6 still need rewriting to that standard** — they are the only two
-left in the old shape. His instruction for everything here: *"ye soch kar concept
-likhna ki student es ke baare mai pahele se kuch nahi janta hai"*, and lean hard
-on clickable panels because that is what he found engaging.
+His instruction for everything here: *"ye soch kar concept likhna ki student es ke
+baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
+because that is what he found engaging.
+
+**Lessons 5 and 6 are rewritten to that standard**, so all six existing lessons
+are now in one shape and **lesson 7 (Chapter 2, "Inside the chip") is next**.
+Three panels were added for the rewrite, and what they teach is the part worth
+copying: each one carries an idea that prose was previously asserting.
+
+- **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
+  and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
+  point ("the job is in memory, not the wiring") is demonstrated rather than
+  claimed.
+- **`multi-byte-lab`** (lesson 6) — a 16-bit sum in two halves, with the
+  instruction *and the numbers* both switchable. The second number pair is the
+  whole point: with no carry out of the low byte, `ADI` and `ACI` agree, which is
+  why this bug survives testing.
+- **`micro-family-lab`** (lesson 6) — processor / controller / computer as one
+  dashed chip boundary with the parts moving across it.
+
+To keep a rewrite honest, measure it rather than eyeballing it: strip the tags
+from `JSON.stringify` of each block and total the ones a student actually reads
+(`objectives hook def note p h2 think analogy recap`). Chapter 1 sits at
+1,035–1,185 on that scale; the two old lessons were 2,123 and 2,033.
 
 ### What is left
 
@@ -264,6 +285,25 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 - **New visuals need a `const` sweep.** `prefer-const` is an error, not a
   warning, and a `let` copied from an existing component will fail lint after
   the build has already passed.
+- **An HTML entity in a JSX text run eats the space in front of it.** Write
+  `<b>3E</b> means &ldquo;load…&rdquo;` and the page renders **`3Emeans`** — the
+  leading space of that text run is trimmed, but only when the run contains an
+  entity (`&ldquo;`, `&quot;`, `&apos;`). The same sentence without one keeps its
+  space, which is why it looks random and why three shipped lessons had it
+  (`encapsulation`, `sql-advanced`, `hypothesis-testing`, plus `asm8085-lab`).
+  Fix with an explicit `{" "}` after the closing tag — the idiom already in
+  `Arch8085Lab`. **Sweep for it after any component edit**, because it survives
+  lint, the build and a passing `db:check`:
+  ```
+  curl -s http://localhost:3000/learn/<slug> | grep -o '</b>[a-zA-Z]\{2,14\}\|</code>[a-zA-Z]\{2,14\}'
+  ```
+  Run it over every slug; a hit like `</b>attaches` is the bug, while
+  `</b>nary` (from `<b>bi</b>nary`) is deliberate.
+- **A component declared inside another component's body is a lint error.**
+  `react-hooks/static-components` — a `const Cell = (...) => …` helper written
+  during render is a new type every render, so React remounts its subtree. Move
+  it to module scope. It fails lint, not the build, so run `npx eslint` on new
+  components before you trust a green `npm run build`.
 - **`def.en` and `def.hi` are plain-text fields.** Markup in them prints
   literally — `<code>` tags appear on the page as `<code>`. `db:check` catches
   it, but only after `db:lessons` has already pushed it to the live database.

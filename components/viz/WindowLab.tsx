@@ -83,7 +83,7 @@ export function WindowLab() {
       </div>
 
       <div className="note tip" style={{ marginTop: 14 }}><span className="i">💡</span><div>
-        The <b>top</b> column holds the same numbers in both. What changes is the row count: <b>GROUP BY</b> gives one row per department and throws the names away, while <b>OVER</b> attaches the group&apos;s answer to every original row and keeps them all. That is the entire idea, and it is why a window function can answer &quot;who earns the most in their department&quot; when a GROUP BY cannot.
+        The <b>top</b> column holds the same numbers in both. What changes is the row count: <b>GROUP BY</b> gives one row per department and throws the names away, while <b>OVER</b>{" "}attaches the group&apos;s answer to every original row and keeps them all. That is the entire idea, and it is why a window function can answer &quot;who earns the most in their department&quot; when a GROUP BY cannot.
       </div></div>
     </div>
   );

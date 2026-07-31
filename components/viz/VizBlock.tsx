@@ -74,6 +74,8 @@ import { MemoryStreetLab, MemoryRwLab, AddressWidthLab } from "./MemoryLabs";
 import { ProgramBytesLab, InstructionBytesLab, ByteOrderLab } from "./ProgramBytesLab";
 import { BinaryAddLab, RolloverLab, FlagAnswersLab } from "./CarryLabs";
 import { BitSwitchLab, DoublingLab, HexLab } from "./BitBasicsLab";
+import { ProgrammableLab } from "./ProgrammableLab";
+import { MultiByteLab, MicroFamilyLab } from "./EvolutionLabs";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -141,6 +143,9 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "asm8085-lab": Asm8085Lab,
   "cpu-evolution-lab": CpuEvolutionLab,
   "arch-8085-lab": Arch8085Lab,
+  "programmable-lab": ProgrammableLab,
+  "multi-byte-lab": MultiByteLab,
+  "micro-family-lab": MicroFamilyLab,
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,

@@ -331,8 +331,9 @@ export function Asm8085Lab() {
         <div>
           Change something and it re-runs. Delete the <code>HLT</code> and read the message — the
           processor does not know your program has ended, it just keeps fetching. Then put{" "}
-          <code>MVI C, 0FFH</code> in the delay loop and watch the T-state counter, which is exactly
-          the calculation asked for in &ldquo;design a 1 ms delay&rdquo;.
+          <code>MVI C, 0FFH</code>{" "}
+          in the delay loop and watch the T-state counter, which is exactly the calculation asked
+          for in &ldquo;design a 1 ms delay&rdquo;.
         </div>
       </div>
     </div>

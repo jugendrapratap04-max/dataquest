@@ -77,7 +77,7 @@ export function PValueLab() {
       </label>
 
       <div className="note tip" style={{ marginTop: 14 }}><span className="i">💡</span><div>
-        <b>1.96 is where p crosses 0.05</b> — the famous threshold is nothing more than that point on this curve. Note the shading is on <i>both</i> sides: a two-tailed test asks &quot;this extreme in either direction&quot;. Halving it to chase significance is a one-tailed test, and it has to be chosen before you see the data, not after.
+        <b>1.96 is where p crosses 0.05</b> — the famous threshold is nothing more than that point on this curve. Note the shading is on <i>both</i>{" "}sides: a two-tailed test asks &quot;this extreme in either direction&quot;. Halving it to chase significance is a one-tailed test, and it has to be chosen before you see the data, not after.
       </div></div>
     </div>
   );

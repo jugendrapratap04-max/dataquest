@@ -69,7 +69,7 @@ export function EncapsulationLab() {
         <span className="viz-badge">interactive</span>
       </div>
       <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "0 0 10px" }}>
-        An <code>Account</code> keeps three fields at three levels. Try to reach each one <b>from outside</b>
+        An <code>Account</code> keeps three fields at three levels. Try to reach each one <b>from outside</b>{" "}
         the class and see what Python really does.
       </p>
 
