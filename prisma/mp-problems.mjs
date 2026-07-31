@@ -914,6 +914,68 @@ const mpProblems = [
       "Move the pointer first, then compare — the first byte is already in A before the loop starts.",
       "The second test has the largest byte first and the third has it last, so a program that assumes either fails."],
     ["8085", "addressing", "compare"]),
+
+  /* ============== 16. Data Transfer Instructions ============== */
+  MP("mp-data-transfer", "Easy", 351, "mp-swap-two-16bit", "Swap Two 16-Bit Values",
+    "Two 16-bit values are stored at **2050H** and **2052H**, each low byte first. Write them out **the other way round** at **2060H** and **2062H** — the second value first, then the first.\n\nOnly `LHLD` and `SHLD` move sixteen bits to and from named addresses, and both of them always use HL. `XCHG` is what lets you hold on to one value while loading the other.\n\nDoing this a byte at a time would work and take four times as many instructions.",
+    [{ input: "2050H = 1234H, 2052H = ABCDH", output: "2060H = ABCDH, 2062H = 1234H" }],
+    "        LHLD 2050H      ; the first value\n        ; park it, load the second, and write them out swapped\n" + HALT,
+    "        LHLD 2050H\n        XCHG\n        LHLD 2052H\n        SHLD 2060H\n        XCHG\n        SHLD 2062H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12, [A50 + 2]: 0xcd, [A50 + 3]: 0xab }, check: ["M:2060-2063"] },
+      { memory: { [A50]: 0x00, [A50 + 1]: 0x30, [A50 + 2]: 0xff, [A50 + 3]: 0x0f }, check: ["M:2060-2063"] },
+    ],
+    ["`LHLD` always loads HL, so the first value has to be moved out of the way before the second is loaded.",
+      "`XCHG` moves a whole pair in one byte and costs four T-states.",
+      "`SHLD` stores L then H, which matches the order the inputs are written in.",
+      "Two XCHGs and two SHLDs is enough — no MOV is needed anywhere."],
+    ["8085", "data-transfer", "16-bit"]),
+
+  MP("mp-data-transfer", "Easy", 352, "mp-copy-block-transfer", "Copy Five Bytes",
+    "Copy the **five** bytes at **2050H** to **2060H**, in the same order.\n\nThere is no memory-to-memory move on this processor, so each byte goes out to a register and back: `LDAX D` reads through DE and `MOV M, A` writes through HL.\n\nBoth pointers step forward every pass, and `C` counts.",
+    [{ input: "AAH BBH CCH DDH EEH", output: "2060H..2064H = AAH BBH CCH DDH EEH" }],
+    "        LXI D, 2050H    ; source\n        LXI H, 2060H    ; destination\n        MVI C, 05H\n        ; copy five bytes\n" + HALT,
+    "        LXI D, 2050H\n        LXI H, 2060H\n        MVI C, 05H\nLOOP:   LDAX D\n        MOV M, A\n        INX D\n        INX H\n        DCR C\n        JNZ LOOP\n        HLT\n",
+    [
+      { memory: { [A50]: 0xaa, [A50 + 1]: 0xbb, [A50 + 2]: 0xcc, [A50 + 3]: 0xdd, [A50 + 4]: 0xee }, check: ["M:2060-2064"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04, [A50 + 4]: 0x05 }, check: ["M:2060-2064"] },
+    ],
+    ["`LDAX D` reads the byte at the address in DE — the only indirect read the other pairs get.",
+      "`MOV M, A` writes through HL, because M is always HL.",
+      "Both `INX D` and `INX H` are needed every pass.",
+      "Neither transfer touches a flag, so `DCR C` at the end of the loop still controls it."],
+    ["8085", "data-transfer", "loops"]),
+
+  MP("mp-data-transfer", "Medium", 353, "mp-copy-reversed", "Copy a Block Backwards",
+    "Copy the **four** bytes at **2050H** to **2060H**, but in **reverse order** — the first source byte goes to 2063H and the last goes to 2060H.\n\nOnly one thing changes from an ordinary copy: the destination pointer starts at the far end and counts **down**.\n\n`DCX H` is the decrementing twin of `INX H`, and like it, it sets no flags at all.",
+    [{ input: "11H 22H 33H 44H", output: "2060H..2063H = 44H 33H 22H 11H" }],
+    "        LXI D, 2050H    ; source, going up\n        LXI H, 2063H    ; destination, going down\n        MVI C, 04H\n" + HALT,
+    "        LXI D, 2050H\n        LXI H, 2063H\n        MVI C, 04H\nLOOP:   LDAX D\n        MOV M, A\n        INX D\n        DCX H\n        DCR C\n        JNZ LOOP\n        HLT\n",
+    [
+      { memory: { [A50]: 0x11, [A50 + 1]: 0x22, [A50 + 2]: 0x33, [A50 + 3]: 0x44 }, check: ["M:2060-2063"] },
+      { memory: { [A50]: 0xaa, [A50 + 1]: 0xbb, [A50 + 2]: 0xcc, [A50 + 3]: 0xdd }, check: ["M:2060-2063"] },
+    ],
+    ["The destination pointer starts at 2063H, which is the last byte of the four, not 2064H.",
+      "`DCX H` moves it back by one each pass.",
+      "The source pointer still goes forwards with `INX D`.",
+      "`DCX` sets no flags, so it is safe to put between the copy and the `DCR C`."],
+    ["8085", "data-transfer", "loops"]),
+
+  MP("mp-data-transfer", "Medium", 354, "mp-preserve-flags", "Keep the Flags Across a Transfer",
+    "Compute `05H - 09H`, which borrows and leaves FCH in the accumulator with the carry set. Then copy the byte at **2050H** to **2060H**, and finally store the **original subtraction result** at **2061H**.\n\nThe data transfers in the middle will not disturb the flags — that is the whole point of the group — but they will destroy the accumulator, because `LDA` writes to it.\n\n`PUSH PSW` and `POP PSW` save and restore the accumulator and the flag byte together.",
+    [{ input: "2050H = 5AH", output: "2060H = 5AH, 2061H = FCH" }],
+    "        MVI A, 05H\n        SUI 09H         ; A = FCH, carry set\n        ; copy 2050H to 2060H, then store FCH at 2061H\n" + HALT,
+    "        MVI A, 05H\n        SUI 09H\n        PUSH PSW\n        LDA 2050H\n        STA 2060H\n        POP PSW\n        STA 2061H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x5a }, check: ["A", "M:2060", "M:2061"] },
+      { memory: { [A50]: 0x77 }, check: ["A", "M:2060", "M:2061"] },
+      { memory: { [A50]: 0x01 }, check: ["A", "M:2060", "M:2061"] },
+    ],
+    ["`PUSH PSW` saves the accumulator and the flag byte as one 16-bit value.",
+      "`LDA` overwrites the accumulator — a load is always a write to its destination.",
+      "`POP PSW` brings both back, so the subtraction result is in A again.",
+      "Any spare register would also work here; PSW is the one that brings the flags with it."],
+    ["8085", "data-transfer", "stack"]),
 ];
 
 export { mpProblems };

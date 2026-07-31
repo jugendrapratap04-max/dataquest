@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**15 written, 57 problems.** Read that file before touching this subject.
+**16 written, 61 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -195,9 +195,9 @@ baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
 **Chapters 2 and 3 are both finished** — lessons 5 to 13 are all at that
-standard, so the whole subject is in one shape and **lesson 16 ("Data transfer
-instructions") is next in Chapter 4**. Twenty-six panels were built across those
-eleven lessons, and what they teach is the part worth copying: each one carries an
+standard, so the whole subject is in one shape and **lesson 17 ("Arithmetic
+and the flags") is next in Chapter 4**. Twenty-eight panels were built across those
+twelve lessons, and what they teach is the part worth copying: each one carries an
 idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine

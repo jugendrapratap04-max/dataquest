@@ -7360,6 +7360,94 @@ const MP11 = [
   ]},
 ];
 
+const MP12 = [
+  { t: "objectives", items: [
+    "Name every data transfer instruction and say what it moves, from where to where",
+    "Say the one thing they all have in common: <b>none of them touches a flag</b>",
+    "Use the <b>16-bit</b> transfers — <code>LXI</code>, <code>LHLD</code>, <code>SHLD</code>, <code>XCHG</code>",
+    "Explain what <code>XTHL</code> does, and why the stack pointer does not move",
+  ]},
+  { t: "hook", q: "This is the biggest group in the instruction set and every instruction in it does the same thing: move a byte. So why does it need fourteen instructions instead of one?", why: "Because <i>where from</i> and <i>where to</i> are what an instruction is mostly made of, and each combination needs its own opcode.<br/><br/>Register to register is one byte. Memory to register through a pointer is one byte. Memory to the accumulator by name is three. A whole pair from two named addresses is three. They are all \"move a byte\" and they cost between four and sixteen T-states, because the cost is in the journey rather than the moving.<br/><br/>And there is one thing every single one of them shares, which is worth more than the list: <b>not one of them changes a flag</b>. That is what makes this group the safe one — the only instructions you can put between a comparison and the jump that reads its answer." },
+  { t: "def", term: "Data transfer", en: "The group of instructions that copy a byte or a 16-bit value from one place to another without computing anything. Sources and destinations include registers, register pairs, memory reached directly or through a pointer, and I/O ports. Because nothing is calculated, no flag is set.", hi: "The word is <b>copy</b>, not move. Nothing on this processor empties a register — <code>MOV B, A</code> leaves A exactly as it was, and so does every other instruction in the group. A register is eight flip-flops and always holds something." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> the recall question is \"list the data transfer instructions with examples\", which is easy marks. The one that separates answers is <i>which flags do they affect</i> — the answer is none, and knowing why it matters is what makes it a real answer: a MOV between a CMP and a JZ is safe, and an ADD is not." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44, 51], note: "Three bytes at 2050H onwards — 5AH, 2CH and 33H. The direct and indirect loads below all read them." },
+
+  { t: "h2", n: "1", text: "Fourteen instructions, one job" },
+  { t: "p", html: "The whole group is a table of <b>from</b> and <b>to</b>. Read it that way and there is nothing left to memorise." },
+  { t: "viz", name: "transfer-map-lab" },
+  { t: "p", html: "Two gaps in that table are worth noticing. There is <b>no memory-to-memory move</b> — every byte has to pass through a register — and <code>LDA</code> and <code>STA</code> only work with the <b>accumulator</b>, never with B or C." },
+  { t: "code", file: "noflags.asm", lang: "asm8085", show: ["A", "CY", "S"], code: "        MVI A, 05H\n        SUI 09H         ; borrows: CY = 1, S = 1\n        MVI B, 00H      ; four data transfers follow\n        LDA 2050H\n        MOV C, A\n        STA 2060H\n        HLT\n", output: "A=5A CY=1 S=1" },
+  { t: "p", html: "The accumulator was completely rewritten — <code>SUI</code> left FCH in it and <code>LDA</code> replaced that with 5AH — and <code>CY</code> and <code>S</code> still describe the subtraction from five instructions earlier. Nothing in between reported anything, because nothing in between computed anything." },
+
+  { t: "h2", n: "2", text: "Moving sixteen bits at a time" },
+  { t: "p", html: "Four instructions move a whole pair, and they are the ones that make pointers practical." },
+  { t: "code", file: "sixteen.asm", lang: "asm8085", show: ["HL", "DE", "M:2060-2061"], code: "        LHLD 2050H      ; L from 2050H, H from 2051H\n        XCHG            ; park it in DE\n        LXI H, 1234H\n        SHLD 2060H      ; store L then H\n        HLT\n", output: "HL=1234 DE=2C5A [2060..2061]=34 12" },
+  { t: "p", html: "<code>LHLD</code> read two bytes into HL and <code>XCHG</code> moved them to DE in a single byte. Then <code>SHLD</code> wrote 1234H back out as <b>34 12</b> — low byte first, which is why a value written by <code>SHLD</code> reads back correctly with <code>LHLD</code>." },
+
+  { t: "h2", n: "3", text: "The four pair moves, including the strange one" },
+  { t: "p", html: "Three of these are what they look like. The fourth catches almost everybody." },
+  { t: "viz", name: "pair-move-lab" },
+  { t: "p", html: "<code>XTHL</code> exchanges HL with the two bytes on <b>top of the stack</b>, and the stack pointer does not move — nothing is pushed and nothing is popped, the two values trade places. That is what makes it an exchange rather than a pop-and-push." },
+  { t: "code", file: "xthl.asm", lang: "asm8085", show: ["HL", "M:23FE-23FF"], code: "        LXI SP, 2400H\n        LXI H, 1234H\n        PUSH H          ; 1234H is now on the stack\n        LXI H, 0ABCDH\n        XTHL            ; they swap\n        HLT\n", output: "HL=1234 [23FE..23FF]=CD AB" },
+  { t: "p", html: "HL got the stacked 1234H and the stack got ABCDH. Both survived, and the stack is exactly as deep as it was before the <code>XTHL</code> ran." },
+
+  { t: "h2", n: "4", text: "Ports are transfers too" },
+  { t: "p", html: "<code>IN</code> and <code>OUT</code> belong to this group, and the important half is the one that surprises people." },
+  { t: "code", file: "ports.asm", lang: "asm8085", show: ["A", "OUT"], code: "        LDA 2050H\n        OUT 40H         ; send it\n        IN 41H          ; read a status port\n        HLT\n", output: "A=00 OUT 40=5A" },
+  { t: "p", html: "The <code>OUT</code> sent 5AH and left the accumulator alone. The <code>IN</code> then <b>overwrote</b> it with whatever port 41H returned, which here is 00H — because an input is also a write, to A." },
+  { t: "viz", name: "asm8085-lab" },
+  { t: "p", html: "Run any of this page's examples in the lab and step through them. Watch the flag row while a data transfer executes: it never changes, no matter how large the value being moved is." },
+
+  { t: "think", q: "Why is there no instruction that moves a byte from one memory location to another?", a: "Because it would need two addresses, and an instruction cannot carry two.<br/><br/>A direct address is sixteen bits, so an instruction with two of them would be five bytes long — one opcode plus four. That is longer than anything the 8085 has, and it would need two extra machine cycles on top of the ones a three-byte instruction already costs.<br/><br/>The indirect version has a different problem: there is only one pointer register that works with <code>M</code>. A memory-to-memory move would need two pointers active at once and a way to name both, and the opcode has no field for it.<br/><br/>So every byte goes through a register, which is why a block copy is <code>MOV A, M</code> then <code>STAX D</code> rather than one instruction. It is worth noticing that this is not a quirk of small machines: the same argument shapes modern instruction sets too, and where memory-to-memory moves do exist — the 8086's string instructions, for instance — they use <i>implied</i> registers exactly because there is no room to name them." },
+  { t: "analogy", concept: "Data transfer", real: "Photocopying, not carrying", html: "Every instruction in this group is a <b>photocopier</b>, not a courier. The original stays exactly where it was.<br/><br/>That is why <code>MOV B, A</code> leaves A holding what it held, and why a swap by hand needs somewhere to stand: copy the first sheet to a spare tray before you copy the second one over it, or the first is gone.<br/><br/>The <b>flags</b> are a clerk who watches the arithmetic department and writes a note about every calculation. The photocopier is a different department entirely — it does not calculate anything, so the clerk has nothing to write and the last note stays on the counter.<br/><br/>And there is no machine that copies from one filing cabinet directly to another. Everything goes onto the desk first, because the desk is the only place with hands." },
+
+  { t: "trace", intro: "Four transfers in a row. Write each value the way the processor holds it.", code: "        LXI H, 2050H\n        MOV A, M\n        MOV B, A\n        XCHG\n        HLT\n", steps: [
+    { q: "After line 2, <code>A</code> is", answer: "5A", accept: ["5ah"], why: "Register indirect: the byte at the address in HL. One byte of instruction, seven T-states, and no flag moved." },
+    { q: "After line 3, <code>B</code> is", answer: "5A", accept: ["5ah"], why: "<code>MOV</code> copies — A still holds 5AH as well. There is no instruction on this processor that empties a register." },
+    { q: "After line 4, <code>HL</code> is", answer: "0000", accept: ["0000h", "0"], why: "<code>XCHG</code> swaps HL with DE, and DE was never loaded, so it held 0000H. The swap is real and complete — which is exactly why you have to know what is in DE before you use it." },
+  ]},
+
+  { t: "drills", intro: "Eleven transfers. Predict the result, then open — and none of them changes a flag.", items: [
+    { task: "A byte copied twice.", code: "MVI A, 42H\nMOV B, A\nMOV C, B\nHLT", show: ["A", "B", "C"], out: "A=42 B=42 C=42" },
+    { task: "Read through a pointer.", code: "LXI H, 2050H\nMOV A, M\nHLT", show: ["A"], out: "A=5A" },
+    { task: "Write through a pointer.", code: "MVI A, 77H\nLXI H, 2060H\nMOV M, A\nHLT", show: ["M:2060"], out: "[2060]=77" },
+    { task: "Read and write by name.", code: "LDA 2050H\nSTA 2060H\nHLT", show: ["A", "M:2060"], out: "A=5A [2060]=5A" },
+    { task: "Load a pair from two addresses.", code: "LHLD 2050H\nHLT", show: ["HL"], out: "HL=2C5A" },
+    { task: "Store a pair. Which byte goes first?", code: "LXI H, 1234H\nSHLD 2060H\nHLT", show: ["M:2060-2061"], out: "[2060..2061]=34 12" },
+    { task: "Indirect through DE instead of HL.", code: "LXI D, 2050H\nLDAX D\nHLT", show: ["A"], out: "A=5A" },
+    { task: "And writing indirect through BC.", code: "MVI A, 99H\nLXI B, 2060H\nSTAX B\nHLT", show: ["M:2060"], out: "[2060]=99" },
+    { task: "Swap two pairs in one byte.", code: "LXI H, 1234H\nLXI D, 0ABCDH\nXCHG\nHLT", show: ["HL", "DE"], out: "HL=ABCD DE=1234" },
+    { task: "Do the flags survive a MOV?", code: "MVI A, 05H\nSUI 09H\nMOV B, A\nHLT", show: ["B", "CY", "S"], out: "B=FC CY=1 S=1" },
+    { task: "Send a byte to a port.", code: "MVI A, 7FH\nOUT 20H\nHLT", show: ["OUT"], out: "OUT 20=7F" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MOV 2060H, A", why: "<code>MOV</code> only names registers and <code>M</code>. Writing to a named address is <code>STA</code>, which is a different instruction with a different opcode and three bytes instead of one.", fix: "STA 2060H" },
+    { bad: "LDA 2050H\nSTA 2060H\n; \"moved it\"", why: "Copied it. 2050H still holds what it held — nothing on this processor empties a source. If the original must go, something has to overwrite it deliberately.", fix: "LDA 2050H\nSTA 2060H\nXRA A\nSTA 2050H" },
+    { bad: "LDA 2050H\nMOV B, M", why: "Two different addressing modes reaching for two different things. <code>LDA</code> read from 2050H by name, but <code>M</code> reads from wherever <b>HL</b> points — and HL was never set, so this reads address 0000H.", fix: "LXI H, 2050H\nMOV A, M\nMOV B, M" },
+    { bad: "LXI B, 2050H\nMOV A, M", why: "<code>M</code> is always HL, never BC or DE. The indirect instruction for the other pairs is <code>LDAX</code>, and it only loads the accumulator.", fix: "LXI B, 2050H\nLDAX B" },
+  ]},
+
+  { t: "debug", intro: "This stores 1234H at 2060H and ABCDH at 2062H. It runs cleanly and both slots end up holding 1234H. Read it before you open the fix.", show: ["HL", "M:2060-2063"], code: "        LXI H, 1234H\n        SHLD 2060H\n        LXI H, 0ABCDH\n        LHLD 2060H      ; check what we stored\n        SHLD 2062H\n        HLT\n", symptom: "both slots finish holding 1234H, and ABCDH never reaches memory at all", q: "What was in HL when the second SHLD ran, and which instruction put it there?", fix: "        LXI H, 1234H\n        SHLD 2060H\n        LXI H, 0ABCDH\n        SHLD 2062H\n        HLT\n", why: "<code>LHLD 2060H</code> loaded HL from memory — which is exactly what it is for — and in doing so it threw away the ABCDH that had just been put there. The next <code>SHLD</code> then stored what it found, which was 1234H all over again.<br/><br/>The fix is to delete the check. It was reading a value the program already knew, and the cost of looking was the value itself.<br/><br/>What makes this worth a debug task is that <code>LHLD</code> looks like a read, and reads feel harmless. On this processor a load is always <b>also a write</b> — to whatever it loads into — and HL is the register most likely to be holding something you still need.<br/><br/>The tell is the duplicate. When two slots that should differ end up identical, look for an instruction between them that quietly reloaded the register they both came from." },
+
+  { t: "recap", items: [
+    "Data transfer copies; <b>nothing on this processor empties a source</b>",
+    "<b>Not one instruction in the group touches a flag</b> — which is what makes it safe between a compare and a jump",
+    "There is <b>no memory-to-memory move</b>: every byte passes through a register",
+    "16-bit moves: <code>LXI</code>, <code>LHLD</code>, <code>SHLD</code>, <code>XCHG</code>, <code>SPHL</code>, <code>PCHL</code>, <code>XTHL</code> — all low byte first in memory",
+    "<code>XTHL</code> swaps HL with the top of the stack and <b>the stack pointer does not move</b>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Which flags do the data transfer instructions affect?", a: "None of them. Nothing is computed, so there is nothing to report. It is the most useful fact about the group in practice, because it means a MOV, an LDA or an LXI can sit between a compare and the conditional jump that reads its verdict without destroying it — which an ADD or an ORA would." },
+    { level: "beginner", q: "What is the difference between <code>MOV</code> and <code>MVI</code>?", a: "MOV copies between two registers, or between a register and the byte in memory at HL, and it is one byte because both operands are register codes inside the opcode. MVI loads an immediate value — a constant carried in the instruction — so it is two bytes. The names are one letter apart and they are different instructions with different opcodes." },
+    { level: "intermediate", q: "Why is there no instruction to move a byte from one memory location to another?", a: "It would need two 16-bit addresses, making a five-byte instruction, which is longer than anything the 8085 has. The indirect version fails for a different reason: only HL works with M, so two live pointers cannot both be named in one opcode. Every byte therefore passes through a register — MOV A, M then STAX D, or LDAX D then MOV M, A." },
+    { level: "intermediate", q: "What does <code>XTHL</code> do?", a: "It exchanges the HL pair with the two bytes at the top of the stack — L with the byte at SP and H with the byte at SP+1. The stack pointer does not change, so nothing is pushed or popped; the two values simply trade places. It is used to get at a value already on the stack without disturbing what is above or below it." },
+    { level: "advanced", q: "A subroutine returns the wrong value, and the bug turns out to be an <code>LHLD</code> in the middle of it. How does that happen?", a: "Because LHLD is a write as well as a read. It looks like an inspection — go and see what is in memory — but its destination is HL, and HL is usually the register holding the pointer or the result the routine is working with. Anything in HL at that moment is gone. The same trap exists for LDA and IN, which both overwrite the accumulator, and for POP, which overwrites a pair. The habit that avoids it is to treat every load as a write to its destination and to ask what that destination was holding, which in practice means pushing HL before a routine that needs to look something up and popping it afterwards. It is also an argument for computing addresses into DE and moving them with XCHG only when needed, so HL is occupied for as few instructions as possible." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7712,6 +7800,7 @@ const mpLessons = [
   { slug: "mp-timing-diagrams", order: 13, title: "Machine Cycles, T-States and Timing Diagrams", minutes: 15, problems: [], content: MP9 },
   { slug: "mp-instruction-set", order: 14, title: "The Instruction Set, Classified", minutes: 14, problems: [], content: MP10 },
   { slug: "mp-addressing-modes", order: 15, title: "Addressing Modes", minutes: 14, problems: [], content: MP11 },
+  { slug: "mp-data-transfer", order: 16, title: "Data Transfer Instructions", minutes: 14, problems: [], content: MP12 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -8016,6 +8105,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-data-transfer": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which flags do the data transfer instructions affect?", options: ["None of them", "All five", "Only the zero flag", "Only the carry flag"], correct: 0, why: "Nothing is computed, so there is nothing to report. It is what makes a MOV safe between a compare and the conditional jump that reads its verdict." },
+    { level: "easy", q: "After <code>MOV B, A</code>, what is in A?", options: ["Zero", "Whatever it held before — MOV copies", "Undefined", "The old contents of B"], correct: 1, why: "Nothing on this processor empties a register. A register is eight flip-flops and always holds something, so every transfer is a copy." },
+    { level: "easy", q: "What is the difference between <code>MOV</code> and <code>MVI</code>?", options: ["MVI is faster", "MOV works on pairs and MVI on single registers", "MOV copies between registers; MVI loads a constant carried in the instruction", "They are the same instruction"], correct: 2, why: "MOV is one byte because both operands are register codes inside the opcode. MVI is two, because the constant travels with it." },
+    // Medium — apply it
+    { level: "medium", q: "Why is there no instruction that moves a byte straight from one memory location to another?", options: ["It would be too slow", "Memory-to-memory is only possible with DMA", "It exists but is undocumented", "Two 16-bit addresses would make a five-byte instruction, and only HL works with M"], correct: 3, why: "Every byte therefore passes through a register — MOV A, M then STAX D, or LDAX D then MOV M, A." },
+    { level: "medium", q: "<code>SHLD 2060H</code> with HL = 1234H writes which bytes?", options: ["12H at 2060H and 34H at 2061H", "34H at 2060H and 12H at 2061H", "1234H at 2060H only", "34H at 2060H only"], correct: 1, why: "Low byte first, as everywhere else in 8085 machine code — which is why a value written by SHLD reads back correctly with LHLD." },
+    { level: "medium", q: "What does <code>XCHG</code> do?", options: ["Copies HL into DE", "Swaps H with L", "Swaps the whole of HL with the whole of DE, in one byte", "Exchanges the accumulator with memory"], correct: 2, why: "Both halves at once, four T-states. Doing it by hand with MOV needs a spare register and three steps, because MOV copies rather than moves." },
+    { level: "medium", q: "Which pair does <code>LDAX</code> work with?", options: ["HL only", "BC or DE", "Any pair including SP", "HL or SP"], correct: 1, why: "BC and DE get LDAX and STAX for indirect addressing, and both only move the accumulator. HL gets M instead, which also works with arithmetic." },
+    // Hard — the edges
+    { level: "hard", q: "<code>XTHL</code> exchanges HL with the top of the stack. What happens to the stack pointer?", options: ["It increases by two", "It decreases by two", "It becomes equal to HL", "Nothing — it does not move at all"], correct: 3, why: "Nothing is pushed and nothing is popped; the two values trade places. That is what makes XTHL an exchange rather than a pop followed by a push." },
+    { level: "hard", q: "A routine works until an <code>LHLD</code> is added in the middle to check a stored value. Why does that break it?", options: ["LHLD writes to HL, destroying whatever pointer or result was there", "LHLD sets the zero flag", "LHLD is a three-byte instruction and shifts the addresses", "LHLD cannot be used inside a subroutine"], correct: 0, why: "A load looks like an inspection but its destination is HL. Treat every load as a write to its destination, and ask what that destination was holding." },
+    { level: "hard", q: "Which of these overwrites the accumulator, even though it looks like it only reads?", options: ["OUT 80H", "STA 2060H", "IN 80H", "MOV M, A"], correct: 2, why: "An input is also a write — to A. That is why a byte you still need has to be parked in another register before an IN, and it is the single-accumulator design showing through." },
+  ],
   "mp-addressing-modes": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which addressing mode does <code>MVI A, 5AH</code> use?", options: ["Immediate", "Direct", "Register indirect", "Implied"], correct: 0, why: "The value travels inside the instruction, in the byte right after the opcode. Nothing is fetched from anywhere else, which is why it is the cheapest way to load a known constant." },
