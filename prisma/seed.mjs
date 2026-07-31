@@ -7272,6 +7272,94 @@ const MP10 = [
   ]},
 ];
 
+const MP11 = [
+  { t: "objectives", items: [
+    "Name the <b>five addressing modes</b> and say what question each one answers",
+    "Recognise the mode from the instruction, without looking anything up",
+    "Say why <b>register indirect</b> is the only mode a loop can use",
+    "Choose between <b>direct</b> and <b>indirect</b> on the two things that differ: bytes and reach",
+  ]},
+  { t: "hook", q: "<code>MVI A, 5AH</code>, <code>MOV A, B</code>, <code>LDA 2050H</code> and <code>MOV A, M</code> can all end with 5AH in the accumulator. Four instructions, one result. What is actually different?", why: "Where the 5AH came from — and that is the whole idea of an addressing mode.<br/><br/>One carried it inside the instruction. One found it in another register. One went to an address written into the program. One went to an address that was sitting in HL. Same destination, four different journeys, and each journey costs a different number of bytes and clock cycles.<br/><br/>There are five modes in total on this processor, and the reason to learn them is not the names. It is that <b>only one of them can reach a different byte on each pass of a loop</b>, and knowing which one is the difference between a program that walks an array and a program that reads the same byte a hundred times." },
+  { t: "def", term: "Addressing mode", en: "How an instruction says where its operand is. The 8085 has five: immediate (the value is in the instruction), register (it is in a named register), direct (its address is in the instruction), register indirect (its address is in a register pair) and implied (the operand is the accumulator, and the instruction does not name it at all).", hi: "The mode is not a property you look up — it is visible in what the instruction is written with. A number after the comma is immediate, a register name is register, a 16-bit address is direct, an <code>M</code> is indirect, and no operand at all is implied." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"explain the addressing modes of the 8085 with examples\" is a guaranteed question and an easy one — five names, five examples. The follow-up that separates answers is <i>why register indirect exists when direct already works</i>, and the answer is on this page: a direct address is baked into the instruction and can never move." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44, 51], note: "Three bytes at 2050H, 2051H and 2052H — 5AH, 2CH and 33H. Every example below reaches them a different way." },
+
+  { t: "h2", n: "1", text: "Five answers to one question" },
+  { t: "p", html: "The question is always the same: <b>where is the operand?</b> The five modes are the five answers this processor can give." },
+  { t: "viz", name: "addressing-lab" },
+  { t: "p", html: "Look at the byte counts and the T-states together. <b>Register</b> is cheapest because nothing leaves the chip; <b>immediate</b> is next because the value is already in the instruction stream; <b>direct</b> is the longest instruction and one of the slowest, because the address has to be fetched before the data can be." },
+  { t: "code", file: "modes.asm", lang: "asm8085", show: ["A", "B", "C", "T"], code: "        MVI A, 5AH      ; immediate\n        MOV B, A        ; register\n        LDA 2050H       ; direct\n        LXI H, 2051H\n        MOV C, M        ; register indirect\n        CMA             ; implied\n        HLT\n", output: "A=A5 B=5A C=2C T=50" },
+  { t: "p", html: "All five in six lines. C picked up <b>2C</b> from 2051H through HL, and <code>CMA</code> complemented the accumulator without naming it — 5AH became A5H, which is the implied mode in one instruction." },
+
+  { t: "h2", n: "2", text: "The one mode a loop can use" },
+  { t: "p", html: "Four of the five reach a fixed place. Only one reaches a place that can move while the program runs." },
+  { t: "viz", name: "indirect-lab" },
+  { t: "p", html: "Press <code>INX H</code> and the two instructions part company. <code>MOV A, M</code> follows, because its address lives in HL. <code>LDA 2050H</code> cannot, because its address is two of its own three bytes — and you cannot rewrite an instruction while it runs." },
+  { t: "code", file: "walk.asm", lang: "asm8085", show: ["A", "HL"], code: "        LXI H, 2050H\n        MOV A, M        ; 5A\n        INX H\n        ADD M           ; + 2C\n        INX H\n        ADD M           ; + 33\n        HLT\n", output: "A=B9 HL=2052" },
+  { t: "p", html: "Three different bytes reached by two instructions that never changed. 5A + 2C + 33 is <b>B9</b>, and HL finished at 2052H because it was the pointer that moved, not the code." },
+
+  { t: "h2", n: "3", text: "Reading the mode off the page" },
+  { t: "p", html: "You never have to look a mode up. It is visible in what the operand is written as." },
+  { t: "viz", name: "pair-lab" },
+  { t: "p", html: "That panel is register indirect from the other side: HL is one 16-bit number, and <code>M</code> is whatever byte it currently points at. The mode is a statement about <b>HL</b>, which is why <code>INR L</code> and <code>INX H</code> send the same <code>MOV A, M</code> to different places." },
+  { t: "code", file: "reading.asm", lang: "asm8085", show: ["A", "B", "M:2060"], code: "        MVI A, 11H      ; a number    -> immediate\n        MOV B, A        ; a register  -> register\n        LXI H, 2060H\n        MOV M, A        ; an M        -> register indirect\n        LDA 2060H       ; an address  -> direct\n        HLT\n", output: "A=11 B=11 [2060]=11" },
+  { t: "p", html: "Four modes, and the operand tells you which every time: a number, a register name, an <code>M</code>, or a 16-bit address. The fifth needs no operand at all." },
+
+  { t: "h2", n: "4", text: "Indirect through the other pairs" },
+  { t: "p", html: "HL gets the shorthand, but BC and DE can hold addresses too — with their own instructions." },
+  { t: "code", file: "ldax.asm", lang: "asm8085", show: ["A", "M:2060"], code: "        LXI D, 2050H\n        LDAX D          ; read through DE\n        LXI B, 2060H\n        STAX B          ; write through BC\n        HLT\n", output: "A=5A [2060]=5A" },
+  { t: "p", html: "<code>LDAX</code> and <code>STAX</code> are register indirect through BC or DE, and they only ever move the accumulator. HL is the privileged one: <code>M</code> works with arithmetic too, so <code>ADD M</code> exists and <code>ADD</code>-through-DE does not." },
+
+  { t: "think", q: "If register indirect is more flexible, why does direct addressing exist at all?", a: "Because most memory accesses are not in a loop, and for those, direct is simply better.<br/><br/>Reading one known location — a status byte, a stored result, a configuration value — takes <b>one</b> instruction with direct addressing. Doing the same thing indirectly takes two: an <code>LXI</code> to set the pointer and then the access. Three bytes against four, and thirteen T-states against seventeen.<br/><br/>The trade flips as soon as you touch more than one address. Setting HL once and then walking it costs one byte per access, while direct addressing costs three bytes for every single one — and cannot loop at all.<br/><br/>There is a second reason worth knowing, and it is about the registers rather than the bytes. HL is the only pair that works with <code>M</code>, so anything using indirect addressing has HL tied up for the duration. On a machine with seven registers that is a real cost, and it is why programs that need two pointers end up leaning on <code>XCHG</code>. Direct addressing needs no register at all — which is exactly why it is the right choice for the one-off access that would otherwise evict a pointer you still need." },
+  { t: "analogy", concept: "Direct and indirect addressing", real: "A written address and a finger on a map", html: "Direct addressing is an address <b>printed on the envelope</b>. It is complete, it needs nothing else, and it will always go to the same house. To send to a different house you print a new envelope.<br/><br/>Register indirect is <b>pointing at a map</b>. The instruction says &ldquo;deliver to where I am pointing&rdquo; and says nothing about where that is. Move your finger and the same sentence means somewhere else.<br/><br/>That is why a round of deliveries uses the map. You give one instruction — &ldquo;deliver here, then move on&rdquo; — and repeat it, instead of printing a hundred envelopes.<br/><br/>And it is why a single delivery uses the envelope. Printing one is quicker than getting the map out, and the map has to be put down somewhere while you use it, which on this processor means HL is not available for anything else." },
+
+  { t: "trace", intro: "A pointer walking a small block. Write each value the way the processor holds it.", code: "        LXI H, 2050H\n        MOV A, M\n        INX H\n        ADD M\n        HLT\n", steps: [
+    { q: "After line 1, <code>HL</code> is", answer: "2050", accept: ["2050h"], why: "<code>LXI</code> is immediate addressing with a 16-bit operand — the address travels inside the instruction and lands in the pair. This is the only line in the program that names an address." },
+    { q: "After line 2, <code>A</code> is", answer: "5A", accept: ["5ah"], why: "Register indirect: the operand is the byte at whatever address HL holds, which is 2050H, and that byte is 5AH. The instruction itself is one byte and mentions no address at all." },
+    { q: "After line 4, <code>A</code> is", answer: "86", accept: ["86h"], why: "<code>INX H</code> moved the pointer to 2051H, so <code>ADD M</code> added the 2CH stored there. 5AH + 2CH = 86H — and note that the same <code>M</code> meant a different byte than it did two lines earlier." },
+  ]},
+
+  { t: "drills", intro: "Eleven instructions. Name the mode in your head, predict the result, then open.", items: [
+    { task: "Immediate — the value is inside the instruction.", code: "MVI A, 5AH\nHLT", show: ["A", "CODE:2000-2001", "T"], out: "A=5A CODE=3E 5A T=12" },
+    { task: "Register — no bus trip at all.", code: "MVI B, 5AH\nMOV A, B\nHLT", show: ["A", "T"], out: "A=5A T=16" },
+    { task: "Direct — the address is in the instruction.", code: "LDA 2050H\nHLT", show: ["A", "CODE:2000-2002", "T"], out: "A=5A CODE=3A 50 20 T=18" },
+    { task: "Register indirect — the address is in HL.", code: "LXI H, 2050H\nMOV A, M\nHLT", show: ["A", "T"], out: "A=5A T=22" },
+    { task: "The same idea through DE.", code: "LXI D, 2050H\nLDAX D\nHLT", show: ["A"], out: "A=5A" },
+    { task: "Implied — the instruction names no operand.", code: "MVI A, 0A5H\nCMA\nHLT", show: ["A", "CODE:2000-2002"], out: "A=5A CODE=3E A5 2F" },
+    { task: "Point one byte further along.", code: "LXI H, 2051H\nMOV A, M\nHLT", show: ["A"], out: "A=2C" },
+    { task: "Write through a pointer.", code: "MVI A, 11H\nLXI H, 2060H\nMOV M, A\nHLT", show: ["M:2060"], out: "[2060]=11" },
+    { task: "Write to a named address instead.", code: "MVI A, 22H\nSTA 2060H\nHLT", show: ["M:2060", "CODE:2000-2004"], out: "[2060]=22 CODE=3E 22 32 60 20" },
+    { task: "Clear the accumulator — which mode is XRA A?", code: "MVI A, 0FFH\nXRA A\nHLT", show: ["A", "CODE:2000-2002"], out: "A=00 CODE=3E FF AF" },
+    { task: "Add two bytes without naming either address twice.", code: "LXI H, 2050H\nMOV A, M\nINX H\nADD M\nHLT", show: ["A"], out: "A=86" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "LXI H, 2050H\nMOV A, H", why: "That reads the <b>register</b> H, which holds 20H — the high half of the address. Register indirect needs <code>M</code>, which means the byte the pair points at. One letter, and the difference between an address and the data at it.", fix: "LXI H, 2050H\nMOV A, M" },
+    { bad: "MVI A, 2050H", why: "Immediate addressing on the accumulator carries <b>one byte</b>, because the accumulator is one byte. A 16-bit immediate only makes sense loaded into a pair, which is what <code>LXI</code> is for.", fix: "LXI H, 2050H" },
+    { bad: "LXI H, 2050H\nLDA 2050H\nINX H\nADD M", why: "Not wrong, but confused: the <code>LDA</code> reaches 2050H directly while HL is also pointing there. Mixing the two modes at the same address usually means the author is not sure which one is driving, and the loop version of this reads the same byte every pass.", fix: "LXI H, 2050H\nMOV A, M\nINX H\nADD M" },
+    { bad: "LXI B, 2050H\nADD M", why: "<code>M</code> always means the address in <b>HL</b>, never BC or DE. The other two pairs have their own indirect instructions — <code>LDAX</code> and <code>STAX</code> — and those only move the accumulator, never do arithmetic.", fix: "LXI H, 2050H\nADD M" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to read the byte stored at 2050H and copy it to 2060H. The byte at 2050H is 5AH. It runs cleanly and stores 20H. Read it before you open the fix.", show: ["A", "M:2060"], code: "        LXI H, 2050H\n        MOV A, H        ; read the byte\n        STA 2060H\n        HLT\n", symptom: "stores 20H, which is the high half of the address 2050H rather than the byte kept there", q: "H and M are one letter apart. Which one is a register, and which one is memory?", fix: "        LXI H, 2050H\n        MOV A, M        ; the byte AT the address in HL\n        STA 2060H\n        HLT\n", why: "<code>H</code> is a register and it holds 20H, the high half of the address that was just loaded into the pair. <code>M</code> is not a register at all — it is the byte in memory at whatever address HL contains, which is 5AH.<br/><br/>So the broken version is <b>register</b> addressing where <b>register indirect</b> was meant, and the value it produced is a piece of the address rather than the data.<br/><br/>What makes this one worth its own debug task is that both instructions are legal, both are one byte, and both put something plausible in the accumulator. Nothing is reported, and 20H is a perfectly reasonable-looking byte.<br/><br/>The tell is that the answer <b>is half the address you just loaded</b>. Whenever a value turns out to be 20H after <code>LXI H, 20xxH</code>, or 2050H's low byte 50H after a <code>MOV A, L</code>, the program is reading the pointer instead of following it." },
+
+  { t: "recap", items: [
+    "Five modes: <b>immediate, register, direct, register indirect, implied</b>",
+    "The mode is visible in the operand — a number, a register, a 16-bit address, an <code>M</code>, or nothing at all",
+    "<b>Register indirect is the only mode that can move</b>, which is why every loop over memory uses <code>M</code>",
+    "Direct is one instruction and three bytes; indirect is one byte after an <code>LXI</code> — better as soon as you touch more than one address",
+    "<code>M</code> always means <b>HL</b>. BC and DE do indirect through <code>LDAX</code> and <code>STAX</code>, accumulator only",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Name the addressing modes of the 8085 with an example of each.", a: "Immediate — MVI A, 5AH, where the value is in the instruction. Register — MOV A, B, where the operand is a named register. Direct — LDA 2050H, where the address is in the instruction. Register indirect — MOV A, M, where the address is in the HL pair. And implied — CMA, where the operand is the accumulator and the instruction does not name it at all." },
+    { level: "beginner", q: "What does <code>M</code> mean, and which mode is it?", a: "It means the byte in memory at the address currently in HL, and it makes the instruction register indirect. It is written where a register name would go because it occupies the eighth register code in the opcode, which is why MOV A, M is one byte like every other MOV." },
+    { level: "intermediate", q: "Why is register indirect the only mode a loop can use?", a: "Because it is the only one whose address is not part of the instruction. A direct address occupies two of the instruction's three bytes, so reaching a different location means a different instruction — and a program cannot rewrite itself as it runs. With indirect, the address is in HL, and incrementing HL sends the same unchanged instruction somewhere else." },
+    { level: "intermediate", q: "When would you choose direct addressing over indirect?", a: "For a one-off access to a known location. Direct is a single instruction where indirect needs an LXI first, so it is fewer bytes and fewer T-states for one access. It also uses no registers, whereas indirect ties up HL for the duration — which matters on a machine with seven registers, especially if HL is already holding a pointer you still need." },
+    { level: "advanced", q: "Why does <code>ADD M</code> exist but not an equivalent through DE?", a: "Because of the opcode encoding. Arithmetic instructions have a single three-bit field naming the source, and those eight codes are the seven registers plus M — there is no room for a code meaning 'through DE'. HL was given the eighth slot because a machine needs one pointer that works everywhere, and making it work with arithmetic saves an instruction in every loop that sums a block. BC and DE get LDAX and STAX instead, which are separate opcodes and only move the accumulator. The practical consequence is that HL is the pointer and the other pairs are storage for pointers, which is why XCHG exists and why block-move routines are written the way they are." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7623,6 +7711,7 @@ const mpLessons = [
   { slug: "mp-memory-decoding", order: 12, title: "Memory Organization and Decoding", minutes: 14, problems: [], content: MP8 },
   { slug: "mp-timing-diagrams", order: 13, title: "Machine Cycles, T-States and Timing Diagrams", minutes: 15, problems: [], content: MP9 },
   { slug: "mp-instruction-set", order: 14, title: "The Instruction Set, Classified", minutes: 14, problems: [], content: MP10 },
+  { slug: "mp-addressing-modes", order: 15, title: "Addressing Modes", minutes: 14, problems: [], content: MP11 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7927,6 +8016,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-addressing-modes": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which addressing mode does <code>MVI A, 5AH</code> use?", options: ["Immediate", "Direct", "Register indirect", "Implied"], correct: 0, why: "The value travels inside the instruction, in the byte right after the opcode. Nothing is fetched from anywhere else, which is why it is the cheapest way to load a known constant." },
+    { level: "easy", q: "Which mode does <code>MOV A, M</code> use?", options: ["Direct", "Register indirect", "Immediate", "Register"], correct: 1, why: "M means the byte at the address currently in HL. The instruction contains no address at all — it contains a reference to the pair that holds one." },
+    { level: "easy", q: "How many addressing modes does the 8085 have?", options: ["Three", "Four", "Five", "Eight"], correct: 2, why: "Immediate, register, direct, register indirect and implied. Each one is a different answer to the single question of where the operand is." },
+    // Medium — apply it
+    { level: "medium", q: "Which mode does <code>CMA</code> use?", options: ["Register", "Immediate", "Direct", "Implied — the operand is the accumulator and is never named"], correct: 3, why: "There is only one thing CMA could complement, so the opcode says it by itself. RLC, RRC, STC, CMC and DAA are the same." },
+    { level: "medium", q: "Why can a loop over a block of memory not use direct addressing?", options: ["Direct addressing is too slow", "LDA does not set the flags", "The address is part of the instruction, so it cannot change while the program runs", "Direct addressing only reaches the first 256 bytes"], correct: 2, why: "Two of LDA's three bytes are the address. Reaching a different location would mean a different instruction, and a program cannot rewrite itself as it runs — so the pointer has to live somewhere that can change, which is a register pair." },
+    { level: "medium", q: "<code>LXI H, 2050H</code> then <code>MOV A, H</code>. What does A hold?", options: ["20H — the high half of the address", "5AH, the byte stored at 2050H", "50H", "2050H"], correct: 0, why: "H is a register and it holds half the address. M is the byte at the address. One letter apart, both legal, and the tell is that the answer is a piece of the address you just loaded." },
+    { level: "medium", q: "Which register pair does <code>M</code> always refer to?", options: ["BC", "HL", "DE", "Whichever was loaded most recently"], correct: 1, why: "M occupies the eighth register code in the opcode and is wired to HL. BC and DE do indirect addressing through LDAX and STAX, which only move the accumulator." },
+    // Hard — the edges
+    { level: "hard", q: "When is direct addressing the better choice than register indirect?", options: ["Whenever the address is above 8000H", "For a one-off access to a known location — one instruction, and no register tied up", "Inside loops", "When the flags must be preserved"], correct: 1, why: "Indirect needs an LXI first, so it is more bytes and more T-states for a single access, and it occupies HL for the duration. The trade flips as soon as more than one address is touched." },
+    { level: "hard", q: "Why does <code>ADD M</code> exist but there is no equivalent that adds through DE?", options: ["DE cannot hold an address", "Because ADD only works on 8-bit values", "It exists but is undocumented", "The arithmetic opcodes have one three-bit source field, and its eight codes are the seven registers plus M"], correct: 3, why: "There is no code left to mean 'through DE'. HL was given the eighth slot because a machine needs one pointer that works everywhere, and making it work with arithmetic saves an instruction in every loop that sums a block." },
+    { level: "hard", q: "<code>LXI H, 2050H</code> uses which mode for its operand?", options: ["Immediate — the 16-bit value travels inside the instruction", "Direct", "Register indirect", "Implied"], correct: 0, why: "It is easy to call it direct because the value looks like an address, but nothing is fetched from 2050H — the number itself is loaded into the pair. The address only becomes an address when something later uses M." },
+  ],
   "mp-instruction-set": [
     // Easy — did the core idea land?
     { level: "easy", q: "How many groups does the 8085 instruction set fall into?", options: ["Five", "Three", "Eight", "Two"], correct: 0, why: "Data transfer, arithmetic, logical, branching and machine control. The useful part of the grouping is that two of the five write the flags and three do not." },

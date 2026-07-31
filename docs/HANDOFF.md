@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**14 written, 53 problems.** Read that file before touching this subject.
+**15 written, 57 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -195,9 +195,9 @@ baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
 **Chapters 2 and 3 are both finished** — lessons 5 to 13 are all at that
-standard, so the whole subject is in one shape and **lesson 15 ("Addressing
-modes") is next in Chapter 4**. Twenty-four panels were built across those
-ten lessons, and what they teach is the part worth copying: each one carries an
+standard, so the whole subject is in one shape and **lesson 16 ("Data transfer
+instructions") is next in Chapter 4**. Twenty-six panels were built across those
+eleven lessons, and what they teach is the part worth copying: each one carries an
 idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
@@ -278,6 +278,13 @@ asked about the address bus rather than a street of boxes.
   and hex by calling the real `assemble()`, so the listing cannot drift from what
   the 8085 Lab would run. Lesson 14 also reuses `instruction-bytes-lab` from
   lesson 3.
+
+- **`addressing-lab`** (lesson 15) — the same job done five ways, compared on
+  bytes and T-states rather than listed as five definitions.
+- **`indirect-lab`** (lesson 15) — one `INX H` and `MOV A, M` parts company with
+  `LDA 2050H`. That is the whole reason register indirect exists, and it is a
+  claim about *change over time* that a static example cannot make. Lesson 15
+  also reuses `pair-lab` from lesson 9.
 
 Lesson 13 is where the simulator and the topic finally agree: **T-state totals
 come from `lib/asm8085.ts`**, and every drill on that page is one instruction
