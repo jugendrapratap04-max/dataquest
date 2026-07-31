@@ -153,6 +153,47 @@ Three things about writing a plotting lesson:
   them prints as `[np.float64(3.0)]`. `float()` / `int()` on the way out, or the
   claimed output is wrong on a repr you did not check.
 
+### Microprocessor — in progress 🚧
+
+The tenth subject, and the first that is not data science. Full plan:
+**`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
+**6 written, 21 problems.** Read that file before touching this subject.
+
+It brought its own runtime, and that is the part worth knowing about:
+
+- **`lib/asm8085.ts`** is a real 8085 assembler, simulator and disassembler. It
+  counts T-states, because "calculate the delay of this loop" is an exam question
+  and counting them turns it into something checkable. `npm run test:8085` is
+  **270 hand-derived checks**, including a round-trip that assembles every
+  instruction form and decodes it back.
+- **One engine, four consumers**: the browser, `verify:lesson`, `db:check` and
+  `lib/verify.ts` all import that one file, so they cannot disagree. Node strips
+  the types on import — no build step.
+- **`Problem.kind = "asm8085"`** works end to end, graded by `grade()` in the same
+  file. It diffs the student's machine against the problem's own reference on
+  identical memory and compares only the state each test names, so a correct
+  answer written with different registers passes. Same rule as the SQL verifier.
+- A lesson declares itself 8085 by carrying a **`memsetup`** block (the memory
+  equivalent of `sqlsetup`) or by marking a code block `lang: "asm8085"`. Snippets
+  claim only what they teach, via a `show` list: `["C", "Z", "T"]`.
+
+**Chapter 1 is the format the rest of the subject must match**, and it exists
+because the first draft failed. Jugendra read it and said *"mera base hi sahi
+nahi hai… it is like lot of theory so I am bored"*. Both true and measurable:
+3,652 words against two visuals, with hex, bytes and registers all assumed. So
+the course now starts one floor lower — bits, then memory, then what a program
+is, then carrying — and the shape changed with it:
+
+| | visible prose | visuals |
+|---|---|---|
+| Chapter 1 (lessons 1–4) | ~700–850 words | **3 each** |
+| Lessons 5–6 (old format) | 1,683 and 1,549 | 2 and 1 |
+
+**Lessons 5 and 6 still need rewriting to that standard** — they are the only two
+left in the old shape. His instruction for everything here: *"ye soch kar concept
+likhna ki student es ke baare mai pahele se kuch nahi janta hai"*, and lean hard
+on clickable panels because that is what he found engaging.
+
 ### What is left
 
 `npm run syllabus` prints the honest state of every subject. The remaining stub
@@ -264,6 +305,58 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
   already has an attempt reproduces it exactly.
 
 ---
+
+## 4a. Planned, designed, not built: the theme that follows the clock
+
+Jugendra's idea, and the design is settled — only the building is left. Do not
+re-litigate the decisions below; he pushed back on the first sketch and these are
+the answers that survived.
+
+**It is platform-wide**, not per-subject. The theme system is already global
+(`data-theme` on `<html>`, four themes, picker in the Topbar), so nothing extra is
+needed to make it apply everywhere.
+
+**Nobody is asked for anything.** The first sketch had a location prompt and he
+killed it, correctly: *"user ko bahut boring lagega setup karna, why they will
+effort"*. A student came to learn, not to configure a colour scheme, and the
+reward is a colour. So:
+
+| | how | who gets it |
+|---|---|---|
+| **Time of day** | `new Date().getHours()`. No permission, no API, cannot fail | **Free, and the DEFAULT** for anyone who has never picked a theme |
+| **Weather** | City from the request IP (Vercel geo header), not a browser prompt. Open-Meteo needs no key; cache per city for ~30 min so the cost is ~0 | **Premium**, on the XP-unlock mechanism that already exists |
+
+That split exists because he asked for both "apne aap change ho" and "premium
+feature", and those cannot both be true of one thing. Comfort is free — a student
+reading at midnight should get the dark theme without earning it. The decorative
+half is what gets earned.
+
+**Design already settled:**
+
+- Schedule reuses the existing themes, so no new CSS: `06:00` light, `17:00`
+  sunset, `20:00` dark. Sunset is a dark theme with warm accents, so it suits the
+  evening for everybody.
+- **The OS preference is a veto, not noise.** If `prefers-color-scheme: dark`,
+  auto never goes light — somebody who set that has said something.
+- **Auto must never overrule a choice.** Picking any theme turns auto off; the way
+  back is choosing "Auto" in the menu. So the Topbar needs *two* pieces of state:
+  what is applied, and what was chosen. They differ whenever the clock is driving.
+- The pre-paint script in `app/layout.tsx` has to resolve it, or the page flashes
+  the wrong theme. It cannot import, so **interpolate the boundary hours** from
+  the shared module into the script string — the numbers are the part that would
+  actually drift.
+- A one-minute interval while auto is on, so somebody studying from 4pm to 9pm
+  sees it change under them without a reload.
+
+**Verify before building the weather half:** Vercel's `x-vercel-ip-city` may be
+plan-gated (country is not). The whole design rests on it. And decide up front
+what happens when the API is slow or down — the theme should simply stay as it is
+and the page must never wait on it. This would be the platform's **first
+dependency on an outside service**.
+
+A first attempt at the time half was written and then reverted deliberately, to
+avoid leaving half-wired code in the tree. Nothing of it remains; the design above
+is the whole of what it knew.
 
 ## 4b. Features shipped alongside the lessons
 
