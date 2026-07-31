@@ -7448,6 +7448,95 @@ const MP12 = [
   ]},
 ];
 
+const MP13 = [
+  { t: "objectives", items: [
+    "Use <code>ADD</code>, <code>ADC</code>, <code>SUB</code> and <code>SBB</code>, and say when the carry versions are needed",
+    "Explain why <b>CY means borrow</b> after a subtraction — from what the hardware actually does",
+    "Read a byte as <b>signed or unsigned</b>, and pick the flag that matches",
+    "Add and subtract <b>16-bit</b> values, with <code>DAD</code> and by hand",
+  ]},
+  { t: "hook", q: "The 8085's ALU can add. It cannot subtract — there is no subtractor on the chip. So how does <code>SUB B</code> work?", why: "By adding the negative. The processor takes the two's complement of B — flip every bit, add one — and adds that instead, which gives exactly the right answer for every pair of bytes.<br/><br/>That trick has one visible consequence, and it is the thing this lesson exists to explain. When you add a complement, a carry out of the top bit means the subtraction did <b>not</b> need to borrow, and no carry means it did. So the processor <b>inverts</b> the carry before storing it, and <code>CY = 1</code> after a <code>SUB</code> means the accumulator was the smaller number.<br/><br/>Get that one inversion straight and <code>JC</code> after a <code>CMP</code> stops being something you look up." },
+  { t: "def", term: "Two's complement", en: "How this processor represents a negative number: flip every bit of the positive value and add one. 4AH becomes B6H, and adding B6H to something is the same as subtracting 4AH from it. The same bit pattern is a large positive number if the program chooses to read it that way.", hi: "This is why subtraction and addition are the same circuit. It is also why the <b>sign flag</b> is nothing more than a copy of bit 7 — in two's complement, the top bit being on is exactly what makes a number negative." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"what does the carry flag indicate after a subtraction\" is asked constantly, and the answer is <i>borrow</i> — the accumulator was smaller. The follow-up worth marks is <i>why</i>, and the answer is on this page: the ALU adds the two's complement and inverts the carry out." },
+
+  { t: "memsetup", at: 8272, bytes: [52, 18, 205, 171], note: "Two 16-bit values, low byte first: 1234H at 2050H and ABCDH at 2052H. The 16-bit examples add them." },
+
+  { t: "h2", n: "1", text: "Adding, and the five answers it produces" },
+  { t: "p", html: "An addition through the ALU writes all five flags, every time — and each one is a question about the result." },
+  { t: "code", file: "add.asm", lang: "asm8085", show: ["A", "CY", "S", "Z", "P", "AC"], code: "        MVI A, 3CH      ; 60\n        MVI B, 2AH      ; 42\n        ADD B           ; 102\n        HLT\n", output: "A=66 CY=0 S=0 Z=0 P=1 AC=1" },
+  { t: "p", html: "66H is 102, so nothing overflowed and <code>CY</code> is clear. <code>AC</code> is set because the low digits, C and A, carried into the high one — a carry out of bit 3 that the byte as a whole never saw." },
+
+  { t: "h2", n: "2", text: "Subtraction is addition wearing a disguise" },
+  { t: "p", html: "There is no subtractor. Step through what actually happens and the carry flag stops being arbitrary." },
+  { t: "viz", name: "sub-borrow-lab" },
+  { t: "p", html: "Adding the two's complement gives the right answer, and the carry out of that addition is <b>inverted</b> before it reaches the flag. So after a subtraction, <code>CY = 1</code> means the accumulator was smaller and the result borrowed." },
+  { t: "code", file: "sub.asm", lang: "asm8085", show: ["A", "CY", "S"], code: "        MVI A, 3CH      ; 60\n        MVI B, 4AH      ; 74\n        SUB B           ; 60 - 74\n        HLT\n", output: "A=F2 CY=1 S=1" },
+  { t: "p", html: "60 − 74 does not fit in a byte that only holds 0 to 255, so <code>CY</code> reports the borrow. <b>F2H</b> is what −14 looks like wrapped into a byte, and <code>S=1</code> is the top bit that says so." },
+
+  { t: "h2", n: "3", text: "Which flag you test depends on what you decided" },
+  { t: "p", html: "The processor stores bits. Whether they are 0-to-255 or −128-to-+127 is a decision your program makes and the machine never sees." },
+  { t: "viz", name: "signed-lab" },
+  { t: "p", html: "So the comparison flag has to match the decision. Unsigned comparisons read the <b>carry</b>; signed comparisons read the <b>sign</b>. Choosing wrong produces a program that works for small values and fails the moment one passes 7FH." },
+  { t: "code", file: "signed.asm", lang: "asm8085", show: ["A", "S", "CY"], code: "        MVI A, 7FH      ; 127, the largest positive signed byte\n        ADI 01H\n        HLT\n", output: "A=80 S=1 CY=0" },
+  { t: "p", html: "Read as unsigned, 127 + 1 = 128 and nothing at all went wrong. Read as signed, +127 + 1 became −128 — and the only sign of it is <code>S</code> flipping on while <code>CY</code> stayed clear." },
+
+  { t: "h2", n: "4", text: "Sixteen bits, two ways" },
+  { t: "p", html: "A 16-bit addition can be done in one instruction or by hand, and the hand version is what teaches the carry chain." },
+  { t: "code", file: "dad16.asm", lang: "asm8085", show: ["HL", "CY"], code: "        LHLD 2050H      ; 1234H\n        XCHG\n        LHLD 2052H      ; ABCDH\n        DAD D           ; add the pairs\n        HLT\n", output: "HL=BE01 CY=0" },
+  { t: "code", file: "byte16.asm", lang: "asm8085", show: ["A", "CY"], code: "        MVI A, 0FFH\n        ADI 01H         ; overflows: CY = 1\n        MVI A, 12H      ; MVI does not disturb the flags\n        ACI 00H         ; add the carry into the next byte\n        HLT\n", output: "A=13 CY=0" },
+  { t: "p", html: "1234H + ABCDH is BE01H, done in one <code>DAD</code>. The second block is the same mechanism a byte at a time: the carry out of the low half was picked up by <code>ACI</code>, which is why 12H became 13H.<br/><br/>Subtraction chains the same way, with <code>SUB</code> then <code>SBB</code>." },
+  { t: "viz", name: "asm8085-lab" },
+  { t: "p", html: "Step any of these through the lab and watch the flag row. The one to try is <code>MVI A, 0FFH</code> then <code>ADI 01H</code>: the accumulator goes to 00 and <code>CY</code> comes on in the same instruction." },
+
+  { t: "think", q: "Why does <code>DAA</code> exist, when the ALU already adds correctly?", a: "Because it adds correctly in <b>hex</b>, and sometimes the digits were meant to be decimal.<br/><br/>In BCD each hex digit holds one decimal digit, so 27H means twenty-seven. Add 27H and 15H and the ALU gives 3CH, which is arithmetically right and completely useless — C is not a decimal digit. The answer wanted is 42H.<br/><br/><code>DAA</code> is the repair. It adds 6 to a digit that has gone above 9, and it also adds 6 to a digit that <i>overflowed into the next one</i> — which is a case you cannot see in the result at all, and is exactly what the auxiliary carry flag is there to report.<br/><br/>The reason this is worth a whole instruction is that BCD was not a niche. Anything with a display shows decimal digits, and converting between binary and decimal costs a division routine, which on this processor is a loop. Keeping the numbers in BCD from the start means the display needs no conversion at all — and the price is one instruction after every addition. For a calculator or an instrument, that was the right trade, and it is why <code>DAA</code> sits in the instruction set next to <code>ADD</code>." },
+  { t: "analogy", concept: "Subtraction by complement", real: "Winding a clock backwards", html: "A clock face has twelve hours and no negative numbers. To go back three hours you can turn the hands <b>back three</b> — or forward nine, and land in exactly the same place.<br/><br/>Nine is twelve minus three. It is the complement of three on a twelve-hour face, and it works because the face <b>wraps</b>: going past twelve costs you nothing, because there is no thirteen.<br/><br/>A byte wraps the same way at 256, so subtracting four is the same as adding 252. That is the two's complement, and it is why the machine needs no subtractor at all.<br/><br/>And the borrow is whether you passed twelve on the way round. If you did, you have stayed inside the hour you started in; if you did not, you went below and wrapped. The processor watches for exactly that, and reports the opposite of what the addition saw." },
+
+  { t: "trace", intro: "A carry chained from one byte into the next. Write each value as two hex digits, or 0 and 1 for a flag.", code: "        MVI A, 0FFH\n        ADI 02H\n        MVI A, 10H\n        ACI 00H\n        HLT\n", steps: [
+    { q: "After line 2, <code>A</code> is", answer: "01", accept: ["1", "01h"], why: "FFH + 02H is 101H, which needs nine bits. The accumulator keeps the low eight — 01H — and the ninth goes to the carry." },
+    { q: "After line 2, <code>CY</code> is", answer: "1", accept: ["1", "set", "true"], why: "The ninth bit. Reading CY and A together gives 101H, so nothing was lost — it is just spread across two places." },
+    { q: "After line 4, <code>A</code> is", answer: "11", accept: ["11h"], why: "<code>MVI</code> does not disturb the flags, so the carry survived into <code>ACI 00H</code>: 10H + 00H + 1 = 11H. That is the carry from the low byte arriving in the high byte, which is the whole of multi-byte arithmetic." },
+  ]},
+
+  { t: "drills", intro: "Eleven sums. Predict the result and the flags, then open.", items: [
+    { task: "A plain addition that fits.", code: "MVI A, 3CH\nMVI B, 2AH\nADD B\nHLT", show: ["A", "CY"], out: "A=66 CY=0" },
+    { task: "The same thing with an immediate.", code: "MVI A, 3CH\nADI 2AH\nHLT", show: ["A", "CY"], out: "A=66 CY=0" },
+    { task: "Add with carry, when the carry is already set.", code: "STC\nMVI A, 10H\nMVI B, 05H\nADC B\nHLT", show: ["A", "CY"], out: "A=16 CY=0" },
+    { task: "A subtraction that borrows.", code: "MVI A, 3CH\nMVI B, 4AH\nSUB B\nHLT", show: ["A", "CY", "S"], out: "A=F2 CY=1 S=1" },
+    { task: "Subtract with borrow, when the carry is already set.", code: "STC\nMVI A, 10H\nSBI 05H\nHLT", show: ["A", "CY"], out: "A=0A CY=0" },
+    { task: "Increment past the largest positive signed byte.", code: "MVI A, 7FH\nINR A\nHLT", show: ["A", "S", "CY"], out: "A=80 S=1 CY=0" },
+    { task: "Decrement below zero. Does the carry notice?", code: "MVI C, 00H\nDCR C\nHLT", show: ["C", "Z", "CY"], out: "C=FF Z=0 CY=0" },
+    { task: "A 16-bit increment that wraps.", code: "LXI H, 0FFFFH\nINX H\nHLT", show: ["HL", "Z"], out: "HL=0000 Z=0" },
+    { task: "A 16-bit addition that carries out.", code: "LXI H, 8000H\nLXI D, 8000H\nDAD D\nHLT", show: ["HL", "CY", "Z"], out: "HL=0000 CY=1 Z=0" },
+    { task: "BCD addition, repaired.", code: "MVI A, 38H\nADI 45H\nDAA\nHLT", show: ["A", "CY"], out: "A=83 CY=0" },
+    { task: "Subtract a register from itself.", code: "MVI A, 05H\nSUB A\nHLT", show: ["A", "Z", "CY"], out: "A=00 Z=1 CY=0" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "SUB B\nJC SMALLER     ; \"jump if B was smaller\"", why: "The other way round. <code>CY = 1</code> after a subtraction means the <b>accumulator</b> was smaller, because the borrow was needed. This is the most commonly reversed fact in the whole instruction set.", fix: "SUB B\nJC A_WAS_SMALLER" },
+    { bad: "MVI A, 7FH\nADI 01H\nJC OVERFLOW", why: "Signed overflow does not set the carry. 127 + 1 gives 80H with <code>CY = 0</code> and <code>S = 1</code> — perfectly fine as unsigned arithmetic, and −128 as signed. The carry flag answers an unsigned question only.", fix: "MVI A, 7FH\nADI 01H\nJM WENT_NEGATIVE" },
+    { bad: "MVI A, 27H\nADI 15H\n; \"BCD answer is in A\"", why: "A holds 3CH, which is not a decimal number at all. The ALU added in hex and does not know the digits were meant as decimal — the answer needs <code>DAA</code> before it means forty-two.", fix: "MVI A, 27H\nADI 15H\nDAA" },
+    { bad: "DAD D\nJZ ZERO", why: "<code>DAD</code> writes the carry flag and nothing else, so the zero flag still belongs to whatever ran before it. Testing a 16-bit result for zero has to be built by hand.", fix: "DAD D\nMOV A, H\nORA L\nJZ ZERO" },
+  ]},
+
+  { t: "debug", intro: "This adds the 16-bit values at 2050H and 2052H — 1234H and ABCDH — a byte at a time, and stores the answer at 2060H. The right answer is BE01H. It runs cleanly and produces BD01H. Read it before you open the fix.", show: ["HL", "M:2060-2061"], code: "        LHLD 2050H\n        XCHG\n        LHLD 2052H\n        MOV A, E\n        ADD L           ; low bytes\n        MOV L, A\n        MOV A, D\n        ADD H           ; high bytes\n        MOV H, A\n        SHLD 2060H\n        HLT\n", symptom: "produces BD01H when the sum is BE01H - exactly 100H short, which is one unit of the high byte", q: "The low bytes were 34H and CDH. What did adding them produce that the high half never received?", fix: "        LHLD 2050H\n        XCHG\n        LHLD 2052H\n        MOV A, E\n        ADD L           ; low bytes\n        MOV L, A\n        MOV A, D\n        ADC H           ; high bytes, PLUS the carry\n        MOV H, A\n        SHLD 2060H\n        HLT\n", why: "34H + CDH is 101H. The low byte 01H went into L correctly and the ninth bit went to the carry flag — where it stayed, because the high half used <code>ADD</code>, which does not read it.<br/><br/><code>ADC</code> is the same instruction that does: 12H + ABH + 1 = BEH instead of BDH. One letter, one hundred hex.<br/><br/>What makes this survive testing is that it is <b>right whenever the low bytes do not overflow</b>. Half the value pairs you might try will pass, and the ones that fail are the ones nobody picked deliberately.<br/><br/>The tell is the size of the error. <b>Wrong by exactly 100H</b> is what one lost carry is worth at the byte boundary, and 10000H is the same mistake one byte further up. The rule is short: the lowest byte uses <code>ADD</code>, and every byte above it uses <code>ADC</code>." },
+
+  { t: "recap", items: [
+    "The ALU only adds. <b>Subtraction is the two's complement, added</b> — and the carry out is inverted on the way to the flag",
+    "So after a <code>SUB</code> or <code>CMP</code>, <b><code>CY = 1</code> means the accumulator was smaller</b>",
+    "A byte is signed or unsigned because <b>your program decided</b>: compare with <code>CY</code> for unsigned, <code>S</code> for signed",
+    "Multi-byte arithmetic: <code>ADD</code> then <code>ADC</code>, or <code>SUB</code> then <code>SBB</code>. <code>MVI</code> in between is safe",
+    "<code>DAD</code> adds a pair in one instruction and writes <b>only the carry</b>; <code>DAA</code> repairs a BCD sum",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does the carry flag mean after a subtraction?", a: "A borrow — the accumulator was smaller than what was subtracted from it. It is worth knowing why: the ALU has no subtractor, so it adds the two's complement, and a carry out of that addition means no borrow was needed. The processor inverts it before storing, which is why CY = 1 means the subtraction went negative." },
+    { level: "beginner", q: "How does the 8085 subtract without a subtractor?", a: "By adding the two's complement of the second operand — every bit flipped, plus one. That gives the correct answer for every pair of bytes because a byte wraps at 256, so subtracting four and adding 252 land in the same place. The only visible consequence is the inverted carry." },
+    { level: "intermediate", q: "How do you add two 16-bit numbers on this processor?", a: "Either with DAD, which adds a register pair to HL in one 10-T-state instruction and affects only the carry — or by hand, low bytes with ADD and high bytes with ADC so the carry from the low half is included. The by-hand version is what extends to 24 or 32 bits: the lowest byte uses ADD and every byte above it uses ADC." },
+    { level: "intermediate", q: "Which flag tells you a signed addition overflowed?", a: "None of them directly — the 8085 has no overflow flag. The carry flag answers the unsigned question, and 7FH + 1 gives 80H with the carry clear even though a signed reading has gone from +127 to −128. What you can do is watch the sign flag against the signs of the operands: if two positives produce a negative, or two negatives produce a positive, the signed result has overflowed. The 8086 added a dedicated overflow flag precisely because doing it by hand is awkward." },
+    { level: "advanced", q: "A comparison routine works in testing and fails on real data. What would you look at first?", a: "Whether it is testing the right flag for the kind of number it is comparing. JC and JNC answer an unsigned question and JM and JP answer a signed one, and the two agree for every value below 80H — which is exactly the range that casual test data lives in. The moment a byte passes 7FH they disagree, and a routine that sorts unsigned bytes with JM will put every value above 127 at the wrong end. The second thing I would check is the direction of the carry after CMP, because reversing it is the most common single error in 8085 code: CY = 1 means the accumulator was the smaller one." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7801,6 +7890,7 @@ const mpLessons = [
   { slug: "mp-instruction-set", order: 14, title: "The Instruction Set, Classified", minutes: 14, problems: [], content: MP10 },
   { slug: "mp-addressing-modes", order: 15, title: "Addressing Modes", minutes: 14, problems: [], content: MP11 },
   { slug: "mp-data-transfer", order: 16, title: "Data Transfer Instructions", minutes: 14, problems: [], content: MP12 },
+  { slug: "mp-arithmetic", order: 17, title: "Arithmetic and the Flags", minutes: 14, problems: [], content: MP13 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -8105,6 +8195,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-arithmetic": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does <code>CY = 1</code> mean after a <code>SUB</code>?", options: ["The accumulator was smaller, so the subtraction borrowed", "The result was zero", "The result was negative in the signed sense", "The operand was smaller"], correct: 0, why: "The ALU adds the two's complement and inverts the carry out, so a set carry after a subtraction means a borrow was needed. Reversing this is the most common single error in 8085 code." },
+    { level: "easy", q: "How does the 8085 subtract?", options: ["With a dedicated subtractor circuit", "By adding the two's complement of the second operand", "By counting down in a loop", "By complementing the result afterwards"], correct: 1, why: "Flip every bit and add one, then add. It works because a byte wraps at 256, so subtracting four and adding 252 land in the same place." },
+    { level: "easy", q: "Which instruction adds the carry flag along with its operand?", options: ["ADD", "ADI", "ADC", "DAD"], correct: 2, why: "ADC and ACI are the with-carry forms. They exist so a carry out of one byte can be picked up by the next byte in a multi-byte sum." },
+    // Medium — apply it
+    { level: "medium", q: "<code>MVI A, 7FH</code> then <code>ADI 01H</code>. What are A and the flags?", options: ["A = 80H, carry set", "A = 00H, zero set", "A = 80H, sign set and carry clear", "A = 7FH, unchanged"], correct: 2, why: "As unsigned that is 127 + 1 = 128 and nothing went wrong. As signed it is +127 becoming −128, and the only sign of it is S coming on — the 8085 has no overflow flag." },
+    { level: "medium", q: "Which flags does <code>DAD</code> affect?", options: ["All five", "Zero and carry", "The carry, and nothing else", "None"], correct: 2, why: "So DAD followed by JZ tests a stale zero flag. Testing a 16-bit result for zero has to be built by hand, usually MOV A, H then ORA L." },
+    { level: "medium", q: "In a multi-byte addition, which instruction does the <b>lowest</b> byte use?", options: ["ADC, so nothing is lost", "ADD or ADI — there is no carry in yet", "DAD", "SBB"], correct: 1, why: "There is nothing below the lowest byte to carry in from. Every byte above it uses ADC or ACI so the carry from underneath is included." },
+    { level: "medium", q: "You are comparing two <b>unsigned</b> bytes with <code>CMP</code>. Which jumps do you use?", options: ["JM and JP", "JZ and JNZ only", "JC and JNC", "JPE and JPO"], correct: 2, why: "The carry answers the unsigned question and the sign flag answers the signed one. They agree for every value below 80H, which is exactly why choosing wrong survives testing." },
+    // Hard — the edges
+    { level: "hard", q: "Why does <code>DAA</code> need the auxiliary carry flag?", options: ["To know whether the whole byte overflowed", "Because AC is faster to test than CY", "To decide whether to add 60H", "Because a low digit can overflow into the high one without ending above 9 — and only AC records that"], correct: 3, why: "08H + 09H gives 11H, which looks like perfectly valid BCD. Nothing in the result reveals the problem; AC does." },
+    { level: "hard", q: "A hand-written 16-bit addition comes out exactly 100H short. What is wrong?", options: ["The high byte used ADD instead of ADC", "The values were stored high byte first", "DAD was needed instead", "The carry flag was cleared by an MVI"], correct: 0, why: "100H is what one lost carry is worth at the byte boundary. And note MVI does not disturb the flags — that is precisely why it is safe between the two halves." },
+    { level: "hard", q: "Why is there no overflow flag on the 8085?", options: ["Overflow cannot happen on an 8-bit machine", "The carry flag already reports it", "Signed arithmetic was rare enough that the opcode space went elsewhere; you infer it from the operand signs and S", "It exists but is not documented"], correct: 2, why: "If two positives produce a negative, or two negatives a positive, the signed result overflowed. The 8086 added a dedicated flag precisely because doing it by hand is awkward." },
+  ],
   "mp-data-transfer": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which flags do the data transfer instructions affect?", options: ["None of them", "All five", "Only the zero flag", "Only the carry flag"], correct: 0, why: "Nothing is computed, so there is nothing to report. It is what makes a MOV safe between a compare and the conditional jump that reads its verdict." },
