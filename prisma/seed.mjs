@@ -7537,6 +7537,96 @@ const MP13 = [
   ]},
 ];
 
+const MP14 = [
+  { t: "objectives", items: [
+    "Use <b>AND to clear</b>, <b>OR to set</b> and <b>XOR to flip</b> chosen bits, by picking the mask",
+    "Say which flags the logical instructions force rather than report",
+    "Tell the <b>circular</b> rotates from the ones that go <b>through the carry</b>",
+    "Read a <code>CMP</code> result: three outcomes from two flags",
+  ]},
+  { t: "hook", q: "You have a byte in the accumulator and you want to keep only its bottom four bits. There is no instruction called <code>KEEP</code>. What do you use?", why: "<code>ANI 0FH</code>, and the reason is worth more than the answer.<br/><br/>AND gives a 1 only when both inputs are 1. So a <b>0</b> in the mask forces that column to zero no matter what was there, and a <b>1</b> lets the original bit through untouched. Choosing the mask is choosing which columns survive.<br/><br/>That is the whole of bit manipulation on this processor. AND clears, OR sets, XOR flips — and the rotates move bits sideways when you need a bit somewhere else rather than gone. Between them they are how a program reads a switch, builds a control word, packs two digits into one byte, or multiplies by two." },
+  { t: "def", term: "Mask", en: "A constant chosen so that a logical operation affects exactly the bits you want. With AND, zeros in the mask clear and ones preserve. With OR, ones set and zeros preserve. With XOR, ones flip and zeros preserve. The mask is the instruction's real argument — the operation is almost incidental.", hi: "Masks are why <b>hex</b> is the right way to write these constants. 0FH is obviously the low four bits and F0H is obviously the high four; the same numbers in decimal, 15 and 240, say nothing at all about which columns they touch." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"mask the lower nibble\", \"set bit 3 without disturbing the others\", \"check whether bit 5 is set\" are standard questions and they are all one instruction plus the right constant. The rotate question is usually <i>the difference between RLC and RAL</i>, which is the second panel on this page." },
+
+  { t: "memsetup", at: 8272, bytes: [165, 60, 15], note: "Three bytes at 2050H onwards — A5H, 3CH and 0FH. A5H is 1010 0101, which makes every mask visible." },
+
+  { t: "h2", n: "1", text: "Choosing the mask is the whole job" },
+  { t: "p", html: "Three operations, one idea: the mask decides which columns are touched and which are left exactly as they were." },
+  { t: "viz", name: "mask-lab" },
+  { t: "p", html: "Read the columns downwards rather than the bytes across. Every bit of the answer depends only on the two bits above it — which is why a mask is a picture of what you want and hex is the right way to write it." },
+  { t: "code", file: "mask.asm", lang: "asm8085", show: ["A", "CY", "AC", "Z"], code: "        MVI A, 0A5H     ; 1010 0101\n        ANI 0FH         ; keep the low four bits\n        HLT\n", output: "A=05 CY=0 AC=1 Z=0" },
+  { t: "p", html: "05H is what is left of A5H when the top nibble is cleared. Notice <code>AC=1</code> and <code>CY=0</code> — <b>every</b> <code>ANA</code> and <code>ANI</code> sets AC and clears CY, whatever the operands. Those two flags are describing the instruction, not the result." },
+
+  { t: "h2", n: "2", text: "Setting and flipping" },
+  { t: "p", html: "The other two operations are the same idea with the rule turned round." },
+  { t: "code", file: "setbits.asm", lang: "asm8085", show: ["A", "CY", "AC"], code: "        MVI A, 0A5H\n        ORI 0F0H        ; force the high four bits on\n        HLT\n", output: "A=F5 CY=0 AC=0" },
+  { t: "code", file: "flip.asm", lang: "asm8085", show: ["A", "CY", "AC"], code: "        MVI A, 0A5H\n        XRI 0FFH        ; flip every bit\n        HLT\n", output: "A=5A CY=0 AC=0" },
+  { t: "p", html: "<code>ORI 0F0H</code> turned the high nibble on and left the low one alone; <code>XRI 0FFH</code> inverted all eight, which is what <code>CMA</code> does in a single byte.<br/><br/><code>ORA</code> and <code>XRA</code> <b>clear both CY and AC</b> every time, which is why <code>XRA A</code> is the idiomatic way to zero the accumulator and the carry together." },
+
+  { t: "h2", n: "3", text: "Moving bits sideways" },
+  { t: "p", html: "Sometimes a bit is not unwanted, just in the wrong place. Four instructions rotate the accumulator, and they split into two pairs." },
+  { t: "viz", name: "rotate-lab" },
+  { t: "p", html: "<b>RLC and RRC are circular</b> — eight bits going round, with a copy of the departing bit dropped into the carry. <b>RAL and RAR go through the carry</b>, making it a nine-bit ring: the bit that leaves goes into the carry and the carry's old value comes in at the other end." },
+  { t: "code", file: "rlc.asm", lang: "asm8085", show: ["A", "CY"], code: "        MVI A, 81H      ; 1000 0001, carry clear\n        RLC             ; circular\n        HLT\n", output: "A=03 CY=1" },
+  { t: "code", file: "ral.asm", lang: "asm8085", show: ["A", "CY"], code: "        MVI A, 81H      ; the same byte, the same carry\n        RAL             ; through the carry\n        HLT\n", output: "A=02 CY=1" },
+  { t: "p", html: "<b>03H against 02H</b> — one bit of difference, from the same starting byte. <code>RLC</code> brought bit 7 round into bit 0; <code>RAL</code> brought the old carry in instead, and it was zero. All four rotates affect <b>only the carry flag</b>." },
+
+  { t: "h2", n: "4", text: "Comparing without destroying" },
+  { t: "p", html: "<code>CMP</code> subtracts and throws the answer away. Three possible verdicts, and two flags to carry them." },
+  { t: "viz", name: "compare-lab" },
+  { t: "p", html: "<b>Z</b> answers \"equal?\" on its own. <b>CY</b> answers \"was the accumulator smaller?\". Greater-than is the awkward one, because it is the case where neither flag is set — <code>JNC</code> alone would also accept equal." },
+  { t: "code", file: "cmp.asm", lang: "asm8085", show: ["A", "CY", "Z"], code: "        MVI A, 3CH      ; 60\n        CPI 4AH         ; against 74\n        HLT\n", output: "A=3C CY=1 Z=0" },
+  { t: "p", html: "The accumulator still holds 3CH — that is the point of <code>CMP</code> over <code>SUB</code>. <code>CY=1</code> because 60 is less than 74, and the borrow rule from lesson 17 is what makes that the right way round." },
+
+  { t: "think", q: "Why is <code>XRA A</code> used to clear the accumulator instead of <code>MVI A, 00H</code>?", a: "Because it is shorter, faster, and it clears the carry at the same time.<br/><br/><code>MVI A, 00H</code> is two bytes and seven T-states, and it leaves every flag exactly as it found them. <code>XRA A</code> is <b>one</b> byte and four T-states, because it names only a register — and XOR of anything with itself is zero, so the result is guaranteed.<br/><br/>The flags are the part that decides it in practice. <code>XRA A</code> sets Z, clears S, clears CY and clears AC — so a routine that needs to start with a clean accumulator <i>and</i> a clean carry, which every multi-byte addition does, gets both in one instruction.<br/><br/>There is a case for <code>MVI A, 00H</code> and it is the mirror image: when you must clear the accumulator and <b>keep</b> the flags, because a comparison has already happened and its verdict is still needed. That is a real situation and it is exactly why both exist. The general lesson is that on this processor the choice between two instructions that produce the same value is usually decided by what they do to the flags, not by the value." },
+  { t: "analogy", concept: "Masks", real: "A stencil over a page", html: "A mask is a <b>stencil</b>. You lay it over the byte and only the holes are affected.<br/><br/>With <b>AND</b> the stencil has holes where the ones are, and everything outside a hole is painted over in white — cleared. With <b>OR</b> everything inside a hole is painted black — set. With <b>XOR</b> everything inside a hole is swapped for its opposite.<br/><br/>The operation is the paint. The <b>stencil is the argument that actually matters</b>, and choosing it is the skill: 0FH is a stencil with the bottom half open, 80H has a single hole over the top bit, FFH has no stencil at all.<br/><br/>And a rotate is not a stencil. It is picking the page up and turning it, so that the bit you care about ends up under a hole you already have — which is why nibble swaps and bit tests are usually a rotate followed by a mask." },
+
+  { t: "trace", intro: "A mask followed by two rotates. Write each value as two hex digits, or 0 and 1 for a flag.", code: "        MVI A, 0A5H\n        ANI 0F0H\n        RRC\n        RRC\n        HLT\n", steps: [
+    { q: "After line 2, <code>A</code> is", answer: "A0", accept: ["a0h", "a0"], why: "A5H is 1010 0101 and the mask keeps only the top four bits, giving 1010 0000 — A0H. The low nibble was thrown away because those mask columns were zero." },
+    { q: "After line 2, <code>CY</code> is", answer: "0", accept: ["0", "clear", "false"], why: "<code>ANI</code> always clears the carry, whatever the operands. It is not reporting anything about A0H — it is a property of the instruction." },
+    { q: "After line 4, <code>A</code> is", answer: "28", accept: ["28h"], why: "Two circular rotates to the right: A0H becomes 50H and then 28H. Each one moves every bit down one place, with bit 0 wrapping round to the top — which here was a zero both times." },
+  ]},
+
+  { t: "drills", intro: "Eleven bit operations on A5H and friends. Predict, then open.", items: [
+    { task: "Keep the low nibble.", code: "MVI A, 0A5H\nANI 0FH\nHLT", show: ["A", "CY", "AC"], out: "A=05 CY=0 AC=1" },
+    { task: "Force the high nibble on.", code: "MVI A, 0A5H\nORI 0F0H\nHLT", show: ["A", "CY", "AC"], out: "A=F5 CY=0 AC=0" },
+    { task: "Flip every bit with a mask.", code: "MVI A, 0A5H\nXRI 0FFH\nHLT", show: ["A", "CY"], out: "A=5A CY=0" },
+    { task: "The same thing in one byte. Which flags move?", code: "MVI A, 0A5H\nCMA\nHLT", show: ["A", "CY", "Z"], out: "A=5A CY=0 Z=0" },
+    { task: "Compare two equal values.", code: "MVI A, 3CH\nCPI 3CH\nHLT", show: ["A", "Z", "CY"], out: "A=3C Z=1 CY=0" },
+    { task: "Compare against something larger.", code: "MVI A, 3CH\nCPI 4AH\nHLT", show: ["A", "Z", "CY"], out: "A=3C Z=0 CY=1" },
+    { task: "And against something smaller.", code: "MVI A, 4AH\nCPI 3CH\nHLT", show: ["A", "Z", "CY"], out: "A=4A Z=0 CY=0" },
+    { task: "A circular rotate left.", code: "MVI A, 81H\nRLC\nHLT", show: ["A", "CY"], out: "A=03 CY=1" },
+    { task: "The same byte, through the carry instead.", code: "MVI A, 81H\nRAL\nHLT", show: ["A", "CY"], out: "A=02 CY=1" },
+    { task: "A circular rotate right.", code: "MVI A, 81H\nRRC\nHLT", show: ["A", "CY"], out: "A=C0 CY=1" },
+    { task: "Set the carry, then complement it.", code: "STC\nCMC\nHLT", show: ["CY"], out: "CY=0" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MVI A, 0A5H\nANI 0F0H\n; \"now A holds the high digit, 0AH\"", why: "A holds <b>A0H</b>. Masking clears the other bits but does not <i>move</i> the ones you kept — they are still in the top four columns. Getting the digit as a number needs four rotates as well.", fix: "MVI A, 0A5H\nANI 0F0H\nRRC\nRRC\nRRC\nRRC" },
+    { bad: "MVI A, 81H\nRAL\n; \"bit 7 comes round to bit 0\"", why: "That is <code>RLC</code>. <code>RAL</code> sends bit 7 to the carry and brings the <b>old carry</b> in at bit 0 — so the answer depends on a flag set somewhere earlier in the program, which is exactly what makes this bug intermittent.", fix: "MVI A, 81H\nRLC" },
+    { bad: "CMP B\nJNC BIGGER      ; \"jump if A is greater\"", why: "<code>JNC</code> fires when A is greater <b>or equal</b>, because equal also produces no borrow. Strictly greater needs the zero flag ruled out first.", fix: "CMP B\nJZ SAME\nJNC BIGGER" },
+    { bad: "ANI 0F0H\nJC MASKED", why: "<code>ANI</code> always <b>clears</b> the carry, so this jump can never be taken. The logical instructions force CY and AC rather than reporting them, which makes those two flags meaningless after one.", fix: "ANI 0F0H\nJZ NOTHING_LEFT" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to swap the two hex digits of the byte at 2050H, which is A5H, and store 5AH at 2060H. It runs cleanly and stores 55H. Read it before you open the fix.", show: ["A", "M:2060"], code: "        LDA 2050H\n        RAL\n        RAL\n        RAL\n        RAL\n        STA 2060H\n        HLT\n", symptom: "stores 55H when swapping the digits of A5H should give 5A", q: "Four rotates moved eight bits by four places. So what came in at the bottom each time?", fix: "        LDA 2050H\n        RLC\n        RLC\n        RLC\n        RLC\n        STA 2060H\n        HLT\n", why: "<code>RAL</code> rotates through the carry, so the ring is <b>nine</b> bits long, not eight. Four rotations of a nine-bit ring do not bring the byte back into alignment — bits from the carry get mixed in and one real bit ends up parked in the carry at the end.<br/><br/><code>RLC</code> is the circular version: eight bits, bit 7 wrapping straight round to bit 0. Four of those move every bit by exactly half a byte, which is a digit swap.<br/><br/>What makes this dangerous is that it is <b>almost right</b>. 55H and 5AH look equally plausible, and with some input bytes the two versions even agree — so a test with the wrong data passes.<br/><br/>The rule to carry away: use the <b>circular</b> rotates (<code>RLC</code>, <code>RRC</code>) when you are rearranging bits inside one byte, and the <b>through-carry</b> ones (<code>RAL</code>, <code>RAR</code>) when a bit has to travel between bytes — which is what makes them the right choice for multi-byte shifts and the wrong one here." },
+
+  { t: "recap", items: [
+    "<b>AND clears, OR sets, XOR flips</b> — and the mask is the argument that decides which columns",
+    "<code>ANA</code>/<code>ANI</code> always set AC and clear CY; <code>ORA</code>/<code>XRA</code> clear both. Those flags describe the instruction, not the result",
+    "<code>CMA</code> complements the accumulator and touches <b>no flag at all</b>",
+    "<b>RLC and RRC are circular</b>; <b>RAL and RAR go through the carry</b>, making a nine-bit ring. All four affect only CY",
+    "<code>CMP</code> leaves A alone: <b>Z</b> means equal, <b>CY</b> means A was smaller, and greater-than needs both tested",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "How do you clear the upper four bits of the accumulator?", a: "ANI 0FH. AND gives a 1 only when both bits are 1, so a zero in the mask forces that column to zero and a one lets the original through. The mask 0FH has zeros in the top four columns and ones in the bottom four, which is exactly the requirement — and writing it in hex is what makes that obvious." },
+    { level: "beginner", q: "What is the difference between <code>RLC</code> and <code>RAL</code>?", a: "RLC is circular: bit 7 wraps round to bit 0 and a copy also goes to the carry. RAL goes through the carry: bit 7 moves into the carry and the carry's previous value comes in at bit 0, so nine bits are rotating rather than eight. With 81H and the carry clear, RLC gives 03H and RAL gives 02H." },
+    { level: "intermediate", q: "Which flags does <code>ANA</code> affect, and what is unusual about them?", a: "All five, but two of them are not describing the result: AC is always set and CY is always cleared, whatever the operands. Only sign, zero and parity say anything about the answer. It means a conditional jump on the carry after an AND can never be taken, which is a real bug people write." },
+    { level: "intermediate", q: "How do you test whether bit 5 of a byte is set?", a: "ANI 20H, then JZ. The mask has a single one in bit 5, so everything else is cleared and the result is either 20H or zero — zero exactly when the bit was clear. The alternative is to rotate the bit into the carry and test that with JC, which is cheaper if you are already rotating for another reason." },
+    { level: "advanced", q: "Why would you choose <code>XRA A</code> over <code>MVI A, 00H</code>, and when would you not?", a: "XRA A is one byte and four T-states against two bytes and seven, and it clears the carry and the auxiliary carry as well as the accumulator — which is what a multi-byte addition needs before it starts. MVI A, 00H is the right choice in exactly the situation where that is a problem: when a comparison has already happened and the flags still carry a verdict you are about to jump on. Data transfer instructions leave the flags alone, so MVI is the safe way to clear the accumulator without destroying the answer to a question already asked. It is a good example of the general rule that on this processor the choice between two instructions producing the same value is usually decided by their effect on the flags." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7891,6 +7981,7 @@ const mpLessons = [
   { slug: "mp-addressing-modes", order: 15, title: "Addressing Modes", minutes: 14, problems: [], content: MP11 },
   { slug: "mp-data-transfer", order: 16, title: "Data Transfer Instructions", minutes: 14, problems: [], content: MP12 },
   { slug: "mp-arithmetic", order: 17, title: "Arithmetic and the Flags", minutes: 14, problems: [], content: MP13 },
+  { slug: "mp-logical", order: 18, title: "Logical, Compare and Rotate", minutes: 14, problems: [], content: MP14 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -8195,6 +8286,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-logical": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which logical operation is used to <b>clear</b> chosen bits?", options: ["AND, with zeros in the mask where you want clearing", "OR", "XOR", "CMA"], correct: 0, why: "AND gives a 1 only when both bits are 1, so a zero in the mask forces that column to zero and a one lets the original through untouched." },
+    { level: "easy", q: "How do you keep only the lower four bits of the accumulator?", options: ["ORI 0FH", "ANI 0FH", "XRI 0FH", "ANI 0F0H"], correct: 1, why: "The mask has ones in the bottom four columns and zeros in the top four. Writing it in hex is what makes that obvious — the same value as decimal 15 says nothing about which columns it touches." },
+    { level: "easy", q: "What does <code>CMP B</code> do to the accumulator?", options: ["Sets it to the difference", "Clears it", "Nothing — it subtracts and throws the answer away", "Sets it to zero if they are equal"], correct: 2, why: "Only the flags survive. That is what lets CMP hold a running leader in A while everything else is compared against it." },
+    // Medium — apply it
+    { level: "medium", q: "What is the difference between <code>RLC</code> and <code>RAL</code>?", options: ["RLC is faster", "RAL rotates by two places", "RLC affects the flags and RAL does not", "RLC is circular over 8 bits; RAL rotates 9 bits, with the carry in the ring"], correct: 3, why: "With 81H and the carry clear, RLC gives 03H and RAL gives 02H — one bit of difference, because RLC brought bit 7 round and RAL brought the old carry in instead." },
+    { level: "medium", q: "Which flags does <code>ANI</code> force regardless of the operands?", options: ["It sets AC and clears CY", "It clears both AC and CY", "It sets both", "It affects no flags"], correct: 0, why: "Only sign, zero and parity describe the result. A conditional jump on the carry after an AND can never be taken, which is a real bug people write." },
+    { level: "medium", q: "After <code>CMP B</code>, which jump fires when the accumulator is <b>strictly greater</b> than B?", options: ["JC", "JZ", "JNC on its own", "JNC, but only after ruling out JZ"], correct: 3, why: "No borrow means greater or equal, because equal also borrows nothing. Greater-than is the one outcome that needs both flags tested." },
+    { level: "medium", q: "How would you test whether bit 5 of a byte is set?", options: ["ANI 05H then JNZ", "ANI 20H then JZ", "ORI 20H then JZ", "RLC five times then JZ"], correct: 1, why: "The mask has a single one in bit 5, so the result is either 20H or zero — zero exactly when the bit was clear. Rotating the bit into the carry and testing with JC also works." },
+    // Hard — the edges
+    { level: "hard", q: "Four <code>RAL</code> instructions are used to swap the two hex digits of a byte, and the answer is wrong. Why?", options: ["RAL rotates the wrong way", "RAL goes through the carry, so the ring is nine bits and four rotations do not realign the byte", "Four rotations move by two bits, not four", "RAL clears the accumulator"], correct: 1, why: "The circular rotates RLC and RRC rearrange bits inside one byte; the through-carry ones are for moving a bit between bytes, which is what makes them right for multi-byte shifts and wrong for a nibble swap." },
+    { level: "hard", q: "Which instruction complements the accumulator and affects <b>no</b> flag?", options: ["XRI 0FFH", "CMA", "CMC", "NOT A"], correct: 1, why: "XRI 0FFH gives the same value but writes all five flags, including forcing CY and AC to zero. CMA changes A and nothing else, which is exactly why it exists alongside the XOR." },
+    { level: "hard", q: "Why is <code>XRA A</code> preferred over <code>MVI A, 00H</code> for clearing the accumulator?", options: ["MVI A, 00H does not work on the 8085", "XRA A also clears the flags on which a pending comparison depends", "One byte and four T-states instead of two and seven, and it clears CY and AC too", "XRA A is the only one that sets the zero flag"], correct: 2, why: "Which is also the reason to use MVI A, 00H instead in the one case where it matters — when a comparison has already happened and its verdict is still needed, because data transfer leaves the flags alone." },
+  ],
   "mp-arithmetic": [
     // Easy — did the core idea land?
     { level: "easy", q: "What does <code>CY = 1</code> mean after a <code>SUB</code>?", options: ["The accumulator was smaller, so the subtraction borrowed", "The result was zero", "The result was negative in the signed sense", "The operand was smaller"], correct: 0, why: "The ALU adds the two's complement and inverts the carry out, so a set carry after a subtraction means a borrow was needed. Reversing this is the most common single error in 8085 code." },
