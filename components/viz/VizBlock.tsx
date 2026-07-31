@@ -79,6 +79,7 @@ import { MultiByteLab, MicroFamilyLab } from "./EvolutionLabs";
 import { AluPathLab, MemoryModelLab } from "./CpuBlockLabs";
 import { BusLab, TristateLab } from "./BusLabs";
 import { RegisterLab, PairLab, OpcodeBitsLab } from "./RegisterLabs";
+import { FlagLab, FlagEffectsLab, DaaLab } from "./FlagLabs";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -156,6 +157,9 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "register-lab": RegisterLab,
   "pair-lab": PairLab,
   "opcode-bits-lab": OpcodeBitsLab,
+  "flag-lab": FlagLab,
+  "flag-effects-lab": FlagEffectsLab,
+  "daa-lab": DaaLab,
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,

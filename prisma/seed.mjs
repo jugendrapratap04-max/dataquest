@@ -6840,6 +6840,92 @@ const MP5 = [
   ]},
 ];
 
+const MP6 = [
+  { t: "objectives", items: [
+    "Place all five flags in the <b>flag byte</b>, and say what the other three bits are",
+    "Say which instructions set which flags — and name the <b>three exceptions</b> that are examined",
+    "Explain <b>AC</b>: a carry out of bit 3, testable by nothing, used by one instruction",
+    "Use <code>DAA</code> to turn a hex sum back into a decimal one",
+  ]},
+  { t: "hook", q: "A program adds two numbers, then moves a byte, then jumps if the answer was zero. The jump goes the wrong way. Nothing in those three lines is written incorrectly. What happened?", why: "It depends entirely on which instruction did the moving. Some instructions leave the flags exactly as they found them and some quietly rewrite them, and the difference is not something you can see by reading the code — it is a property of each instruction that has to be known.<br/><br/>That is what this lesson is: the flags are five bits in a byte, they are written by almost every arithmetic instruction, and the whole skill is knowing which ones do and which ones do not. Lesson 4 introduced them as five questions. This is the version the exam asks about." },
+  { t: "def", term: "Flag register", en: "The five status bits the ALU produces, packed into a byte alongside three fixed bits. Sign is bit 7, Zero bit 6, Auxiliary Carry bit 4, Parity bit 2 and Carry bit 0; bits 5 and 3 are always 0 and bit 1 is always 1. Together with the accumulator it forms the PSW, the pair that PUSH PSW and POP PSW save and restore.", hi: "There is no flag register on the chip in the way there is an accumulator — the five bits are separate flip-flops. The byte exists because PUSH needs something byte-shaped to store, so the fixed bits are padding, and that padding is why an empty flag byte reads 02H rather than 00H." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> two questions come up almost every year — <i>give the bit positions of the flags</i>, and <i>which flags does this instruction affect</i>. The second is worth more, and it is nearly always asked about <code>INR</code>, <code>INX</code> or <code>DAD</code>, because those are the three that break the rule." },
+
+  { t: "h2", n: "1", text: "Five bits, and three that are not flags at all" },
+  { t: "p", html: "The flags are individual flip-flops, but they can be read as one byte — and their positions in it are fixed." },
+  { t: "viz", name: "flag-lab" },
+  { t: "p", html: "Notice the gaps. <b>Bit 5 and bit 3 are always 0, and bit 1 is always 1</b>, so those three tell you nothing and cannot be changed. They exist because <code>PUSH PSW</code> needs a whole byte to store, and five bits do not fill one." },
+  { t: "code", file: "psw.asm", lang: "asm8085", show: ["A", "AC", "P", "M:23FE", "M:23FF"], code: "        LXI SP, 2400H\n        MVI A, 3CH\n        ADI 3CH         ; 60 + 60 = 120\n        PUSH PSW        ; store A and the flags\n        HLT\n", output: "A=78 AC=1 P=1 [23FE]=16 [23FF]=78" },
+  { t: "p", html: "There is the byte, in memory, where you can read it: <b>16H</b> is 0001 0110 — AC at bit 4, P at bit 2, and the fixed 1 at bit 1. The accumulator went in beside it at the higher address, which is what makes the pair a <b>PSW</b>." },
+
+  { t: "h2", n: "2", text: "Which instructions actually touch them" },
+  { t: "p", html: "The rule is short — arithmetic sets all five — and everything worth marks is an exception to it." },
+  { t: "viz", name: "flag-effects-lab" },
+  { t: "p", html: "The three to know cold are on that list: <code>INR</code> and <code>DCR</code> leave the <b>carry</b> alone, <code>INX</code> and <code>DCX</code> set <b>nothing at all</b>, and <code>DAD</code> sets <b>only the carry</b>. None of them is arbitrary — each follows from which block did the arithmetic." },
+  { t: "code", file: "exceptions.asm", lang: "asm8085", show: ["HL", "CY", "Z"], code: "        XRA A           ; A = 00, so Z = 1\n        LXI H, 0FFFFH\n        LXI B, 0002H\n        DAD B           ; HL = 0001 — not zero\n        HLT\n", output: "HL=0001 CY=1 Z=1" },
+  { t: "p", html: "HL holds 0001H, which is plainly not zero, and <code>Z</code> is still <b>1</b> — left there by the <code>XRA A</code> four lines earlier. <code>DAD</code> reported its carry and touched nothing else, so a <code>JZ</code> here would test a five-instruction-old answer." },
+
+  { t: "h2", n: "3", text: "The flag nothing can test" },
+  { t: "p", html: "<b>AC</b> is a carry out of bit 3 — from the low hex digit into the high one. No conditional jump can read it: there is no <code>JAC</code>. It exists for one instruction." },
+  { t: "viz", name: "daa-lab" },
+  { t: "p", html: "In <b>BCD</b> each hex digit holds one decimal digit, so 27H means twenty-seven. The ALU adds in hex regardless, and <code>DAA</code> repairs the answer — adding 6 to a digit that overflowed, and using <b>AC</b> to find out that it did." },
+  { t: "code", file: "bcd.asm", lang: "asm8085", show: ["A", "AC", "CY"], code: "        MVI A, 27H      ; BCD 27\n        ADI 15H         ; BCD 15\n        DAA             ; fix the answer\n        HLT\n", output: "A=42 AC=1 CY=0" },
+  { t: "p", html: "Without the <code>DAA</code> the accumulator holds 3CH, which is not a decimal number at all. With it, 42H — and read as BCD that is forty-two, which is what 27 + 15 comes to." },
+
+  { t: "h2", n: "4", text: "Flags are the last instruction's, not the program's" },
+  { t: "p", html: "Nothing preserves a flag. It holds its value until some instruction writes it, and that instruction may be several lines below the one you meant to test." },
+  { t: "code", file: "stale.asm", lang: "asm8085", show: ["A", "Z", "CY"], code: "        STC             ; carry deliberately set\n        MVI A, 0FFH\n        INR A           ; wraps to 00\n        HLT\n", output: "A=00 Z=1 CY=1" },
+  { t: "p", html: "The accumulator wrapped past its top and <code>CY</code> is still showing the <code>STC</code> from three lines up, because <code>INR</code> does not write the carry. <code>Z</code> is real and <code>CY</code> is a leftover, and nothing on the page distinguishes them." },
+
+  { t: "think", q: "Why is there no conditional jump for the auxiliary carry?", a: "Because there is nothing useful to jump on.<br/><br/>The other four flags answer questions a program asks about a <i>result</i>: was it zero, was it negative, did it overflow, is it even. AC answers a question about the <i>middle of the byte</i> — did bit 3 carry into bit 4 — and a byte's middle is not a meaningful boundary unless you have decided the two halves mean separate things.<br/><br/>Exactly one thing makes that decision: BCD, where each hex digit stands for a decimal digit. And BCD has its own instruction, <code>DAA</code>, which reads AC directly. So a jump would be a second way to reach a flag that already has its consumer.<br/><br/>It is also worth seeing what that costs. Conditional jumps on the 8085 are encoded as <b>three bits</b> selecting one of eight conditions — zero, not-zero, carry, not-carry, parity even, parity odd, plus and minus. Eight is what three bits reach, and all eight are used. Adding JAC and JNAC would have meant a fourth bit and a different instruction format, for a flag with one customer. The gap in the instruction set is a decision, not an oversight." },
+  { t: "analogy", concept: "The flags", real: "A note left on the counter", html: "Somebody finishes a job and leaves a note: <i>came out empty · nothing left over · the total was even</i>. They do not hand it to anyone. They put it on the counter and walk away.<br/><br/>Anyone who wants it has to read it <b>before the next person leaves their own note</b>, because there is only one counter and the new note replaces the old one. That is the flags: written by whoever last did arithmetic, read by whoever looks next, and overwritten without warning.<br/><br/>Some people finish a job and leave <b>no</b> note at all — they moved a box, they did not calculate anything. The old note is still sitting there, and it still looks current. That is <code>MOV</code>, and it is why a data transfer between a compare and a jump is safe.<br/><br/>And one person always writes the same two lines whatever happened — <i>nothing left over, middle carried</i> — regardless of the actual job. That is <code>ANA</code>, and it is the reason its flags cannot be trusted to describe anything." },
+
+  { t: "trace", intro: "Two bytes added, then compared against the answer. Write each value as two hex digits, or 0 and 1 for a flag.", code: "        MVI A, 3CH\n        ADI 3CH\n        MVI B, 78H\n        CMP B\n        HLT\n", steps: [
+    { q: "After line 2, <code>A</code> is", answer: "78", accept: ["78h"], why: "3CH is 60 and twice that is 120, which is 78H. It fits in a byte, so the carry stays clear." },
+    { q: "After line 2, <code>AC</code> is", answer: "1", accept: ["1", "set", "true"], why: "The low digits were C and C, and C + C is 18H — more than one digit holds. That carry out of bit 3 is exactly what the auxiliary carry records, and it is set even though the full byte did not overflow." },
+    { q: "After line 4, <code>Z</code> is", answer: "1", accept: ["1", "set", "true"], why: "<code>CMP B</code> subtracts B from A and throws the answer away. 78H − 78H is zero, so the zero flag comes on — which is how a comparison reports \"equal\". The accumulator still holds 78H." },
+  ]},
+
+  { t: "drills", intro: "Eleven flag readings. Predict every value, then open.", items: [
+    { task: "Parity counts the 1 bits. Is 03H even?", code: "MVI A, 03H\nORA A\nHLT", show: ["A", "P"], out: "A=03 P=1" },
+    { task: "And 07H?", code: "MVI A, 07H\nORA A\nHLT", show: ["A", "P"], out: "A=07 P=0" },
+    { task: "The sign flag is just the top bit.", code: "MVI A, 80H\nORA A\nHLT", show: ["A", "S", "Z"], out: "A=80 S=1 Z=0" },
+    { task: "Clear the accumulator and read two flags.", code: "MVI A, 0FFH\nXRA A\nHLT", show: ["A", "Z", "P"], out: "A=00 Z=1 P=1" },
+    { task: "A carry out of bit 3, with no carry out of the byte.", code: "MVI A, 0FH\nADI 01H\nHLT", show: ["A", "AC", "CY"], out: "A=10 AC=1 CY=0" },
+    { task: "The same sum one higher — does AC still fire?", code: "MVI A, 10H\nADI 01H\nHLT", show: ["A", "AC", "CY"], out: "A=11 AC=0 CY=0" },
+    { task: "Set the carry, then wrap with INR. Is the carry disturbed?", code: "STC\nMVI A, 0FFH\nINR A\nHLT", show: ["A", "Z", "CY"], out: "A=00 Z=1 CY=1" },
+    { task: "INX gives a zero result. Does the zero flag notice?", code: "MVI A, 01H\nORA A\nLXI H, 0FFFFH\nINX H\nHLT", show: ["HL", "Z"], out: "HL=0000 Z=0" },
+    { task: "ANA always sets AC and always clears CY.", code: "STC\nMVI A, 0F0H\nMVI B, 3CH\nANA B\nHLT", show: ["A", "CY", "AC"], out: "A=30 CY=0 AC=1" },
+    { task: "XRA clears both of them.", code: "STC\nMVI A, 0FFH\nXRA A\nHLT", show: ["A", "CY", "AC", "Z"], out: "A=00 CY=0 AC=0 Z=1" },
+    { task: "A subtraction that borrows — read all three.", code: "MVI A, 05H\nSUI 09H\nHLT", show: ["A", "S", "CY", "AC"], out: "A=FC S=1 CY=1 AC=0" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "DAD B\nJZ DONE", why: "<code>DAD</code> affects the carry flag and nothing else, so this tests whatever the last ALU instruction left in the zero flag. It will look correct whenever that stale value happens to be right, which is what makes it survive testing.", fix: "DAD B\nMOV A, H\nORA L           ; ORA goes through the ALU\nJZ DONE" },
+    { bad: "INR A\nJC OVERFLOW", why: "<code>INR</code> sets four flags and the carry is the one it leaves alone. The value may well have wrapped — but the carry is not how you find out, and here it is reporting something from earlier in the program.", fix: "INR A\nJZ WRAPPED      ; INR does set the zero flag" },
+    { bad: "MVI A, 27H\nADI 15H\n; A now holds BCD 42", why: "A holds 3CH. The ALU added in hex and does not know the digits were meant to be decimal, so the answer needs correcting before it is a BCD number.", fix: "MVI A, 27H\nADI 15H\nDAA             ; now A is 42H" },
+    { bad: "; \"an empty flag byte is 00H\"", why: "It is <b>02H</b>. Bit 1 of the flag byte is wired to 1 and cannot be cleared, so a PSW with every flag off still has that bit set. Bits 5 and 3 are wired to 0 for the same reason — they are padding, not flags.", fix: "; no flags set -> flag byte = 02H" },
+  ]},
+
+  { t: "debug", intro: "This adds 2 to HL and is supposed to notice when the result reaches zero, loading 55H into A if it does. HL really does end up at 0000H — and it runs cleanly and loads AAH instead. Read it before you open the fix.", show: ["A", "HL"], code: "        LXI H, 0FFFEH\n        LXI B, 0002H\n        MVI A, 01H\n        ORA A           ; some earlier work\n        DAD B           ; HL = 0000\n        JZ ZERO\n        MVI A, 0AAH\n        HLT\nZERO:   MVI A, 55H\n        HLT\n", symptom: "takes the not-zero path even though HL really is 0000H", q: "The addition is right and the result is zero. So which instruction wrote the flag the jump is reading?", fix: "        LXI H, 0FFFEH\n        LXI B, 0002H\n        MVI A, 01H\n        ORA A           ; some earlier work\n        DAD B           ; HL = 0000\n        MOV A, H\n        ORA L           ; through the ALU, so Z is real\n        JZ ZERO\n        MVI A, 0AAH\n        HLT\nZERO:   MVI A, 55H\n        HLT\n", why: "<code>ORA A</code> on line 4 set the zero flag to 0, because A held 01H. Then <code>DAD B</code> ran, produced 0000H, and <b>did not touch the zero flag</b> — it only ever writes the carry. So <code>JZ</code> read a flag that was four instructions old and describing a different value entirely.<br/><br/>The fix does not change the addition. It <i>makes</i> a zero test: <code>MOV A, H</code> then <code>ORA L</code> ORs both halves together, which goes through the ALU and therefore sets Z honestly — zero only if both bytes were zero. It costs the accumulator, which is why you save A first if you still need it.<br/><br/>What makes this class of bug dangerous is that it is <b>right most of the time</b>. Whenever the stale flag happens to match the real answer, the program works. It fails on the inputs where they differ, which are exactly the ones nobody tested.<br/><br/>The habit that catches it: after any 16-bit operation, ask which flags it actually wrote. The three worth memorising are on this page — <code>INX</code> and <code>DCX</code> write none, <code>DAD</code> writes only the carry, and <code>INR</code> and <code>DCR</code> write everything except it." },
+
+  { t: "recap", items: [
+    "The flag byte is <b>S · Z · 0 · AC · 0 · P · 1 · CY</b> — bits 7, 6, 4, 2 and 0 are flags; bits 5, 3 and 1 are fixed",
+    "With no flags set the byte reads <b>02H</b>, because bit 1 is wired to 1",
+    "The exceptions worth memorising: <code>INR</code>/<code>DCR</code> skip <b>CY</b>, <code>INX</code>/<code>DCX</code> set <b>nothing</b>, <code>DAD</code> sets <b>only CY</b>",
+    "<code>ANA</code> always sets AC and clears CY; <code>ORA</code> and <code>XRA</code> clear both — regardless of the operands",
+    "<b>AC</b> is a carry out of bit 3, no jump can test it, and its only customer is <code>DAA</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Name the five flags of the 8085 and their bit positions.", a: "Sign at bit 7, Zero at bit 6, Auxiliary Carry at bit 4, Parity at bit 2 and Carry at bit 0. Bits 5 and 3 are always 0 and bit 1 is always 1, so those three are padding rather than flags — which is why a flag byte with nothing set reads 02H." },
+    { level: "beginner", q: "What is the PSW?", a: "The Program Status Word — the accumulator and the flag byte treated as a 16-bit pair, with A as the high half. It exists so PUSH PSW and POP PSW can save and restore both in one instruction, which is the first thing an interrupt service routine does and the last thing it undoes." },
+    { level: "intermediate", q: "Which flags does <code>DAD</code> affect, and why does that matter?", a: "Only the carry. It matters because a DAD followed by a conditional jump on zero or sign is testing whatever an earlier instruction left in those flags — a stale value that will be right often enough to pass casual testing. To test a 16-bit result for zero you have to make the test yourself, usually MOV A, H then ORA L." },
+    { level: "intermediate", q: "What is the auxiliary carry flag and what uses it?", a: "A carry out of bit 3 into bit 4 — from the low hex digit into the high one. No conditional jump can test it; the only instruction that reads it is DAA, which uses it to decide whether the low digit of a BCD sum overflowed and needs 6 added. Without AC, DAA could not tell 11H meaning eleven from 11H that came from 8 + 9 and should be 17." },
+    { level: "advanced", q: "A program compares two values, does some housekeeping, then jumps on the result of the compare. When is that safe?", a: "Only when nothing between the compare and the jump writes a flag. Data transfer is safe — MOV, MVI, LDA, STA and the register-pair loads set nothing — and so are INX and DCX, which is exactly why they are the instructions used to step pointers inside a loop that tests a counter. Anything through the ALU is not safe: an ADD, a compare, even an ORA used to clear a register will overwrite the verdict. The general habit is to jump as soon as possible after the compare, and where that is not possible, to save the flags with PUSH PSW and restore them with POP PSW — which is also the mechanism an interrupt has to use, because the interrupted program's flags must survive the routine that ran in the middle of it." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7186,6 +7272,7 @@ const mpLessons = [
   { slug: "mp-inside-the-chip", order: 7, title: "Inside the Chip", minutes: 14, problems: [], content: MP3 },
   { slug: "mp-three-buses", order: 8, title: "The Three Buses", minutes: 14, problems: [], content: MP4 },
   { slug: "mp-register-set", order: 9, title: "The Register Set", minutes: 14, problems: [], content: MP5 },
+  { slug: "mp-flag-register", order: 10, title: "The Flag Register, Bit by Bit", minutes: 14, problems: [], content: MP6 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7490,6 +7577,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-flag-register": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Which bit of the flag byte is the carry flag?", options: ["Bit 0", "Bit 7", "Bit 4", "Bit 1"], correct: 0, why: "Carry sits at the bottom, sign at the top (bit 7), zero at bit 6, auxiliary carry at bit 4 and parity at bit 2. Bits 5, 3 and 1 are not flags at all." },
+    { level: "easy", q: "Which flag lives at bit 6 of the flag byte?", options: ["Sign", "Zero", "Parity", "Auxiliary carry"], correct: 1, why: "Sign is bit 7 and zero is bit 6 — the two most-used flags sit at the top, and the order S then Z is worth memorising as a pair." },
+    { level: "easy", q: "An 8085 program has just started and no flag is set. What does the flag byte read?", options: ["00H", "FFH", "02H", "01H"], correct: 2, why: "Bit 1 is wired to 1 and cannot be cleared, so an empty flag byte is 02H. Bits 5 and 3 are wired to 0 for the same reason — all three are padding that makes the five flags fill a whole byte." },
+    // Medium — apply it
+    { level: "medium", q: "Which flags does <code>DAD</code> affect?", options: ["All five", "Zero and carry", "None", "The carry, and nothing else"], correct: 3, why: "So DAD followed by JZ tests whatever an earlier ALU instruction left in the zero flag. To test a 16-bit result for zero you have to build the test yourself, usually MOV A, H then ORA L." },
+    { level: "medium", q: "<code>LXI H, 0FFFFH</code> then <code>INX H</code> gives HL = 0000H. Which flags changed?", options: ["None — INX and DCX affect no flags at all", "Zero only", "Zero and carry", "All five"], correct: 0, why: "INX is a 16-bit operation through the incrementer rather than the ALU, and that block has nothing wired to the flag flip-flops. It is also what makes INX safe inside a loop whose exit depends on DCR C." },
+    { level: "medium", q: "A program does <code>STC</code>, then <code>MVI A, 0FFH</code>, then <code>INR A</code>. What is the carry flag afterwards?", options: ["0, because the result is zero", "1 — still the STC, because INR does not write the carry", "1, because the value wrapped", "Undefined"], correct: 1, why: "INR sets sign, zero, parity and auxiliary carry, and deliberately leaves the carry alone. The value really did wrap, but the carry is not how you find that out — the zero flag is." },
+    { level: "medium", q: "What is the auxiliary carry flag?", options: ["A copy of the carry flag", "The carry produced by 16-bit instructions", "A carry out of bit 3, into the high hex digit", "The carry left over from the previous instruction"], correct: 2, why: "It records a carry across the boundary between the two hex digits of a byte. That boundary only means something in BCD, which is why exactly one instruction reads it." },
+    // Hard — the edges
+    { level: "hard", q: "Why is there no conditional jump on the auxiliary carry?", options: ["AC is not stored anywhere", "It would be too slow", "AC is cleared before every jump", "All eight condition codes are already used, and DAA already reads AC directly"], correct: 3, why: "Conditional jumps encode the condition in three bits — eight codes, and all eight are taken. Adding JAC would have needed a different instruction format for a flag with exactly one customer." },
+    { level: "hard", q: "<code>MVI A, 27H</code> then <code>ADI 15H</code>, meaning BCD 27 plus BCD 15. What does A hold?", options: ["3CH — the hex sum, which needs DAA to become 42H", "42H already", "The assembler rejects BCD values", "27H, unchanged"], correct: 0, why: "The ALU adds in hex and has no idea the digits were meant to be decimal. DAA is what adds 6 to the overflowed digit and turns 3CH into 42H." },
+    { level: "hard", q: "Why does an interrupt service routine begin with <code>PUSH PSW</code>?", options: ["To reserve stack space", "Because the interrupted program's accumulator and flags must survive the routine", "Because PSW cannot be read any other way", "To clear the flags before the routine runs"], correct: 1, why: "An interrupt can arrive between a compare and the jump that reads its verdict. Saving A and the flag byte together, and popping them before RET, is what makes the interruption invisible to the program it interrupted." },
+  ],
   "mp-register-set": [
     // Easy — did the core idea land?
     { level: "easy", q: "How many 8-bit general-purpose registers can an 8085 program name?", options: ["Seven — A, B, C, D, E, H and L", "Eight, including M", "Six", "Eleven"], correct: 0, why: "Seven, because three bits in the opcode give eight codes and one of them is spent on M — the byte in memory at HL, which is not a register at all." },

@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**9 written, 33 problems.** Read that file before touching this subject.
+**10 written, 37 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,11 +194,11 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Chapter 2 is finished and Chapter 3 has started** — lessons 5 to 9 are all at
-that standard, so the whole subject is in one shape and **lesson 10 ("The flag
-register, bit by bit") is next**. Ten panels were built across those five
-lessons, and what they teach is the part worth copying: each one carries an idea
-that prose was previously asserting.
+**Chapter 2 is finished and Chapter 3 is two lessons in** — lessons 5 to 10 are
+all at that standard, so the whole subject is in one shape and **lesson 11 ("Pins
+and signals") is next**. Thirteen panels were built across those six lessons, and
+what they teach is the part worth copying: each one carries an idea that prose
+was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -234,6 +234,21 @@ that prose was previously asserting.
 
 Lesson 8 also reuses `address-width-lab` from lesson 2 — same 2ⁿ calculation, now
 asked about the address bus rather than a street of boxes.
+
+- **`flag-lab`** (lesson 10) — the five flags as a *byte*, with the three fixed
+  bits in their gaps, computed live from a chosen operation. "What is the PSW
+  after this" is a standard question and it needs the layout in front of you.
+- **`flag-effects-lab`** (lesson 10) — which instruction writes which flag, as a
+  list you press. All the value is in the exceptions, and they light up.
+- **`daa-lab`** (lesson 10) — why AC exists at all. The `08 + 09` case is the
+  one that earns the panel: the raw sum 11H looks like valid BCD, so nothing but
+  AC reveals that the low digit overflowed.
+
+`flag-lab` re-implements the ALU's flag rules in TypeScript rather than calling
+the simulator, so the two could drift. They were checked against each other
+before shipping — `3CH + 3CH` gives a flag byte of **16H** in the panel and in a
+real `PUSH PSW`, which is the lesson's own code block. If you touch either, check
+that pair again.
 
 `opcode-bits-lab` is worth copying from when Chapter 4 gets to hand-assembly:
 every byte it can produce was checked against `assemble()` in `lib/asm8085.ts`
@@ -331,10 +346,14 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
   `Arch8085Lab`. **Sweep for it after any component edit**, because it survives
   lint, the build and a passing `db:check`:
   ```
-  curl -s http://localhost:3000/learn/<slug> | grep -o '</b>[a-zA-Z]\{2,14\}\|</code>[a-zA-Z]\{2,14\}'
+  curl -s http://localhost:3000/learn/<slug> | grep -o '</b>[A-Za-z0-9]\{2,14\}\|</code>[A-Za-z0-9]\{2,14\}'
   ```
   Run it over every slug; a hit like `</b>attaches` is the bug, while
-  `</b>nary` (from `<b>bi</b>nary`) is deliberate.
+  `</b>nary` (from `<b>bi</b>nary`) is deliberate. **Include `0-9` in the class**
+  — the first version of this sweep used `[a-zA-Z]` and silently missed
+  `</b>08H` in lesson 10's DAA panel, because the next character was a digit.
+  Sweeping all 93 pages takes several minutes; do it in two halves so the shell
+  does not time out.
 - **A component declared inside another component's body is a lint error.**
   `react-hooks/static-components` — a `const Cell = (...) => …` helper written
   during render is a new type every render, so React remounts its subtree. Move
