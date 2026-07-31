@@ -7184,6 +7184,94 @@ const MP9 = [
   ]},
 ];
 
+const MP10 = [
+  { t: "objectives", items: [
+    "Sort any instruction into one of the <b>five groups</b>, and say what each group does to the flags",
+    "Say whether an instruction is <b>1, 2 or 3 bytes</b> from what its operand is",
+    "Read an <b>opcode</b> as fields rather than as a number to look up",
+    "<b>Hand-assemble</b> a short program into addresses and hex bytes",
+  ]},
+  { t: "hook", q: "The 8085 has 246 instructions. Nobody memorises 246 of anything. So what do people who know this processor actually hold in their heads?", why: "Two small things, and everything else follows from them.<br/><br/>First, <b>five groups</b> — move a byte, do arithmetic, do logic, jump somewhere, control the processor. Which group an instruction is in tells you the one thing that matters most in practice: whether it touches the flags.<br/><br/>Second, <b>three lengths</b>. An instruction is one byte if it only names registers, two if it carries a byte of data, three if it carries an address. That is the whole rule, and it is what lets you work out where each instruction sits in memory without an assembler.<br/><br/>Neither is a list. Both are patterns, and this lesson is where the instruction set stops being a table at the back of a book." },
+  { t: "def", term: "Instruction group", en: "One of the five families the 8085's instructions fall into: data transfer, arithmetic, logical, branching and machine control. The grouping is not decoration — it predicts behaviour, because the arithmetic and logical groups write the flags and the other three do not.", hi: "Length is the second axis and it is decided by the operand. <b>Register operands are encoded inside the opcode</b>, so those instructions are one byte. A byte of immediate data adds one more, and a 16-bit address adds two." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"classify the instruction set with examples\" is a straight recall question, and \"assemble this program and give the machine code with addresses\" is the one that carries real marks. The second is only arithmetic — each address is the previous one plus that instruction's length — and it is worth practising until it is boring." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H, so the examples that read memory have something to read." },
+
+  { t: "h2", n: "1", text: "Five groups, and the one that matters" },
+  { t: "p", html: "Every instruction is in exactly one group, and the group predicts what it does to the flags." },
+  { t: "viz", name: "instr-group-lab" },
+  { t: "p", html: "The useful split is not five ways but two: <b>arithmetic and logical write the flags; data transfer, branching and machine control do not</b>. That is why a <code>MOV</code> can sit safely between a <code>CMP</code> and the <code>JZ</code> that reads its verdict, and an <code>ADD</code> cannot." },
+  { t: "code", file: "groups.asm", lang: "asm8085", show: ["A", "T"], code: "        MVI A, 25H      ; data transfer\n        ADI 10H         ; arithmetic\n        ANI 0FH         ; logical\n        JMP DONE        ; branching\nDONE:   HLT             ; machine control\n", output: "A=05 T=36" },
+  { t: "p", html: "One instruction from each group, in five lines. 25H + 10H is 35H, and <code>ANI 0FH</code> keeps only the low digit, leaving <b>05</b>." },
+
+  { t: "h2", n: "2", text: "One byte, two bytes, or three" },
+  { t: "p", html: "The length is not arbitrary and it is not memorised. It follows from what the instruction has to carry." },
+  { t: "viz", name: "instruction-bytes-lab" },
+  { t: "p", html: "<b>One byte</b> when every operand is a register, because a register only needs three bits and they fit inside the opcode. <b>Two</b> when a byte of data comes along. <b>Three</b> when a 16-bit address does — and never more, because there is nothing bigger than an address to carry." },
+  { t: "code", file: "bytes.asm", lang: "asm8085", show: ["CODE:2000-2006"], code: "        MVI A, 25H      ; 2 bytes\n        MOV B, A        ; 1 byte\n        LXI H, 2050H    ; 3 bytes\n        HLT             ; 1 byte\n", output: "CODE=3E 25 47 21 50 20 76" },
+  { t: "p", html: "Seven bytes for four instructions, and you can point at each one: <b>3E 25</b>, then <b>47</b>, then <b>21 50 20</b>, then <b>76</b>. Notice the address in <code>LXI</code> is stored <b>low byte first</b> — 50 then 20 for 2050H." },
+
+  { t: "h2", n: "3", text: "Turning a program into hex" },
+  { t: "p", html: "Put the two rules together and you can assemble by hand, which is what a trainer kit and an exam both ask for." },
+  { t: "viz", name: "hand-assemble-lab" },
+  { t: "p", html: "The only column that takes thought is the <b>address</b>: each one is the previous address plus that instruction's length. Miscount a single byte and every line below it shifts, which is exactly how a hand-computed jump address ends up pointing into the middle of an instruction." },
+  { t: "code", file: "listing.asm", lang: "asm8085", show: ["A", "M:2060", "CODE:2000-2009"], code: "        MVI A, 25H\n        MOV B, A\n        LXI H, 2050H\n        ADD M\n        STA 2060H\n        HLT\n", output: "A=7F [2060]=7F CODE=3E 25 47 21 50 20 86 32 60 20" },
+  { t: "p", html: "Ten bytes, 2000H to 2009H, with <code>HLT</code> at 200AH. And the program works: 25H plus the 5AH at 2050H is <b>7FH</b>, stored where it was told." },
+
+  { t: "h2", n: "4", text: "The same operation, two forms" },
+  { t: "p", html: "Most arithmetic and logical operations come in a <b>register</b> form and an <b>immediate</b> form, and the difference is a byte." },
+  { t: "code", file: "forms.asm", lang: "asm8085", show: ["A", "CODE:2000-2005"], code: "        MVI A, 25H\n        MVI B, 10H\n        ADD B           ; register form  — 1 byte\n        SUI 05H         ; immediate form — 2 bytes\n        HLT\n", output: "A=30 CODE=3E 25 06 10 80 D6" },
+  { t: "p", html: "<code>ADD B</code> is one byte because B fits in the opcode; <code>SUI 05H</code> is two because the 05 has to travel with it. The names follow a pattern worth learning once: the <b>I</b> on the end means immediate — <code>ADI</code>, <code>SUI</code>, <code>ANI</code>, <code>ORI</code>, <code>XRI</code>, <code>CPI</code>." },
+
+  { t: "think", q: "Why is there no instruction to add two registers together and put the answer in a third?", a: "Because it would not fit in a byte, and everything on this processor is built around instructions that do.<br/><br/>Naming three registers needs three fields of three bits, which is nine bits before the opcode has said what operation it is. There is no room. Two fields fit — that is <code>MOV</code>, at 01 ddd sss — and two fields is already the whole byte.<br/><br/>So the accumulator is the answer to the space problem: fix one operand and one destination permanently, and an arithmetic instruction only needs to name the <i>other</i> operand. That is three bits, leaving five for the operation, and it fits.<br/><br/>The cost is the copying you have already met. Adding B and C means <code>MOV A, B</code>, <code>ADD C</code>, <code>MOV C, A</code> — three instructions where a three-operand machine would use one. Modern processors with sixteen or thirty-two registers do have three-operand instructions, and they pay for them in instruction length: four bytes where the 8085 uses one. Neither is wrong. They are the same trade made in different decades." },
+  { t: "analogy", concept: "Instruction groups and lengths", real: "A form with optional attachments", html: "Think of each instruction as a small form. The <b>opcode</b> is the form itself — one byte, and it says what is being requested.<br/><br/>Some forms are complete on their own: &ldquo;copy the thing in B into A&rdquo; needs no attachment, because both names are printed on the form. That is a <b>one-byte</b> instruction.<br/><br/>Some need a number attached: &ldquo;put <i>this value</i> in A&rdquo;. One page attached, so <b>two bytes</b>. And some need an address attached, which takes two pages because an address is sixteen bits — <b>three bytes</b>.<br/><br/>The <b>group</b> is which department the form goes to, and it tells you what comes back. Forms to the arithmetic department always return a note about the result — the flags. Forms to the filing department never do, because filing does not have an opinion." },
+
+  { t: "trace", intro: "Four instructions from three different groups. Write each value as two hex digits.", code: "        MVI A, 25H\n        MOV B, A\n        ADI 10H\n        ANA B\n        HLT\n", steps: [
+    { q: "After line 1, <code>A</code> is", answer: "25", accept: ["25h"], why: "A two-byte data transfer instruction: the opcode 3EH and the value 25H that follows it. No flag moved, because the data transfer group never touches them." },
+    { q: "After line 3, <code>A</code> is", answer: "35", accept: ["35h"], why: "25H + 10H = 35H. <code>ADI</code> is the immediate form, so this is two bytes and it does set all five flags." },
+    { q: "After line 4, <code>A</code> is", answer: "25", accept: ["25h"], why: "B still holds the 25H copied in line 2, and 35H AND 25H is 25H. <code>ANA</code> is the register form of the AND — one byte, because B fits inside the opcode." },
+  ]},
+
+  { t: "drills", intro: "Eleven instructions. Predict the bytes or the result, then open.", items: [
+    { task: "A register-to-register move. How many bytes?", code: "MOV B, A\nHLT", show: ["CODE:2000-2000"], out: "CODE=47" },
+    { task: "An immediate load.", code: "MVI A, 42H\nHLT", show: ["CODE:2000-2001"], out: "CODE=3E 42" },
+    { task: "A 16-bit load — which byte of the address comes first?", code: "LXI H, 2050H\nHLT", show: ["CODE:2000-2002"], out: "CODE=21 50 20" },
+    { task: "The register form of an addition.", code: "MVI A, 25H\nMVI B, 10H\nADD B\nHLT", show: ["A"], out: "A=35" },
+    { task: "The immediate form of an AND.", code: "MVI A, 0FFH\nANI 0FH\nHLT", show: ["A"], out: "A=0F" },
+    { task: "An unconditional jump over an instruction.", code: "JMP SKIP\nMVI A, 0FFH\nSKIP: MVI A, 11H\nHLT", show: ["A"], out: "A=11" },
+    { task: "Complement the accumulator — a logical instruction that sets no flag.", code: "MVI A, 0F0H\nCMA\nHLT", show: ["A"], out: "A=0F" },
+    { task: "A store, with its three bytes.", code: "MVI A, 7FH\nSTA 2060H\nHLT", show: ["M:2060", "CODE:2000-2004"], out: "[2060]=7F CODE=3E 7F 32 60 20" },
+    { task: "An input instruction. Two bytes — what is the second?", code: "IN 40H\nHLT", show: ["A", "CODE:2000-2001"], out: "A=00 CODE=DB 40" },
+    { task: "A rotate. Which flag does it touch?", code: "MVI A, 81H\nRLC\nHLT", show: ["A", "CY"], out: "A=03 CY=1" },
+    { task: "Two instructions that do nothing at all.", code: "NOP\nNOP\nHLT", show: ["T", "STEPS"], out: "T=13 STEPS=3" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MOV A, 05H", why: "<code>MOV</code> is the register form and both of its operands must be registers — they are encoded inside the single opcode byte. A value needs the immediate form, which is a different instruction with a different opcode and one more byte.", fix: "MVI A, 05H" },
+    { bad: "ADD 05H", why: "Same confusion in the arithmetic group. <code>ADD</code> takes a register; the immediate form has an <b>I</b> on the end. The pattern holds across the whole group: ADI, SUI, ANI, ORI, XRI, CPI.", fix: "ADI 05H" },
+    { bad: "; \"LXI H, 2050H stores 20 then 50\"", why: "It stores <b>50 then 20</b>. Every 16-bit value in 8085 machine code is written low byte first, in the instruction and in memory. Getting this backwards makes every hand-assembled listing wrong from that line on.", fix: "; 21 50 20 — opcode, low byte, high byte" },
+    { bad: "; \"CMA is arithmetic, so it sets the flags\"", why: "<code>CMA</code> is in the logical group and it affects <b>no flags at all</b> — it complements the accumulator and nothing else. Group membership predicts flag behaviour well, but this is one of the exceptions worth knowing by name.", fix: "; CMA changes A and no flag" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to keep only the low digit of 25H, which is 5, and store it at 2060H. It runs cleanly and stores 00H. Read it before you open the fix.", show: ["A", "M:2060"], code: "        MVI A, 25H\n        ANA B           ; mask off the high digit\n        STA 2060H\n        HLT\n", symptom: "stores 00H when the low digit of 25H is 5", q: "Which operand is this AND actually using, and where did that value come from?", fix: "        MVI A, 25H\n        ANI 0FH         ; the immediate form takes a mask\n        STA 2060H\n        HLT\n", why: "<code>ANA B</code> is the <b>register</b> form: it ANDs the accumulator with whatever is in B. Nothing ever put a mask in B, so B held 00H, and anything ANDed with zero is zero.<br/><br/>The mask 0FH is a <i>value</i>, not a register, so it needs the <b>immediate</b> form — <code>ANI 0FH</code>. One extra byte in the instruction, and the mask travels inside it.<br/><br/>This is the classification mistake that actually costs time, because both forms assemble and both run. The register form is only wrong in the sense that it used a register you did not mean to use — and B being zero at the start of a program is exactly what makes the symptom look like the mask itself failed.<br/><br/>The tell is the result. <b>An AND that returns 00H</b> when neither input should be zero means one of the inputs was, and on this processor the usual reason is a register nobody loaded." },
+
+  { t: "recap", items: [
+    "Five groups: <b>data transfer, arithmetic, logical, branching, machine control</b>",
+    "<b>Arithmetic and logical write the flags. The other three do not</b> — which is the useful half of the classification",
+    "Length follows the operand: <b>1 byte</b> for registers only, <b>2</b> with a data byte, <b>3</b> with an address",
+    "A 16-bit operand is always stored <b>low byte first</b>: <code>LXI H, 2050H</code> is <code>21 50 20</code>",
+    "Hand-assembly is arithmetic: each address is the previous one <b>plus that instruction's length</b>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Classify the 8085 instruction set.", a: "Five groups. Data transfer moves bytes between registers, memory and ports. Arithmetic adds, subtracts, increments and decrements. Logical does AND, OR, XOR, compare and the rotates. Branching changes the program counter — jumps, calls and returns. Machine control is HLT, NOP, EI, DI, SIM and RIM. The practical value of the grouping is that arithmetic and logical write the flags and the other three do not." },
+    { level: "beginner", q: "What decides whether an instruction is one, two or three bytes?", a: "The operand. If every operand is a register, it fits inside the opcode itself, so the instruction is one byte. A byte of immediate data makes it two. A 16-bit address makes it three, and nothing is longer than three because nothing bigger than an address has to be carried." },
+    { level: "intermediate", q: "What is the difference between <code>ADD B</code> and <code>ADI 05H</code>?", a: "The same addition with different operand types. ADD B is the register form — one byte, because the register code fits in the opcode — and it adds whatever B currently holds. ADI 05H is the immediate form, two bytes, and it adds the constant that travels inside the instruction. The I suffix marks the immediate form throughout the arithmetic and logical groups." },
+    { level: "intermediate", q: "How would you hand-assemble a program, and what goes wrong most often?", a: "Write the mnemonics down, look up or derive each opcode, then walk the addresses: each instruction starts where the previous one ended, so the address column is the running total of the lengths. What goes wrong is miscounting one instruction's length — usually forgetting that a 16-bit operand takes two bytes — which shifts every address below it and silently breaks any jump written as an absolute address." },
+    { level: "advanced", q: "Why is there no three-operand arithmetic instruction on the 8085?", a: "There is no room in the byte. A register field is three bits, so naming three registers costs nine bits before the opcode has said what the operation is. Fixing one source and the destination as the accumulator reduces that to a single three-bit field, leaving five bits for the operation, and the whole instruction fits in one byte. The cost is the copying — adding B into C takes three instructions instead of one — and it is a deliberate trade of code size against instruction count. Processors with more registers make the opposite trade: thirty-two registers means five-bit fields, three of them, so instructions become four bytes and the copies disappear. The 8085's choice is the right one for a machine whose programs had to fit in a few kilobytes of ROM." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7534,6 +7622,7 @@ const mpLessons = [
   { slug: "mp-pins-and-signals", order: 11, title: "Pins and Signals", minutes: 14, problems: [], content: MP7 },
   { slug: "mp-memory-decoding", order: 12, title: "Memory Organization and Decoding", minutes: 14, problems: [], content: MP8 },
   { slug: "mp-timing-diagrams", order: 13, title: "Machine Cycles, T-States and Timing Diagrams", minutes: 15, problems: [], content: MP9 },
+  { slug: "mp-instruction-set", order: 14, title: "The Instruction Set, Classified", minutes: 14, problems: [], content: MP10 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7838,6 +7927,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-instruction-set": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How many groups does the 8085 instruction set fall into?", options: ["Five", "Three", "Eight", "Two"], correct: 0, why: "Data transfer, arithmetic, logical, branching and machine control. The useful part of the grouping is that two of the five write the flags and three do not." },
+    { level: "easy", q: "Which group never affects any flag?", options: ["Arithmetic", "Data transfer", "Logical", "All groups affect the flags"], correct: 1, why: "Moving a byte computes nothing, so there is nothing to judge. That is exactly what makes a MOV safe between a compare and the conditional jump that reads its verdict." },
+    { level: "easy", q: "How many bytes is <code>MOV B, A</code>?", options: ["Three", "Two", "One", "It depends on the registers"], correct: 2, why: "Both operands are registers, and a register code is three bits, so both fit inside the single opcode byte. That is why register-only instructions are always one byte." },
+    // Medium — apply it
+    { level: "medium", q: "What makes an 8085 instruction three bytes long?", options: ["Using the accumulator", "Affecting the flags", "Being in the branching group", "Carrying a 16-bit address or 16-bit data"], correct: 3, why: "One byte for the opcode and two for the 16-bit value. Nothing is longer than three bytes, because nothing bigger than an address ever has to travel with an instruction." },
+    { level: "medium", q: "<code>LXI H, 2050H</code> assembles to which three bytes?", options: ["21 50 20 — opcode, low byte, high byte", "21 20 50", "50 20 21", "26 20 50"], correct: 0, why: "Every 16-bit value in 8085 machine code is stored low byte first. Getting this backwards makes every hand-assembled listing wrong from that line onwards." },
+    { level: "medium", q: "What is the difference between <code>ADD B</code> and <code>ADI 05H</code>?", options: ["ADD sets flags and ADI does not", "ADD B adds a register (1 byte); ADI adds a constant carried in the instruction (2 bytes)", "They are the same instruction", "ADI only works on the accumulator"], correct: 1, why: "The I suffix marks the immediate form throughout the arithmetic and logical groups — ADI, SUI, ANI, ORI, XRI, CPI." },
+    { level: "medium", q: "When hand-assembling, how do you work out each instruction's address?", options: ["Every instruction is two bytes apart", "From the opcode value", "Previous address plus the previous instruction's length", "They are assigned by the assembler at random"], correct: 2, why: "The address column is a running total of the lengths. Miscount one instruction and every line below it shifts, which silently breaks any jump written as an absolute address." },
+    // Hard — the edges
+    { level: "hard", q: "Why is there no instruction that adds two registers and stores the result in a third?", options: ["Three register fields would not fit in one byte", "The ALU has three inputs but only two are wired", "It exists, but only on the 8086", "Because the flags could not describe the result"], correct: 0, why: "Three bits per register means nine bits before the opcode has said anything. Fixing one operand and the destination as the accumulator leaves a single three-bit field, and the instruction fits in one byte." },
+    { level: "hard", q: "A program does <code>MVI A, 25H</code> then <code>ANA B</code> to keep the low digit, and gets 00H. Why?", options: ["ANA clears the accumulator", "ANA always sets AC and clears CY", "The mask should have been 0F0H", "ANA B ANDs with register B, which nobody loaded — so it ANDed with zero"], correct: 3, why: "A mask is a value, not a register, so it needs the immediate form ANI 0FH. Both versions assemble and both run, which is what makes this the classification mistake that actually costs time." },
+    { level: "hard", q: "Which of these is in the logical group but affects no flags at all?", options: ["ANA B", "CMA", "XRA A", "CPI 09H"], correct: 1, why: "CMA complements the accumulator and leaves every flag alone. Group membership predicts flag behaviour well, but this is one of the exceptions worth knowing by name." },
+  ],
   "mp-timing-diagrams": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is a machine cycle?", options: ["One trip over the bus — one address out, one byte in or out", "One complete instruction", "One tick of the clock", "One pass through a loop"], correct: 0, why: "An instruction cycle is made of machine cycles, and each machine cycle is made of T-states. Knowing which of the three words means which is itself an exam question." },

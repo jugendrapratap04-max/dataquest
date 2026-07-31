@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**13 written, 49 problems.** Read that file before touching this subject.
+**14 written, 53 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -195,9 +195,9 @@ baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
 **Chapters 2 and 3 are both finished** — lessons 5 to 13 are all at that
-standard, so the whole subject is in one shape and **lesson 14 ("The instruction
-set, classified") opens Chapter 4**. Twenty-two panels were built across those
-nine lessons, and what they teach is the part worth copying: each one carries an
+standard, so the whole subject is in one shape and **lesson 15 ("Addressing
+modes") is next in Chapter 4**. Twenty-four panels were built across those
+ten lessons, and what they teach is the part worth copying: each one carries an
 idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
@@ -271,6 +271,13 @@ asked about the address bus rather than a street of boxes.
   than waveforms, and the memory-write / I/O-write pair differs by one row.
 - **`wait-state-lab`** (lesson 13) — READY, and what slow memory costs. The one
   panel in the subject whose number changes a wall-clock answer.
+
+- **`instr-group-lab`** (lesson 14) — the five groups, with the flags column that
+  is the only part of the classification that changes how you write code.
+- **`hand-assemble-lab`** (lesson 14) — a source listing turned into addresses
+  and hex by calling the real `assemble()`, so the listing cannot drift from what
+  the 8085 Lab would run. Lesson 14 also reuses `instruction-bytes-lab` from
+  lesson 3.
 
 Lesson 13 is where the simulator and the topic finally agree: **T-state totals
 come from `lib/asm8085.ts`**, and every drill on that page is one instruction
