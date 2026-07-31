@@ -77,6 +77,7 @@ import { BitSwitchLab, DoublingLab, HexLab } from "./BitBasicsLab";
 import { ProgrammableLab } from "./ProgrammableLab";
 import { MultiByteLab, MicroFamilyLab } from "./EvolutionLabs";
 import { AluPathLab, MemoryModelLab } from "./CpuBlockLabs";
+import { BusLab, TristateLab } from "./BusLabs";
 
 const REGISTRY: Record<string, React.ComponentType> = {
   "code-runner": CodeRunner,
@@ -149,6 +150,8 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "micro-family-lab": MicroFamilyLab,
   "alu-path-lab": AluPathLab,
   "memory-model-lab": MemoryModelLab,
+  "bus-lab": BusLab,
+  "tristate-lab": TristateLab,
   "memory-street-lab": MemoryStreetLab,
   "memory-rw-lab": MemoryRwLab,
   "address-width-lab": AddressWidthLab,

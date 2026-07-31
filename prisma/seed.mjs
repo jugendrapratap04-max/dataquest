@@ -6666,6 +6666,92 @@ const MP3 = [
   ]},
 ];
 
+const MP4 = [
+  { t: "objectives", items: [
+    "Name the <b>three buses</b> and say what each one carries, and in which direction",
+    "Work out why <b>16 address lines</b> means exactly 64 KB and not one byte more",
+    "Explain <b>tri-state</b>: why a device connected to a bus is usually letting go of it",
+    "Say what <b>bus contention</b> is, and why only the address decoder can prevent it",
+  ]},
+  { t: "hook", q: "A memory chip, a keyboard and a display are all soldered to the same eight wires. You send a byte to the display. Why doesn't it also land in memory?", why: "Because the eight wires carrying the byte are not the only wires. Two more bundles run alongside them: one saying <b>where</b>, and one saying <b>what kind of trip this is</b> — and it is that second one, a single line going high, that tells memory to ignore what is happening.<br/><br/>Those three bundles are the buses, and they are how one small chip talks to everything without a private wire to each device. This lesson is what is on each of them, and what happens when two devices forget to take turns." },
+  { t: "def", term: "Bus", en: "A group of wires shared by every device in the system, carrying one kind of information. The 8085 has three: the address bus (16 lines) saying which location, the data bus (8 lines) carrying the byte itself, and the control bus saying whether this is a read or a write, and whether it is memory or an I/O device.", hi: "The word to hold on to is <b>shared</b>. A private wire to every chip would need thousands of pins; sharing needs only one rule — that no two devices ever put a value on the same wire at the same moment. Everything else in this lesson is that rule being enforced." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"a processor has n address lines, how much memory can it access\" and \"differentiate the three buses\" are both near-certain marks. The follow-up that separates answers is <i>direction</i>: the address bus is unidirectional and the data bus is bidirectional, and being able to say why is worth more than listing them." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H — 5AH and 2CH. Everything on this page reads them over the bus." },
+
+  { t: "h2", n: "1", text: "Three bundles of wire" },
+  { t: "p", html: "Every trip the processor makes uses all three: an address goes out, a byte moves one way or the other, and a control line says what the trip was for." },
+  { t: "viz", name: "bus-lab" },
+  { t: "p", html: "Two things to compare there. The <b>address bus always points outward</b> — the processor names a location and nothing ever answers on those lines. The <b>data bus turns around</b>, and which way it faces is decided entirely by the control bus.<br/><br/>Then look at <b>Memory write</b> and <b>I/O write</b> back to back: same byte, same address value, same <code>WR</code>, and one <code>IO/M</code> line is the whole difference between them." },
+  { t: "code", file: "immediate.asm", lang: "asm8085", show: ["A", "T", "STEPS"], code: "        MVI A, 42H      ; the byte is inside the instruction\n        HLT\n", output: "A=42 T=12 STEPS=2" },
+  { t: "code", file: "frommemory.asm", lang: "asm8085", show: ["A", "T", "STEPS"], code: "        LDA 2050H       ; the byte is somewhere else\n        HLT\n", output: "A=5A T=18 STEPS=2" },
+  { t: "p", html: "The same number of instructions and six more T-states, because bus trips are what cost time. <code>MVI</code> makes two — fetch the opcode, fetch the byte behind it. <code>LDA</code> makes four: three to read its own three bytes, then a fourth to go and get the data." },
+
+  { t: "h2", n: "2", text: "The address bus decides how much memory can exist" },
+  { t: "p", html: "Sixteen lines, each either 0 or 1, so the largest address the 8085 can put out is sixteen ones — FFFFH. Here is the very last box on the bus, written and read back." },
+  { t: "code", file: "topofmemory.asm", lang: "asm8085", show: ["A", "M:FFFF"], code: "        MVI A, 5AH\n        STA 0FFFFH      ; the highest address there is\n        LDA 0FFFFH\n        HLT\n", output: "A=5A [FFFF]=5A" },
+  { t: "viz", name: "address-width-lab" },
+  { t: "p", html: "Drag it to 16 and the number is 65,536 — one byte per address, so <b>64 KB</b>. It is not a design limit somebody chose and it cannot be programmed around: with sixteen wires there are 2<sup>16</sup> patterns, and a seventeenth address is a wire the chip does not have." },
+
+  { t: "h2", n: "3", text: "One bus, many devices, and only one may speak" },
+  { t: "p", html: "Every device is wired to the same eight data lines. If two of them put a byte on at once, there is no rule of arithmetic that decides who wins — so there has to be a way for a connected device to stay silent." },
+  { t: "viz", name: "tristate-lab" },
+  { t: "p", html: "That silence is the <b>third state</b>. A tri-state output is not 0 or 1 but <i>high impedance</i> — still wired up, electrically letting go — and it is what makes a shared bus possible at all.<br/><br/>Turn two on together and the panel stops showing a byte, because there is not one. Two outputs fighting over a wire is a short circuit, not a value, and no software can rescue it: preventing it is the job of the address decoder, which is lesson 12." },
+
+  { t: "h2", n: "4", text: "The control bus says what kind of trip it is" },
+  { t: "p", html: "Memory and I/O devices share the same address and data lines. What separates them is one control line — <code>IO/M</code> — and the instruction you chose is what drives it." },
+  { t: "code", file: "port.asm", lang: "asm8085", show: ["A", "OUT"], code: "        MVI A, 7FH\n        OUT 80H         ; to PORT 80H, not memory 0080H\n        HLT\n", output: "A=7F OUT 80=7F" },
+  { t: "p", html: "The byte left the chip and reached a device. Nothing was written to memory address 0080H, which is a real and separate place that still holds whatever it held before.<br/><br/>Two things about an I/O cycle are examined: the port number is <b>8 bits</b>, so there are 256 ports rather than 65,536, and the 8085 puts that number on <b>both halves</b> of the address bus — which is why the panel above shows 8080H for <code>OUT 80H</code>." },
+
+  { t: "think", q: "Why is the data bus only 8 lines wide when the address bus is 16?", a: "Because they are answering two different questions, and widening the wrong one costs more than it returns.<br/><br/>The address bus width is set by <b>how many places there are to name</b>, and every extra line doubles that. Sixteen was generous in 1976 — most buyers could not afford 64 KB of memory to fill it.<br/><br/>The data bus width is set by <b>how big a value the processor works on at once</b>, and that is the word length: eight bits. Making it sixteen would mean widening the ALU, every register and every memory chip beside it, for a machine whose job was moving bytes.<br/><br/>There is a second reason, and it is the more practical one: <b>pins are the scarce resource</b>. The 8085 has forty of them, and sixteen address plus eight data plus control plus power already exceeds what fits — which is why the low eight address lines and the data lines <i>share the same physical pins</i>, carrying an address first and then data. That trick is what makes the numbers add up, and it is the subject of lesson 11." },
+  { t: "analogy", concept: "The three buses", real: "A delivery van on a shared street", html: "The <b>address bus</b> is the house number the driver reads out. It only ever goes one way — the driver announces it, and no house shouts a number back.<br/><br/>The <b>data bus</b> is the parcel. Sometimes it is being delivered and sometimes collected, so unlike the address it travels in both directions, and everyone has to know which before it moves.<br/><br/>The <b>control bus</b> is the driver saying &ldquo;delivery&rdquo; or &ldquo;collection&rdquo;, and whether this is a house or a post box. Two buildings can share a number as long as that word distinguishes them — which is exactly how memory location 0080H and I/O port 80H coexist.<br/><br/>And the street is shared. If two houses answer one call at once, nothing sensible arrives — which is why every house stays silent unless its own number was the one read out." },
+
+  { t: "trace", intro: "A byte fetched from memory, copied, and written back somewhere else. Write each value the way the processor holds it.", code: "        LXI H, 2050H\n        MOV A, M\n        MOV B, A\n        STA 2060H\n        HLT\n", steps: [
+    { q: "After line 1, <code>HL</code> is", answer: "2050", accept: ["2050h"], why: "<code>LXI</code> is a three-byte instruction carrying the address in its own bytes. Nothing went out on the address bus to fetch it — the number was already in the program." },
+    { q: "After line 2, <code>A</code> is", answer: "5A", accept: ["5ah", "5a"], why: "This is the memory read: 2050H went out on the address bus and 5AH came back on the data bus, into the accumulator." },
+    { q: "After line 4, <code>B</code> is", answer: "5A", accept: ["5ah", "5a"], why: "Untouched. <code>STA</code> puts a copy of the accumulator out on the data bus — writing to the bus does not consume the byte, and it disturbs no register at all." },
+  ]},
+
+  { t: "drills", intro: "Eleven trips over the bus. Predict the result, then open.", items: [
+    { task: "Write to the very last address the bus can reach.", code: "MVI A, 5AH\nSTA 0FFFFH\nHLT", show: ["M:FFFF"], out: "[FFFF]=5A" },
+    { task: "And the very first one.", code: "MVI A, 33H\nSTA 0000H\nHLT", show: ["M:0000"], out: "[0000]=33" },
+    { task: "Send a byte to a device instead of to memory.", code: "MVI A, 0AAH\nOUT 20H\nHLT", show: ["OUT"], out: "OUT 20=AA" },
+    { task: "Two devices, two ports.", code: "MVI A, 01H\nOUT 20H\nMVI A, 02H\nOUT 21H\nHLT", show: ["OUT"], out: "OUT 20=01 OUT 21=02" },
+    { task: "Read a port with nothing connected to it.", code: "IN 80H\nHLT", show: ["A"], out: "A=00" },
+    { task: "Read a byte by naming its address directly.", code: "LDA 2050H\nHLT", show: ["A", "T"], out: "A=5A T=18" },
+    { task: "The same byte through a pointer. Which one costs more?", code: "LXI H, 2050H\nMOV A, M\nHLT", show: ["A", "T"], out: "A=5A T=22" },
+    { task: "An immediate load never leaves the instruction.", code: "MVI A, 42H\nHLT", show: ["A", "T"], out: "A=42 T=12" },
+    { task: "Store using BC as the address instead of HL.", code: "MVI A, 77H\nLXI B, 2060H\nSTAX B\nHLT", show: ["M:2060"], out: "[2060]=77" },
+    { task: "A 16-bit store is two trips. Which byte goes first?", code: "LXI H, 1234H\nSHLD 2060H\nHLT", show: ["M:2060-2061"], out: "[2060..2061]=34 12" },
+    { task: "And a 16-bit load reads both back.", code: "LHLD 2050H\nHLT", show: ["HL", "T"], out: "HL=2C5A T=21" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "; \"the 8085 has 16 data lines because addresses are 16 bits\"", why: "Two different buses with two different jobs. The <b>data bus is 8 lines</b> because the processor works on one byte at a time; the <b>address bus is 16</b> because that is how many places it can name. Nothing requires them to match, and on the 8085 they do not.", fix: "; 8 data lines, 16 address lines" },
+    { bad: "MVI A, 7FH\nSTA 0080H       ; send it to the port", why: "<code>STA</code> is a memory write — <code>IO/M</code> stays low, so this reaches memory location 0080H and no device sees it. Memory 0080H and port 80H are different places that happen to share a number.", fix: "MVI A, 7FH\nOUT 80H" },
+    { bad: "OUT 1234H       ; port 1234H", why: "There is no port 1234H. An I/O address is <b>one byte</b>, so the ports run 00H to FFH — 256 of them. The assembler is reading a 16-bit number into an 8-bit field.", fix: "OUT 34H" },
+    { bad: "; \"two chips answering at once just gives the wrong byte\"", why: "It does not give a byte at all. One output is pulling the line high while the other pulls it low, which is a short circuit through both — the reading is meaningless and on real hardware the parts overheat. This is <b>contention</b>, and it is a wiring fault rather than a software one.", fix: "; the address decoder must select at most one device" },
+  ]},
+
+  { t: "debug", intro: "A display is wired to port 80H. This is supposed to send 7FH to it, and it runs cleanly — but the display never shows anything. Read it before you open the fix.", show: ["OUT", "M:0080"], code: "        MVI A, 7FH      ; the byte to show\n        STA 0080H       ; send it to the display at 80H\n        HLT\n", symptom: "no device ever receives the byte, and memory location 0080H quietly changes instead", q: "The address 80H is right. So which of the three buses is carrying the wrong thing?", fix: "        MVI A, 7FH      ; the byte to show\n        OUT 80H         ; an I/O write, not a memory write\n        HLT\n", why: "The address bus and the data bus were both correct — 80H went out, 7FH went out with it. The <b>control bus</b> was wrong. <code>STA</code> holds <code>IO/M</code> low, which means \"this is memory\", so every memory chip listened and every device ignored it.<br/><br/><code>OUT</code> is the same trip with that one line high. Same byte, same number on the address pins, and now the display is the thing that answers.<br/><br/>What makes this hard to see is that <b>nothing failed</b>. The write succeeded; it simply succeeded somewhere else, and memory location 0080H — a real location that some other part of your program may be using — now holds 7FH. Two separate faults from one wrong instruction, and neither of them announces itself.<br/><br/>The habit that catches it: whenever an address appears in a program, ask which <i>space</i> it lives in. Memory 0080H and port 80H share a number and nothing else." },
+
+  { t: "recap", items: [
+    "Three buses: <b>address</b> (16 lines, always outward), <b>data</b> (8 lines, both ways), <b>control</b> (what kind of trip)",
+    "<b>16 address lines → 2<sup>16</sup> = 64 KB.</b> A seventeenth address needs a wire the chip does not have",
+    "The data bus is the only one that changes direction, and the control bus is what decides which way",
+    "<b>Tri-state</b> is the third state — high impedance — that lets a connected device let go of the wire",
+    "Two drivers at once is <b>contention</b>: not a wrong byte, but a short circuit. Only the address decoder prevents it",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "Name the three buses of the 8085 and what each carries.", a: "The address bus, 16 lines, carrying the location the processor wants — always outward from the processor. The data bus, 8 lines, carrying the byte itself, in either direction. And the control bus, which says what kind of access this is: RD or WR for the direction, and IO/M for whether it is memory or an I/O device." },
+    { level: "beginner", q: "Why is the address bus unidirectional and the data bus bidirectional?", a: "Because only the processor ever names a location — no device answers with an address, so those lines never need to be driven from outside. Data has to travel both ways: into the processor on a read and out of it on a write, which is why the data lines need drivers at both ends and a rule about who is using them." },
+    { level: "intermediate", q: "What is tri-state logic and why does a bus need it?", a: "An output that can be 0, 1, or high impedance — effectively disconnected while still physically wired. A bus needs it because every device shares the same lines, so all but one have to be electrically absent at any moment. Without a third state, a chip that was not selected would still be driving its output, and the bus could never be shared at all." },
+    { level: "intermediate", q: "How does the 8085 distinguish memory location 0080H from I/O port 80H?", a: "By the IO/M line on the control bus. STA 0080H is a memory write with IO/M low; OUT 80H is an I/O write with IO/M high. The address and data pins do the same thing in both cases — only that control line differs, and it is what the decoding logic on the board uses to enable memory or a peripheral. It is also worth knowing that an I/O address is only 8 bits, so there are 256 ports, and the 8085 puts the port number on both halves of the address bus." },
+    { level: "advanced", q: "What is bus contention, what causes it, and why can software not fix it?", a: "Two devices driving the same bus line at the same time — one pulling it high, one low. The result is not a wrong value but an undefined one, and a low-resistance path through both output stages, so the parts heat up. It is caused by decoding, not by code: two chip selects that overlap, or a select that stays active a moment too long as another begins. Software cannot fix it because the fault is that both devices were legally told to answer — the processor has no way to ask one of them to stop. The fix is in the address decoder, which must guarantee at most one device is selected for any address, and in respecting the timing so one output has released the bus before the next takes it." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7010,6 +7096,7 @@ const mpLessons = [
   { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
   { slug: "mp-inside-the-chip", order: 7, title: "Inside the Chip", minutes: 14, problems: [], content: MP3 },
+  { slug: "mp-three-buses", order: 8, title: "The Three Buses", minutes: 14, problems: [], content: MP4 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7314,6 +7401,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-three-buses": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How many lines does the 8085's address bus have?", options: ["16", "8", "20", "40"], correct: 0, why: "Sixteen, which is what lets it name 65,536 separate locations. The data bus is the 8-bit one — the two widths are different numbers answering different questions." },
+    { level: "easy", q: "Which of the three buses carries information in <b>both</b> directions?", options: ["The address bus", "The data bus", "The control bus", "All three"], correct: 1, why: "A byte travels into the processor on a read and out of it on a write. The address bus only ever points outward, because no device answers with an address." },
+    { level: "easy", q: "A processor with 16 address lines can address how much memory?", options: ["16 KB", "1 MB", "64 KB", "256 bytes"], correct: 2, why: "2 to the power 16 is 65,536, and each address holds one byte — so exactly 64 KB. A seventeenth address would need a wire the chip does not have." },
+    // Medium — apply it
+    { level: "medium", q: "What distinguishes memory location 0080H from I/O port 80H on the 8085?", options: ["The address is 16-bit for memory and 8-bit for ports, so they never collide", "Ports live above FF00H", "Nothing — they are the same place", "The IO/M line on the control bus"], correct: 3, why: "Same address pins, same data pins, same WR. One control line going high is the entire difference, and it is why STA 0080H and OUT 80H reach two completely different places." },
+    { level: "medium", q: "What does it mean for a device's output to be in <b>high impedance</b>?", options: ["Still wired to the bus, but electrically letting go of it", "Outputting zero", "Powered off", "Waiting for the next clock edge"], correct: 0, why: "It is the third state that makes \"tri-state\" tri. Every device on a shared bus has to be able to be present and silent at the same time, or the bus could not be shared at all." },
+    { level: "medium", q: "How many I/O ports can an 8085 address?", options: ["65,536", "256", "128", "1,024"], correct: 1, why: "An I/O address is one byte, so 00H to FFH. The 8085 then puts that same byte on both halves of the address bus, which is why OUT 80H shows 8080H on the pins." },
+    { level: "medium", q: "<code>MVI A, 42H</code> costs 7 T-states and <code>LDA 2050H</code> costs 13. Why?", options: ["LDA also updates the flags", "MVI runs entirely inside the ALU", "LDA makes more trips over the bus — three to read itself, then one for the data", "LDA is a 16-bit operation"], correct: 2, why: "Time on this machine is bus trips. MVI's byte is inside the instruction, so two trips; LDA has to fetch three bytes and then go back out for the data." },
+    // Hard — the edges
+    { level: "hard", q: "Two devices drive the data bus at the same moment. What is on the bus?", options: ["The value from whichever was enabled first", "The two bytes OR-ed together", "The value from the faster chip", "Nothing meaningful — one output pulls high while the other pulls low, which is a short circuit"], correct: 3, why: "Contention is an electrical fault, not a wrong answer. No software can prevent it either: both devices were legally told to answer, so the fix belongs in the address decoder." },
+    { level: "hard", q: "Why is the address bus unidirectional?", options: ["Only the processor ever names a location, so nothing needs to drive those lines back", "Because addresses are larger than data", "To save power", "Because the latch only works one way"], correct: 0, why: "Memory and devices answer with data, never with an address. Lines that are only ever driven from one end need no drivers at the other, and no rule about who is using them." },
+    { level: "hard", q: "A program sends a byte to a display at port 80H using <code>STA 0080H</code>. What actually happens?", options: ["The assembler rejects it", "The byte is written to memory 0080H and no device sees it", "The display receives it, since the address is right", "Both the display and memory receive it"], correct: 1, why: "Two faults from one instruction, and neither announces itself: the display stays blank, and a real memory location that something else may be using quietly changes. Whenever an address appears, ask which space it lives in." },
+  ],
   "mp-inside-the-chip": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is the 8085's temp register for?", options: ["Holding the second operand while the ALU works", "Storing the last result before it is written to memory", "Keeping a copy of the program counter", "Buffering bytes on their way to the address pins"], correct: 0, why: "The ALU has two inputs and one of them is permanently the accumulator, so the other operand has to wait somewhere. No instruction can name that place — the operation itself puts the value there." },

@@ -402,6 +402,68 @@ const mpProblems = [
       "`JZ` skips the `INR D` when the byte was zero.",
       "`INX H` walks the pointer and `DCR C` counts the loop — two separate jobs, both needed."],
     ["8085", "loops", "flags"]),
+
+  /* ============== 8. The Three Buses ============== */
+  MP("mp-three-buses", "Easy", 319, "mp-out-port", "Send It to a Device, Not to Memory",
+    "A byte is waiting at **2050H**. Read it and send it to the device on **port 40H**.\n\n`OUT` is a write like `STA`, over the same address and data pins — the only difference is the `IO/M` control line, which is what makes a device answer instead of a memory chip.\n\nA port number is **one byte**, so it runs 00H to FFH. There is no port 2050H.",
+    [{ input: "2050H = 5AH", output: "port 40H receives 5AH" }, { input: "2050H = 99H", output: "port 40H receives 99H" }],
+    "        LDA 2050H\n        ; now send it to port 40H\n" + HALT,
+    "        LDA 2050H\n        OUT 40H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x5a }, check: ["A", "OUT"] },
+      { memory: { [A50]: 0x99 }, check: ["A", "OUT"] },
+      { memory: { [A50]: 0x01 }, check: ["A", "OUT"] },
+    ],
+    ["`LDA 2050H` reads a byte straight from an address into the accumulator.",
+      "`OUT 40H` writes the accumulator to a port. The number after OUT is the port, not a memory address.",
+      "`STA 0040H` would look almost identical and reach a completely different place — memory location 0040H."],
+    ["8085", "io", "buses"]),
+
+  MP("mp-three-buses", "Easy", 320, "mp-both-ends", "Both Ends of the Address Bus",
+    "Read the byte at **2050H** and write a copy of it to the **lowest** address the 8085 can reach and to the **highest**: 0000H and FFFFH.\n\nSixteen address lines means every value from 0000H to FFFFH is a real, reachable location — 65,536 of them, which is exactly 64 KB.\n\nRemember that a hex value starting with a letter needs a leading zero: `0FFFFH`, not `FFFFH`.",
+    [{ input: "2050H = 5AH", output: "0000H = 5AH and FFFFH = 5AH" }],
+    "        LDA 2050H\n        ; copy it to the first address and the last one\n" + HALT,
+    "        LDA 2050H\n        STA 0000H\n        STA 0FFFFH\n        HLT\n",
+    [
+      { memory: { [A50]: 0x5a }, check: ["M:0000", "M:FFFF"] },
+      { memory: { [A50]: 0x77 }, check: ["M:0000", "M:FFFF"] },
+    ],
+    ["One `LDA`, then two `STA` instructions — the accumulator keeps its byte after a store.",
+      "`STA 0000H` writes to the very first location.",
+      "`STA 0FFFFH` writes to the very last one. Without the leading zero the assembler reads FFFFH as a label."],
+    ["8085", "memory", "buses"]),
+
+  MP("mp-three-buses", "Medium", 321, "mp-sum-to-port", "Add the Block, Then Show It",
+    "Five bytes start at **2050H**. Add them, store the total at **2060H**, and also send it to the display on **port 50H**.\n\nThe point is that the last two steps are the *same byte over the same wires*, going to two different places — one memory write and one I/O write, separated only by the control bus.\n\nNone of the test blocks overflows, so a plain 8-bit total is enough.",
+    [{ input: "10H 20H 30H 40H 50H", output: "2060H = F0H, port 50H = F0H" }],
+    "        LXI H, 2050H\n        MVI C, 05H\n        XRA A\n        ; add the five bytes, store at 2060H, send to port 50H\n" + HALT,
+    "        LXI H, 2050H\n        MVI C, 05H\n        XRA A\nLOOP:   ADD M\n        INX H\n        DCR C\n        JNZ LOOP\n        STA 2060H\n        OUT 50H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x10, [A50 + 1]: 0x20, [A50 + 2]: 0x30, [A50 + 3]: 0x40, [A50 + 4]: 0x50 }, check: ["A", "M:2060", "OUT"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04, [A50 + 4]: 0x05 }, check: ["A", "M:2060", "OUT"] },
+      { memory: { [A50]: 0x0a, [A50 + 1]: 0x0a, [A50 + 2]: 0x0a, [A50 + 3]: 0x0a, [A50 + 4]: 0x0a }, check: ["A", "M:2060", "OUT"] },
+    ],
+    ["`XRA A` clears the accumulator before the loop starts.",
+      "The loop needs two moving parts: `INX H` walks the pointer and `DCR C` counts.",
+      "`STA 2060H` does not disturb the accumulator, so `OUT 50H` can follow it directly.",
+      "Do the store and the OUT after the loop, not inside it."],
+    ["8085", "io", "loops"]),
+
+  MP("mp-three-buses", "Medium", 322, "mp-address-span", "The Last Address in a Block",
+    "A 16-bit start address is stored at **2050H**, **low byte first**, and a byte count is at **2052H**. Work out the address of the **last** byte in that block and store it at **2060H**, low byte first.\n\nSo a block of 10H bytes starting at 2000H ends at **200FH** — start plus count, minus one.\n\n`LHLD` loads a 16-bit value in one instruction, `DAD` adds a register pair, and `SHLD` stores one back. One of the tests runs off the top of the address bus, and wrapping to FFFFH is the correct answer there — there is no seventeenth line to carry into.",
+    [{ input: "2050H = 00H 20H (2000H), 2052H = 10H", output: "2060H = 0FH 20H (200FH)" }],
+    "        LHLD 2050H      ; the start address\n        LDA 2052H       ; the count\n        ; last address = start + count - 1, stored at 2060H\n" + HALT,
+    "        LHLD 2050H\n        LDA 2052H\n        MOV E, A\n        MVI D, 00H\n        DAD D\n        DCX H\n        SHLD 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x00, [A50 + 1]: 0x20, [A50 + 2]: 0x10 }, check: ["HL", "M:2060", "M:2061"] },
+      { memory: { [A50]: 0xf0, [A50 + 1]: 0xff, [A50 + 2]: 0x10 }, check: ["HL", "M:2060", "M:2061"] },
+      { memory: { [A50]: 0x50, [A50 + 1]: 0x20, [A50 + 2]: 0x01 }, check: ["HL", "M:2060", "M:2061"] },
+    ],
+    ["`LHLD 2050H` puts the low byte in L and the high byte in H — the address arrives as one 16-bit value.",
+      "`DAD` adds a whole register pair, so put the count into DE with the high byte zero: `MOV E, A` then `MVI D, 00H`.",
+      "`DCX H` takes one off, because a block of 10H bytes starting at 2000H ends at 200FH and not at 2010H.",
+      "The third test has a count of 1, so the last address is the start address itself."],
+    ["8085", "16-bit", "memory"]),
 ];
 
 export { mpProblems };

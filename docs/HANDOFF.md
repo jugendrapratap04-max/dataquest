@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**7 written, 25 problems.** Read that file before touching this subject.
+**8 written, 29 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,10 +194,10 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Lessons 5, 6 and 7 are all at that standard**, so the subject is in one shape
-throughout and **lesson 8 ("The three buses") is next**. Five panels were built
-for those three lessons, and what they teach is the part worth copying: each one
-carries an idea that prose was previously asserting.
+**Chapter 2 is finished** — lessons 5 to 8 are all at that standard, so the whole
+subject is in one shape and **lesson 9 (Chapter 3, "The register set") is next**.
+Seven panels were built across those four lessons, and what they teach is the
+part worth copying: each one carries an idea that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -215,6 +215,15 @@ carries an idea that prose was previously asserting.
   written back — which is also this lesson's debug task.
 - **`memory-model-lab`** (lesson 7) — von Neumann against Harvard. The claim is
   about *simultaneity*, so a block diagram cannot make it; the timeline can.
+- **`bus-lab`** (lesson 8) — five machine cycles over the same three rows, so
+  what changes between them is visible: the data arrow's direction, and one
+  control line. Memory write against I/O write is the pair that carries it.
+- **`tristate-lab`** (lesson 8) — three devices on one data bus, each switchable.
+  Two on at once is one click, and contention is the only idea here that a
+  diagram genuinely cannot show.
+
+Lesson 8 also reuses `address-width-lab` from lesson 2 — same 2ⁿ calculation, now
+asked about the address bus rather than a street of boxes.
 
 Adding a lesson that does not exist yet needs four things, in this order:
 an empty `const MP<n> = [\n];` in `seed.mjs` for `splice-lesson.mjs` to replace
@@ -320,6 +329,9 @@ grep -n 'slug: "<lesson-slug>"' prisma/seed.mjs
 - **`def.en` and `def.hi` are plain-text fields.** Markup in them prints
   literally — `<code>` tags appear on the page as `<code>`. `db:check` catches
   it, but only after `db:lessons` has already pushed it to the live database.
+  **A quiz option is the same kind of field**, and it is easier to forget because
+  the question above it *does* take markup: `q` may carry `<code>` and `<b>`,
+  `options[]` may not. Caught on lesson 8, after it was already live.
 - **Never background a deploy with its output discarded.** `(npx vercel deploy
   --prod --yes >/dev/null 2>&1 &)` hides a failure completely: the push
   succeeds, nothing is live, and the next check says 404 with no explanation of
