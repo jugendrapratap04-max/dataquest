@@ -464,6 +464,68 @@ const mpProblems = [
       "`DCX H` takes one off, because a block of 10H bytes starting at 2000H ends at 200FH and not at 2010H.",
       "The third test has a count of 1, so the last address is the start address itself."],
     ["8085", "16-bit", "memory"]),
+
+  /* ============== 9. The Register Set ============== */
+  MP("mp-register-set", "Easy", 323, "mp-follow-pointer", "Follow the Pointer",
+    "A 16-bit **address** is stored at **2050H**, low byte first. Load it into **HL**, then read the byte it points at into the accumulator.\n\n`LHLD` does the first half in one instruction: it puts the byte at 2050H into L and the byte at 2051H into H, which is exactly the low-byte-first order the address is written in.\n\nOnce HL holds the address, `M` means the byte there.",
+    [{ input: "2050H = 70H 20H (so the address is 2070H), 2070H = 99H", output: "HL=2070H, A=99H" }],
+    "        LHLD 2050H      ; the address, low byte first\n        ; now read the byte it points at\n" + HALT,
+    "        LHLD 2050H\n        MOV A, M\n        HLT\n",
+    [
+      { memory: { [A50]: 0x70, [A50 + 1]: 0x20, 0x2070: 0x99 }, check: ["HL", "A"] },
+      { memory: { [A50]: 0x00, [A50 + 1]: 0x21, 0x2100: 0x5a }, check: ["HL", "A"] },
+      { memory: { [A50]: 0x90, [A50 + 1]: 0x20, 0x2090: 0x01 }, check: ["HL", "A"] },
+    ],
+    ["`LHLD 2050H` loads both halves at once: L from 2050H, H from 2051H.",
+      "The address is stored low byte first, which is the order LHLD already expects — no swapping needed.",
+      "`MOV A, M` reads the byte at whatever address HL is holding."],
+    ["8085", "pairs", "pointers"]),
+
+  MP("mp-register-set", "Easy", 324, "mp-two-values-two-pairs", "One Value in Each Pair",
+    "Two 16-bit values are stored back to back at **2050H** and **2052H**, each low byte first.\n\nPut the **first** one in **DE** and the **second** one in **HL**.\n\nThere is only one instruction that loads a 16-bit value from memory — `LHLD` — and it always loads HL. `XCHG` swaps HL and DE in a single byte, which is how you get a value out of the way before loading the next one.",
+    [{ input: "2050H = 34H 12H, 2052H = CDH ABH", output: "DE=1234H, HL=ABCDH" }],
+    "        LHLD 2050H      ; the first value lands in HL\n        ; move it to DE, then load the second\n" + HALT,
+    "        LHLD 2050H\n        XCHG\n        LHLD 2052H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x34, [A50 + 1]: 0x12, [A50 + 2]: 0xcd, [A50 + 3]: 0xab }, check: ["HL", "DE"] },
+      { memory: { [A50]: 0x00, [A50 + 1]: 0x30, [A50 + 2]: 0xff, [A50 + 3]: 0x0f }, check: ["HL", "DE"] },
+    ],
+    ["Load the first value with `LHLD 2050H` — it arrives in HL whether you wanted it there or not.",
+      "`XCHG` swaps HL and DE, so the first value is parked in DE.",
+      "Then `LHLD 2052H` brings the second value into HL.",
+      "Doing the swap with MOV instead would destroy one of the values, because MOV copies."],
+    ["8085", "pairs", "data-transfer"]),
+
+  MP("mp-register-set", "Medium", 325, "mp-walk-a-block", "Walk a Block, Across a Boundary",
+    "A 16-bit **start address** is at **2050H**, low byte first. Add the **four** bytes beginning at that address and store the total at **2060H**.\n\nOne of the tests starts at **20FEH**, so the pointer has to cross from 20FFH into 2100H. That is the whole point of the problem: `INR L` would wrap to 2000H and read four wrong bytes, while `INX H` carries into H and keeps going.\n\nNo test overflows, so an 8-bit total is enough.",
+    [{ input: "start 2070H, then 10H 20H 30H 40H", output: "2060H = A0H" }, { input: "start 20FEH, then 11H 22H 33H 44H", output: "2060H = AAH" }],
+    "        LHLD 2050H      ; the start address\n        MVI C, 04H\n        XRA A\n        ; add four bytes from there, store at 2060H\n" + HALT,
+    "        LHLD 2050H\n        MVI C, 04H\n        XRA A\nLOOP:   ADD M\n        INX H\n        DCR C\n        JNZ LOOP\n        STA 2060H\n        HLT\n",
+    [
+      { memory: { [A50]: 0x70, [A50 + 1]: 0x20, 0x2070: 0x10, 0x2071: 0x20, 0x2072: 0x30, 0x2073: 0x40 }, check: ["A", "M:2060"] },
+      { memory: { [A50]: 0xfe, [A50 + 1]: 0x20, 0x20fe: 0x11, 0x20ff: 0x22, 0x2100: 0x33, 0x2101: 0x44 }, check: ["A", "M:2060"] },
+      { memory: { [A50]: 0x80, [A50 + 1]: 0x20, 0x2080: 0x01, 0x2081: 0x02, 0x2082: 0x03, 0x2083: 0x04 }, check: ["A", "M:2060"] },
+    ],
+    ["`LHLD 2050H` gives you the start address in HL in one instruction.",
+      "`XRA A` clears the running total before the loop.",
+      "Use `INX H` to advance the pointer. `INR L` passes the first and third tests and fails the second.",
+      "`INX H` sets no flags, so it is safe between `ADD M` and `DCR C`."],
+    ["8085", "pairs", "loops"]),
+
+  MP("mp-register-set", "Medium", 326, "mp-two-pointers", "Two Pointers at Once",
+    "Copy the **four** bytes at **2050H** to **2070H**, keeping them in the same order.\n\nA copy needs two addresses live at the same time, and the 8085 gives you exactly two pairs for the job: `HL` for the source, `DE` for the destination.\n\n`MOV A, M` reads through HL and `STAX D` writes through DE, so each pass moves one byte and then both pointers step on.",
+    [{ input: "2050H = AAH BBH CCH DDH", output: "2070H = AAH BBH CCH DDH" }],
+    "        LXI H, 2050H    ; source\n        LXI D, 2070H    ; destination\n        MVI C, 04H\n        ; copy four bytes\n" + HALT,
+    "        LXI H, 2050H\n        LXI D, 2070H\n        MVI C, 04H\nLOOP:   MOV A, M\n        STAX D\n        INX H\n        INX D\n        DCR C\n        JNZ LOOP\n        HLT\n",
+    [
+      { memory: { [A50]: 0xaa, [A50 + 1]: 0xbb, [A50 + 2]: 0xcc, [A50 + 3]: 0xdd }, check: ["M:2070-2073"] },
+      { memory: { [A50]: 0x01, [A50 + 1]: 0x02, [A50 + 2]: 0x03, [A50 + 3]: 0x04 }, check: ["M:2070-2073"] },
+    ],
+    ["`MOV A, M` reads the byte HL points at; `STAX D` writes the accumulator to the address in DE.",
+      "Both pointers have to move every pass — `INX H` and `INX D`.",
+      "`C` counts the bytes; `DCR C` and `JNZ` close the loop.",
+      "There is no instruction that copies memory to memory directly, which is why the byte goes through A."],
+    ["8085", "pairs", "loops"]),
 ];
 
 export { mpProblems };

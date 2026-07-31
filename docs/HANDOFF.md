@@ -157,7 +157,7 @@ Three things about writing a plotting lesson:
 
 The tenth subject, and the first that is not data science. Full plan:
 **`docs/MICROPROCESSOR-SYLLABUS.md`** — 42 lessons, 11 chapters, decided in one go.
-**8 written, 29 problems.** Read that file before touching this subject.
+**9 written, 33 problems.** Read that file before touching this subject.
 
 It brought its own runtime, and that is the part worth knowing about:
 
@@ -194,10 +194,11 @@ His instruction for everything here: *"ye soch kar concept likhna ki student es 
 baare mai pahele se kuch nahi janta hai"*, and lean hard on clickable panels
 because that is what he found engaging.
 
-**Chapter 2 is finished** — lessons 5 to 8 are all at that standard, so the whole
-subject is in one shape and **lesson 9 (Chapter 3, "The register set") is next**.
-Seven panels were built across those four lessons, and what they teach is the
-part worth copying: each one carries an idea that prose was previously asserting.
+**Chapter 2 is finished and Chapter 3 has started** — lessons 5 to 9 are all at
+that standard, so the whole subject is in one shape and **lesson 10 ("The flag
+register, bit by bit") is next**. Ten panels were built across those five
+lessons, and what they teach is the part worth copying: each one carries an idea
+that prose was previously asserting.
 
 - **`programmable-lab`** (lesson 5) — the same three jobs done by a wired machine
   and by an 8085, side by side. The bytes are real, out of `assemble()`, so the
@@ -222,8 +223,21 @@ part worth copying: each one carries an idea that prose was previously asserting
   Two on at once is one click, and contention is the only idea here that a
   diagram genuinely cannot show.
 
+- **`register-lab`** (lesson 9) — all eleven registers, with the two facts that
+  are examined shown rather than listed: width, and whether a program may name it.
+- **`pair-lab`** (lesson 9) — HL at 20FFH with an `INR L` button and an `INX H`
+  button. One click is the entire difference between two bytes and one number,
+  and it is where the classic pointer bug comes from.
+- **`opcode-bits-lab`** (lesson 9) — builds a `MOV` byte from `01 ddd sss`, so
+  "why seven registers" is counted rather than asserted. Setting both fields to
+  M lands on 76H, which is `HLT` — the payoff, and the reason that slot was free.
+
 Lesson 8 also reuses `address-width-lab` from lesson 2 — same 2ⁿ calculation, now
 asked about the address bus rather than a street of boxes.
+
+`opcode-bits-lab` is worth copying from when Chapter 4 gets to hand-assembly:
+every byte it can produce was checked against `assemble()` in `lib/asm8085.ts`
+before it shipped, so the panel and the compiler cannot disagree with the lesson.
 
 Adding a lesson that does not exist yet needs four things, in this order:
 an empty `const MP<n> = [\n];` in `seed.mjs` for `splice-lesson.mjs` to replace

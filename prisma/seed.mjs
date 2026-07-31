@@ -6752,6 +6752,94 @@ const MP4 = [
   ]},
 ];
 
+const MP5 = [
+  { t: "objectives", items: [
+    "Name every register the 8085 has, including the ones no program can reach",
+    "Read <b>H and L</b> as two bytes and as one 16-bit number, and say which the instruction decided",
+    "Work out why there are <b>exactly seven</b> general-purpose registers, from the opcode's own bits",
+    "Say what <b>SP</b> and <b>PC</b> hold, and why both are sixteen bits wide",
+  ]},
+  { t: "hook", q: "The 8085 has seven registers you can name. Not six, not eight, not thirty-two. Why seven — and who decided?", why: "Nobody decided. It falls out of the size of an opcode.<br/><br/>A <code>MOV</code> has to fit in one byte, and it has to name two registers inside that byte. Three bits each is what is left over, three bits count to eight, and one of those eight codes was spent on something that is not a register at all. Seven is what remains.<br/><br/>That is the shape of this whole lesson: the register set looks like a list to memorise, and almost every item on it is a consequence of something — of a byte's width, of an address needing sixteen bits, or of a value having to wait somewhere while the rest of it arrives." },
+  { t: "def", term: "Register pair", en: "Two 8-bit registers that some instructions treat as a single 16-bit value: B with C, D with E, H with L. The high byte is the first-named register. Which reading applies is decided entirely by the instruction, not by the registers, so the same two bytes are two numbers to MOV and one number to INX.", hi: "A pair exists because an <b>address</b> is 16 bits and a register is 8. Anything that points at memory needs two registers working as one, which is why every pointer in an 8085 program is a pair and why HL — the pair the instruction set is built around — gets a shorthand of its own: <code>M</code>." },
+  { t: "note", variant: "key", html: "💼 <b>On the job and in the exam:</b> \"list the registers of the 8085 with their sizes\" is a guaranteed question and an easy one. The marks are lost on the follow-ups — <i>which registers are 16-bit and why</i>, <i>what are W and Z</i>, and <i>what does a register pair mean</i>. All three are on this page, and the last one is also where real 8085 bugs come from." },
+
+  { t: "memsetup", at: 8272, bytes: [90, 44], note: "Two bytes at 2050H and 2051H — 5AH and 2CH — so the pointer examples have something real to point at." },
+
+  { t: "h2", n: "1", text: "Seven you can name, and four you cannot" },
+  { t: "p", html: "Eleven registers exist. Seven are ordinary bytes a program can name, two are sixteen bits because they hold addresses, and two are invisible." },
+  { t: "viz", name: "register-lab" },
+  { t: "p", html: "<b>W</b> and <b>Z</b> are the surprise, and they are worth a moment. A three-byte instruction like <code>LXI</code> arrives one byte at a time over an 8-bit bus, so the two address bytes have to wait somewhere until both are in — that somewhere is W and Z. No program can name them, and none needs to." },
+
+  { t: "h2", n: "2", text: "Two bytes, or one number" },
+  { t: "p", html: "One instruction, two registers filled. <code>LXI</code> takes a 16-bit value and splits it: the high byte into H, the low byte into L." },
+  { t: "code", file: "pairs.asm", lang: "asm8085", show: ["H", "L", "HL", "A"], code: "        LXI H, 2050H    ; one value, two registers\n        MOV A, M        ; the byte HL is pointing at\n        HLT\n", output: "H=20 L=50 HL=2050 A=5A" },
+  { t: "p", html: "H holds 20H and L holds 50H, and together they are the address 2050H. <code>M</code> is the shorthand for \"the byte at that address\", which is the whole reason HL gets used as the pointer more than the other two pairs." },
+  { t: "viz", name: "pair-lab" },
+  { t: "p", html: "The two buttons are the same registers read two different ways. <code>INR L</code> sees a byte on its own and wraps FFH to 00H, leaving H alone — so the pointer jumps <b>backwards</b> by 255. <code>INX H</code> sees one 16-bit number, so the carry out of L moves into H and 20FFH becomes 2100H." },
+  { t: "code", file: "boundary.asm", lang: "asm8085", show: ["H", "L", "HL"], code: "        LXI H, 20FFH\n        INX H           ; the pair, as one number\n        HLT\n", output: "H=21 L=00 HL=2100" },
+  { t: "p", html: "Nothing in H or L records which reading is correct. The instruction decides, every time — and that is exactly why the wrong one is a bug that only appears at a boundary." },
+
+  { t: "h2", n: "3", text: "Why exactly seven" },
+  { t: "p", html: "A <code>MOV</code> is one byte and has to name two registers inside it. Build one and watch where the room runs out." },
+  { t: "viz", name: "opcode-bits-lab" },
+  { t: "p", html: "Three bits per operand, so eight codes — and the eighth is <b>M</b>, which is memory rather than a register. Seven registers is what is left, and the last combination, <code>MOV M, M</code>, would do nothing at all, so its code 76H was given to <code>HLT</code> instead." },
+  { t: "code", file: "opcodes.asm", lang: "asm8085", show: ["CODE:2000-2003"], code: "        MOV B, A\n        MOV A, M\n        MOV M, A\n        HLT\n", output: "CODE=47 7E 77 76" },
+  { t: "p", html: "Four bytes, and every one of them is the panel's formula. <b>47H</b> is 01 000 111 — destination B, source A. <b>7EH</b> is 01 111 110 — into A, from M. And <b>76H</b> at the end is <code>HLT</code>, sitting in the slot <code>MOV M, M</code> would have used." },
+
+  { t: "h2", n: "4", text: "The two that only ever hold addresses" },
+  { t: "p", html: "<b>SP</b> and <b>PC</b> are sixteen bits for one reason: an address is sixteen bits. Neither holds data, and both move without being told to." },
+  { t: "code", file: "stack.asm", lang: "asm8085", show: ["SP", "M:23FE-23FF"], code: "        LXI SP, 2400H   ; the stack starts here\n        LXI H, 1234H\n        PUSH H          ; two bytes go out, SP moves\n        HLT\n", output: "SP=23FE [23FE..23FF]=34 12" },
+  { t: "p", html: "<code>PUSH</code> wrote two bytes and the stack pointer went <b>down</b> by two, from 2400H to 23FEH — the stack grows towards lower addresses. The program counter behaves the same way in the other direction: every fetch advances it by that instruction's own length, and no instruction can load it directly." },
+
+  { t: "think", q: "Why do the pairs have to be B–C, D–E and H–L? Why not B with E, or any two registers?", a: "Because a pair is a wire, not a convention.<br/><br/>When <code>INX H</code> runs, a 16-bit value has to reach the incrementer and come back, and the two registers holding it must be physically arranged so the carry out of the low half lands in the high half. That path exists between H and L. It does not exist between B and E, and adding it would mean building it for every possible combination.<br/><br/>You can see the same argument in the opcodes. Only <b>two bits</b> are spent naming a pair in <code>LXI</code>, <code>DAD</code>, <code>INX</code> and <code>PUSH</code>, giving four codes: BC, DE, HL and one more — SP for most of them, PSW for PUSH and POP. Four is all the encoding allows, so the pairs are fixed at three plus a special case.<br/><br/>The practical consequence is worth remembering when you write assembly: you cannot invent a pair. If you need two pointers at once, they are HL and DE, and <code>XCHG</code> exists precisely because you will need to swap them." },
+  { t: "analogy", concept: "A register pair", real: "Two digits of one house number", html: "A street has houses numbered up to 9999, and the number is painted as two tiles: a <b>hundreds tile</b> and a <b>units tile</b>. House 2050 is a tile reading 20 and a tile reading 50.<br/><br/>Now change one tile. If you tell somebody &ldquo;add one to the units tile&rdquo; and it already reads 99, it rolls to 00 and the hundreds tile does not move — you have walked from house 2099 to house 2000, which is a long way in the wrong direction. That is <code>INR L</code>.<br/><br/>If instead you say &ldquo;go to the next house&rdquo;, both tiles are read as one number, and 2099 becomes 2100. That is <code>INX H</code>.<br/><br/>The tiles never change. What changes is whether you treated them as two numbers or one — and the tiles cannot tell you which you meant." },
+
+  { t: "trace", intro: "Three instructions on one pair, right at a boundary. Write each value the way the processor holds it.", code: "        LXI H, 20FFH\n        INX H\n        MOV A, L\n        HLT\n", steps: [
+    { q: "After line 1, <code>HL</code> is", answer: "20FF", accept: ["20ffh"], why: "<code>LXI</code> splits its 16-bit operand: 20H into H, FFH into L. One instruction, two registers, and the value is carried inside the instruction's own bytes." },
+    { q: "After line 2, <code>HL</code> is", answer: "2100", accept: ["2100h"], why: "<code>INX</code> treats the pair as one 16-bit number, so the carry out of L moves into H by itself. Had this been <code>INR L</code>, HL would now be 2000H — 255 bytes backwards." },
+    { q: "After line 3, <code>A</code> is", answer: "00", accept: ["0", "00h"], why: "L is the low half of 2100H, which is 00H. The pair being one number does not stop either half from being read on its own — that is the whole double reading this lesson is about." },
+  ]},
+
+  { t: "drills", intro: "Eleven small programs about registers and pairs. Predict, then open.", items: [
+    { task: "One instruction fills two registers.", code: "LXI H, 2050H\nHLT", show: ["H", "L", "HL"], out: "H=20 L=50 HL=2050" },
+    { task: "The same result, one byte at a time.", code: "MVI H, 20H\nMVI L, 50H\nHLT", show: ["H", "L", "HL"], out: "H=20 L=50 HL=2050" },
+    { task: "Which half of BC gets which byte?", code: "LXI B, 0ABCDH\nHLT", show: ["B", "C", "BC"], out: "B=AB C=CD BC=ABCD" },
+    { task: "At a boundary, the pair carries.", code: "LXI H, 20FFH\nINX H\nHLT", show: ["H", "L", "HL"], out: "H=21 L=00 HL=2100" },
+    { task: "The same boundary, treating L as a lone byte.", code: "LXI H, 20FFH\nINR L\nHLT", show: ["H", "L", "HL"], out: "H=20 L=00 HL=2000" },
+    { task: "Swap two pairs in one instruction.", code: "LXI H, 1234H\nLXI D, 0ABCDH\nXCHG\nHLT", show: ["HL", "DE"], out: "HL=ABCD DE=1234" },
+    { task: "Double a 16-bit value by adding it to itself.", code: "LXI H, 1234H\nDAD H\nHLT", show: ["HL", "CY"], out: "HL=2468 CY=0" },
+    { task: "Load the stack pointer from HL.", code: "LXI H, 2400H\nSPHL\nHLT", show: ["SP"], out: "SP=2400" },
+    { task: "Push a pair. Which way does SP move, and what is stored?", code: "LXI SP, 2400H\nLXI H, 1234H\nPUSH H\nHLT", show: ["SP", "M:23FE-23FF"], out: "SP=23FE [23FE..23FF]=34 12" },
+    { task: "DE as a pointer instead of HL.", code: "LXI D, 2050H\nLDAX D\nHLT", show: ["A"], out: "A=5A" },
+    { task: "Three MOVs and a HLT — read the bytes they assembled into.", code: "MOV B, A\nMOV A, M\nMOV M, A\nHLT", show: ["CODE:2000-2003"], out: "CODE=47 7E 77 76" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "LXI H, 2050H\nINR L           ; move the pointer on", why: "This increments L as a byte on its own. It works until L is FFH, and then it wraps to 00H without touching H — so the pointer jumps back 255 bytes instead of forward one. The bug only appears at a boundary, which is why it survives testing.", fix: "LXI H, 2050H\nINX H           ; increment the pair" },
+    { bad: "MOV H, D\nMOV L, E        ; swap HL and DE", why: "That is a copy, not a swap. DE still holds its value and the old contents of HL are gone. Two instructions where one would do, and the one that does it properly does it correctly.", fix: "XCHG            ; swaps both halves at once" },
+    { bad: "LXI M, 2050H", why: "<code>M</code> is not a register and not a pair — it is the byte in memory at the address in HL, which is why it cannot be loaded with an address. Only B, D, H and SP can follow <code>LXI</code>.", fix: "LXI H, 2050H" },
+    { bad: "MOV PC, H       ; jump to the address in HL", why: "The program counter is not in the MOV encoding — three bits only reach the seven registers and M. There is a dedicated instruction for exactly this job.", fix: "PCHL            ; loads PC from HL" },
+  ]},
+
+  { t: "debug", intro: "This is supposed to swap the contents of HL and DE — HL should end up with ABCDH and DE with 1234H. It runs cleanly and both pairs end up the same. Read it before you open the fix.", show: ["HL", "DE"], code: "        LXI H, 1234H\n        LXI D, 0ABCDH\n        MOV H, D        ; swap the high halves\n        MOV L, E        ; swap the low halves\n        HLT\n", symptom: "both pairs finish holding ABCDH, and the value 1234H is nowhere in the machine", q: "Both MOVs did exactly what they say. So what happened to the value that used to be in HL?", fix: "        LXI H, 1234H\n        LXI D, 0ABCDH\n        XCHG            ; swap both halves at once\n        HLT\n", why: "<code>MOV</code> copies. It has always copied — there is no instruction on this chip that moves a value out of a register and leaves it empty, because a register is eight flip-flops that always hold something.<br/><br/>So <code>MOV H, D</code> overwrote 12H with ABH, and the 12H was gone the instant it ran. By the time <code>MOV L, E</code> executed there was nothing left to swap with.<br/><br/>A swap done by hand needs <b>three</b> steps and somewhere to stand: copy the first value to a spare register, copy the second over the first, then copy the spare into the second. Six instructions for the pair — which is why the 8085 has <code>XCHG</code>, one byte, exchanging HL and DE in four T-states.<br/><br/>The tell is in the symptom. When two things that should have swapped both end up holding the <i>same</i> value, one of them was overwritten before it was saved. It is the same shape of mistake as swapping two variables without a temporary in any language." },
+
+  { t: "recap", items: [
+    "Seven registers a program can name — <b>A B C D E H L</b> — plus <b>SP</b> and <b>PC</b> at sixteen bits, and <b>W–Z</b> that no instruction reaches",
+    "<b>B–C, D–E and H–L</b> are pairs. The first-named register holds the high byte",
+    "The same two bytes are two numbers or one, and <b>the instruction decides</b> — <code>INR L</code> against <code>INX H</code>",
+    "<code>MOV</code> is <b>01 ddd sss</b>: three bits per operand, eight codes, one of them <code>M</code>. That is where seven comes from",
+    "<code>MOV M, M</code> would be 76H and would do nothing, so that code is <b><code>HLT</code></b>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "List the registers of the 8085 and their sizes.", a: "Seven 8-bit general-purpose registers — A, B, C, D, E, H and L — where A is the accumulator. Two 16-bit registers, the stack pointer and the program counter, both of which hold addresses. And a temporary pair, W and Z, which is 8 bits each and cannot be named by any instruction; it holds an address while a three-byte instruction is still being fetched." },
+    { level: "beginner", q: "What is a register pair, and which ones exist?", a: "Two 8-bit registers that certain instructions treat as one 16-bit value: B with C, D with E, and H with L, with the first-named register holding the high byte. They exist because an address is 16 bits and a register is 8, so any pointer needs two registers working as one. HL is the one the instruction set favours, because M means the byte at the address in HL." },
+    { level: "intermediate", q: "What is the difference between <code>INR L</code> and <code>INX H</code>?", a: "INR L adds one to L as an 8-bit register and sets the flags; INX H adds one to the HL pair as a 16-bit number and sets no flags at all. They agree on every value except a boundary: with HL at 20FFH, INX H gives 2100H while INR L gives 2000H, because the carry out of L has nowhere to go. That is a classic pointer bug — it appears only when a block crosses a page boundary, so it passes most testing." },
+    { level: "intermediate", q: "Why does the 8085 have exactly seven general-purpose registers?", a: "Because of the opcode. MOV has to fit in one byte and name two operands, which leaves three bits each — eight codes per operand. One of those eight is used for M, the byte at the address in HL, so seven are left for registers. The same encoding also explains why MOV is a single byte while an instruction naming a memory address is three: register codes are cheap, addresses are not." },
+    { level: "advanced", q: "Why is the opcode 76H <code>HLT</code> rather than <code>MOV M, M</code>?", a: "Because MOV M, M is the one combination in the encoding that has no meaning. The pattern 01 ddd sss with both fields set to 110 would mean copy the byte at HL to the byte at HL, which is a no-op that also costs two memory accesses. So that slot was reused for HLT, which needed an opcode and has no operands. It is a good example of instruction-set design under pressure: with 256 codes and no room to spare, the combination that does nothing useful becomes the one that does something unrelated. The practical consequence is that a stray 76H in what you thought was data will stop the processor dead, and it is the single byte most likely to do so." },
+  ]},
+];
+
 const MP0 = [
   { t: "objectives", items: [
     "Say why a computer counts in <b>1s and 0s</b> — and it is not because someone chose to",
@@ -7097,6 +7185,7 @@ const mpLessons = [
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
   { slug: "mp-inside-the-chip", order: 7, title: "Inside the Chip", minutes: 14, problems: [], content: MP3 },
   { slug: "mp-three-buses", order: 8, title: "The Three Buses", minutes: 14, problems: [], content: MP4 },
+  { slug: "mp-register-set", order: 9, title: "The Register Set", minutes: 14, problems: [], content: MP5 },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -7401,6 +7490,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-register-set": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How many 8-bit general-purpose registers can an 8085 program name?", options: ["Seven — A, B, C, D, E, H and L", "Eight, including M", "Six", "Eleven"], correct: 0, why: "Seven, because three bits in the opcode give eight codes and one of them is spent on M — the byte in memory at HL, which is not a register at all." },
+    { level: "easy", q: "Which registers of the 8085 are 16 bits wide?", options: ["H and L", "The stack pointer and the program counter", "The accumulator and the flags", "B and C"], correct: 1, why: "Both hold addresses, and an address on this machine is sixteen bits. Everything else is a byte, and pairs are how two bytes stand in for an address." },
+    { level: "easy", q: "In the HL pair, which register holds the high byte?", options: ["L", "Whichever was loaded first", "H", "Neither — the pair is stored separately"], correct: 2, why: "The first-named register is always the high half, so LXI H, 2050H puts 20H in H and 50H in L. Same rule for B–C and D–E." },
+    // Medium — apply it
+    { level: "medium", q: "HL holds 20FFH and the program runs <code>INR L</code>. What is in HL now?", options: ["2100H", "20FFH, unchanged", "2101H", "2000H"], correct: 3, why: "INR L sees a lone byte: FFH wraps to 00H and H is never told. The pointer has jumped 255 bytes backwards — and this only ever goes wrong at a boundary, which is why it survives testing." },
+    { level: "medium", q: "What are the W and Z registers?", options: ["A temporary pair no instruction can name, holding an address mid-fetch", "The two halves of the flag register", "Another name for the stack pointer", "Registers reserved for interrupts"], correct: 0, why: "A three-byte instruction arrives one byte at a time over an 8-bit bus, so the two address bytes need somewhere to wait until both are in. No program can reach them and none needs to." },
+    { level: "medium", q: "A <code>MOV</code> opcode is <b>01 ddd sss</b>. How many things can each three-bit field name?", options: ["Seven, one per register", "Eight — the seven registers plus M", "Three", "Sixteen"], correct: 1, why: "Three bits count to eight. Seven codes are registers and the eighth is M, which is why MOV A, M is a single byte just like MOV A, B." },
+    { level: "medium", q: "What does <code>XCHG</code> do?", options: ["Copies HL into DE", "Swaps H with L", "Swaps the whole of HL with the whole of DE", "Exchanges the accumulator with memory"], correct: 2, why: "One byte, four T-states, both halves at once. Doing it by hand with MOV needs a spare register and three steps, because MOV copies rather than moves." },
+    // Hard — the edges
+    { level: "hard", q: "Why is the opcode 76H <code>HLT</code> rather than <code>MOV M, M</code>?", options: ["76H is outside the MOV range", "HLT was added later and took the next free code", "MOV M, M is illegal on any processor", "MOV M, M would copy a byte onto itself, so the useless slot was reused"], correct: 3, why: "With 256 codes and no room to spare, the one combination in the pattern that does nothing useful becomes the one that does something unrelated. A stray 76H in what you thought was data stops the processor dead." },
+    { level: "hard", q: "SP holds 2400H and the program runs <code>PUSH H</code>. Where does SP end up?", options: ["23FEH — the stack grows downwards, two bytes at a time", "2402H", "2400H, unchanged", "23FFH"], correct: 0, why: "Two bytes went out and the pointer moved down by two. The stack growing towards lower addresses is why it is normally initialised near the top of RAM." },
+    { level: "hard", q: "A program uses <code>MOV H, D</code> then <code>MOV L, E</code> to swap HL and DE. What actually happens?", options: ["Both pairs are swapped correctly but slowly", "DE is copied over HL, and HL's old value is destroyed", "The assembler rejects the second instruction", "Only the high bytes are exchanged"], correct: 1, why: "MOV copies — the first instruction overwrites H before anything has saved it. When two things that should have swapped end up holding the same value, one was overwritten before it was stored." },
+  ],
   "mp-three-buses": [
     // Easy — did the core idea land?
     { level: "easy", q: "How many lines does the 8085's address bus have?", options: ["16", "8", "20", "40"], correct: 0, why: "Sixteen, which is what lets it name 65,536 separate locations. The data bus is the 8-bit one — the two widths are different numbers answering different questions." },
