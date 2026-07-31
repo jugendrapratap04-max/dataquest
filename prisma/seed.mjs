@@ -6820,10 +6820,97 @@ const MPM = [
   ]},
 ];
 
+const MPC = [
+  { t: "objectives", items: [
+    "Add two bytes in binary the way the processor does — <b>column by column</b>",
+    "Say what a <b>carry</b> is: a column with no room, passing a bit to the left",
+    "Explain why <b>255 + 1 is 0</b>, and why nothing goes wrong when it happens",
+    "Read the <b>five flags</b> as five questions the processor answers after every sum",
+  ]},
+  { t: "hook", q: "A car's odometer reads 999999. You drive one more kilometre. What does it show?", why: "000000 — because there is no seventh wheel. The kilometre still happened; the odometer just has nowhere to put it.<br/><br/>A byte is an odometer with eight wheels, and each wheel only has 0 and 1 on it. This lesson is what happens when you drive past the end." },
+  { t: "def", term: "Carry", en: "A bit that will not fit in the column it was made in, so it moves one column to the left. When it happens in the leftmost column there is nowhere left to go, and the processor puts it in the carry flag instead.", hi: "You already do this in decimal. 7 + 5 is 12 — you write the 2 and carry the 1. Binary is the same rule with only two symbols, so it carries far more often." },
+  { t: "note", variant: "key", html: "📌 The sentence to keep: <b>a processor never says \"error\".</b> When a number does not fit, it keeps what fits, sets a flag, and carries straight on. Whether that becomes a bug depends entirely on whether anybody reads the flag." },
+
+  { t: "h2", n: "1", text: "Adding, one column at a time" },
+  { t: "p", html: "Same as adding on paper. Start at the right, add the column, and if it will not fit, carry to the left." },
+  { t: "viz", name: "binary-add-lab" },
+  { t: "p", html: "In decimal a column holds 0 to 9, so you carry when you pass 9. In binary a column holds <b>only 0 or 1</b>, so <code>1 + 1</code> already needs two digits: you write 0 and carry 1.<br/><br/>Step through <b>255 + 1</b> and watch every single column carry, one after another, all the way to the left edge — and then off it." },
+
+  { t: "h2", n: "2", text: "When a sum fits, and when it does not" },
+  { t: "p", html: "Two sums, same instruction. The only difference is whether the answer needed a ninth bit." },
+  { t: "code", file: "fits.asm", lang: "asm8085", show: ["A", "CY", "Z"], code: "        MVI A, 3CH      ; 60\n        MVI B, 2AH      ; 42\n        ADD B           ; 102\n        HLT\n", output: "A=66 CY=0 Z=0" },
+  { t: "code", file: "spills.asm", lang: "asm8085", show: ["A", "CY", "Z"], code: "        MVI A, 0F0H     ; 240\n        MVI B, 20H      ; 32\n        ADD B           ; 272 — too big for one byte\n        HLT\n", output: "A=10 CY=1 Z=0" },
+  { t: "p", html: "272 in hex is <b>110H</b> — three digits. The byte kept <b>10H</b> and the ninth bit went to <code>CY</code>.<br/><br/>So the answer was not lost and it was not rounded. It is in two places at once: the low eight bits in A, the ninth in the carry flag. Read them together and you have 272 back." },
+
+  { t: "h2", n: "3", text: "Past the end, and back to zero" },
+  { t: "p", html: "Press <b>+1</b> here until the count runs out of room. Then try <b>−1</b> from zero." },
+  { t: "viz", name: "rollover-lab" },
+  { t: "p", html: "It wraps, in both directions, and quietly. That is the odometer from the hook: 255 + 1 lands on 0 and 0 − 1 lands on 255.<br/><br/>Now the detail that gets examined, because two instructions that look identical do not behave identically:" },
+  { t: "code", file: "rollover.asm", lang: "asm8085", show: ["A", "Z", "CY"], code: "        MVI A, 0FFH\n        INR A           ; add one, the counter way\n        HLT\n", output: "A=00 Z=1 CY=0" },
+  { t: "code", file: "rollover-add.asm", lang: "asm8085", show: ["A", "Z", "CY"], code: "        MVI A, 0FFH\n        MVI B, 01H\n        ADD B           ; add one, the arithmetic way\n        HLT\n", output: "A=00 Z=1 CY=1" },
+  { t: "p", html: "Same answer, <b>different carry flag</b>. <code>ADD</code> is arithmetic, so it reports the carry. <code>INR</code> is a counter — it is built for loops, where you care whether you hit zero and not whether a bit fell off the end — so it leaves <code>CY</code> exactly as it found it.<br/><br/>Both set <code>Z=1</code>, because both landed on zero. That is the flag a loop actually watches." },
+
+  { t: "h2", n: "4", text: "Five questions, five flags" },
+  { t: "p", html: "After every sum the processor answers the same five questions about the result and keeps each answer as one bit." },
+  { t: "viz", name: "flag-answers-lab" },
+  { t: "p", html: "None of them is a warning. They are notes the processor leaves for the next instruction — and that is literally how a decision works: <code>JZ</code> means \"jump if the answer to <i>was it zero</i> was yes\".<br/><br/>Subtraction uses the same five. Here is what they say when a subtraction needs to borrow." },
+  { t: "code", file: "borrow.asm", lang: "asm8085", show: ["A", "S", "Z", "CY"], code: "        MVI A, 05H\n        MVI B, 09H\n        SUB B           ; 5 - 9, which does not go\n        HLT\n", output: "A=FC S=1 Z=0 CY=1" },
+  { t: "p", html: "5 − 9 cannot be done in a box that only holds 0 to 255, so the processor <b>borrowed</b> — and on a subtraction, <code>CY=1</code> means exactly that. The answer <b>FCH</b> is what −4 looks like when it is wrapped into a byte, and <code>S=1</code> says the top bit is on, which is how you spot it." },
+
+  { t: "think", q: "Why doesn't the processor just stop when a number does not fit?", a: "Because it would be wrong far more often than it would be right.<br/><br/>Overflow is not always a mistake. A counter that wraps from 255 to 0 is doing its job. A checksum is <i>built</i> out of deliberate wrapping. Multi-byte arithmetic depends on the carry falling out of one byte and into the next — that is the whole mechanism, not an accident. A processor that halted on every carry would halt on almost every useful program.<br/><br/>So the hardware does the only sensible thing: it computes the answer, records what happened, and lets the program decide whether it mattered. The flag is not a complaint, it is a fact.<br/><br/>The cost is real, though, and it is the reason this lesson exists. <b>Nothing forces you to look.</b> If your program adds two large numbers and never checks the carry, the wrong answer travels on quietly and turns up somewhere far away from the addition that caused it. Modern languages paper over this differently — some grow the number, some raise an error, some wrap exactly like the 8085 — but underneath, the silicon is still doing what you have just watched it do." },
+  { t: "analogy", concept: "Carry and the flags", real: "An odometer, and the note you leave", html: "An odometer with six wheels reads 999999. Drive one more kilometre and it shows 000000. The kilometre was real; the odometer simply had nowhere to record it.<br/><br/>Now imagine a small light that comes on for a moment each time the wheels roll past the end. That light is the <b>carry flag</b> — it does not stop the car, it does not fix the reading, it just tells anyone watching that a rollover happened.<br/><br/>The other four flags are lights for other questions: is the reading zero, is the top wheel showing, is the count of ones even. All five are answers to questions somebody might want, kept for a moment in case somebody asks." },
+
+  { t: "trace", intro: "Three lines. Work out what the accumulator holds — as two hex digits — and what the zero flag says.", code: "        MVI A, 0FEH\n        INR A\n        INR A\n        HLT\n", steps: [
+    { q: "After line 2, <code>A</code> is", answer: "FF", accept: ["ff", "0ffh", "ffh"], why: "FEH is 254, and one more is 255 — every switch on. This is the biggest number a byte can hold." },
+    { q: "After line 3, <code>A</code> is", answer: "00", accept: ["0", "00h"], why: "255 + 1 needs a ninth bit and there is not one, so it wraps to zero. The odometer rolled over." },
+    { q: "After line 3, <code>Z</code> is", answer: "1", accept: ["1", "set", "true"], why: "The answer is zero, so the zero flag comes on. Note that <code>CY</code> stays at 0 — <code>INR</code> is a counter and does not touch the carry, which is exactly the distinction §3 drew." },
+  ]},
+
+  { t: "drills", intro: "Eleven small sums. Predict the answer and the flags, then open.", items: [
+    { task: "A sum that fits comfortably.", code: "MVI A, 10H\nMVI B, 05H\nADD B\nHLT", show: ["A", "CY"], out: "A=15 CY=0" },
+    { task: "The biggest byte, plus one.", code: "MVI A, 0FFH\nADI 01H\nHLT", show: ["A", "CY", "Z"], out: "A=00 CY=1 Z=1" },
+    { task: "Zero minus one. Where does it land?", code: "MVI A, 00H\nSUI 01H\nHLT", show: ["A", "CY"], out: "A=FF CY=1" },
+    { task: "Subtract a number from itself.", code: "MVI A, 06H\nSUI 06H\nHLT", show: ["A", "Z"], out: "A=00 Z=1" },
+    { task: "Double 64. Does the top bit come on?", code: "MVI A, 40H\nADD A\nHLT", show: ["A", "S"], out: "A=80 S=1" },
+    { task: "Double 128. Now where did it go?", code: "MVI A, 80H\nADD A\nHLT", show: ["A", "CY", "Z"], out: "A=00 CY=1 Z=1" },
+    { task: "Count three down to zero.", code: "MVI C, 03H\nDCR C\nDCR C\nDCR C\nHLT", show: ["C", "Z"], out: "C=00 Z=1" },
+    { task: "One below zero.", code: "MVI C, 00H\nDCR C\nHLT", show: ["C", "Z"], out: "C=FF Z=0" },
+    { task: "Set the carry, then wrap with INR. Is the carry disturbed?", code: "STC\nMVI A, 0FFH\nINR A\nHLT", show: ["A", "CY"], out: "A=00 CY=1" },
+    { task: "Compare without changing the accumulator.", code: "MVI A, 05H\nCPI 09H\nHLT", show: ["A", "CY", "Z"], out: "A=05 CY=1 Z=0" },
+    { task: "Catch the carry and add it into the next byte.", code: "MVI A, 0FFH\nADI 01H\nMVI A, 00H\nACI 00H\nHLT", show: ["A"], out: "A=01" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "MVI A, 0C8H\nADI 0C8H\n; A now holds 400", why: "A holds 90H, which is 144. The ninth bit of 400 is in the carry flag. Nothing failed and nothing warned you — reading A alone simply loses it.", fix: "MVI A, 0C8H\nADI 0C8H\nJNC OK      ; look at the carry before trusting A" },
+    { bad: "MVI A, 0FFH\nINR A\nJC OVERFLOW", why: "<code>INR</code> does not touch the carry flag, so this tests whatever some earlier instruction left there. The value did wrap — but the carry is not how you find out.", fix: "MVI A, 0FFH\nINR A\nJZ WRAPPED   ; INR does set the zero flag" },
+    { bad: "MVI A, 05H\nSUI 09H\n; \"the answer is -4\"", why: "The byte holds FCH. Whether that <i>means</i> −4 is a decision the program makes, not something stored in the byte — the same FCH is 252 if you are counting upwards. The processor does not know which you meant.", fix: "MVI A, 05H\nSUI 09H\nJC WENT_NEGATIVE   ; CY = 1 means it borrowed" },
+    { bad: "; \"if it overflows, the program will crash\"", why: "It will not. There is no exception in the hardware to raise. The answer wraps, a flag is set, and execution continues to the next instruction as if nothing happened.", fix: "; it wraps silently — the flag is the only sign" },
+  ]},
+
+  { t: "debug", intro: "This adds 192 and 192 and stores the answer at 2060H. The right answer is 384. It runs cleanly and stores 128. Read it before you open the fix.", show: ["A", "M:2060", "CY"], code: "        MVI A, 0C0H     ; 192\n        MVI B, 0C0H     ; 192\n        ADD B           ; 384\n        STA 2060H       ; store the answer\n        HLT\n", symptom: "stores 80H, which is 128, when 192 + 192 is 384 - and 384 minus 256 is exactly 128", q: "The addition was right. So what did STA fail to store?", fix: "        MVI A, 0C0H     ; 192\n        MVI B, 0C0H     ; 192\n        ADD B           ; 384 - low byte in A, ninth bit in CY\n        MOV L, A        ; keep the low byte\n        MVI A, 00H      ; MVI does not disturb the flags\n        ACI 00H         ; turn the carry into a number\n        MOV H, A        ; keep it as the high byte\n        SHLD 2060H      ; store BOTH bytes\n        HLT\n", why: "The sum was correct — 384 — but 384 does not fit in one byte. A kept the low eight bits (80H, which is 128) and the ninth went to the carry flag, where <code>STA</code> never looked. <code>STA</code> stores one byte, because that is all a box holds.<br/><br/>The fix does not change the addition. It stores <b>two</b> bytes: the low half from A, and the carry turned into a number by <code>ACI 00H</code> — add zero <i>with carry</i>, so A becomes 1 if it carried and 0 if it did not.<br/><br/>What makes this dangerous is the size of the error. Being wrong by <b>exactly 256</b> is the signature of a lost carry, and it is easy to miss because 128 is a perfectly plausible number. Nothing about it looks like a failure.<br/><br/>Two habits catch it. Sanity-check the answer against what you expected — 192 + 192 cannot be smaller than 192. And whenever a sum might exceed 255, <b>decide before you write it</b> whether you are storing one byte or two, because the hardware will not decide for you." },
+
+  { t: "recap", items: [
+    "A <b>carry</b> is a bit with no room in its column, passed to the left — the same rule as carrying in decimal",
+    "Out of the leftmost column there is nowhere to go, so the bit lands in the <b>carry flag</b>",
+    "<b>255 + 1 = 0</b> and <b>0 − 1 = 255</b>. It wraps in both directions, silently",
+    "<code>ADD</code> reports the carry; <code>INR</code> does not touch it. Both set <b>Z</b> when the answer is zero",
+    "The five flags are five <b>questions</b> about the result — not warnings, and nothing stops when one comes on",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the carry flag?", a: "A single bit that records whether the last arithmetic operation produced a result too big for eight bits — or, on a subtraction, whether it needed to borrow. It is where the ninth bit goes when there is no ninth bit of storage." },
+    { level: "beginner", q: "What happens when you add 1 to FFH?", a: "The accumulator becomes 00H, the zero flag is set, and the carry flag is set if you used ADD or ADI. Nothing is raised and nothing stops — the byte simply wrapped, and the carry is the only record that it did." },
+    { level: "intermediate", q: "Why does <code>INR A</code> not affect the carry flag when <code>ADD</code> does?", a: "Because INR is meant for counting, not arithmetic. Loop counters increment and decrement constantly, and if every step overwrote the carry you could not carry a value across a loop. So INR and DCR set sign, zero, parity and auxiliary carry but deliberately leave CY alone. It is examined more often than the instructions themselves." },
+    { level: "intermediate", q: "After <code>SUB</code>, what does <code>CY = 1</code> mean?", a: "That the subtraction needed a borrow — the accumulator was smaller than what was subtracted from it. On the 8085 the carry flag doubles as the borrow flag, which is why JC after a CMP means \"jump if A was smaller\"." },
+    { level: "advanced", q: "A program adds two bytes and stores the result, and the answer is wrong by exactly 256. What happened?", a: "A carry was produced and thrown away. The addition itself was correct — the low eight bits are right — but the ninth bit went into the carry flag and whatever stored the result only stored one byte. Being off by exactly 256, or 100H, is the signature: that is what one lost carry is worth at the byte boundary. The fix is to decide up front whether the result needs two bytes, and if it does, turn the carry into a number with ACI 00H and store both. The same mistake one byte further up is an error of 65,536." },
+  ]},
+];
+
 const mpLessons = [
   { slug: "mp-switches-and-numbers", order: 1, title: "Switches, and How They Become Numbers", minutes: 12, problems: [], content: MP0 },
   { slug: "mp-memory-street", order: 2, title: "Memory — a Street of Numbered Boxes", minutes: 13, problems: [], content: MPM },
   { slug: "mp-what-is-a-program", order: 3, title: "What a Program Actually Is", minutes: 13, problems: [], content: MPP },
+  { slug: "mp-carry-and-flags", order: 4, title: "Counting, Carrying and Running Out of Room", minutes: 13, problems: [], content: MPC },
   { slug: "mp-what-is-a-microprocessor", order: 5, title: "What a Microprocessor Really Is", minutes: 14, problems: [], content: MP1 },
   { slug: "mp-evolution", order: 6, title: "Evolution — What Actually Changed", minutes: 15, problems: [], content: MP2 },
 ];
@@ -7130,6 +7217,21 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "mp-carry-and-flags": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What is a carry?", options: ["An error the processor reports", "A bit with no room in its column, passed to the left", "A spare register", "The largest value a byte holds"], correct: 1, why: "Exactly what you do in decimal when 7 + 5 gives 12: write the 2, carry the 1. Binary has only two symbols, so it happens far more often." },
+    { level: "easy", q: "<code>MVI A, 0FFH</code> then <code>ADI 01H</code>. What is in A?", options: ["00H", "256", "0FFH", "01H"], correct: 0, why: "255 + 1 needs a ninth bit and a byte has eight. It wraps to zero, the zero flag comes on, and the ninth bit goes to the carry flag." },
+    { level: "easy", q: "What does the processor do when a result does not fit?", options: ["Stops with an error", "Rounds it down to 255", "Keeps what fits, sets a flag, and carries on", "Asks for more memory"], correct: 2, why: "There is no exception in the hardware to raise. Whether it becomes a bug depends entirely on whether anybody reads the flag." },
+    // Medium — apply it
+    { level: "medium", q: "240 + 32 gives A = 10H and CY = 1. Where is the rest of the answer?", options: ["Rounded away", "In register B", "It was never computed", "In the carry flag — read together they are 272"], correct: 3, why: "272 is 110H. The byte kept the low eight bits and the ninth is in CY. The answer is not lost, it is in two places." },
+    { level: "medium", q: "Why does <code>INR A</code> leave the carry flag alone when <code>ADD B</code> sets it?", options: ["INR is a counter, so it must not disturb a carry being kept across a loop", "INR is faster", "It is a bug in the 8085", "INR cannot overflow"], correct: 0, why: "Both wrap FFH to 00H and both set the zero flag. Only ADD reports the carry, because only ADD is arithmetic. This distinction gets examined more than the instructions do." },
+    { level: "medium", q: "<code>MVI A, 05H</code> then <code>SUI 09H</code>. What is CY?", options: ["1 — the subtraction had to borrow", "0 — subtraction never carries", "1 — the result was zero", "0 — 5 is smaller than 9"], correct: 0, why: "On the 8085 the carry flag doubles as the borrow flag. That is why JC after a compare means \"jump if A was smaller\"." },
+    { level: "medium", q: "After a subtraction the accumulator holds FCH. What does that mean?", options: ["Definitely -4", "Definitely 252", "An error value", "Either 252 or -4 - the byte does not say which"], correct: 3, why: "The byte stores eight bits and nothing else. Whether you read them as 0-255 or as a signed number is a decision the program makes; the sign flag just reports that the top bit is on." },
+    // Hard — the edges
+    { level: "hard", q: "A program adds two bytes with <code>ADD</code> then stores the result with <code>STA</code>, and the answer is wrong by exactly 256. What happened?", options: ["The addition was computed wrongly", "A carry was produced and never stored - STA writes one byte", "The address was wrong", "The zero flag was misread"], correct: 1, why: "Being off by exactly 256, or 100H, is the signature of a lost carry — that is what one carry is worth at the byte boundary. The sum was right; only eight bits of it were kept." },
+    { level: "hard", q: "Why doesn't a processor halt when a result overflows?", options: ["Because overflow is rare", "Because halting is slow", "Because wrapping is often deliberate - counters, checksums and multi-byte arithmetic all depend on it", "Because the flag replaces the need"], correct: 2, why: "Multi-byte arithmetic IS a carry falling out of one byte and into the next. A processor that stopped on every carry would stop on almost every useful program, so it records the fact and lets the program decide." },
+    { level: "hard", q: "<code>ACI 00H</code> after an addition. What is it for?", options: ["Clearing the accumulator", "Turning the carry flag into a number - 1 if it carried, 0 if not", "Checking whether the result was zero", "Adding one to the accumulator"], correct: 1, why: "Add zero WITH carry. It is how the ninth bit becomes the low bit of the next byte up, which is the whole mechanism behind arithmetic wider than the registers." },
+  ],
   "mp-what-is-a-program": [
     // Easy — did the core idea land?
     { level: "easy", q: "Where does a program live?", options: ["In the same memory boxes as the data, as bytes", "In a special program-only memory", "Inside the processor's registers", "On the address bus"], correct: 0, why: "Same memory, same kind of byte. There is no separate place for programs — that is what \"stored-program computer\" means." },
