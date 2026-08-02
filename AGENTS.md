@@ -1,6 +1,6 @@
 # Read this before designing anything
 
-**DataMarg is not a Python course and not a Data Science platform.** It is an
+**Etudo is not a Python course and not a Data Science platform.** It is an
 AI-powered, multi-subject learning ecosystem. Python is only the first subject.
 
 Before you design a schema, a service, an AI workflow or a screen, read

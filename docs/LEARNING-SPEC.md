@@ -1,11 +1,11 @@
-# DataMarg — The Learning Experience, merged spec
+# Etudo — The Learning Experience, merged spec
 
 Jugendra has described the learning experience in **two documents**, sent on
 29 July 2026. They agree on the shape and disagree in small, load-bearing ways.
 This file merges them into one source of truth so nothing has to be guessed
 twice, and records exactly where they differed and how it was resolved.
 
-- **Doc A** — *"DataMarg – Product Ideas & Feature Backlog"* (the vision, with
+- **Doc A** — *"Etudo – Product Ideas & Feature Backlog"* (the vision, with
   the per-subject animation detail).
 - **Doc B** — *"Additional Product Requirements"* (the stricter rules, with the
   two-problems rule and the download lock).

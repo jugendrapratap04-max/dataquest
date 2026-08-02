@@ -26,7 +26,7 @@ export default function AppError({
       <div className="auth-card">
         <div className="auth-logo">
           <div className="mark">D</div>
-          <div><span className="wm">DataMarg</span></div>
+          <div><span className="wm">Etudo</span></div>
         </div>
         <h1>Something went wrong at our end</h1>
         <p className="sub">

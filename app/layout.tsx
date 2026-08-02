@@ -35,7 +35,7 @@ for(var i=0;i<q.length;i++){if(localStorage.getItem(q[i][0])===q[i][2]){d.setAtt
 // No "job-ready" in the title or the description. It is a claim about an outcome
 // nobody here controls, and it was the first thing Google showed for every page.
 export const metadata: Metadata = {
-  title: "DataMarg — Learn it. Practise it. Build with it.",
+  title: "Etudo — Learn it. Practise it. Build with it.",
   description: "Learn data science and practise it in the browser — real Python and SQL that run as you type, with visuals that make the concepts click.",
 };
 

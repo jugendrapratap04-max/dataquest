@@ -1,4 +1,4 @@
-# How DataMarg works
+# How Etudo works
 
 Written for Jugendra, 31 July 2026, and for anyone else who has to work on this
 without a web-development background. It assumes **nothing**. If a sentence uses
@@ -14,7 +14,7 @@ you the vocabulary, and Part 4 is the whole system explained as one journey.
 You need about twelve. Everything else in this file is built from them.
 
 **Web app.** A program you use through a browser instead of installing it.
-DataMarg is one.
+Etudo is one.
 
 **Browser and server.** Two computers, always. The **browser** is the student's
 phone or laptop — it draws what they see. The **server** is a computer somewhere
@@ -25,7 +25,7 @@ web app works is really "does this happen in the browser or on the server?"
 what happens on the server. One person doing both is called "full stack".
 
 **Framework.** A framework is a set of ready-made parts and rules so you are not
-building a web app from nothing. DataMarg uses **Next.js**, which is a framework
+building a web app from nothing. Etudo uses **Next.js**, which is a framework
 built on top of **React**.
 
 **React.** The tool that draws the screen. You write small pieces called
@@ -51,7 +51,7 @@ We deploy to **Vercel**, and the live address is `dataquest-navy.vercel.app`.
 every change; **GitHub** stores a copy online.
 
 **WebAssembly (WASM).** A way to run real programs *inside the browser*, fast.
-It is how DataMarg runs Python and SQL on the student's own device with no server
+It is how Etudo runs Python and SQL on the student's own device with no server
 involved. You will see this again in Part 5 — it is the single most unusual thing
 about this platform.
 
@@ -60,7 +60,7 @@ about this platform.
 
 ---
 
-## Part 2 — What DataMarg is made of
+## Part 2 — What Etudo is made of
 
 Eight real dependencies. That is deliberately few.
 
@@ -166,7 +166,7 @@ this problem. Not "40% complete" — see Part 5.
 
 ## Part 5 — The four things that are actually unusual
 
-Most of DataMarg is ordinary. These four are not, and they are what to talk about
+Most of Etudo is ordinary. These four are not, and they are what to talk about
 if anyone asks what is interesting about it.
 
 ### 1. There is a real 8085 processor inside the repo

@@ -14,7 +14,7 @@ export type ProblemData = {
   descriptionMd: string; examples: { input: string; output: string }[];
   starterCode: string; functionName: string; tests: TestCase[]; hints: string[];
   xp: number; recap: string; lessonSlug?: string; nextSlug?: string | null;
-  /** Editor language id, from the problem — not assumed. DataMarg is a
+  /** Editor language id, from the problem — not assumed. Etudo is a
    *  multi-subject platform, so the day a JavaScript or C++ problem exists the
    *  editor must already be reading this rather than being pinned to Python. */
   language?: string;

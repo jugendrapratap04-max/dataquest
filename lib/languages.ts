@@ -1,7 +1,7 @@
 // The language registry.
 //
 // `Problem.kind` started life as a two-value flag ("python" | "sql") because
-// those were the only two runtimes. DataMarg is a multi-subject platform
+// those were the only two runtimes. Etudo is a multi-subject platform
 // (docs/ARCHITECTURE.md), so the editor, the label and the runner have to read a
 // problem's language from data rather than assume Python — otherwise every new
 // subject means hunting down another hardcoded string.

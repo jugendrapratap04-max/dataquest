@@ -15,8 +15,8 @@ import { SITE_URL } from "@/lib/seo";
 export async function generateMetadata({ params }: { params: Promise<{ track: string }> }): Promise<Metadata> {
   const { track } = await params;
   const t = await prisma.track.findUnique({ where: { slug: track }, select: { title: true, subtitle: true } });
-  if (!t) return { title: "Not found — DataMarg" };
-  const title = `${t.title} — written notes | The DataMarg Book`;
+  if (!t) return { title: "Not found — Etudo" };
+  const title = `${t.title} — written notes | The Etudo Book`;
   const description = `Free written notes for ${t.title}: ${t.subtitle}. Definitions, worked examples, mistakes and exercises with answers.`;
   return {
     title,
@@ -47,7 +47,7 @@ export default async function BookTrack({ params }: { params: Promise<{ track: s
       </header>
 
       <div className="bk-cover">
-        <div className="bk-brand mono">DataMarg</div>
+        <div className="bk-brand mono">Etudo</div>
         <span className="subject-pill">{subjectName(t.title, t.slug)}</span>
         <h1>{t.title}</h1>
         <p className="bk-sub">{t.subtitle}</p>
@@ -78,9 +78,9 @@ export default async function BookTrack({ params }: { params: Promise<{ track: s
       <footer className="bk-foot">
         <p>
           Want to run this code and have it checked? The same material is interactive at{" "}
-          <Link href="/learn">DataMarg lessons</Link>.
+          <Link href="/learn">Etudo lessons</Link>.
         </p>
-        <span className="mono">DataMarg</span> · <Link href="/terms">Terms</Link> ·{" "}
+        <span className="mono">Etudo</span> · <Link href="/terms">Terms</Link> ·{" "}
         <Link href="/privacy">Privacy</Link>
       </footer>
     </div>

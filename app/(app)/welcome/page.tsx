@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/session";
 import { Onboarding } from "@/components/Onboarding";
 
 export const metadata: Metadata = {
-  title: "Welcome — DataMarg",
+  title: "Welcome — Etudo",
   robots: { index: false },
 };
 

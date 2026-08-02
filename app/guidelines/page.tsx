@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/LegalShell";
 
 export const metadata: Metadata = {
-  title: "Community Guidelines — DataMarg",
-  description: "The rules for studying together on DataMarg, including voice study rooms.",
+  title: "Community Guidelines — Etudo",
+  description: "The rules for studying together on Etudo, including voice study rooms.",
 };
 
 export default function GuidelinesPage() {
   return (
     <LegalShell title="Community Guidelines" current="/guidelines">
       <p className="legal-lead">
-        DataMarg exists so people can learn data science together. These guidelines keep it a place
+        Etudo exists so people can learn data science together. These guidelines keep it a place
         where a beginner is comfortable saying &quot;I don&apos;t understand this&quot; out loud.
       </p>
 
@@ -52,7 +52,7 @@ export default function GuidelinesPage() {
         </li>
         <li>
           <b>Voice is currently invite-only.</b> While it is being tested it works only in rooms
-          opened by the DataMarg team, so you will not end up in a voice room with strangers.
+          opened by the Etudo team, so you will not end up in a voice room with strangers.
         </li>
       </ul>
       <p>

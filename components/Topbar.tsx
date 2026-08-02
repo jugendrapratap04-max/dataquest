@@ -24,7 +24,7 @@ const titles: Record<string, [string, string]> = {
 // we can actually stand behind.
 function pick(pathname: string): [string, string] {
   const key = Object.keys(titles).find((k) => pathname.startsWith(k));
-  return key ? titles[key] : ["DataMarg", "Learn it. Practise it. Build with it."];
+  return key ? titles[key] : ["Etudo", "Learn it. Practise it. Build with it."];
 }
 
 // Two free themes, two earned with coins (= XP; never spent, unlocks at a

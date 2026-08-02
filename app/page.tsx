@@ -86,7 +86,7 @@ export default async function LandingPage() {
       <header className="lp-nav">
         <div className="lp-brand">
           <div className="mark">D</div>
-          <span className="wm">DataMarg</span>
+          <span className="wm">Etudo</span>
           <span className="beta">BETA</span>
         </div>
         <nav className="lp-navlinks">
@@ -180,7 +180,7 @@ export default async function LandingPage() {
       </section>
 
       <footer className="lp-foot">
-        <span className="mono">DataMarg</span> — learn it, practise it, build with it.
+        <span className="mono">Etudo</span> — learn it, practise it, build with it.
         <br />
         <Link href="/book">Free written notes</Link> · <Link href="/guidelines">Community Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
       </footer>

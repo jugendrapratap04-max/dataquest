@@ -1,6 +1,6 @@
-# DataMarg — Product Vision and Architecture
+# Etudo — Product Vision and Architecture
 
-**DataMarg is not a Python course and not a Data Science platform.** It is an
+**Etudo is not a Python course and not a Data Science platform.** It is an
 AI-powered personalised learning ecosystem where a student masters technical
 skills, builds real projects, and prepares for a career — in one place.
 
@@ -154,7 +154,7 @@ Honest options, cheapest first:
    not to launch on.
 4. **Not yet** — build every non-AI part of the ecosystem first.
 
-**This is your decision, not mine, because it is the first thing in DataMarg that
+**This is your decision, not mine, because it is the first thing in Etudo that
 has a bill attached.** What I would do: build the mentor's *hooks* now — the
 progress data it needs, the moments it would speak — so it is a small change to
 switch on, and decide the spend only when there are students to spend it on.

@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 // like the rest of the site.
 
 export const metadata: Metadata = {
-  title: "Page not found — DataMarg",
+  title: "Page not found — Etudo",
   robots: { index: false },
 };
 
@@ -20,7 +20,7 @@ export default function NotFound() {
       <div className="auth-card">
         <div className="auth-logo">
           <div className="mark">D</div>
-          <div><span className="wm">DataMarg</span></div>
+          <div><span className="wm">Etudo</span></div>
         </div>
         <h1>This page does not exist</h1>
         <p className="sub">

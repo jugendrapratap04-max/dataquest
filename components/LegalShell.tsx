@@ -17,7 +17,7 @@ export function LegalShell({ title, current, children }: { title: string; curren
   return (
     <div className="legal">
       <header className="legal-top">
-        <Link href="/" className="legal-brand"><span className="mono">DataMarg</span></Link>
+        <Link href="/" className="legal-brand"><span className="mono">Etudo</span></Link>
         <Link href="/" className="legal-back">← Back to site</Link>
       </header>
 
@@ -35,20 +35,20 @@ export function LegalShell({ title, current, children }: { title: string; curren
         <section className="legal-grievance">
           <h2>Grievance Officer</h2>
           <p>
-            If you have a complaint about anything on DataMarg — another user&apos;s behaviour, your
+            If you have a complaint about anything on Etudo — another user&apos;s behaviour, your
             own data, or content you believe should not be here — write to the Grievance Officer.
             We acknowledge complaints within 24 hours and aim to resolve them within 15 days.
           </p>
           <p className="legal-contact">
             <b>Jugendra Pratap</b><br />
-            Grievance Officer, DataMarg<br />
+            Grievance Officer, Etudo<br />
             <a href={`mailto:${GRIEVANCE_EMAIL}`}>{GRIEVANCE_EMAIL}</a>
           </p>
         </section>
       </article>
 
       <footer className="legal-foot">
-        <span className="mono">DataMarg</span> · <Link href="/guidelines">Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
+        <span className="mono">Etudo</span> · <Link href="/guidelines">Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
       </footer>
     </div>
   );

@@ -14,10 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ code: str
     where: { code },
     select: { title: true, creator: { select: { name: true } }, attempts: { select: { correct: true, total: true } } },
   });
-  if (!c) return { title: "Challenge — DataMarg" };
+  if (!c) return { title: "Challenge — Etudo" };
   const best = c.attempts.reduce((m, a) => Math.max(m, a.correct), 0);
   return {
-    title: `${c.title} — challenge from ${c.creator.name.split(" ")[0]} | DataMarg`,
+    title: `${c.title} — challenge from ${c.creator.name.split(" ")[0]} | Etudo`,
     description: c.attempts.length
       ? `Best score so far: ${best}/${c.attempts[0].total}. Take the same questions and see how you compare.`
       : "Take the same questions and see how you compare.",

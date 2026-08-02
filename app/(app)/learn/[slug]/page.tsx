@@ -308,7 +308,7 @@ function Block({ b }: { b: any }) {
 }
 
 // Without this every lesson served the root layout's title, so search engines
-// saw 83 pages all called "DataMarg — Learn. Practice. Get Job-Ready." The
+// saw 83 pages all called "Etudo — Learn. Practice. Get Job-Ready." The
 // description is taken from the lesson's own first paragraph rather than being
 // generated, so it always matches what the page actually says.
 export async function generateMetadata({
@@ -321,7 +321,7 @@ export async function generateMetadata({
     where: { slug },
     include: { track: { select: { title: true } } },
   });
-  if (!lesson) return { title: "Lesson not found — DataMarg" };
+  if (!lesson) return { title: "Lesson not found — Etudo" };
 
   let blocks: any[] = [];
   try { blocks = JSON.parse(lesson.contentJson || "[]"); } catch {}
@@ -331,7 +331,7 @@ export async function generateMetadata({
     "";
 
   const track = lesson.track.title.split(" — ")[0];
-  const title = `${lesson.title} — ${track} | DataMarg`;
+  const title = `${lesson.title} — ${track} | Etudo`;
   const description =
     clamp(intro) || `Learn ${lesson.title} with an interactive lesson, worked examples and practice you can run in the browser.`;
   const url = `${SITE_URL}/learn/${lesson.slug}`;
@@ -340,7 +340,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "article", siteName: "DataMarg" },
+    openGraph: { title, description, url, type: "article", siteName: "Etudo" },
     twitter: { card: "summary", title, description },
   };
 }

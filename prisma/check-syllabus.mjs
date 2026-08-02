@@ -54,7 +54,7 @@ function measure(lesson) {
 //
 // This tool used to load the python track alone and report "4 lessons below
 // standard", which read as "the platform is nearly done" while 44 stub lessons
-// sat untouched across the other eight subjects. DataMarg is a multi-subject
+// sat untouched across the other eight subjects. Etudo is a multi-subject
 // platform (docs/ARCHITECTURE.md); a scoreboard that can only see one subject
 // is a scoreboard that misleads.
 //

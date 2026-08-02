@@ -58,7 +58,7 @@ export default async function CertificatePage({ params }: { params: Promise<{ sl
           <div className="cert-foot">
             <div className="cert-foot-item"><div className="cl">Issued</div><div className="cv">{issued}</div></div>
             <div className="cert-badge">★</div>
-            <div className="cert-foot-item" style={{ textAlign: "right" }}><div className="cl">Platform</div><div className="cv">DataMarg</div></div>
+            <div className="cert-foot-item" style={{ textAlign: "right" }}><div className="cl">Platform</div><div className="cv">Etudo</div></div>
           </div>
         </div>
       </div>

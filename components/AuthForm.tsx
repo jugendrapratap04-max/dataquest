@@ -61,7 +61,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       <form className="auth-card" onSubmit={submit} noValidate>
         <div className="auth-logo">
           <div className="mark">D</div>
-          <div><span className="wm">DataMarg</span></div>
+          <div><span className="wm">Etudo</span></div>
         </div>
         <h1>{isSignup ? "Create your account" : "Welcome back 👋"}</h1>
         <p className="sub">{isSignup ? "One account, and the whole data science path is yours." : "Sign in and pick up exactly where you left off."}</p>
@@ -96,7 +96,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <p className="auth-legal">
             By creating an account you agree to our <Link href="/terms">Terms of Service</Link> and{" "}
             <Link href="/guidelines">Community Guidelines</Link>, and to the{" "}
-            <Link href="/privacy">Privacy Policy</Link>. If you are under 18, please use DataMarg
+            <Link href="/privacy">Privacy Policy</Link>. If you are under 18, please use Etudo
             with a parent or guardian&apos;s permission.
           </p>
         )}

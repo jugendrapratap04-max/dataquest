@@ -35,8 +35,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { track, chapter } = await params;
   const c = await load(track, chapter);
-  if (!c) return { title: "Not found — DataMarg" };
-  const title = `${c.title} — ${subjectName(c.track.title, c.track.slug)} notes | DataMarg`;
+  if (!c) return { title: "Not found — Etudo" };
+  const title = `${c.title} — ${subjectName(c.track.title, c.track.slug)} notes | Etudo`;
   const description =
     clamp(c.summary) ||
     `Free written notes for ${c.title}: definitions, worked examples, common mistakes and exercises with answers.`;
@@ -45,7 +45,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "article", siteName: "DataMarg" },
+    openGraph: { title, description, url, type: "article", siteName: "Etudo" },
   };
 }
 
@@ -80,7 +80,7 @@ export default async function BookChapterPage({
       </header>
 
       <div className="bk-cover">
-        <div className="bk-brand mono">DataMarg</div>
+        <div className="bk-brand mono">Etudo</div>
         <span className="subject-pill">{subjectName(c.track.title, c.track.slug)}</span>
         <h1>{c.title}</h1>
         {c.summary && <p className="bk-sub">{c.summary}</p>}
@@ -141,9 +141,9 @@ export default async function BookChapterPage({
       <footer className="bk-foot">
         <p>
           Want to run this code and have it checked? The same material is interactive at{" "}
-          <Link href={`/learn/${topics[0]?.slug ?? ""}`}>DataMarg lessons</Link>.
+          <Link href={`/learn/${topics[0]?.slug ?? ""}`}>Etudo lessons</Link>.
         </p>
-        <span className="mono">DataMarg</span> · <Link href="/terms">Terms</Link> ·{" "}
+        <span className="mono">Etudo</span> · <Link href="/terms">Terms</Link> ·{" "}
         <Link href="/privacy">Privacy</Link>
       </footer>
     </div>

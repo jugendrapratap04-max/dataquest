@@ -73,7 +73,7 @@ export function FeedbackButton() {
               <div className="fb-thanks">
                 <div className="fb-tick">✓</div>
                 <b>Shukriya!</b>
-                <p>Feedback received — this is how DataMarg gets better.</p>
+                <p>Feedback received — this is how Etudo gets better.</p>
               </div>
             ) : (
               <>

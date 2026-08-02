@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "The DataMarg Book — free written notes for every topic",
-  description: "Every DataMarg lesson as written notes you can read straight through, revise from, or print as a PDF. Free, no account needed.",
+  title: "The Etudo Book — free written notes for every topic",
+  description: "Every Etudo lesson as written notes you can read straight through, revise from, or print as a PDF. Free, no account needed.",
 };
 
 export default async function BookIndex() {
@@ -20,8 +20,8 @@ export default async function BookIndex() {
   return (
     <div className="book-index">
       <header className="bki-head">
-        <Link href="/" className="bki-back">← DataMarg</Link>
-        <h1>The DataMarg Book</h1>
+        <Link href="/" className="bki-back">← Etudo</Link>
+        <h1>The Etudo Book</h1>
         <p>
           Every lesson, written out as notes you can read straight through — definitions, worked
           examples, common mistakes, exercises with answers, and interview questions. {total} topics
@@ -46,7 +46,7 @@ export default async function BookIndex() {
       </div>
 
       <footer className="bki-foot">
-        <span className="mono">DataMarg</span> · <Link href="/guidelines">Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
+        <span className="mono">Etudo</span> · <Link href="/guidelines">Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
       </footer>
     </div>
   );

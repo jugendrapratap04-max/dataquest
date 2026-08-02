@@ -1,6 +1,6 @@
-# DataMarg — Improvements Backlog
+# Etudo — Improvements Backlog
 
-> **Read [`ARCHITECTURE.md`](./ARCHITECTURE.md) first.** DataMarg is an
+> **Read [`ARCHITECTURE.md`](./ARCHITECTURE.md) first.** Etudo is an
 > AI-powered, multi-subject learning ecosystem — not a Python course and not a
 > Data Science platform. Python is only the first subject, because a browser can
 > already run it. An earlier draft of this backlog read as though the platform
@@ -11,7 +11,7 @@
 Everything Jugendra has asked for, in one place, with what is done, what is left,
 and what changes on screen.
 
-**Sources:** Jugendra's product document *"DataMarg – Product Ideas & Feature
+**Sources:** Jugendra's product document *"Etudo – Product Ideas & Feature
 Backlog"* (29 July 2026) and his review notes in chat the same day.
 **Technical findings** live separately in [`REVIEW-2026-07-29.md`](./REVIEW-2026-07-29.md).
 

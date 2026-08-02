@@ -86,10 +86,10 @@ export async function generateMetadata({
     where: { slug },
     select: { title: true, slug: true, difficulty: true, descriptionMd: true, kind: true },
   });
-  if (!problem) return { title: "Problem not found — DataMarg" };
+  if (!problem) return { title: "Problem not found — Etudo" };
 
   const lang = languageOf(problem.kind).name;
-  const title = `${problem.title} — ${problem.difficulty} ${lang} practice | DataMarg`;
+  const title = `${problem.title} — ${problem.difficulty} ${lang} practice | Etudo`;
   const description =
     clamp(problem.descriptionMd) ||
     `Solve ${problem.title}, a ${problem.difficulty.toLowerCase()} ${lang} problem you can run and check in the browser.`;
@@ -99,7 +99,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "article", siteName: "DataMarg" },
+    openGraph: { title, description, url, type: "article", siteName: "Etudo" },
     twitter: { card: "summary", title, description },
   };
 }

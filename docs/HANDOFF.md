@@ -7,7 +7,7 @@ either in this file or in the repo.
 
 ## 1. The prompt
 
-> Continue building DataMarg at `F:\projects\dataquest`. Read `AGENTS.md`,
+> Continue building Etudo at `F:\projects\dataquest`. Read `AGENTS.md`,
 > `docs/ARCHITECTURE.md` and `docs/LEARNING-SPEC.md` first — they are the
 > standing brief and they override any assumption you would otherwise make.
 >

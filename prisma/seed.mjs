@@ -101,7 +101,7 @@ const L0 = [
   { t: "h2", n: "1", text: "What Python actually is" },
   { t: "def", term: "Python", en: "Python is a programming language: a set of words and rules for writing instructions a computer can carry out.", hi: "In plain words: you write the steps, Python performs them — exactly, in order, and as many times as you ask." },
   { t: "analogy", concept: "A program", real: "A recipe", html: "A recipe is a list of steps in a fixed order, written so that <i>anybody</i> can follow it and get the same dish. A program is the same thing written for a computer — with one difference: the computer follows it <b>exactly</b>, including your mistakes. It will never guess what you meant." },
-  { t: "code", file: "first.py", code: "print(\"Hello, DataMarg!\")", output: "Hello, DataMarg!" },
+  { t: "code", file: "first.py", code: "print(\"Hello, Etudo!\")", output: "Hello, Etudo!" },
   { t: "psoft", html: "That is a complete Python program. One line. <code>print()</code> is an instruction that means <strong>\"put this on the screen\"</strong>, and the thing inside the quotes is what gets put there." },
   { t: "note", variant: "tip", html: "<b>Try changing it.</b> Put your own name in the quotes and run it again. Breaking and fixing a one-line program is the cheapest lesson you will ever get." },
 
@@ -124,7 +124,7 @@ const L0 = [
 
   { t: "h2", n: "5", text: "Asking a person for something" },
   { t: "p", html: "<code>input()</code> stops the program, waits for someone to type, and hands you whatever they typed." },
-  { t: "code", file: "greet.py", code: "name = input(\"What is your name? \")\nprint(\"Hello,\", name)\nprint(\"Welcome to DataMarg\")" },
+  { t: "code", file: "greet.py", code: "name = input(\"What is your name? \")\nprint(\"Hello,\", name)\nprint(\"Welcome to Etudo\")" },
   { t: "note", variant: "warn", html: "<b>Remember this one — it causes more beginner bugs than anything else:</b> <code>input()</code> always gives you <b>text</b>, even when the person types a number. <code>input()</code> then <code>+ 1</code> will not add — you will meet this properly in the next lesson." },
 
   { t: "h2", n: "6", text: "Why data science picked Python" },
@@ -249,11 +249,17 @@ const L1 = [
   { t: "p", html: "Two conversions surprise almost everybody:" },
   { t: "code", file: "casting_edges.py", code: "print(int(9.7))            # cuts the decimal off, it does NOT round\nprint(round(9.7))          # use round() when you want rounding\nprint(int(float(\"9.7\")))   # a decimal string needs two steps", output: "9\n10\n9" },
   { t: "note", variant: "warn", html: "<code>int(\"9.7\")</code> on its own raises <code>ValueError</code>. <code>int()</code> only accepts a string that already looks like a whole number, so go through <code>float()</code> first." },
-  { t: "h2", n: "6", text: "Why Python feels different: dynamic typing" },
+  { t: "h2", n: "6", text: "None — a value that means \"nothing yet\"" },
+  { t: "p", html: "Alongside the four types there is a fifth value worth meeting now: <code>None</code>. It is not zero, and it is not an empty string — those are answers. <code>None</code> means <b>there is no answer</b>: not filled in, not found, not decided." },
+  { t: "code", file: "none.py", code: "result = None\n\nprint(result)\nprint(type(result))\nprint(result is None)\n\ndef greet(name=None):\n    if name is None:\n        name = \"there\"\n    return \"Hello, \" + name\n\nprint(greet())\nprint(greet(\"Priya\"))", output: "None\n<class 'NoneType'>\nTrue\nHello, there\nHello, Priya" },
+  { t: "note", variant: "tip", html: "Check it with <code>is None</code>, never <code>== None</code>. There is only ever <b>one</b> <code>None</code> in a running program, so <code>is</code> — which asks \"the same object?\" — is both exactly right and faster. It also cannot be fooled by a class that defines its own <code>==</code>." },
+  { t: "note", variant: "warn", html: "Two places <code>None</code> appears without you writing it. A function with no <code>return</code> returns <code>None</code>, and so does a method like <code>list.sort()</code> that changes something in place. That is the source of <code>TypeError: 'NoneType' object is not subscriptable</code> — a message that means \"you are using the result of something that did not return a result\"." },
+
+  { t: "h2", n: "7", text: "Why Python feels different: dynamic typing" },
   { t: "def", term: "Dynamic typing", en: "The type belongs to the value, not to the variable, so the same variable can hold a different type later.", hi: "In plain words: the box does not care what you put in it. In Java or C++ you must promise up front that a box will only ever hold whole numbers." },
   { t: "code", file: "dynamic.py", code: "x = 5\nprint(type(x))\n\nx = \"five\"       # completely legal in Python\nprint(type(x))", output: "<class 'int'>\n<class 'str'>" },
   { t: "p", html: "The upside is how fast this is to write. The downside is that a type mistake is only discovered when that line actually <em>runs</em> — which in a long data pipeline can be twenty minutes in. That is why experienced teams add type hints later (<code>marks: int = 85</code>); you will meet them in the Clean Code lesson." },
-  { t: "h2", n: "7", text: "Putting it together" },
+  { t: "h2", n: "8", text: "Putting it together" },
   { t: "worked", title: "marks arrive as text, add a 5-mark bonus, print a sentence", goal: "Study this before you write anything. Notice the <b>labels on each step</b> — that shape (get it, convert it, calculate, format, show) repeats in almost every program you will ever write.", steps: [
     { label: "1. Take the raw value", code: "marks_text = \"85\"", why: "This is what <code>input()</code> would hand you — text, even though it looks like a number." },
     { label: "2. Convert it to the type you need", code: "marks = int(marks_text)", why: "Nothing arithmetic can happen until this line runs. Convert as early as possible, not deep inside the calculation." },
@@ -415,7 +421,12 @@ const L3 = [
   { t: "code", file: "ternary.py", code: "age = 15\nstatus = \"Adult\" if age >= 18 else \"Minor\"\nprint(status)", output: "Minor" },
   { t: "note", variant: "warn", html: "Fine for a small assignment. Nesting one inside another gets unreadable fast — when that happens, go back to a normal <code>if</code>." },
 
-  { t: "trace", intro: "Read it in order and work out what each name holds. The trap is which line actually gets reached.", code: "score = 88\nresult = \"none\"\nif score >= 95:\n    result = \"top\"\nelif score >= 60:\n    result = \"good\"\nelif score >= 85:\n    result = \"great\"", steps: [
+  { t: "h2", n: "4", text: "pass — doing nothing, on purpose" },
+  { t: "p", html: "Python decides where a block starts and ends by indentation, so a block can never be <b>empty</b> — leaving one blank is an <code>IndentationError</code>. <code>pass</code> is the statement that does nothing and exists purely to fill that space." },
+  { t: "code", file: "pass.py", code: "def todo():\n    pass              # written, not finished yet\n\nclass Draft:\n    pass\n\nfor n in [1, 2, 3]:\n    if n == 2:\n        pass          # this case is handled by ignoring it\n    else:\n        print(n)\n\nprint(todo())", output: "1\n3\nNone" },
+  { t: "note", variant: "tip", html: "Two honest uses. <b>Scaffolding</b> — sketch the functions you plan to write so the file still runs while you fill them in. And <b>a deliberate skip</b>, where <code>pass</code> says \"this case was considered and needs no action\", which reads very differently from a branch someone forgot to finish. Note the last line too: <code>todo()</code> returns <code>None</code>, because a function that returns nothing returns <code>None</code>." },
+
+  { t: "trace", intro: "Read it in order and work out what each nameholds. The trap is which line actually gets reached.", code: "score = 88\nresult = \"none\"\nif score >= 95:\n    result = \"top\"\nelif score >= 60:\n    result = \"good\"\nelif score >= 85:\n    result = \"great\"", steps: [
     { q: "After line 4, <code>result</code> is", answer: "none", why: "<code>88 >= 95</code> is False, so that body never ran — <code>result</code> still holds what line 2 put there." },
     { q: "After line 6, <code>result</code> is", answer: "good", why: "<code>88 >= 60</code> is True, so this branch runs and the chain is finished." },
     { q: "After line 8, <code>result</code> is", answer: "good", why: "Here is the real lesson. <code>88 >= 85</code> is true, but Python stopped at the branch above and never looked at this one. A stricter condition placed <b>after</b> a looser one is unreachable — the classic ordering bug." },
@@ -581,6 +592,22 @@ const L5 = [
   { t: "code", file: "copying.py", code: "a = [1, 2, 3]\nb = a\nb.append(4)\nprint(a)\n\nc = a[:]\nc.append(5)\nprint(a)\nprint(c)", output: "[1, 2, 3, 4]\n[1, 2, 3, 4]\n[1, 2, 3, 4, 5]" },
   { t: "note", variant: "warn", html: "Read the first two lines of output again. Appending to <code>b</code> changed <code>a</code>, because they were never two lists. Appending to <code>c</code> did not, because <code>a[:]</code> actually copied. Nothing errors either way, which is exactly why this bug survives so long." },
 
+  { t: "h2", n: "6", text: "Sorting — the two versions, and the one that returns nothing" },
+  { t: "p", html: "There are two ways to sort, and the difference is the same one you just met with copying. <code>sorted(x)</code> leaves <code>x</code> alone and hands back a <b>new</b> sorted list. <code>x.sort()</code> rearranges <code>x</code> itself and hands back <b>nothing</b>." },
+  { t: "code", file: "sorting.py", code: "marks = [70, 45, 90, 60]\n\nprint(sorted(marks))     # a new list\nprint(marks)             # the original, untouched\n\nmarks.sort()             # rearranges marks itself\nprint(marks)\n\nmarks.sort(reverse=True)\nprint(marks)\n\nnames = [\"Rahul\", \"priya\", \"Imran\"]\nprint(sorted(names, key=str.lower))", output: "[45, 60, 70, 90]\n[70, 45, 90, 60]\n[45, 60, 70, 90]\n[90, 70, 60, 45]\n['Imran', 'priya', 'Rahul']" },
+  { t: "note", variant: "warn", html: "<code>marks = marks.sort()</code> destroys your data. <code>.sort()</code> returns <code>None</code>, so the name now points at <code>None</code> and the sorted list is gone — and the error only appears later, as <code>TypeError: 'NoneType' object is not subscriptable</code>, pointing at a line that is perfectly fine. Rule: if you want to keep the original, use <code>sorted()</code>; if you do not, call <code>.sort()</code> on its own line and assign nothing." },
+  { t: "note", variant: "tip", html: "<code>key=</code> takes a function applied to each item before comparing. <code>key=str.lower</code> gives a case-insensitive sort; <code>key=len</code> sorts by length. Without it, capital letters sort before lowercase ones, which is why <code>[\"Rahul\", \"priya\"]</code> comes back in that order by default." },
+
+  { t: "h2", n: "7", text: "Joining lists, and the tuple's only two methods" },
+  { t: "p", html: "<code>+</code> builds a new list from two; <code>extend</code> grows an existing one. A tuple, being unchangeable, has exactly <b>two</b> methods — everything else would have to modify it." },
+  { t: "code", file: "joining.py", code: "a = [1, 2]\nb = [3, 4]\n\nprint(a + b)      # a new list; a and b unchanged\nprint(a)\n\na.extend(b)       # a itself grows\nprint(a)\n\nt = (5, 7, 5)\nprint(t.count(5))\nprint(t.index(7))", output: "[1, 2, 3, 4]\n[1, 2]\n[1, 2, 3, 4]\n2\n1" },
+  { t: "note", variant: "tip", html: "<code>count</code> says how many times a value appears; <code>index</code> says where it first appears. Both exist on lists too. <code>index</code> raises <code>ValueError</code> when the value is absent, so check with <code>in</code> first if you are not sure." },
+
+  { t: "h2", n: "8", text: "The list methods worth remembering" },
+  { t: "p", html: "You will not memorise these from a table. Run this block once, watch each line change the list, and you will recognise them when you need them." },
+  { t: "code", file: "listmethods.py", code: "nums = [3, 1, 2]\nnums.append(4)        # add one at the end\nnums.insert(0, 9)     # add at a position\nnums.remove(9)        # delete by VALUE, not index\nprint(nums)\n\nprint(nums.pop(0))    # remove by index, and hand it back\nprint(nums.count(2), nums.index(2))\n\nnums.reverse()\nprint(nums)\nprint(len(nums), min(nums), max(nums), sum(nums))\n\nnums.clear()\nprint(nums)", output: "[3, 1, 2, 4]\n3\n1 1\n[4, 2, 1]\n3 1 4 7\n[]" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the pair that catches people is <code>remove</code> and <code>pop</code>. <code>remove(2)</code> deletes the <b>value</b> 2; <code>pop(2)</code> deletes whatever sits at <b>index</b> 2. On a list of numbers both calls look identical and do completely different things, with no error either way." },
+
   { t: "trace", intro: "A list of scores being updated. Work out what each name holds once the line has run.", code: "scores = [40, 55, 70]\nscores.append(90)\ntop = scores[-1]\nfirst_two = scores[:2]\ncount = len(scores)", steps: [
     { q: "After line 3, <code>top</code> is", answer: "90", why: "<code>append</code> put 90 at the end on line 2, and <code>[-1]</code> always reads the last item — whatever the length happens to be." },
     { q: "After line 4, <code>first_two</code> is", answer: "[40, 55]", accept: ["[40,55]", "40, 55", "40,55"], why: "<code>[:2]</code> takes indexes 0 and 1. The stop value is excluded, so 70 is not included — and the original list is untouched." },
@@ -599,6 +626,13 @@ const L5 = [
     { task: "Join two lists into one with <code>extend</code>.", code: "a = [1, 2]\na.extend([3, 4])\nprint(a)", out: "[1, 2, 3, 4]" },
     { task: "Unpack a tuple into two names and print their sum.", code: "x, y = (4, 9)\nprint(x + y)", out: "13" },
     { task: "Print the total of a list of numbers.", code: "print(sum([5, 10, 15]))", out: "30" },
+    { task: "Print a sorted version <b>without</b> changing the original list.", code: "marks = [3, 1, 2]\nprint(sorted(marks))\nprint(marks)", out: "[1, 2, 3]\n[3, 1, 2]" },
+    { task: "Sort a list in place, largest first.", code: "marks = [3, 1, 2]\nmarks.sort(reverse=True)\nprint(marks)", out: "[3, 2, 1]" },
+    { task: "Sort names ignoring capital letters.", code: "print(sorted([\"Rahul\", \"priya\"], key=str.lower))", out: "['priya', 'Rahul']" },
+    { task: "Join two lists into a <b>new</b> one, leaving both originals alone.", code: "a = [1, 2]\nb = [3]\nprint(a + b)\nprint(a)", out: "[1, 2, 3]\n[1, 2]" },
+    { task: "Count how many times a value appears in a tuple.", code: "print((5, 7, 5).count(5))", out: "2" },
+    { task: "Find the position of a value in a tuple.", code: "print((5, 7, 5).index(7))", out: "1" },
+    { task: "Remove the item at index 0 and print what was removed.", code: "nums = [10, 20, 30]\nprint(nums.pop(0))\nprint(nums)", out: "10\n[20, 30]" },
   ]},
 
   { t: "mistakes", items: [
@@ -606,6 +640,8 @@ const L5 = [
     { bad: "b = a\nb.append(4)   # a changed too", why: "<code>b = a</code> does not build a new list — both names point at the <b>same</b> list, so a change through one is visible through the other. This catches every beginner exactly once, and it never raises an error.", fix: "b = a[:]   # or list(a)" },
     { bad: "nums = (1, 2, 3)\nnums.append(4)", why: "A tuple is <b>immutable</b>, so it has no <code>append</code> at all — <code>AttributeError</code>. If the data needs to change, it should have been a list; if it should not change, that is the tuple doing its job.", fix: "nums = [1, 2, 3]\nnums.append(4)" },
     { bad: "a = [1, 2]\na.append([3, 4])   # expecting [1, 2, 3, 4]", why: "<code>append</code> adds its argument as <b>one item</b>, so you get <code>[1, 2, [3, 4]]</code> — a list nested inside a list. Later code then trips over an item that is not a number.", fix: "a.extend([3, 4])   # [1, 2, 3, 4]" },
+    { bad: "marks = marks.sort()", why: "<code>.sort()</code> rearranges the list <b>in place</b> and returns <code>None</code>, so this throws the sorted data away and leaves <code>marks</code> holding <code>None</code>. Nothing fails on this line — the crash comes later, somewhere that looks innocent.", fix: "marks.sort()          # or: marks = sorted(marks)" },
+    { bad: "nums.remove(2)   # meaning index 2", why: "<code>remove</code> deletes by <b>value</b>, <code>pop</code> deletes by <b>index</b>. On a list of numbers both calls are valid and silently do different things — the only symptom is the wrong item disappearing.", fix: "nums.pop(2)      # by index" },
   ]},
 
   { t: "debug", intro: "This takes a backup of a list before changing it, then prints the backup. The backup shows the change too, which defeats the whole point. Nothing crashes. Read it before opening the fix.", code: "original = [1, 2, 3]\nbackup = original\n\noriginal.append(4)\n\nprint(\"backup:\", backup)", symptom: "prints backup: [1, 2, 3, 4], but the backup was taken before the append", q: "The backup was made on line 2, before anything was added. So how did the 4 get into it?", fix: "original = [1, 2, 3]\nbackup = original[:]\n\noriginal.append(4)\n\nprint(\"backup:\", backup)", why: "<code>backup = original</code> never made a backup. It gave the one list a second name, so there was only ever one list to append to. <code>original[:]</code> copies the items into a genuinely new list, and only then does the word backup mean anything. This is the most expensive one-character-class mistake in Python: nothing errors, the code reads correctly, and the data quietly moves under you. Any time you plan to keep an <i>earlier</i> version of something, ask whether you copied it or just renamed it." },
@@ -616,6 +652,11 @@ const L5 = [
     "<code>[a:b]</code> includes <code>a</code>, excludes <code>b</code>, and returns a <b>new</b> list",
     "A tuple <code>()</code> cannot be changed — use it for values that belong together",
     "<code>b = a</code> is a second name, not a copy. Use <code>a[:]</code>",
+    "<code>sorted(x)</code> returns a new list; <code>x.sort()</code> changes <code>x</code> and returns <code>None</code>",
+    "<code>key=</code> sorts by a computed value — <code>key=str.lower</code>, <code>key=len</code>",
+    "<code>a + b</code> builds a new list; <code>a.extend(b)</code> grows <code>a</code>",
+    "<code>remove</code> deletes by value, <code>pop</code> deletes by index",
+    "A tuple has only two methods: <code>count</code> and <code>index</code>",
   ]},
 
   { t: "interview", items: [
@@ -794,7 +835,7 @@ const L8 = [
 
   { t: "h2", n: "2", text: "Slicing — take a piece" },
   { t: "p", html: "<code>s[start:stop:step]</code> gives you a section. Same rule you already know from <code>range()</code> and lists: <b>start included, stop excluded</b>. Leave a side blank to mean \"from the beginning\" or \"to the end\"." },
-  { t: "code", file: "slicing.py", code: "s = \"DATAMARG\"\nprint(s[0:4])\nprint(s[4:])\nprint(s[::2])\nprint(s[::-1])", output: "DATA\nMARG\nDTMR\nGRAMATAD" },
+  { t: "code", file: "slicing.py", code: "s = \"DATABASE\"\nprint(s[0:4])\nprint(s[4:])\nprint(s[::2])\nprint(s[::-1])", output: "DATA\nBASE\nDTBS\nESABATAD" },
   { t: "viz", name: "string-slicer" },
   { t: "p", html: "Drag the handles in that panel and watch which characters survive. Then try a start beyond the end of the string: slicing quietly returns an empty string rather than crashing, which is the one place Python is <i>more</i> forgiving than indexing." },
   { t: "think", q: "What does <code>s[::-1]</code> do, and what is it good for?", a: "It <b>reverses</b> the string — a step of <code>-1</code> walks backwards from the end.<br/><br/>It is the shortest reverse in the language, and it is how a palindrome check is written: <code>s == s[::-1]</code>. That one line is a genuine interview question, and it is just a slice." },
@@ -815,6 +856,17 @@ const L8 = [
   { t: "p", html: "Line 2 did the work and threw the answer away. Line 4 is the same call with the result kept. Python raises no error for line 2 — it is perfectly valid code that simply achieves nothing, which is what makes it hard to spot." },
   { t: "analogy", concept: "A string", real: "A train of lettered coaches", html: "A string is a train where each coach holds one character and has a fixed seat number — that is the index. A <b>slice</b> is uncoupling some coaches to make a shorter train, leaving the original standing. <b>Immutable</b> means you cannot repaint a coach: you can only build a new train. That is exactly why every string method hands you back a new string." },
 
+  { t: "h2", n: "6", text: "Escape characters — typing what you cannot type" },
+  { t: "p", html: "Some characters cannot go into a string directly. A quote of the same kind as the one you opened with would <b>end</b> the string, and a newline cannot be typed at all. A backslash changes the meaning of the character after it, and that pair is called an <b>escape sequence</b>." },
+  { t: "code", file: "escapes.py", code: "print(\"She said \\\"yes\\\"\")\nprint('It\\'s fine')\nprint(\"line one\\nline two\")\nprint(\"name\\tmarks\")\nprint(\"C:\\\\Users\\\\priya\")\nprint(r\"C:\\Users\\priya\")", output: "She said \"yes\"\nIt's fine\nline one\nline two\nname\tmarks\nC:\\Users\\priya\nC:\\Users\\priya" },
+  { t: "p", html: "The ones you will actually use: <code>\\n</code> newline, <code>\\t</code> tab, <code>\\\\</code> a real backslash, and <code>\\\"</code> or <code>\\'</code> for a quote. Note the other way out on line 2 — a string in single quotes can hold a double quote with no escape at all, and vice versa." },
+  { t: "note", variant: "warn", html: "The last two lines print the same thing by different routes. In an ordinary string a backslash starts an escape, so a Windows path like <code>\"C:\\name\"</code> silently becomes <code>C:</code> followed by a <b>newline</b> and <code>ame</code> — a file-not-found error that makes no sense when you read the code. Either double every backslash, or put <code>r</code> in front for a <b>raw string</b>, where a backslash is just a backslash. Raw strings are also why regex patterns are almost always written <code>r\"...\"</code>." },
+
+  { t: "h2", n: "7", text: "The string methods worth remembering" },
+  { t: "p", html: "Strings carry more methods than any other built-in type. These are the ones that turn up in real cleaning work — run the block once and you have met all of them." },
+  { t: "code", file: "strmethods.py", code: "s = \"  Priya Sharma  \"\n\nprint(s.strip())\nprint(s.strip().lower())\nprint(s.strip().upper())\nprint(s.strip().replace(\" \", \"_\"))\nprint(s.strip().split(\" \"))\nprint(\"-\".join([\"a\", \"b\", \"c\"]))\n\nprint(\"priya\".startswith(\"pr\"), \"priya\".endswith(\"ya\"))\nprint(\"priya\".find(\"i\"), \"priya\".count(\"a\"))\nprint(\"Priya\".title(), \"priya sharma\".capitalize())\nprint(\"42\".isdigit(), \"abc\".isalpha(), \"a1\".isalnum())\nprint(\"priya\".center(11, \"*\"))", output: "Priya Sharma\npriya sharma\nPRIYA SHARMA\nPriya_Sharma\n['Priya', 'Sharma']\na-b-c\nTrue True\n2 1\nPriya Priya sharma\nTrue True True\n***priya***" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> <code>.strip().lower()</code> chained together is the single most-typed line in data cleaning — it is what makes <code>\" Delhi \"</code> and <code>\"delhi\"</code> count as the same city. <code>.isdigit()</code> is how you check a field is numeric <b>before</b> calling <code>int()</code> on it, instead of catching the crash afterwards." },
+
   { t: "trace", intro: "A messy field being cleaned and split. Work out what each name holds once the line has run.", code: "raw = \"  Data Science  \"\nclean = raw.strip()\nwords = clean.split(\" \")\nfirst = words[0]\ncount = len(words)", steps: [
     { q: "After line 2, <code>clean</code> is", answer: "Data Science", why: "<code>strip()</code> removes whitespace from both ends only. The space between the two words is inside the text, so it stays." },
     { q: "After line 4, <code>first</code> is", answer: "Data", why: "<code>split(\" \")</code> produced <code>['Data', 'Science']</code>, and index 0 is the first piece. Note that <code>raw</code> is still the original messy string — none of this changed it." },
@@ -825,7 +877,7 @@ const L8 = [
     { task: "Print the first character of <code>Python</code>.", code: "print(\"Python\"[0])", out: "P" },
     { task: "Print the last character without using <code>len()</code>.", code: "print(\"Python\"[-1])", out: "n" },
     { task: "Print how many characters are in <code>Python</code>.", code: "print(len(\"Python\"))", out: "6" },
-    { task: "Print the first four characters of <code>DATAMARG</code>.", code: "print(\"DATAMARG\"[0:4])", out: "DATA" },
+    { task: "Print the first four characters of <code>DATABASE</code>.", code: "print(\"DATABASE\"[0:4])", out: "DATA" },
     { task: "Print <code>abc</code> reversed.", code: "print(\"abc\"[::-1])", out: "cba" },
     { task: "Print <code>data</code> in capitals.", code: "print(\"data\".upper())", out: "DATA" },
     { task: "Remove the spaces around <code>  hi  </code>.", code: "print(\"  hi  \".strip())", out: "hi" },
@@ -1048,6 +1100,12 @@ const L11 = [
   { t: "think", q: "If you can catch an error, should you always catch it?", a: "No — and this is the judgement the topic is really about.<br/><br/>Catch it when you know what to do instead: skip the bad row, use a default, retry. <b>Let it through</b> when you do not, because an error that reaches you is information, and one that is swallowed is a wrong answer with no warning attached.<br/><br/>A caught exception that returns a plausible-looking number is worse than a crash. The crash tells you where to look." },
   { t: "analogy", concept: "try / except", real: "A safety net under a trapeze", html: "The net does not stop the fall — it decides what happens after one. <code>try</code> is the part of the act where a fall is possible; <code>except</code> is the net, placed for the fall you actually expect. A bare <code>except</code> is a net stretched over the whole circus: it catches the trapeze artist, the audience, and the person who came to fix the lights, and nobody can tell what went wrong." },
 
+  { t: "h2", n: "5", text: "Your own exception types" },
+  { t: "p", html: "<code>raise ValueError(\"bad mark\")</code> works, but every caller then has to read the message to know what went wrong. Give the failure its own <b>class</b> and callers can catch exactly that one — and nothing else." },
+  { t: "code", file: "custom.py", code: "class MarksOutOfRange(ValueError):\n    \"\"\"A mark that is not between 0 and 100.\"\"\"\n\ndef check(mark):\n    if not 0 <= mark <= 100:\n        raise MarksOutOfRange(f\"{mark} is not a valid mark\")\n    return mark\n\ntry:\n    check(120)\nexcept MarksOutOfRange as e:\n    print(\"rejected:\", e)\nexcept ValueError:\n    print(\"some other value problem\")", output: "rejected: 120 is not a valid mark" },
+  { t: "note", variant: "tip", html: "Two decisions in that first line. <b>Inherit from something meaningful</b> — <code>MarksOutOfRange(ValueError)</code> means code that only knows about <code>ValueError</code> still catches it, so you break nobody. And <b>put the specific except first</b>: Python takes the first matching branch, so a <code>ValueError</code> block written above would swallow your own type before it was ever reached." },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> this is how a data pipeline stays debuggable. <code>except MarksOutOfRange</code> can log the row and continue, while a <code>TypeError</code> from a genuine coding bug still crashes loudly — which is exactly what you want. A bare <code>except Exception</code> treats both the same and hides real bugs for months." },
+
   { t: "trace", intro: "A parser that falls back to -1 on bad input. Work out what each name holds once the line has run.", code: "def parse(text):\n    try:\n        return int(text)\n    except ValueError:\n        return -1\n\na = parse(\"10\")\nb = parse(\"x\")\nc = a + b", steps: [
     { q: "After line 7, <code>a</code> is", answer: "10", why: "<code>int(\"10\")</code> succeeded, so the <code>return</code> inside <code>try</code> ran and the <code>except</code> was never reached." },
     { q: "After line 8, <code>b</code> is", answer: "-1", why: "<code>int(\"x\")</code> raised <code>ValueError</code>, so the <code>try</code> was abandoned at that point and the fallback returned instead." },
@@ -1131,6 +1189,11 @@ const L12 = [
   { t: "code", file: "missing.py", code: "try:\n    with open(\"nope.txt\") as f:\n        print(f.read())\nexcept FileNotFoundError:\n    print(\"no such file - carrying on with a default\")\n\nimport os\nprint(os.path.exists(\"nope.txt\"))", output: "no such file - carrying on with a default\nFalse" },
   { t: "code", file: "exclusive.py", code: "with open(\"fresh.txt\", \"w\") as f:\n    f.write(\"data\\n\")\n\ntry:\n    with open(\"fresh.txt\", \"x\") as f:   # x = create, refuse to overwrite\n        f.write(\"data\\n\")\nexcept FileExistsError:\n    print(\"refused - the file is already there\")", output: "refused - the file is already there" },
   { t: "note", variant: "tip", html: "<b>These snippets do run in the practice editor.</b> The browser gives Python a small in-memory filesystem, so <code>open()</code>, <code>write()</code> and <code>read()</code> all behave exactly as they do on your machine — but the files live at <code>/home/pyodide</code> and vanish when you close the tab. Real, permanent files need Python on your own computer." },
+
+  { t: "h2", n: "5", text: "Deleting a file" },
+  { t: "p", html: "Writing and reading covered, one operation is left: removing. <code>Path.unlink()</code> deletes a file, and <code>os.remove()</code> is the older spelling of the same thing." },
+  { t: "code", file: "deleting.py", code: "from pathlib import Path\n\np = Path(\"scratch.txt\")\np.write_text(\"temporary\")\nprint(p.exists())\n\np.unlink()                    # delete it\nprint(p.exists())\n\np.unlink(missing_ok=True)     # deleting again: no complaint\nprint(\"done\")", output: "True\nFalse\ndone" },
+  { t: "note", variant: "warn", html: "Without <code>missing_ok=True</code>, deleting a file that is not there raises <code>FileNotFoundError</code> — which is why cleanup code so often dies on its second run. And there is no recycle bin here: a file removed this way is <b>gone</b>. Check the path you built before you pass it to <code>unlink</code>, especially when the name came from a variable." },
 
   { t: "trace", intro: "Three writes, then two reads. Work out each value before you open it.", code: "with open(\"notes.txt\", \"w\") as f:\n    f.write(\"alpha\\n\")\n\nwith open(\"notes.txt\", \"w\") as f:\n    f.write(\"beta\\n\")\n\nwith open(\"notes.txt\", \"a\") as f:\n    f.write(\"gamma\\n\")\n\nf = open(\"notes.txt\")\nrows = f.read().splitlines()\ncount = len(rows)\nagain = f.read()\nleft = len(again)\nf.close()\n\nwith open(\"notes.txt\", \"a\") as f:\n    f.write(\"delta\\n\")\n\ntotal = len(open(\"notes.txt\").read().splitlines())", steps: [
     { q: "After line 11, <code>rows</code> is", answer: "['beta', 'gamma']", accept: ["['beta','gamma']", "[\"beta\", \"gamma\"]", "[\"beta\",\"gamma\"]"], why: "\"alpha\" never survives. The second <code>open(..., \"w\")</code> on line 4 emptied the file before writing \"beta\", and line 7 opened in <code>\"a\"</code>, which adds without wiping." },
@@ -1216,6 +1279,12 @@ const L13 = [
   { t: "note", variant: "tip", html: "<b>The four commands worth memorising</b> (these run in the terminal, not in a <code>.py</code> file):<pre>python -m venv .venv          # create the environment\n.venv\\Scripts\\activate        # Windows  (mac/Linux: source .venv/bin/activate)\npip install pandas            # install into THIS project only\npip freeze > requirements.txt # record exactly what you installed</pre>" },
   { t: "note", variant: "key", html: "💼 <b>On the job:</b> without a venv, every project shares one global set of packages — so upgrading pandas for a new project silently breaks the one you shipped last month, and there is no record of which versions ever worked. <code>requirements.txt</code> is what lets a teammate reproduce your environment exactly, and it is the first thing an interviewer looks for in a GitHub repo." },
 
+  { t: "h2", n: "5", text: "Packages — a folder full of modules" },
+  { t: "p", html: "One file is a module. A <b>folder</b> of modules is a package, and the dots in <code>from shop.cart.total import add</code> are folder names. The <code>__init__.py</code> file is what marks a folder as importable — it can be completely empty, and usually is." },
+  { t: "code", file: "packages.py", code: "import os, sys\n\n# build a small package on disk\nos.makedirs(\"shop/cart\", exist_ok=True)\nopen(\"shop/__init__.py\", \"w\").close()\nopen(\"shop/cart/__init__.py\", \"w\").close()\nwith open(\"shop/cart/total.py\", \"w\") as f:\n    f.write(\"def add(a, b):\\n    return a + b\\n\")\n\nsys.path.insert(0, \".\")\nfrom shop.cart.total import add\n\nprint(add(2, 3))", output: "5" },
+  { t: "p", html: "The layout that produced it:<br/><code>shop/__init__.py</code><br/><code>shop/cart/__init__.py</code><br/><code>shop/cart/total.py</code> ← holds <code>add()</code><br/><br/>So <code>shop.cart.total</code> is simply the path with slashes swapped for dots, and the <code>.py</code> dropped." },
+  { t: "note", variant: "tip", html: "Modern Python can import a folder without <code>__init__.py</code>, so beginners often skip it and wonder why things work at home and break elsewhere. Keep the file: it makes the folder a <b>regular package</b>, which is what tooling and packaging expect, and it gives you a place to expose a tidy public API — putting <code>from .total import add</code> inside it lets users write <code>from shop.cart import add</code>." },
+
   { t: "trace", intro: "Two imports of the same module, done two different ways. Work out each value.", code: "import math\n\na = math.sqrt(16)\nb = math.floor(3.9)\n\nfrom math import pi\n\nc = round(pi, 2)\nd = \"math\" in dir()\ne = \"pi\" in dir()\nf = \"sqrt\" in dir()", steps: [
     { q: "After line 3, <code>a</code> is", answer: "4.0", why: "<code>math.sqrt</code> always returns a float, even for a perfect square — so 4.0, not 4." },
     { q: "After line 8, <code>c</code> is", answer: "3.14", why: "<code>from math import pi</code> bound the bare name <code>pi</code>, so it can be used without a prefix." },
@@ -1295,6 +1364,12 @@ const L14 = [
   { t: "h2", n: "4", text: "Comparing decimals safely" },
   { t: "code", file: "compare.py", code: "total = 0.1 + 0.2\n\nprint(total == 0.3)                 # False — do not do this\nprint(round(total, 2) == 0.3)       # fine for a fixed number of places\n\nimport math\nprint(math.isclose(total, 0.3))     # the general answer", output: "False\nTrue\nTrue" },
   { t: "note", variant: "tip", html: "<code>math.isclose</code> is the one to reach for when you do not know the scale in advance — it compares relative to the size of the numbers instead of a fixed number of decimals." },
+
+  { t: "h2", n: "5", text: "The random module — and making it repeatable" },
+  { t: "p", html: "Random numbers drive sampling, shuffling and test data. The checks below are written as comparisons on purpose: the values differ every run, so what can be asserted is the <b>range</b>, not the number." },
+  { t: "code", file: "randomness.py", code: "import random\n\nrandom.seed(42)\n\nprint(1 <= random.randint(1, 6) <= 6)\nprint(0.0 <= random.random() < 1.0)\nprint(random.choice([\"a\", \"b\", \"c\"]) in [\"a\", \"b\", \"c\"])\n\ndeck = [1, 2, 3, 4, 5]\nrandom.shuffle(deck)          # in place, like list.sort()\nprint(sorted(deck))\n\nprint(len(random.sample(range(100), 5)))", output: "True\nTrue\nTrue\n[1, 2, 3, 4, 5]\n5" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> <code>random.seed(42)</code> is the most important line there. It fixes the starting point, so the \"random\" sequence is identical on every run and on every machine — which is what makes a train/test split, a shuffled dataset or a failing test <b>reproducible</b>. Without a seed, a colleague running your notebook gets different numbers and cannot confirm your result. Seed for work you need to defend; leave it out for a game." },
+  { t: "note", variant: "warn", html: "<code>random.shuffle(deck)</code> rearranges the list in place and returns <code>None</code> — the same trap as <code>.sort()</code>. <code>deck = random.shuffle(deck)</code> throws your deck away. And this module is fine for sampling and simulations but <b>not</b> for passwords or tokens; use the <code>secrets</code> module for anything security-related." },
 
   { t: "trace", intro: "Work out each value. Two of these are the traps.", code: "a = 7 / 2\nb = 7 // 2\nc = -7 // 2\nd = round(2.5)\ne = 0.1 + 0.2 == 0.3", steps: [
     { q: "After line 2, <code>b</code> is", answer: "3", why: "Floor division throws the decimal away and hands back an int — 3, not 3.5." },
@@ -2749,6 +2824,11 @@ const L32 = [
   { t: "code", file: "reduce.py", code: "from functools import reduce\n\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))     # 1*2*3*4\nprint(reduce(lambda a, b: a + b, [1, 2, 3], 100))  # start from 100", output: "24\n106" },
   { t: "analogy", concept: "reduce", real: "Folding a strip of paper", html: "<code>reduce</code> is folding a long strip of paper down to one square. You fold the first two sections together, then fold that result into the third, then into the fourth — each fold combines \"everything so far\" with the next piece, until one square remains. The function you pass is the fold; the optional starting value is the square you begin with. <code>sum</code> and <code>max</code> are just named folds you use so often they got their own name." },
 
+  { t: "h2", n: "5", text: "array — a list that holds one type only" },
+  { t: "p", html: "A Python list can hold anything, and pays for it: every item is a full object with its own header. The <code>array</code> module stores raw numbers of a single declared type instead, so it uses far less memory for the same values." },
+  { t: "code", file: "arraymod.py", code: "from array import array\n\na = array(\"i\", [1, 2, 3])   # \"i\" = signed int, every item\na.append(4)\n\nprint(a)\nprint(a[0], len(a))\nprint(list(a))\n\ntry:\n    a.append(\"x\")\nexcept TypeError as e:\n    print(\"rejected:\", type(e).__name__)", output: "array('i', [1, 2, 3, 4])\n1 4\n[1, 2, 3, 4]\nrejected: TypeError" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> you will almost never reach for this module — but the idea behind it is the one that matters. \"All items are the same type, stored as raw values\" is exactly what a <b>NumPy array</b> does, and it is why NumPy is fast where a list is slow. This is the standard library's small version of the same bargain: give up mixed types, get memory and speed back. When you meet <code>np.array</code> in the pandas track, you have already seen the trade." },
+
   { t: "trace", intro: "Counter, defaultdict, itertools and reduce. Work out each value.", code: "from collections import Counter\nfrom itertools import accumulate\nfrom functools import reduce\n\nc = Counter([\"x\", \"y\", \"x\", \"x\", \"z\"])\na = c[\"x\"]\nb = c[\"q\"]\nd = c.most_common(1)\ne = list(accumulate([2, 2, 2]))\nf = reduce(lambda p, n: p + n, [10, 20, 30])", steps: [
     { q: "After line 6, <code>a</code> is", answer: "3", why: "x appears three times in the list, and <code>c[\"x\"]</code> reads its count." },
     { q: "After line 7, <code>b</code> is", answer: "0", why: "q is not in the list, and a Counter returns 0 for a missing key rather than raising KeyError." },
@@ -3276,6 +3356,190 @@ const L38 = [
   ]},
 ];
 
+const L39 = [
+  { t: "objectives", items: [
+    "Combine two sets with union, intersection and difference — and pick the right one",
+    "Know why <code>a - b</code> and <code>b - a</code> are different questions",
+    "Use a <code>frozenset</code> where an ordinary set is not allowed",
+    "Read and update a dictionary that has dictionaries inside it",
+    "Copy a dictionary properly — and know when <code>.copy()</code> is not enough",
+  ]},
+  { t: "hook", q: "Two lists: students who submitted assignment 1, and students who submitted assignment 2. Who submitted <b>both</b>? Who submitted the first but not the second?", why: "You could write a loop with an <code>if name in other</code> inside it. On fifty thousand students that loop is slow, and — more importantly — it is easy to write the comparison backwards and never notice. Sets answer each of those questions with <b>one operator</b>, and they do it in about the time it takes to read the data once." },
+  { t: "think", q: "<code>{1, 2, 3} &amp; {2, 3, 4}</code> gives <code>{2, 3}</code>. Why is the answer a set rather than a list?", a: "Because of what the question means. \"Which items are in both?\" can never produce a duplicate — an item is either in both or it is not — and there is no sensible order to put the answer in.<br/><br/>That is the general rule for these operators: every one of them takes two sets and hands back a <b>new set</b>. Neither of the originals is touched, which is why you can chain them without making a mess." },
+
+  { t: "h2", n: "1", text: "The four questions sets can answer" },
+  { t: "def", term: "Set operation", en: "A set operation combines two sets into a new set: union, intersection, difference or symmetric difference.", hi: "In plain words — <b>union</b> is \"in either\", <b>intersection</b> is \"in both\", <b>difference</b> is \"in this one but not that one\", and <b>symmetric difference</b> is \"in exactly one of them\"." },
+  { t: "p", html: "Each one has a short operator. Read them out loud once and they stop looking like punctuation: <code>|</code> is or, <code>&amp;</code> is and, <code>-</code> is minus, <code>^</code> is exactly-one." },
+  { t: "code", file: "setops.py", code: "a1 = {\"priya\", \"rahul\", \"sana\", \"imran\"}\na2 = {\"rahul\", \"sana\", \"vikas\"}\n\nprint(sorted(a1 | a2))   # submitted either one\nprint(sorted(a1 & a2))   # submitted both\nprint(sorted(a1 - a2))   # did 1, skipped 2\nprint(sorted(a1 ^ a2))   # did exactly one of them", output: "['imran', 'priya', 'rahul', 'sana', 'vikas']\n['rahul', 'sana']\n['imran', 'priya']\n['imran', 'priya', 'vikas']" },
+  { t: "note", variant: "tip", html: "Notice every <code>print</code> here is wrapped in <code>sorted()</code>. A set has <b>no order</b>, so printing one directly gives you an arrangement you must never rely on — it can differ between runs and between Python versions. Sort it the moment a human is going to read it." },
+  { t: "note", variant: "warn", html: "<code>a - b</code> is <b>not</b> the same as <code>b - a</code>. Union and intersection do not care which side you write first; difference does. In the code above, <code>a1 - a2</code> is the two who skipped assignment 2, while <code>a2 - a1</code> would be Vikas alone. Getting this backwards produces a perfectly clean-looking wrong answer." },
+
+  { t: "h2", n: "2", text: "Operator or method — and the difference that bites" },
+  { t: "p", html: "Every operator also has a method form: <code>|</code> is <code>.union()</code>, <code>&amp;</code> is <code>.intersection()</code>, <code>-</code> is <code>.difference()</code>, <code>^</code> is <code>.symmetric_difference()</code>. They are not quite interchangeable — the <b>operator demands a set on both sides</b>, while the <b>method accepts any iterable</b>." },
+  { t: "code", file: "opvsmethod.py", code: "a = {1, 2, 3}\nb = [2, 3, 4]              # a LIST, not a set\n\nprint(sorted(a.intersection(b)))   # method: fine with a list\nprint(sorted(a & set(b)))          # operator: convert it first\n\nseen = {1, 2}\nseen.update([2, 3, 4])     # add many at once, duplicates ignored\nseen.discard(99)           # not there? stays silent\nprint(sorted(seen))", output: "[2, 3]\n[2, 3]\n[1, 2, 3, 4]" },
+  { t: "note", variant: "tip", html: "<code>.discard(x)</code> removes <code>x</code> if it is there and does nothing if it is not. <code>.remove(x)</code> does the same thing but raises <code>KeyError</code> when the item is absent. Use <code>discard</code> unless you genuinely want to be told — which, when cleaning real data, you usually do not." },
+
+  { t: "h2", n: "3", text: "frozenset — a set that can be a key" },
+  { t: "def", term: "frozenset", en: "A frozenset is an immutable set: it supports every read operation a set does, but nothing that would change it.", hi: "Because it cannot change, its hash is stable — and that is the entire point. A frozenset can be a dictionary key, or an item inside another set. An ordinary set can be neither." },
+  { t: "p", html: "This is the same rule you already met with lists and tuples: mutable things cannot be keys. Here it matters when the <b>thing you want to count is itself a group</b> — which subject combinations students pick, which tags appear together." },
+  { t: "code", file: "frozen.py", code: "pair = frozenset({\"maths\", \"physics\"})\ncounts = {pair: 12}\n\n# order does not matter — a set has none, so neither does its hash\nprint(counts[frozenset({\"physics\", \"maths\"})])\nprint(len(pair))\nprint(sorted(pair | {\"chemistry\"}))", output: "12\n2\n['chemistry', 'maths', 'physics']" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> counting which combinations occur together — subjects, tags, products bought in the same order — is exactly this. The key insight is on line 5: <code>{\"maths\", \"physics\"}</code> and <code>{\"physics\", \"maths\"}</code> are the <b>same key</b>, because a set has no order. Try that with a tuple and you get two separate entries, and a count that is quietly split in half." },
+  { t: "viz", name: "collection-bench" },
+  { t: "p", html: "Put the same value into all three panels and watch them disagree — the list keeps every copy, the set keeps one, the dictionary keeps one key with the <b>last</b> value. Nothing errors anywhere. That silence is the reason this is worth playing with rather than just reading." },
+
+  { t: "h2", n: "4", text: "Dictionaries inside dictionaries" },
+  { t: "p", html: "A value can be anything — including another dictionary. This is how almost all real data arrives: an API response, a JSON file, a config. You reach in by putting the brackets one after another." },
+  { t: "code", file: "nested.py", code: "school = {\n    \"priya\": {\"maths\": 88, \"physics\": 74},\n    \"rahul\": {\"maths\": 61, \"physics\": 90},\n}\n\nprint(school[\"priya\"][\"maths\"])\n\nschool[\"priya\"][\"chemistry\"] = 79\nprint(sorted(school[\"priya\"]))\n\n# a student who is not there, without a crash\nprint(school.get(\"sana\", {}).get(\"maths\", 0))", output: "88\n['chemistry', 'maths', 'physics']\n0" },
+  { t: "note", variant: "warn", html: "Read the last line again. <code>school[\"sana\"][\"maths\"]</code> would raise <code>KeyError</code> on the <b>first</b> bracket and never reach the second. <code>.get(\"sana\", {})</code> hands back an empty dictionary when the student is missing, and <code>.get(\"maths\", 0)</code> then safely returns 0 from it. Chaining <code>.get</code> with <code>{}</code> as the default is the standard way to walk nested data that might not be complete." },
+
+  { t: "h2", n: "5", text: "Copying — the shallow one is not enough" },
+  { t: "p", html: "You already know <code>b = a</code> is a second name, not a copy. For dictionaries there is a second, subtler version of the same trap: <code>.copy()</code> makes a real new outer dictionary, but the values inside it are still the <b>same objects</b>. If those values are themselves dictionaries, you have not copied them at all." },
+  { t: "code", file: "copying.py", code: "import copy\n\noriginal = {\"priya\": {\"maths\": 88}}\n\nshallow = original.copy()\nshallow[\"priya\"][\"maths\"] = 0\nprint(original[\"priya\"][\"maths\"])   # changed!\n\ndeep = copy.deepcopy(original)\ndeep[\"priya\"][\"maths\"] = 100\nprint(original[\"priya\"][\"maths\"])   # untouched", output: "0\n0" },
+  { t: "note", variant: "warn", html: "Both lines print <code>0</code>, and that is the whole lesson. The first <code>0</code> is damage: writing through <code>shallow</code> reached into the original. The second <code>0</code> is proof of safety: after <code>deepcopy</code>, writing 100 into <code>deep</code> left the original at the 0 it had been dragged down to. <b>Flat dictionary → <code>.copy()</code> is fine. Anything nested → <code>copy.deepcopy()</code>.</b>" },
+  { t: "analogy", concept: "Union, intersection, difference", real: "Two WhatsApp groups", html: "You are in a <b>family</b> group and an <b>office</b> group. Everyone across both groups is the <b>union</b>. Your cousin who also works with you is in the <b>intersection</b>. Family members who are not colleagues are <b>family − office</b> — and note that colleagues who are not family is a completely different list, which is exactly why difference has a direction and union does not." },
+
+  { t: "h2", n: "6", text: "The methods worth remembering" },
+  { t: "p", html: "You do not need to memorise every method. These are the ones that come up in real work — run this block once and you have seen all of them behave." },
+  { t: "code", file: "setmethods.py", code: "s = {3, 1, 2}\ns.add(4)                  # one item\ns.update([5, 6])          # many items\ns.discard(99)             # absent? no error\nprint(sorted(s))\n\nprint(s.issubset({1, 2, 3, 4, 5, 6, 7}))\nprint(s.isdisjoint({40, 50}))\nprint(len(s), min(s), max(s))\n\ns.clear()\nprint(s)", output: "[1, 2, 3, 4, 5, 6]\nTrue\nTrue\n6 1 6\nset()" },
+  { t: "code", file: "dictmethods.py", code: "d = {\"a\": 1, \"b\": 2}\n\nprint(list(d.keys()))\nprint(list(d.values()))\nprint(list(d.items())[0])\n\nprint(d.pop(\"a\"))          # remove and hand it back\nd.setdefault(\"c\", 3)       # add only if the key is absent\nprint(d)\nprint(d.popitem())         # remove the last inserted pair\n\nd.clear()\nprint(d)", output: "['a', 'b']\n[1, 2]\n('a', 1)\n1\n{'b': 2, 'c': 3}\n('c', 3)\n{}" },
+  { t: "note", variant: "tip", html: "<code>setdefault</code> is the one people miss. <code>d.setdefault(k, [])</code> gives you the existing list for <code>k</code>, or installs a fresh empty one and gives you that — which turns \"group these rows by key\" into two lines instead of an <code>if k not in d</code> dance." },
+
+  { t: "trace", intro: "Two sets and the four operators. Work out each value before you open the answer — and watch line 7, which changes a set in place rather than returning a new one. The counts are pulled out into their own names on purpose: a set has no reliable order, so its printout is never the thing to be tested on.", code: "a = {1, 2, 3}\nb = {3, 4}\nboth = a & b\neither = a | b\nonly_a = a - b\nn = len(only_a)\na.update(b)\nsize = len(a)", steps: [
+    { q: "After line 3, <code>both</code> is", answer: "{3}", accept: ["3", "{ 3 }"], why: "Only 3 appears in both sets. Everything else is in one or the other, so intersection drops it. This one is safe to ask by its printout because a single item has no order to get wrong." },
+    { q: "After line 6, <code>n</code> is", answer: "2", why: "<code>a - b</code> is 1 and 2 — the items of <code>a</code> that are not in <code>b</code>. The 3 is removed because it <i>is</i> in <code>b</code>, and 4 never appears because it was never in <code>a</code> to begin with." },
+    { q: "After line 8, <code>size</code> is", answer: "4", why: "<code>update</code> on line 7 is the one operation here that <b>modifies <code>a</code> itself</b> rather than returning something new — <code>a</code> becomes {1, 2, 3, 4}, and the 3 is not added twice. Note what this does <i>not</i> do: <code>only_a</code> and <code>n</code> were computed on lines 5 and 6 and still hold their old values. An in-place change cannot reach backwards into results that were already built." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it before opening the answer.", items: [
+    { task: "Print the items common to two sets, sorted.", code: "print(sorted({1, 2, 3} & {2, 3, 4}))", out: "[2, 3]" },
+    { task: "Print everything in either set, sorted.", code: "print(sorted({1, 2} | {2, 3}))", out: "[1, 2, 3]" },
+    { task: "Print what is in the first set but not the second.", code: "print(sorted({1, 2, 3} - {3}))", out: "[1, 2]" },
+    { task: "Print the items in exactly one of the two sets.", code: "print(sorted({1, 2} ^ {2, 3}))", out: "[1, 3]" },
+    { task: "Intersect a set with a <b>list</b>, without converting the list yourself.", code: "print(sorted({1, 2, 3}.intersection([2, 3, 4])))", out: "[2, 3]" },
+    { task: "Add several items to a set at once.", code: "s = {1}\ns.update([2, 3])\nprint(sorted(s))", out: "[1, 2, 3]" },
+    { task: "Remove an item that might not be there, without crashing.", code: "s = {1}\ns.discard(9)\nprint(sorted(s))", out: "[1]" },
+    { task: "Use a frozenset as a dictionary key, then read it back in the other order.", code: "d = {frozenset({\"a\", \"b\"}): 5}\nprint(d[frozenset({\"b\", \"a\"})])", out: "5" },
+    { task: "Read a value two levels deep.", code: "d = {\"p\": {\"m\": 88}}\nprint(d[\"p\"][\"m\"])", out: "88" },
+    { task: "Read a missing nested key without crashing.", code: "d = {\"p\": {\"m\": 88}}\nprint(d.get(\"x\", {}).get(\"m\", 0))", out: "0" },
+    { task: "Copy a nested dictionary so the inner one is genuinely independent.", code: "import copy\na = {\"p\": {\"m\": 1}}\nb = copy.deepcopy(a)\nb[\"p\"][\"m\"] = 9\nprint(a[\"p\"][\"m\"])", out: "1" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "{1, 2} & [2, 3]", why: "The operator needs a <b>set on both sides</b> — against a list it raises <code>TypeError: unsupported operand type(s) for &amp;</code>. The method form has no such restriction, which is the reason it exists.", fix: "{1, 2}.intersection([2, 3])" },
+    { bad: "s.remove(9)   # 9 may not be there", why: "<code>remove</code> raises <code>KeyError</code> when the item is absent, so a cleaning routine dies on the first value that was already clean. <code>discard</code> does the identical job and stays quiet.", fix: "s.discard(9)" },
+    { bad: 'counts = {{"maths", "physics"}: 12}', why: "A set is mutable, so it cannot be hashed and cannot be a key — <code>TypeError: unhashable type: 'set'</code>. Freeze it and the problem disappears, while the order-independence you wanted is kept.", fix: 'counts = {frozenset({"maths", "physics"}): 12}' },
+    { bad: "backup = settings.copy()\nbackup[\"db\"][\"host\"] = \"test\"", why: "<code>.copy()</code> duplicated the outer dictionary only. <code>backup[\"db\"]</code> and <code>settings[\"db\"]</code> are still the <b>same</b> inner dictionary, so the production host just changed. Nothing errors — this is found later, in the wrong place.", fix: "import copy\nbackup = copy.deepcopy(settings)" },
+  ]},
+
+  { t: "debug", intro: "This is meant to list the students who have <b>not</b> submitted assignment 2, so they can be chased. It runs cleanly and prints the wrong person. Read it before opening the fix.", code: "submitted_1 = {\"priya\", \"rahul\", \"sana\"}\nsubmitted_2 = {\"rahul\", \"sana\", \"vikas\"}\n\nmissing = submitted_2 - submitted_1\n\nprint(\"chase:\", sorted(missing))", symptom: "prints chase: ['vikas'] — but Vikas is the one person who DID submit assignment 2", q: "Vikas appears in <code>submitted_2</code>. So how did he end up on the list of people who did not submit it?", fix: "submitted_1 = {\"priya\", \"rahul\", \"sana\"}\nsubmitted_2 = {\"rahul\", \"sana\", \"vikas\"}\n\nmissing = submitted_1 - submitted_2\n\nprint(\"chase:\", sorted(missing))", why: "The two operands were the right way round for a <i>different</i> question. <code>submitted_2 - submitted_1</code> asks \"who submitted 2 but not 1?\" — that is Vikas, and the code answered it perfectly. The question actually being asked was \"who submitted 1 but not 2?\", which is <code>submitted_1 - submitted_2</code>, and the answer is Priya.<br/><br/>This is worth slowing down for because there is no error to catch it. Union and intersection read the same in either direction, so it is easy to assume difference does too. Whenever you write <code>-</code> between two sets, say the sentence out loud: <b>\"in the left one, not in the right one.\"</b> If that is not the question you meant, swap them." },
+
+  { t: "recap", items: [
+    "<code>|</code> in either, <code>&amp;</code> in both, <code>-</code> in the left but not the right, <code>^</code> in exactly one",
+    "<code>a - b</code> is not <code>b - a</code> — difference has a direction, and no error tells you when it is backwards",
+    "Operators need sets on both sides; <code>.union()</code>, <code>.intersection()</code> and friends accept any iterable",
+    "<code>.discard()</code> is the safe remove; <code>.remove()</code> raises <code>KeyError</code>",
+    "A <code>frozenset</code> cannot change, so it can be a dictionary key or sit inside another set",
+    "<code>d.copy()</code> copies the outer dictionary only — nested values are shared; use <code>copy.deepcopy()</code>",
+    "<code>d.get(k, {}).get(k2, default)</code> walks two levels without crashing on a missing branch",
+    "Print a set with <code>sorted()</code> — a set has no order you can rely on",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between <code>|</code> and <code>&amp;</code> on two sets?", a: "<code>|</code> is <b>union</b> — everything that appears in either set, each item once. <code>&amp;</code> is <b>intersection</b> — only the items present in both. Both return a new set and leave the originals alone." },
+    { level: "beginner", q: "<code>.remove()</code> or <code>.discard()</code>?", a: "They both delete an item. <code>.remove(x)</code> raises <code>KeyError</code> if <code>x</code> is not in the set; <code>.discard(x)</code> does nothing. Use <code>discard</code> when the item's absence is normal, and <code>remove</code> when its absence means a real bug you want to hear about." },
+    { level: "intermediate", q: "Why can a <code>frozenset</code> be a dictionary key when a <code>set</code> cannot?", a: "Keys must be hashable, and a hash has to stay stable while the key is in use. A set can be changed after it is stored, which would move it to a slot nothing can compute its way back to — so Python refuses with <code>TypeError: unhashable type: 'set'</code>. A frozenset cannot change, so its hash is fixed and it is allowed. It is the same rule that lets a tuple be a key but not a list." },
+    { level: "intermediate", q: "What does <code>d.copy()</code> actually copy?", a: "The outer dictionary only — a <b>shallow copy</b>. The new dictionary has its own key-to-value mapping, but the values are the same objects as before. For a flat dictionary of numbers or strings that is genuinely a copy; for one containing lists or dictionaries, writing through the copy still reaches the original. <code>copy.deepcopy()</code> duplicates the whole tree." },
+    { level: "advanced", q: "Why does <code>a.intersection(b)</code> work when <code>b</code> is a list, but <code>a &amp; b</code> does not?", a: "The operator is implemented by <code>set.__and__</code>, which is deliberately strict: it returns <code>NotImplemented</code> for anything that is not a set, and Python then raises <code>TypeError</code>. The method has no such restriction — it iterates whatever you give it. The strictness is intentional rather than an oversight: <code>&amp;</code> also means bitwise-and, so silently accepting any iterable would make a genuine type error read as working code. If you want the operator, convert first with <code>set(b)</code>." },
+  ]},
+];
+
+const L40 = [
+  { t: "objectives", items: [
+    "Tell a class attribute from an instance attribute, and know which one you are reading",
+    "Avoid the shared mutable class attribute — the bug that leaks one user's data into another's",
+    "Inherit from more than one class, and predict which parent wins",
+    "Read a class's MRO instead of guessing it",
+    "Nest a class inside another when the inner one has no life of its own",
+  ]},
+  { t: "hook", q: "A shopping cart class stores its items in a list. Two customers open the site, one adds a laptop — and the other one sees it in <b>their</b> cart. Nothing crashed. What happened?", why: "One line was written in the wrong place: the list was defined on the <b>class</b> instead of inside <code>__init__</code>. So there was never one list per customer — there was one list, full stop, shared by every cart the program will ever create. This is a real bug that has shipped to production in real companies, and by the end of this lesson you will spot it on sight." },
+  { t: "think", q: "<code>a.school</code> works even though <code>__init__</code> never set <code>self.school</code>. Where is Python finding it?", a: "It looks on the <b>object</b> first. Not finding it there, it looks on the object's <b>class</b> — and that is where <code>school</code> lives.<br/><br/>That two-step search explains everything in this lesson. Reading falls through to the class; <b>writing does not</b>. <code>a.school = \"x\"</code> never touches the class — it creates a new attribute on <code>a</code> that hides the class one from then on, for that object only." },
+
+  { t: "h2", n: "1", text: "Class attributes and instance attributes" },
+  { t: "def", term: "Class attribute", en: "A class attribute is defined in the class body and belongs to the class itself, so every instance shares the one value.", hi: "An <b>instance</b> attribute is created with <code>self.x = ...</code> and belongs to that one object. Reading falls back from instance to class; writing always lands on whichever one you named." },
+  { t: "p", html: "Put something in the class body and it is shared. Put it in <code>__init__</code> with <code>self.</code> and every object gets its own." },
+  { t: "code", file: "attrs.py", code: "class Student:\n    school = \"Etudo Public\"      # class attribute — shared\n\n    def __init__(self, name):\n        self.name = name            # instance attribute — one per object\n\na = Student(\"Priya\")\nb = Student(\"Rahul\")\n\nprint(a.school, \"|\", b.school)\n\na.school = \"Other School\"   # makes an attribute on `a` only\nprint(a.school, \"|\", b.school)\n\nStudent.school = \"Renamed\"  # changes the class attribute itself\nprint(a.school, \"|\", b.school)", output: "Etudo Public | Etudo Public\nOther School | Etudo Public\nOther School | Renamed" },
+  { t: "note", variant: "key", html: "Read the last line carefully. <code>b</code> picked up the rename because it still falls through to the class. <code>a</code> did <b>not</b> — it has had its own <code>school</code> since the middle line, and its own value always wins. One assignment quietly changed which of the two rules applies to that object." },
+  { t: "viz", name: "object-inspector" },
+  { t: "p", html: "Add an attribute in that panel and watch where it lands. What you are looking for is the moment an object stops sharing and starts owning — because from the outside, <code>a.school</code> reads identically either way." },
+
+  { t: "h2", n: "2", text: "The mutable class attribute — the bug from the hook" },
+  { t: "p", html: "The rule above has a nasty edge. Assigning to <code>self.x</code> is a write, so it makes an instance attribute — but <code>self.items.append(...)</code> is <b>not a write to <code>self.items</code></b>. It reads the attribute, finds the class's list, and modifies that one list in place." },
+  { t: "code", file: "shared.py", code: "class Cart:\n    items = []                  # WRONG: one list for every cart ever\n\n    def add(self, x):\n        self.items.append(x)    # reads the class list, appends to it\n\nc1, c2 = Cart(), Cart()\nc1.add(\"laptop\")\nprint(\"c2 sees:\", c2.items)\n\nclass CartFixed:\n    def __init__(self):\n        self.items = []         # a fresh list per object\n\n    def add(self, x):\n        self.items.append(x)\n\nd1, d2 = CartFixed(), CartFixed()\nd1.add(\"laptop\")\nprint(\"d2 sees:\", d2.items)", output: "c2 sees: ['laptop']\nd2 sees: []" },
+  { t: "note", variant: "warn", html: "Rule of thumb worth memorising: <b>a class attribute may hold a constant, never a container you intend to fill.</b> <code>tax_rate = 0.18</code> is fine — numbers and strings are immutable, so nobody can modify one in place. <code>items = []</code>, <code>rows = {}</code> and <code>seen = set()</code> belong in <code>__init__</code>, always." },
+
+  { t: "h2", n: "3", text: "Inheriting from more than one class" },
+  { t: "p", html: "A class may list several parents. It gets the methods of all of them — and when two parents define the <b>same</b> method, the one written <b>first</b> wins." },
+  { t: "code", file: "multiple.py", code: "class Reader:\n    def describe(self):\n        return \"can read\"\n\nclass Writer:\n    def describe(self):\n        return \"can write\"\n\nclass Editor(Reader, Writer):\n    pass\n\nprint(Editor().describe())\nprint(Editor.__mro__[1].__name__)", output: "can read\nReader" },
+  { t: "note", variant: "tip", html: "Swap the parents to <code>Editor(Writer, Reader)</code> and the answer becomes \"can write\". Nothing else changes. That is why the order of parents is part of the design, not decoration — and why most codebases keep multiple inheritance to <b>mixins</b>: small classes that add one capability and define no method anyone else defines." },
+
+  { t: "h2", n: "4", text: "The MRO — stop guessing, print it" },
+  { t: "def", term: "MRO", en: "The Method Resolution Order is the fixed list of classes Python searches, in order, to find an attribute.", hi: "Every class has one, it is computed once, and you can read it with <code>ClassName.__mro__</code>. Nothing about attribute lookup is mysterious once you have looked at that list." },
+  { t: "p", html: "The interesting case is the <b>diamond</b>: two parents that share a grandparent. A naive \"go all the way up the first parent, then the second\" would reach the grandparent before the second parent — and Python deliberately does not do that." },
+  { t: "code", file: "mro.py", code: "class A:\n    def who(self): return \"A\"\n\nclass B(A):\n    def who(self): return \"B\"\n\nclass C(A):\n    def who(self): return \"C\"\n\nclass D(B, C):\n    pass\n\nprint(D().who())\nprint([c.__name__ for c in D.__mro__])", output: "B\n['D', 'B', 'C', 'A', 'object']" },
+  { t: "note", variant: "key", html: "Look at where <code>A</code> sits: <b>after C</b>, not straight after B. The rule is that a class always appears before its parents, and no parent is visited until every class that inherits from it has been. So <code>C</code> gets its turn before the shared grandparent does — which is exactly what you want, since <code>C</code> is the more specific class. If you ever cannot predict where a method came from, print <code>__mro__</code>; it is the whole answer, in order." },
+  { t: "viz", name: "inheritance-lab" },
+
+  { t: "h2", n: "5", text: "Inner classes" },
+  { t: "p", html: "A class can be defined inside another. It is worth doing when the inner thing has no meaning on its own — an <code>Address</code> that only ever exists as part of an <code>Order</code> — because the nesting says so in the code itself." },
+  { t: "code", file: "inner.py", code: "class Order:\n    class Address:\n        def __init__(self, city, pin):\n            self.city = city\n            self.pin = pin\n\n        def __str__(self):\n            return f\"{self.city} - {self.pin}\"\n\n    def __init__(self, oid):\n        self.oid = oid\n        self.address = Order.Address(\"Delhi\", \"110001\")\n\no = Order(7)\nprint(o.oid)\nprint(o.address)\nprint(o.address.city)\nprint(Order.Address(\"Pune\", \"411001\"))", output: "7\nDelhi - 110001\nDelhi\nPune - 411001" },
+  { t: "note", variant: "warn", html: "One thing an inner class does <b>not</b> get: any automatic access to the outer object. <code>Address</code> cannot see <code>self.oid</code> — there is no hidden link between them. Nesting is about <b>namespacing and intent</b>, not about a relationship at runtime. If the inner class genuinely needs the outer one, pass it in as an argument like any other value." },
+  { t: "analogy", concept: "Class vs instance attribute", real: "A school uniform and a name badge", html: "Every student in the school wears the <b>same uniform</b> — change the school's uniform policy and every student's changes with it. That is a class attribute. Every student's <b>name badge</b> is their own; changing one changes nobody else's. That is an instance attribute. And the trap in section 2 is a student who gets their own uniform tailored: from then on, school-wide policy changes stop reaching them, and nobody announced it." },
+
+  { t: "trace", intro: "One class attribute, two objects, and a rename. Work out each value before opening the answer — the whole lesson is in the difference between the last two.", code: "class Item:\n    tax = 5\n    def __init__(self, price):\n        self.price = price\na = Item(100)\nb = Item(200)\nItem.tax = 10\nx = a.tax\na.tax = 0\ny = b.tax\nw = a.tax", steps: [
+    { q: "After line 8, <code>x</code> is", answer: "10", why: "<code>a</code> has no <code>tax</code> of its own, so reading it falls through to the class — and line 7 had just changed the class's value to 10. A class attribute updates for every object that has not overridden it." },
+    { q: "After line 10, <code>y</code> is", answer: "10", why: "Line 9 wrote to <code>a</code> only. <code>b</code> is untouched and still falls through to the class, which is still 10. This is what makes the bug in section 2 so confusing: an assignment on one object genuinely does isolate it, so people assume mutation does too." },
+    { q: "After line 11, <code>w</code> is", answer: "0", why: "Line 9 created an instance attribute on <code>a</code>. From that moment <code>a.tax</code> stops consulting the class at all — its own value wins, permanently. <code>a</code> and <code>b</code> now read the same expression and get different answers, and nothing in the code says so." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it before opening the answer.", items: [
+    { task: "Give a class an attribute shared by every object, and print it from two objects.", code: "class S:\n    school = \"Etudo\"\nprint(S().school, S().school)", out: "Etudo Etudo" },
+    { task: "Change a class attribute through the <b>class</b> and show an existing object sees it.", code: "class S:\n    tax = 5\na = S()\nS.tax = 9\nprint(a.tax)", out: "9" },
+    { task: "Show that assigning through one object does not affect another.", code: "class S:\n    tax = 5\na, b = S(), S()\na.tax = 0\nprint(a.tax, b.tax)", out: "0 5" },
+    { task: "Give each object its own list, so they do not share.", code: "class C:\n    def __init__(self):\n        self.items = []\nx, y = C(), C()\nx.items.append(1)\nprint(y.items)", out: "[]" },
+    { task: "Inherit from two classes and show the first parent wins.", code: "class A:\n    def f(self): return \"A\"\nclass B:\n    def f(self): return \"B\"\nclass C(A, B):\n    pass\nprint(C().f())", out: "A" },
+    { task: "Print a class's method resolution order as names.", code: "class A: pass\nclass B(A): pass\nprint([c.__name__ for c in B.__mro__])", out: "['B', 'A', 'object']" },
+    { task: "Define a class inside another and build one from outside.", code: "class Outer:\n    class Inner:\n        def hi(self): return \"inner\"\nprint(Outer.Inner().hi())", out: "inner" },
+    { task: "Check that an object of a child class counts as the parent type.", code: "class A: pass\nclass B(A): pass\nprint(isinstance(B(), A))", out: "True" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "class Cart:\n    items = []", why: "One list is created when the <b>class</b> is defined, and every object shares it. <code>self.items.append(x)</code> does not write to <code>self</code> — it reads the class's list and modifies it in place, so one user's data appears in everyone's.", fix: "class Cart:\n    def __init__(self):\n        self.items = []" },
+    { bad: 'a.school = "New"   # expecting every student to change', why: "Assignment through an object never reaches the class. It creates an attribute on <code>a</code> that shadows the class one from then on — so <code>a</code> changes, nobody else does, and <code>a</code> stops receiving future class-level updates.", fix: 'Student.school = "New"' },
+    { bad: "class D(B, C):   # assuming B, then B's parent, then C", why: "Python does not walk one branch to the top before starting the next. In a diamond the shared grandparent comes <b>last</b>, after both children. Guessing the order is how you end up debugging a method you cannot find the source of.", fix: "print(D.__mro__)   # read it instead of guessing" },
+    { bad: "class Order:\n    class Address:\n        def show(self):\n            return self.oid", why: "An inner class has no automatic access to the outer object — there is no hidden reference, so <code>self</code> here is the <code>Address</code>, which has no <code>oid</code>. The result is <code>AttributeError</code> at a line that looks perfectly reasonable.", fix: "def show(self, order):\n    return order.oid" },
+  ]},
+
+  { t: "debug", intro: "A cart per customer, or so it looks. Priya adds one item and Rahul's cart shows it too. Nothing raises. Read it before opening the fix.", code: "class Cart:\n    items = []\n\n    def add(self, item):\n        self.items.append(item)\n\npriya = Cart()\nrahul = Cart()\n\npriya.add(\"laptop\")\n\nprint(\"rahul's cart:\", rahul.items)", symptom: "prints rahul's cart: ['laptop'] — Rahul never added anything", q: "Two separate <code>Cart()</code> objects were created. So how is there only one list?", fix: "class Cart:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\npriya = Cart()\nrahul = Cart()\n\npriya.add(\"laptop\")\n\nprint(\"rahul's cart:\", rahul.items)", why: "Two carts were created — but only <b>one list</b> ever was. It came into existence when the class was defined, not when a cart was made, so both objects fall through to the same one.<br/><br/>The line that hides it is <code>self.items.append(item)</code>. It looks like it is working on <code>self</code>, and the <code>self.</code> makes it read as per-object. It is not an assignment: Python reads <code>self.items</code>, does not find it on the object, falls through to the class, and appends to <b>that</b>. Moving the list into <code>__init__</code> makes a new one per object, because <code>__init__</code> runs once per object.<br/><br/>Worth being scared of exactly once: in a web app this is how one user sees another user's data, and it will never show up in a test that creates a single object." },
+
+  { t: "recap", items: [
+    "A class attribute is shared by every instance; <code>self.x = ...</code> in <code>__init__</code> gives each object its own",
+    "Reading falls through instance → class. <b>Writing never does</b> — it creates an instance attribute that shadows the class one",
+    "Never put a list, dict or set on the class — <code>self.items.append()</code> mutates the shared one with no error",
+    "With several parents, the one listed <b>first</b> wins a name clash",
+    "<code>Cls.__mro__</code> is the exact search order — print it instead of guessing",
+    "In a diamond, the shared grandparent comes last, after both children",
+    "An inner class is namespacing only — it gets no automatic access to the outer object",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between a class attribute and an instance attribute?", a: "A class attribute is defined in the class body and shared by every instance; an instance attribute is created with <code>self.x = ...</code> and belongs to one object. Reading an attribute checks the instance first and falls back to the class, so a class attribute acts as a default that any object can override for itself." },
+    { level: "beginner", q: "In <code>class C(A, B)</code>, if both parents define <code>run()</code>, which one is called?", a: "<code>A</code>'s — the first parent listed. Python searches the MRO left to right, so parent order is a real design decision. Reversing it to <code>class C(B, A)</code> silently changes behaviour with no other edit." },
+    { level: "intermediate", q: "Why is <code>items = []</code> in the class body a bug?", a: "The list is created once, when the class is defined, so all instances share it. <code>self.items.append(x)</code> is not an assignment — it reads the attribute, falls through to the class, and mutates the single shared list, so one object's data shows up in every other. Immutable defaults like <code>tax = 0.18</code> are safe because nothing can modify them in place; containers must go in <code>__init__</code>." },
+    { level: "intermediate", q: "What does <code>__mro__</code> tell you, and when do you need it?", a: "It is the ordered list of classes Python searches for an attribute, starting with the class itself and ending at <code>object</code>. You need it whenever a method's origin is not obvious — multiple inheritance, mixins, or a diamond — because it turns \"where did this come from?\" into something you read rather than reason about." },
+    { level: "advanced", q: "In a diamond <code>D(B, C)</code> where both <code>B</code> and <code>C</code> inherit from <code>A</code>, why is the MRO <code>D, B, C, A</code> rather than <code>D, B, A, C</code>?", a: "Python linearises with C3, which guarantees two things: a class always precedes its parents, and the order the parents were listed in is preserved. Visiting <code>A</code> before <code>C</code> would break the first rule, since <code>C</code> inherits from <code>A</code> and must come first. The practical payoff is <code>super()</code>: because <code>A</code> appears once, at the end, a chain of <code>super().__init__()</code> calls runs every class exactly once instead of running the shared grandparent twice." },
+  ]},
+];
+
 /* ------------------------------------------------------------------ */
 /* Lessons + their problems                                            */
 /* ------------------------------------------------------------------ */
@@ -3409,7 +3673,9 @@ const pythonLessons = [
       [{ args: [{ a: 1 }, "a"], expected: true }, { args: [{ a: 1 }, "z"], expected: false }],
       ["The 'in' operator checks this.", "return key in d"], ["dict"]) ]},
 
-  { slug: "functions", order: 8, title: "Functions", minutes: 14, content: L7, problems: [
+  { slug: "sets-dicts-deeper", order: 8, title: "Sets & Dictionaries — Going Deeper", minutes: 16, content: L39, problems: [] },
+
+  { slug: "functions", order: 9, title: "Functions", minutes: 14, content: L7, problems: [
     P(1, "square", "Square a Number", "square",
       "Write a function `square(n)` that returns the square of n (n x n).",
       [{ input: "n=5", output: "25" }, { input: "n=-3", output: "9" }],
@@ -3429,7 +3695,7 @@ const pythonLessons = [
       [{ args: [0], expected: 32 }, { args: [100], expected: 212 }, { args: [37], expected: 98.6 }],
       ["Apply the formula directly: c * 9/5 + 32.", "Watch the order of operations: * and / come first."], ["functions","math"]) ]},
 
-  { slug: "strings", order: 9, title: "String Methods & Slicing", minutes: 12, content: L8, problems: [
+  { slug: "strings", order: 10, title: "String Methods & Slicing", minutes: 12, content: L8, problems: [
     P(1, "reverse-string", "Reverse a String", "reverse_string",
       "Write a function `reverse_string(s)` that returns the string reversed.",
       [{ input: 's="abc"', output: '"cba"' }, { input: 's="hello"', output: '"olleh"' }],
@@ -3449,7 +3715,7 @@ const pythonLessons = [
       [{ args: ["banana", "a"], expected: 3 }, { args: ["hello", "l"], expected: 2 }, { args: ["abc", "z"], expected: 0 }],
       ["Strings have a built-in .count().", "return s.count(ch)"], ["strings"]) ]},
 
-  { slug: "comprehensions", order: 10, title: "List Comprehensions", minutes: 11, content: L9, problems: [
+  { slug: "comprehensions", order: 11, title: "List Comprehensions", minutes: 11, content: L9, problems: [
     P(1, "squares", "List of Squares", "squares",
       "Write a function `squares(n)` that returns the list `[1², 2², ..., n²]`. Use a comprehension.",
       [{ input: "n=3", output: "[1, 4, 9]" }, { input: "n=4", output: "[1, 4, 9, 16]" }],
@@ -3469,7 +3735,7 @@ const pythonLessons = [
       [{ args: [["hi","bye"]], expected: [2,3] }, { args: [["a"]], expected: [1] }, { args: [[]], expected: [] }],
       ["[len(w) for w in words].", "len() gives you the length."], ["comprehension"]) ]},
 
-  { slug: "oop", order: 11, title: "Classes & Objects (OOP)", minutes: 15, content: L10, problems: [
+  { slug: "oop", order: 12, title: "Classes & Objects (OOP)", minutes: 15, content: L10, problems: [
     P(1, "circle-area", "Circle Area (OOP)", "circle_area",
       "Complete the `area()` method in the `Circle` class - area = `3 × r × r` (take pi as 3). `circle_area(r)` gives you its area.",
       [{ input: "r=2", output: "12" }, { input: "r=3", output: "27" }],
@@ -3485,7 +3751,7 @@ const pythonLessons = [
       [{ args: ["Bruno"], expected: "Bruno woof" }, { args: ["Tommy"], expected: "Tommy woof" }],
       ["self.name gives you the name.", 'return self.name + " woof"'], ["oop","class"]) ]},
 
-  { slug: "error-handling", order: 12, title: "Error Handling (try / except)", minutes: 11, content: L11, problems: [
+  { slug: "error-handling", order: 13, title: "Error Handling (try / except)", minutes: 11, content: L11, problems: [
     P(1, "safe-divide", "Safe Divide", "safe_divide",
       "Write a function `safe_divide(a, b)` that returns `a / b`, but if `b` is zero it returns `0` (use try/except).",
       [{ input: "a=10, b=2", output: "5" }, { input: "a=5, b=0", output: "0" }],
@@ -3499,11 +3765,11 @@ const pythonLessons = [
       [{ args: ["42"], expected: 42 }, { args: ["abc"], expected: 0 }, { args: ["7"], expected: 7 }],
       ["int(s) inside try.", "except ValueError: return 0"], ["error-handling"]) ]},
 
-  { slug: "file-handling", order: 13, title: "File Handling", minutes: 9, content: L12, problems: [] },
+  { slug: "file-handling", order: 14, title: "File Handling", minutes: 9, content: L12, problems: [] },
 
-  { slug: "modules", order: 14, title: "Modules, pip & venv", minutes: 9, content: L13, problems: [] },
+  { slug: "modules", order: 15, title: "Modules, pip & venv", minutes: 9, content: L13, problems: [] },
 
-  { slug: "numbers-math", order: 15, title: "Numbers & the Math Module", minutes: 11, content: L14, problems: [
+  { slug: "numbers-math", order: 16, title: "Numbers & the Math Module", minutes: 11, content: L14, problems: [
     P(1, "round-to", "Round a Number", "round_to",
       "Write a function `round_to(n, digits)` that rounds `n` to `digits` decimal places.",
       [{ input: "n=3.14159, digits=2", output: "3.14" }, { input: "n=5.6789, digits=2", output: "5.68" }],
@@ -3517,7 +3783,7 @@ const pythonLessons = [
       [{ args: [5, 8], expected: 3 }, { args: [10, 3], expected: 7 }, { args: [4, 4], expected: 0 }],
       ["abs() makes a value positive.", "return abs(a - b)"], ["numbers","math"]) ]},
 
-  { slug: "string-formatting", order: 16, title: "String Formatting & f-strings", minutes: 11, content: L15, problems: [
+  { slug: "string-formatting", order: 17, title: "String Formatting & f-strings", minutes: 11, content: L15, problems: [
     P(1, "greet-age", "Greet with Age", "greet_age",
       "Write a function `greet_age(name, age)` that returns `<name> is <age>`. Use an f-string.",
       [{ input: 'name="Freya", age=21', output: '"Freya is 21"' }],
@@ -3537,7 +3803,7 @@ const pythonLessons = [
       [{ args: ["hello world"], expected: "Hello World" }, { args: ["data science"], expected: "Data Science" }],
       ["Use the .title() method.", "return s.title()"], ["strings"]) ]},
 
-  { slug: "booleans", order: 17, title: "Booleans & Truthiness", minutes: 10, content: L16, problems: [
+  { slug: "booleans", order: 18, title: "Booleans & Truthiness", minutes: 10, content: L16, problems: [
     P(1, "is-adult", "Is Adult?", "is_adult",
       "Write a function `is_adult(age)` that returns `True` if age is 18 or more.",
       [{ input: "age=18", output: "True" }, { input: "age=10", output: "False" }],
@@ -3551,7 +3817,7 @@ const pythonLessons = [
       [{ args: [""], expected: true }, { args: ["a"], expected: false }, { args: ["hi"], expected: false }],
       ["len(s) gives the length.", "It is empty when len(s) == 0."], ["boolean","strings"]) ]},
 
-  { slug: "lambda", order: 18, title: "Lambda Functions", minutes: 11, content: L17, problems: [
+  { slug: "lambda", order: 19, title: "Lambda Functions", minutes: 11, content: L17, problems: [
     P(1, "square-all", "Square All (map + lambda)", "square_all",
       "Write a function `square_all(nums)` that returns the square of every number. Use `map` + `lambda`.",
       [{ input: "nums=[1,2,3]", output: "[1, 4, 9]" }, { input: "nums=[0,5]", output: "[0, 25]" }],
@@ -3565,9 +3831,9 @@ const pythonLessons = [
       [{ args: [["bbb","a","cc"]], expected: ["a","cc","bbb"] }, { args: [["hi","a"]], expected: ["a","hi"] }],
       ["sorted(words, key=lambda w: len(w)).", "key tells it what to sort by."], ["lambda"]) ]},
 
-  { slug: "scope", order: 19, title: "Variable Scope", minutes: 9, content: L18, problems: [] },
+  { slug: "scope", order: 20, title: "Variable Scope", minutes: 9, content: L18, problems: [] },
 
-  { slug: "json", order: 20, title: "Working with JSON", minutes: 11, content: L19, problems: [
+  { slug: "json", order: 21, title: "Working with JSON", minutes: 11, content: L19, problems: [
     P(1, "get-json-field", "Read a JSON Field", "get_json_field",
       "Write a function `get_json_field(text, key)` that returns the value of `key` from a JSON string.",
       [{ input: 'text=\'{"name":"Freya","age":21}\', key="age"', output: "21" }],
@@ -3575,9 +3841,9 @@ const pythonLessons = [
       [{ args: ['{"name":"Freya","age":21}', "age"], expected: 21 }, { args: ['{"city":"Delhi"}', "city"], expected: "Delhi" }],
       ["json.loads(text) turns the string into a dict.", "Then data[key]."], ["json"]) ]},
 
-  { slug: "dates", order: 21, title: "Dates & Time", minutes: 9, content: L20, problems: [] },
+  { slug: "dates", order: 22, title: "Dates & Time", minutes: 9, content: L20, problems: [] },
 
-  { slug: "more-operators", order: 22, title: "More Operators (Membership, Identity, Bitwise)", minutes: 10, content: L21, problems: [
+  { slug: "more-operators", order: 23, title: "More Operators (Membership, Identity, Bitwise)", minutes: 10, content: L21, problems: [
     P(1, "is-member", "Is Member?", "is_member",
       "Write a function `is_member(item, items)` that returns `True` if `item` is in the list `items`.",
       [{ input: "item=2, items=[1,2,3]", output: "True" }, { input: "item=5, items=[1,2]", output: "False" }],
@@ -3591,7 +3857,7 @@ const pythonLessons = [
       [{ args: [6, 3], expected: 2 }, { args: [12, 10], expected: 8 }, { args: [5, 5], expected: 5 }],
       ["The & operator does a bitwise AND.", "return a & b"], ["operators","bitwise"]) ]},
 
-  { slug: "match-case", order: 23, title: "Match-Case Statement", minutes: 9, content: L22, problems: [
+  { slug: "match-case", order: 24, title: "Match-Case Statement", minutes: 9, content: L22, problems: [
     P(1, "day-type", "Weekend or Weekday", "day_type",
       'Write a function `day_type(day)` that returns `"weekend"` if day is `"Sat"` or `"Sun"`, otherwise `"weekday"`. Use match-case.',
       [{ input: 'day="Sat"', output: '"weekend"' }, { input: 'day="Mon"', output: '"weekday"' }],
@@ -3599,7 +3865,7 @@ const pythonLessons = [
       [{ args: ["Sat"], expected: "weekend" }, { args: ["Sun"], expected: "weekend" }, { args: ["Mon"], expected: "weekday" }],
       ['case "Sat" | "Sun": weekend.', "case _: default (weekday)."], ["match"]) ]},
 
-  { slug: "advanced-functions", order: 24, title: "Advanced Functions (*args, recursion)", minutes: 13, content: L23, problems: [
+  { slug: "advanced-functions", order: 25, title: "Advanced Functions (*args, recursion)", minutes: 13, content: L23, problems: [
     P(1, "sum-all", "Sum All (*args)", "sum_all",
       "Write a function `sum_all(*args)` that returns the total of any number of numbers.",
       [{ input: "1, 2, 3", output: "6" }, { input: "5, 10", output: "15" }],
@@ -3613,7 +3879,7 @@ const pythonLessons = [
       [{ args: [5], expected: 120 }, { args: [0], expected: 1 }, { args: [4], expected: 24 }],
       ["Base case: if n <= 1: return 1.", "Otherwise n * factorial_rec(n-1)."], ["functions","recursion"]) ]},
 
-  { slug: "inheritance", order: 25, title: "OOP: Inheritance", minutes: 13, content: L24, problems: [
+  { slug: "inheritance", order: 26, title: "OOP: Inheritance", minutes: 13, content: L24, problems: [
     P(1, "cat-speak", "Inherit & Override", "cat_speak",
       "The `Cat` class inherits from `Animal`. Override `speak()` so that it returns `<name> says meow`.",
       [{ input: 'name="Kitty"', output: '"Kitty says meow"' }],
@@ -3622,7 +3888,7 @@ const pythonLessons = [
       [{ args: ["Kitty"], expected: "Kitty says meow" }, { args: ["Tom"], expected: "Tom says meow" }],
       ["self.name is inherited from Animal.", 'return self.name + " says meow"'], ["oop","inheritance"]) ]},
 
-  { slug: "encapsulation", order: 26, title: "OOP: Encapsulation & Polymorphism", minutes: 12, content: L25, problems: [
+  { slug: "encapsulation", order: 27, title: "OOP: Encapsulation & Polymorphism", minutes: 12, content: L25, problems: [
     P(1, "final-balance", "Bank Account (Encapsulation)", "final_balance",
       "Complete the `deposit()` method in the `Account` class (add the amount into the private `__balance`). `final_balance(deposits)` gives the balance after all the deposits.",
       [{ input: "deposits=[100,50,25]", output: "175" }],
@@ -3631,7 +3897,7 @@ const pythonLessons = [
       [{ args: [[100,50,25]], expected: 175 }, { args: [[10]], expected: 10 }, { args: [[]], expected: 0 }],
       ["self.__balance += amt.", "A private variable is only changed through methods."], ["oop","encapsulation"]) ]},
 
-  { slug: "dunder-methods", order: 27, title: "OOP: Static & Dunder Methods", minutes: 12, content: L26, problems: [
+  { slug: "dunder-methods", order: 28, title: "OOP: Static & Dunder Methods", minutes: 12, content: L26, problems: [
     P(1, "team-size", "Team Size (__len__)", "team_size",
       "Complete the `__len__` method of the `Team` class so that `len(team)` gives the count of members. `team_size(members)` calls it.",
       [{ input: 'members=["a","b","c"]', output: "3" }],
@@ -3640,7 +3906,9 @@ const pythonLessons = [
       [{ args: [["a","b","c"]], expected: 3 }, { args: [[]], expected: 0 }, { args: [["x"]], expected: 1 }],
       ["Inside __len__, return len(self.members).", "len(obj) automatically calls __len__."], ["oop","dunder"]) ]},
 
-  { slug: "iterators-generators", order: 28, title: "Iterators & Generators", minutes: 13, content: L27, problems: [
+  { slug: "oop-advanced", order: 29, title: "Advanced OOP — Class Attributes, MRO & Inner Classes", minutes: 16, content: L40, problems: [] },
+
+  { slug: "iterators-generators", order: 30, title: "Iterators & Generators", minutes: 13, content: L27, problems: [
     P(1, "first-squares", "Generator: First Squares", "first_squares",
       "Complete a generator `gen_squares(n)` that yields from 1^2 up to n^2. `first_squares(n)` gives their list.",
       [{ input: "n=3", output: "[1, 4, 9]" }, { input: "n=4", output: "[1, 4, 9, 16]" }],
@@ -3649,9 +3917,9 @@ const pythonLessons = [
       [{ args: [3], expected: [1,4,9] }, { args: [1], expected: [1] }, { args: [4], expected: [1,4,9,16] }],
       ["yield i * i inside the loop.", "yield gives one value at a time."], ["generators"]) ]},
 
-  { slug: "decorators", order: 29, title: "Decorators & Closures", minutes: 12, content: L28, problems: [] },
+  { slug: "decorators", order: 31, title: "Decorators & Closures", minutes: 12, content: L28, problems: [] },
 
-  { slug: "regex", order: 30, title: "Regular Expressions (RegEx)", minutes: 12, content: L29, problems: [
+  { slug: "regex", order: 32, title: "Regular Expressions (RegEx)", minutes: 12, content: L29, problems: [
     P(1, "find-numbers", "Find All Numbers", "find_numbers",
       "Write a function `find_numbers(text)` that returns a list of all the numbers (as strings) in the text. Use `re.findall`.",
       [{ input: 'text="Order 123, bill 456"', output: '["123", "456"]' }],
@@ -3665,10 +3933,10 @@ const pythonLessons = [
       [{ args: ["abc7"], expected: true }, { args: ["abc"], expected: false }, { args: ["12"], expected: true }],
       ['re.search(r"\\d", s) looks for a digit.', "Use bool() to get True/False."], ["regex"]) ]},
 
-  { slug: "concurrency", order: 31, title: "Concurrency — Threads & Processes", minutes: 11, content: L30, problems: [] },
-  { slug: "async", order: 32, title: "Async Programming (asyncio)", minutes: 11, content: L31, problems: [] },
+  { slug: "concurrency", order: 33, title: "Concurrency — Threads & Processes", minutes: 11, content: L30, problems: [] },
+  { slug: "async", order: 34, title: "Async Programming (asyncio)", minutes: 11, content: L31, problems: [] },
 
-  { slug: "collections-itertools", order: 33, title: "collections, itertools & functools", minutes: 13, content: L32, problems: [
+  { slug: "collections-itertools", order: 35, title: "collections, itertools & functools", minutes: 13, content: L32, problems: [
     P(1, "top-item", "Most Common Item", "top_item",
       "Write a function `top_item(items)` that returns the item that appears the most times in the list. Use `Counter`.",
       [{ input: 'items=["a","b","a"]', output: '"a"' }, { input: "items=[1,2,2,3,2]", output: "2" }],
@@ -3688,12 +3956,12 @@ const pythonLessons = [
       [{ args: [[1,2,3,4]], expected: 24 }, { args: [[5]], expected: 5 }, { args: [[2,3]], expected: 6 }],
       ["reduce(lambda a,b: a*b, nums).", "reduce squeezes a list down into a single value."], ["functools"]) ]},
 
-  { slug: "system-modules", order: 34, title: "System Modules — os, sys, pathlib", minutes: 10, content: L33, problems: [] },
-  { slug: "data-persistence", order: 35, title: "CSV, Pickle & SQLite", minutes: 11, content: L34, problems: [] },
-  { slug: "testing", order: 36, title: "Testing — unittest & pytest", minutes: 11, content: L35, problems: [] },
-  { slug: "debugging-logging", order: 37, title: "Debugging & Logging", minutes: 10, content: L36, problems: [] },
+  { slug: "system-modules", order: 36, title: "System Modules — os, sys, pathlib", minutes: 10, content: L33, problems: [] },
+  { slug: "data-persistence", order: 37, title: "CSV, Pickle & SQLite", minutes: 11, content: L34, problems: [] },
+  { slug: "testing", order: 38, title: "Testing — unittest & pytest", minutes: 11, content: L35, problems: [] },
+  { slug: "debugging-logging", order: 39, title: "Debugging & Logging", minutes: 10, content: L36, problems: [] },
 
-  { slug: "clean-code", order: 38, title: "Clean Code — PEP 8, Docstrings, Type Hints", minutes: 11, content: L37, problems: [
+  { slug: "clean-code", order: 40, title: "Clean Code — PEP 8, Docstrings, Type Hints", minutes: 11, content: L37, problems: [
     P(1, "repeat-text", "Repeat with Type Hints", "repeat",
       "Write a function `repeat(text, n)` (with type hints) that repeats `text` `n` times.",
       [{ input: 'text="ab", n=3', output: '"ababab"' }, { input: 'text="x", n=0', output: '""' }],
@@ -3701,7 +3969,7 @@ const pythonLessons = [
       [{ args: ["ab", 3], expected: "ababab" }, { args: ["x", 0], expected: "" }, { args: ["hi", 2], expected: "hihi" }],
       ["You can multiply a string by a number: text * n.", 'With text="x" and n=0, the result is an empty string.'], ["clean-code"]) ]},
 
-  { slug: "project-git", order: 39, title: "Project Structure & Git Basics", minutes: 10, content: L38, problems: [] },
+  { slug: "project-git", order: 41, title: "Project Structure & Git Basics", minutes: 10, content: L38, problems: [] },
 ];
 
 /* ===================== STATISTICS lessons ===================== */
@@ -8375,6 +8643,38 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "oop-advanced": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "Where does a <b>class attribute</b> live?", options: ["On each object, created by <code>__init__</code>", "In the class body, shared by every instance", "In a separate file", "It is created the first time you read it"], correct: 1, why: "It is written in the class body and belongs to the class itself, so every instance sees the same value. An instance attribute is the other one — created with <code>self.x = ...</code>, one per object." },
+    { level: "easy", q: "When you read <code>a.tax</code> and <code>a</code> has no <code>tax</code> of its own, what does Python do?", options: ["Raises <code>AttributeError</code>", "Returns <code>None</code>", "Falls back to the class attribute", "Creates it with a default of 0"], correct: 2, why: "Lookup checks the instance first, then the class. That fallback is what makes a class attribute act as a shared default — and it is why writing to <code>a.tax</code> later changes the answer permanently for <code>a</code>." },
+    { level: "easy", q: "<code>class C(A, B)</code> and both parents define <code>run()</code>. Which runs?", options: ["<code>A</code>'s — the first parent listed", "<code>B</code>'s — the last parent listed", "Both, in order", "Python raises an error about the clash"], correct: 0, why: "The MRO is searched left to right, so the first parent listed wins. Swapping the order to <code>class C(B, A)</code> changes the behaviour with no other edit — which is why parent order is a design decision, not decoration." },
+    { level: "easy", q: "How do you see the exact order Python searches for a method?", options: ["<code>Cls.__dict__</code>", "<code>Cls.__mro__</code>", "<code>dir(Cls)</code>", "<code>Cls.__bases__</code>"], correct: 1, why: "<code>__mro__</code> is the full ordered list, from the class itself down to <code>object</code>. <code>__bases__</code> shows only the direct parents, and <code>dir()</code> lists names without telling you where each came from." },
+    // Medium — apply it
+    { level: "medium", q: "<code>class S: tax = 5</code>. You run <code>a = S()</code>, then <code>a.tax = 0</code>, then <code>S.tax = 9</code>. What is <code>a.tax</code>?", options: ["<code>9</code>", "<code>0</code>", "<code>5</code>", "<code>None</code>"], correct: 1, why: "<code>a.tax = 0</code> created an instance attribute on <code>a</code>. From then on <code>a</code> stops consulting the class entirely, so the later class-level change to 9 never reaches it. Its own value wins, permanently." },
+    { level: "medium", q: "Why is <code>items = []</code> in a class body a bug, while <code>tax = 0.18</code> is fine?", options: ["Lists are slower than floats", "The list is created once and shared, and <code>self.items.append()</code> mutates that shared one", "You cannot put lists in a class body at all", "The list is recreated for every object, wasting memory"], correct: 1, why: "One list exists from the moment the class is defined. <code>self.items.append(x)</code> is not an assignment — it reads the attribute, falls through to the class, and appends to the single shared list. A float cannot be mutated in place, so a numeric class attribute is safe." },
+    { level: "medium", q: "<code>self.items.append(x)</code> does not create an instance attribute. Why not?", options: ["<code>append</code> is a class method", "It is a read followed by a mutation, not an assignment", "<code>self</code> refers to the class here", "It does — the question is wrong"], correct: 1, why: "Only assignment (<code>self.items = ...</code>) creates an attribute on the object. <code>self.items.append(x)</code> reads <code>self.items</code>, and if the object has none, that read falls through to the class — so the method mutates the class's object. This is the exact mechanism behind the shared-cart bug." },
+    { level: "medium", q: "An inner class needs a value from the outer object. What works?", options: ["<code>self.outer_value</code> — the link is automatic", "<code>super().value</code>", "Pass the outer object in as an argument", "<code>Outer.self.value</code>"], correct: 2, why: "Nesting is namespacing only; there is no runtime link between an inner class and an instance of the outer one. <code>self</code> inside the inner class is the inner object. If it genuinely needs the outer object, hand it over explicitly like any other value." },
+    // Hard — the traps
+    { level: "hard", q: "<code>A</code>; <code>B(A)</code>; <code>C(A)</code>; <code>D(B, C)</code>. What is <code>D.__mro__</code>?", options: ["D, B, A, C, object", "D, B, C, A, object", "D, C, B, A, object", "D, A, B, C, object"], correct: 1, why: "C3 linearisation guarantees a class always appears before its parents. Putting <code>A</code> straight after <code>B</code> would break that, since <code>C</code> also inherits from <code>A</code> and must come first. So the shared grandparent lands last, after both children." },
+    { level: "hard", q: "In that diamond, what practical problem does the shared grandparent appearing <b>once</b> solve?", options: ["It saves memory", "A chain of <code>super().__init__()</code> calls runs each class exactly once instead of running <code>A</code> twice", "It makes attribute lookup faster", "It allows classes to inherit from themselves"], correct: 1, why: "This is the real payoff of C3. Because each class occurs once in the linearisation, cooperative <code>super()</code> calls walk the chain without visiting the shared base twice — which would otherwise re-run its <code>__init__</code> and quietly duplicate whatever setup it does." },
+    { level: "hard", q: "A web app gives every user a <code>Cart()</code>, and one user starts seeing another's items. Tests all pass. What is the most likely cause, and why did tests miss it?", options: ["A database transaction bug; tests use a fake database", "<code>items = []</code> on the class instead of in <code>__init__</code>; the tests only ever create one cart", "A caching layer; tests disable the cache", "Threading; tests are single-threaded"], correct: 1, why: "With the list on the class there is one list for the whole program, so any two carts share it. A test that creates a single object can never expose it — the sharing is only visible once a second instance exists. It is worth internalising as a shape: a mutable class attribute plus more than one object equals a data leak, with no error anywhere." },
+  ],
+  "sets-dicts-deeper": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does <code>{1, 2} | {2, 3}</code> give you?", options: ["{1, 2, 3}", "{2}", "{1, 3}", "{1, 2, 2, 3}"], correct: 0, why: "<code>|</code> is union — everything in either set. The 2 appears in both, but a set keeps each item once, so it appears once in the answer." },
+    { level: "easy", q: "Which operator gives you the items present in <b>both</b> sets?", options: ["<code>|</code>", "<code>&amp;</code>", "<code>-</code>", "<code>^</code>"], correct: 1, why: "<code>&amp;</code> is intersection — read it as 'and'. <code>|</code> is or, <code>-</code> is minus, and <code>^</code> is exactly-one." },
+    { level: "easy", q: "<code>{1, 2, 3} - {3, 4}</code> is", options: ["{4}", "{3}", "{1, 2}", "{1, 2, 4}"], correct: 2, why: "Difference keeps the items of the <b>left</b> set that are not in the right one. The 3 is dropped because it is in both; the 4 never appears because it was never in the left set." },
+    { level: "easy", q: "Which removes an item without raising an error when it is missing?", options: ["<code>.remove()</code>", "<code>.discard()</code>", "<code>.pop()</code>", "<code>del</code>"], correct: 1, why: "<code>.discard(x)</code> deletes <code>x</code> if present and does nothing otherwise. <code>.remove(x)</code> does the same job but raises <code>KeyError</code> when the item is absent." },
+    // Medium — apply it
+    { level: "medium", q: "Why should you print a set with <code>sorted()</code> rather than directly?", options: ["Sorting makes it faster", "A set has no reliable order, so the raw printout is not something to depend on", "print() cannot handle sets", "It removes duplicates"], correct: 1, why: "A set stores items by hash, not by position. The arrangement you see when printing one can differ between runs and Python versions, so any test or output a human reads should sort it first. Duplicates were already gone when the set was built." },
+    { level: "medium", q: "<code>{1, 2, 3} &amp; [2, 3]</code> raises <code>TypeError</code>. What is the fix that keeps the list as a list?", options: ["<code>{1, 2, 3}.intersection([2, 3])</code>", "<code>{1, 2, 3} &amp; {2, 3}</code>", "<code>list({1, 2, 3}) &amp; [2, 3]</code>", "There is no fix"], correct: 0, why: "The operator demands a set on both sides; the method form accepts any iterable and does the conversion internally. Converting with <code>set([2, 3])</code> also works, but the question asked to keep the list as it is." },
+    { level: "medium", q: "You want to count which pairs of subjects students choose together, and <code>{\"maths\", \"physics\"}</code> must count as the same pair as <code>{\"physics\", \"maths\"}</code>. What do you use as the dictionary key?", options: ["A set", "A list", "A frozenset", "A string built by joining them"], correct: 2, why: "A set cannot be a key — it is mutable, so it is unhashable. A frozenset can, and it keeps the order-independence you want: the two spellings are the same key. Joining into a string would work only if you sorted the names first, which is extra code that a frozenset does for you." },
+    { level: "medium", q: "<code>d = {\"p\": {\"m\": 88}}</code>. What does <code>d.get(\"x\", {}).get(\"m\", 0)</code> print?", options: ["<code>KeyError</code>", "<code>None</code>", "<code>0</code>", "<code>88</code>"], correct: 2, why: "There is no key <code>\"x\"</code>, so the first <code>.get</code> returns the default <code>{}</code> — an empty dictionary. The second <code>.get</code> then looks for <code>\"m\"</code> in that empty dictionary, does not find it, and returns its own default of 0. No crash at either step." },
+    // Hard — the traps
+    { level: "hard", q: "<code>a = {\"x\": {\"n\": 1}}</code>, then <code>b = a.copy()</code>, then <code>b[\"x\"][\"n\"] = 9</code>. What is <code>a[\"x\"][\"n\"]</code>?", options: ["<code>1</code>", "<code>9</code>", "<code>KeyError</code>", "<code>None</code>"], correct: 1, why: "<code>.copy()</code> is a <b>shallow</b> copy: <code>b</code> is a genuinely new outer dictionary, but its value for <code>\"x\"</code> is the <i>same inner dictionary object</i> that <code>a</code> holds. Writing through <code>b</code> therefore reaches <code>a</code>. <code>copy.deepcopy(a)</code> is what actually separates them." },
+    { level: "hard", q: "<code>a = {1, 2, 3}</code>; <code>b = {3, 4}</code>; <code>only = a - b</code>; then <code>a.update(b)</code>. What is <code>only</code> afterwards?", options: ["<code>{1, 2}</code>", "<code>{1, 2, 3, 4}</code>", "<code>{4}</code>", "<code>set()</code>"], correct: 0, why: "<code>a - b</code> built a <b>new</b> set on that line and <code>only</code> has held it ever since. <code>update</code> modifies <code>a</code> in place, but it cannot reach into a set that was already created — so <code>only</code> still holds {1, 2}. Distinguishing the operations that return something new from the ones that mutate in place is the whole trick." },
+    { level: "hard", q: "A report should list students who submitted assignment 1 but not assignment 2, and it prints the wrong names with no error. The line reads <code>missing = submitted_2 - submitted_1</code>. What went wrong?", options: ["Difference does not work on sets of strings", "The operands are the wrong way round — this asks who submitted 2 but not 1", "It should be <code>&amp;</code> instead of <code>-</code>", "Sets cannot be subtracted, only lists can"], correct: 1, why: "Difference has a direction: <code>x - y</code> means 'in x, not in y'. Union and intersection read the same either way round, which is exactly why it is easy to assume difference does too. Nothing raises, so the only symptom is a clean-looking wrong answer — say the sentence out loud whenever you write <code>-</code> between two sets." },
+  ],
   "mp-branching-stack": [
     // Easy — did the core idea land?
     { level: "easy", q: "Which way does the 8085 stack grow?", options: ["Downwards — PUSH decrements the stack pointer", "Upwards", "It depends on the instruction", "It does not move; SP stays fixed"], correct: 0, why: "Programs load from the bottom of memory upwards, so putting the stack at the top and growing it down means the two only meet when memory is genuinely full." },
@@ -9269,7 +9569,7 @@ export const QUIZZES = {
     { level: "medium", q: "<code>name = \"  Freya  \"</code>, then <code>name.strip()</code> on its own line, then <code>print(name)</code>. What is printed?", options: ["Freya", "  Freya  ", "an error", "an empty string"], correct: 1, why: "Strings are immutable. <code>.strip()</code> returned a cleaned copy which was never stored, so <code>name</code> is untouched. No error is raised - the line simply did nothing." },
     { level: "medium", q: "<code>print(\"a,b,c\".split(\",\"))</code> — what appears?", options: ["['a', 'b', 'c']", "a,b,c", "['a,b,c']", "abc"], correct: 0, why: "<code>split</code> returns a <b>list</b> of the pieces between the separators." },
     { level: "medium", q: "How do you join <code>[\"a\", \"b\"]</code> into <code>a-b</code>?", options: ["[\"a\", \"b\"].join(\"-\")", "join([\"a\", \"b\"], \"-\")", "\"-\".split([\"a\", \"b\"])", "\"-\".join([\"a\", \"b\"])"], correct: 3, why: "<code>join</code> is called on the <b>separator</b>, with the list as its argument. It reads backwards at first and then never confuses you again." },
-    { level: "medium", q: "<code>print(\"DATAMARG\"[::2])</code> — what appears?", options: ["DATA", "DTMR", "GRAM", "AAAG"], correct: 1, why: "A step of 2 takes every second character starting at index 0: D, T, M, R." },
+    { level: "medium", q: "<code>print(\"DATABASE\"[::2])</code> — what appears?", options: ["DATA", "DTBS", "BASE", "AAAE"], correct: 1, why: "A step of 2 takes every second character starting at index 0: D, T, B, S." },
     // Hard — edge cases and bugs; not written in the lesson
     { level: "hard", q: "<code>s = \"Hi\"</code>. What is the difference between <code>s[5]</code> and <code>s[5:]</code>?", options: ["Both raise IndexError", "Both return an empty string", "s[5] raises IndexError, but s[5:] returns an empty string", "Both return Hi"], correct: 2, why: "Indexing past the end is an error; <b>slicing</b> past the end is not. It is the one place Python is more forgiving with slices than with indexes." },
     { level: "hard", q: "On the text <code>\"  a   b  \"</code>, how do <code>split(\" \")</code> and <code>split()</code> differ?", options: ["They give the same result", "split() is only faster", "split(\" \") produces empty strings for repeated spaces, split() ignores runs of whitespace", "split() only works on tabs"], correct: 2, why: "<code>split()</code> with no argument is a different rule, not a default: it treats any run of whitespace as one separator and drops the empty pieces. For messy real text it is nearly always the right call." },

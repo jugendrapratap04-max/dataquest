@@ -7,7 +7,7 @@ import { GuestBanner } from "@/components/GuestBanner";
 import { formatDuration } from "@/lib/duration";
 
 export const metadata = {
-  title: "Challenges — DataMarg",
+  title: "Challenges — Etudo",
   description: "Take a fixed set of questions, send the link to a friend, and compare how you both did.",
 };
 

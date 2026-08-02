@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { LegalShell } from "@/components/LegalShell";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — DataMarg",
-  description: "What DataMarg stores, why, and what it never does with your data.",
+  title: "Privacy Policy — Etudo",
+  description: "What Etudo stores, why, and what it never does with your data.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalShell title="Privacy Policy" current="/privacy">
       <p className="legal-lead">
-        This describes exactly what DataMarg stores and why. It is written from what the code
+        This describes exactly what Etudo stores and why. It is written from what the code
         actually does, not from a template.
       </p>
 
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
       </p>
 
       <h2>Who else can see it</h2>
-      <p>We use two service providers to run DataMarg, and your data sits on their infrastructure:</p>
+      <p>We use two service providers to run Etudo, and your data sits on their infrastructure:</p>
       <ul>
         <li><b>Vercel</b> — hosting and serving the site.</li>
         <li><b>Neon</b> — the database, hosted in Singapore.</li>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
 
       <h2>If you are under 18</h2>
       <p>
-        DataMarg is intended for learners aged 16 and over, and anyone under 18 should be using it
+        Etudo is intended for learners aged 16 and over, and anyone under 18 should be using it
         with a parent or guardian&apos;s permission. We do not knowingly build profiles of children,
         show them advertising, or track their behaviour — we run no advertising or tracking at all.
         If you are a parent and want your child&apos;s account and data removed, write to us and we

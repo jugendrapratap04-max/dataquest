@@ -1,4 +1,4 @@
-# DataMarg 📊🔥
+# Etudo 📊🔥
 
 Ek full-stack **data science learning platform** — LeetCode jaisa, but data science ke liye.
 Philosophy: **pehle padho → phir usi topic pe practice karo → phir project banao.**
