@@ -117,11 +117,22 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     try {
       const r = await runTests(code, p.functionName, p.tests);
       setResult(r);
+
+      const ok = r.compiled && r.passed === r.total && r.total > 0;
+
       // Cue the outcome, not the click. `fail` is the softer of the two on
       // purpose — see lib/sound.ts.
-      playCue(r.compiled && r.passed === r.total && r.total > 0 ? "pass" : "fail");
+      //
+      // A passing SUBMIT stays silent here, because the celebration that follows
+      // plays `solve` and two reward cues landing half a second apart muddy each
+      // other instead of feeling bigger. The success branches below cue `pass`
+      // themselves when no celebration is coming — a solve that saved nothing
+      // should still be heard.
+      if (!ok) playCue("fail");
+      else if (!submit) playCue("pass");
+
       if (submit) {
-        const passed = r.compiled && r.passed === r.total && r.total > 0;
+        const passed = ok;
         const resp = await fetch("/api/submit", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ problemId: p.id, code, passed }),
@@ -135,10 +146,13 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
           // Not logged in — a "connection" message would send them into a retry
           // loop. Tell them plainly what to do.
           setNeedsLogin(true);
+          playCue("pass");   // they did solve it; no celebration is coming
         } else if (!res?.ok) {
           setSubmitNote("Submission did not save — check your connection and press Submit again.");
+          playCue("pass");
         } else if (res.verifyNote) {
           setSubmitNote(`The server could not verify this: ${res.verifyNote}`);
+          playCue("pass");
         } else {
           // The server's time, not the browser's — it is measured from the
           // first character typed and survives a reload, which the local
