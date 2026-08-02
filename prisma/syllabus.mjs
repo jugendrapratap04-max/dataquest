@@ -136,9 +136,9 @@ export const SYLLABUS = [
     { t: "RegEx", covers: ["regex"] },
     { t: "Random module", covers: ["numbers-math"] },
   ]},
-  { group: "DSA (interview-critical, we have none)", topics: [
-    { t: "Big-O / complexity", covers: [] },
-    { t: "Arrays and lists as data structures", covers: [] },
+  { group: "DSA (interview-critical)", topics: [
+    { t: "Big-O / complexity", covers: ["big-o"] },
+    { t: "Arrays and lists as data structures", covers: ["big-o", "lists-tuples"] },
     { t: "Stacks", covers: [] },
     { t: "Queues", covers: [] },
     { t: "Linked lists", covers: [] },

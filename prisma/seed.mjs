@@ -3718,6 +3718,95 @@ const L40 = [
   ]},
 ];
 
+const L41 = [
+  { t: "objectives", items: [
+    "Read <code>O(n)</code>, <code>O(n²)</code>, <code>O(log n)</code> and <code>O(1)</code> and say what each one promises",
+    "Count the steps an algorithm takes instead of guessing whether it is fast",
+    "Recognise the loop-inside-a-loop that works on ten rows and dies on a lakh",
+    "Know why <code>x in list</code> is slow and <code>x in set</code> is not",
+  ]},
+  { t: "hook", q: "Your script cleans 500 rows in under a second. You run it on the real file — 200,000 rows — and it is still going twenty minutes later. Nothing crashed, nothing errored. What went wrong?", why: "Nothing went <i>wrong</i>. The code was always this slow; 500 rows was just too small to notice. The data grew 400 times and the work grew <b>160,000</b> times, because of one line nobody looked at twice. Big-O is the tool that lets you see that line before the real file does." },
+  { t: "think", q: "Two functions both take a list. One always does 5,000 steps. The other does one step per item. Which is faster?", a: "It depends entirely on the size — and that is the whole point.<br/><br/>On 100 items the second one wins easily (100 steps against 5,000). On a million items it loses badly (1,000,000 against 5,000).<br/><br/>So \"faster\" is not a property of code. The only honest question is <b>how does the work grow as the data grows</b>, and that is exactly what Big-O measures. It deliberately ignores constants like the 5,000, because on a big enough input the growth always wins." },
+
+  { t: "h2", n: "1", text: "What Big-O actually asks" },
+  { t: "def", term: "Big-O", en: "Big-O describes how the number of steps grows as the input grows, ignoring constant factors.", hi: "It is <b>not</b> seconds, and it is not about your machine being fast. It answers one question: if the data gets ten times bigger, does the work get ten times bigger, a hundred times bigger, or barely change at all?" },
+  { t: "p", html: "You do not need a stopwatch to measure this, and a stopwatch would give you a different answer on every machine anyway. Count the steps instead — the count is exact, repeatable, and tells you the shape." },
+  { t: "note", variant: "tip", html: "The names, worst to best: <code>O(n²)</code> quadratic · <code>O(n log n)</code> · <code>O(n)</code> linear · <code>O(log n)</code> logarithmic · <code>O(1)</code> constant. Read <code>O(n)</code> out loud as \"grows in step with the data\" and <code>O(1)</code> as \"does not care how big the data is\"." },
+
+  { t: "h2", n: "2", text: "O(n) — work that grows in step with the data" },
+  { t: "p", html: "One loop over the data. Ten times the items, ten times the steps. Almost everything you have written so far is this, and this is a perfectly good place to be." },
+  { t: "code", file: "linear.py", code: "def steps_linear(n):\n    steps = 0\n    for i in range(n):\n        steps += 1\n    return steps\n\nprint(steps_linear(10))\nprint(steps_linear(100))\nprint(steps_linear(1000))", output: "10\n100\n1000" },
+  { t: "p", html: "The data grew ten times, the work grew ten times, twice over. That straight relationship is what <code>O(n)</code> means — and it is why a linear algorithm on a million rows is still perfectly usable." },
+
+  { t: "h2", n: "3", text: "O(n²) — the loop inside a loop" },
+  { t: "p", html: "Now put one loop inside another. Every item is compared against every item, and the numbers stop being friendly very quickly." },
+  { t: "code", file: "quadratic.py", code: "def steps_quadratic(n):\n    steps = 0\n    for i in range(n):\n        for j in range(n):\n            steps += 1\n    return steps\n\nprint(steps_quadratic(10))\nprint(steps_quadratic(100))\nprint(steps_quadratic(1000))", output: "100\n10000\n1000000" },
+  { t: "note", variant: "warn", html: "Read those two outputs side by side. At <b>n = 10</b> the linear version does 10 steps and this one does 100 — a difference you would never feel. At <b>n = 1000</b> it is 1,000 against 1,000,000. The gap is not constant; it grows with your data. That is why a quadratic bug always passes testing and always fails in production: your test file is small, and the real one is not." },
+
+  { t: "h2", n: "4", text: "O(log n) — halving until there is nothing left" },
+  { t: "p", html: "Some algorithms throw away <b>half</b> the remaining data at every step. Looking up a word in a dictionary works this way — you never read from page one. Count how many halvings it takes to get down to a single item." },
+  { t: "code", file: "logarithmic.py", code: "def halvings(n):\n    steps = 0\n    while n > 1:\n        n = n // 2\n        steps += 1\n    return steps\n\nprint(halvings(8))\nprint(halvings(1024))\nprint(halvings(1000000))", output: "3\n10\n19" },
+  { t: "note", variant: "key", html: "Look at that last line and let it land: <b>a million items, nineteen steps.</b> A linear search would take up to a million. This is the single biggest speed-up in this lesson, and it is what binary search, database indexes and dictionary lookups are all built on. The price is that the data must be <b>sorted</b> first — halving only works if you know which half to throw away." },
+
+  { t: "h2", n: "5", text: "O(1) — the ones that do not care how big it is" },
+  { t: "p", html: "Some operations take the same time whether the collection holds ten items or ten crore. Reaching a list item by index is one. So is a dictionary or set lookup — the slot is <b>calculated</b> from the key rather than searched for." },
+  { t: "code", file: "constant.py", code: "small = [1, 2, 3]\nbig = list(range(1000000))\n\nprint(small[0], big[0])          # same cost, either way\nprint(small[-1], big[-1])\nprint(len(small), len(big))      # Python stores the length; it never counts\n\nseen = {\"a\", \"b\"}\nprint(\"a\" in seen)               # calculated, not searched", output: "1 0\n3 999999\n3 1000000\nTrue" },
+  { t: "viz", name: "collection-bench" },
+  { t: "p", html: "Put the same value into all three panels there. What you are watching for is not just what each keeps — it is that the list has to <b>walk</b> to find something, while the set and the dictionary go straight to it." },
+
+  { t: "h2", n: "6", text: "Where this bites you in real code" },
+  { t: "p", html: "One line separates a script that finishes in a second from one that never finishes: checking membership against a <b>list</b> instead of a <b>set</b>." },
+  { t: "code", file: "membership.py", code: "ids_list = list(range(20))\nids_set = set(ids_list)\n\n# Both give the same answer.\nprint(19 in ids_list)\nprint(19 in ids_set)\n\n# The difference is what they DO to get it:\n#   in a list -> look at every item until it matches   O(n)\n#   in a set  -> calculate where it would be, look once O(1)\n\ndef list_steps(items, target):\n    steps = 0\n    for x in items:\n        steps += 1\n        if x == target:\n            return steps\n    return steps\n\nprint(list_steps(ids_list, 19))\nprint(list_steps(ids_list, 0))", output: "True\nTrue\n20\n1" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> the last two numbers are the lesson. Finding item 0 took one step; finding the last took twenty. On a list of a lakh IDs, checked once per row of a lakh-row file, that is ten billion comparisons — and the fix is one word: <code>set(ids)</code>. Whenever you see <code>if x in something</code> <b>inside a loop</b>, check what <code>something</code> is." },
+  { t: "analogy", concept: "O(n) vs O(1) lookup", real: "Finding a phone number", html: "Someone hands you a printed list of 500 names in no particular order and asks for Priya's number. You read from the top until you find her — that is <b>O(n)</b>, and 500 names means up to 500 lines. Now the same 500 numbers are in your phone's contacts: you type \"Pri\" and it is there. It would still be instant with 50,000 contacts, because your phone is not reading them — it is <b>calculating</b> where Priya must be. That is <b>O(1)</b>, and it is exactly what a set and a dictionary do." },
+
+  { t: "trace", intro: "Step counters, not stopwatches. Work out each value before opening the answer — every one is a fixed number you can reason out.", code: "def linear(n):\n    s = 0\n    for i in range(n):\n        s += 1\n    return s\ndef square(n):\n    s = 0\n    for i in range(n):\n        for j in range(n):\n            s += 1\n    return s\na = linear(50)\nb = square(50)\nc = b // a", steps: [
+    { q: "After line 12, <code>a</code> is", answer: "50", why: "One loop, one step per item. <code>O(n)</code> means exactly this: 50 items, 50 steps." },
+    { q: "After line 13, <code>b</code> is", answer: "2500", why: "The inner loop runs 50 times for <b>each</b> of the outer loop's 50 passes — 50 × 50. That multiplication is where the squared comes from." },
+    { q: "After line 14, <code>c</code> is", answer: "50", why: "The quadratic version does 50 times more work than the linear one at this size — and that multiplier is <b>not fixed</b>. At n = 1000 it would be 1000 times more. The gap grows with your data, which is the whole reason Big-O is worth learning." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Work it out before opening the answer.", items: [
+    { task: "Count the steps of a single loop over 25 items.", code: "s = 0\nfor i in range(25):\n    s += 1\nprint(s)", out: "25" },
+    { task: "Count the steps of a loop inside a loop over 25 items.", code: "s = 0\nfor i in range(25):\n    for j in range(25):\n        s += 1\nprint(s)", out: "625" },
+    { task: "Count how many halvings it takes to reduce 64 to 1.", code: "n = 64\ns = 0\nwhile n > 1:\n    n = n // 2\n    s += 1\nprint(s)", out: "6" },
+    { task: "Show that reading the last item of a big list is one operation, by printing it.", code: "big = list(range(100000))\nprint(big[-1])", out: "99999" },
+    { task: "Print the length of a large list — Python stores it, so this never counts.", code: "print(len(list(range(50000))))", out: "50000" },
+    { task: "Count the steps a list search takes to find the last item of 30.", code: "items = list(range(30))\ns = 0\nfor x in items:\n    s += 1\n    if x == 29:\n        break\nprint(s)", out: "30" },
+    { task: "Show that a set answers the same question without searching.", code: "items = set(range(30))\nprint(29 in items)", out: "True" },
+    { task: "Turn a list into a set so membership checks stop scanning.", code: "ids = [4, 8, 15]\nfast = set(ids)\nprint(8 in fast)", out: "True" },
+    { task: "Count the steps of a loop that skips two at a time over 100 items.", code: "s = 0\nfor i in range(0, 100, 2):\n    s += 1\nprint(s)", out: "50" },
+    { task: "Show that halving a million takes under twenty steps.", code: "n = 1000000\ns = 0\nwhile n > 1:\n    n = n // 2\n    s += 1\nprint(s < 20)", out: "True" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "if user_id in all_ids:   # all_ids is a list, inside a loop", why: "Each check walks the list from the start. Inside a loop over the same data that is <code>O(n²)</code> — fine on the 50-row sample you tested with, hours on the real file. Nothing errors, so nobody looks here.", fix: "all_ids = set(all_ids)   # build once, then check\nif user_id in all_ids:" },
+    { bad: "rows.insert(0, new_row)   # in a loop", why: "Inserting at the <b>front</b> of a list has to shift every other item along by one, so it is <code>O(n)</code> per insert and <code>O(n²)</code> in a loop. Appending to the end does not move anything.", fix: "rows.append(new_row)   # then reverse once at the end if you need it" },
+    { bad: '"the code is fast, I timed it"', why: "You timed it on <b>your</b> data on <b>your</b> machine. Timing measures one point; Big-O tells you the shape of the curve. A quadratic algorithm is fast on small input right up to the moment it is not.", fix: "Ask how the steps grow when the input doubles — the answer does not depend on hardware." },
+    { bad: "for i in range(len(items)):\n    if items[i] in items[i+1:]:", why: "The slice <code>items[i+1:]</code> <b>copies</b> the rest of the list on every pass, so this is quadratic in memory as well as in time. Slices are cheap to write and are not free.", fix: "seen = set()\nfor x in items:\n    if x in seen: ...\n    seen.add(x)" },
+  ]},
+
+  { t: "debug", intro: "This finds the duplicate IDs and gets the right answer. It is also doing far more work than it needs to, and the step counter shows it. Read it before opening the fix.", code: "ids = [5, 3, 5, 9, 3]\nseen = []\ndupes = []\nsteps = 0\n\nfor i in ids:\n    for s in seen:\n        steps += 1\n        if s == i:\n            dupes.append(i)\n    seen.append(i)\n\nprint(sorted(dupes), steps)", symptom: "prints [3, 5] 10 — the right answer, but ten comparisons for five IDs", q: "There are only five IDs. Where did ten comparisons come from — and what happens to that number on a file with fifty thousand?", fix: "ids = [5, 3, 5, 9, 3]\nseen = set()\ndupes = []\nsteps = 0\n\nfor i in ids:\n    steps += 1\n    if i in seen:\n        dupes.append(i)\n    seen.add(i)\n\nprint(sorted(dupes), steps)", why: "The inner <code>for s in seen</code> re-reads everything collected so far, every single time round — 0 + 1 + 2 + 3 + 4 = 10 comparisons for five IDs. That is <code>O(n²)</code>.<br/><br/>The fix does one check per ID, whatever the size, because a set <b>calculates</b> where the value would be instead of looking through what is there. Five IDs, five steps.<br/><br/>Now scale both. At 50,000 IDs the first version does about <b>1.25 billion</b> comparisons and the second does 50,000. Same answer, same output, and one of them finishes. This is the whole reason the chapter exists: at n = 5 the difference is 10 against 5 and looks like nothing — which is exactly why it survives code review and reaches production." },
+
+  { t: "recap", items: [
+    "Big-O measures how the work <b>grows</b> with the data — not seconds, and not your machine",
+    "Count steps, not time: the count is exact and the same everywhere",
+    "One loop is <code>O(n)</code>; a loop inside a loop over the same data is <code>O(n²)</code>",
+    "Halving the data each step is <code>O(log n)</code> — a million items in nineteen steps",
+    "Index access, <code>len()</code>, and set/dict lookup are <code>O(1)</code> — size does not matter",
+    "<code>x in list</code> scans; <code>x in set</code> calculates. Inside a loop that is the whole difference",
+    "A quadratic algorithm always passes a small test and always fails on real data",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What does <code>O(n)</code> mean?", a: "The work grows in step with the input: twice the data, twice the steps. It describes the <b>shape of the growth</b>, not a number of seconds — the same <code>O(n)</code> code runs at different speeds on different machines, and the classification does not change." },
+    { level: "beginner", q: "What is the complexity of looking up a value in a dictionary?", a: "<code>O(1)</code> on average. The key is hashed into a number that says which slot to look in, so nothing is searched — the location is calculated. That is why a dictionary lookup costs the same on ten entries and ten crore." },
+    { level: "intermediate", q: "Why is <code>x in some_list</code> slower than <code>x in some_set</code>?", a: "A list has no idea where anything is, so <code>in</code> compares against each item until it finds a match — <code>O(n)</code>, and the worst case is a value that is not there at all, which checks every single item. A set hashes <code>x</code> and looks in one place: <code>O(1)</code>. Converting the list to a set once, before a loop, is one of the highest-value one-line changes there is." },
+    { level: "intermediate", q: "Why do we ignore constants in Big-O — is <code>O(2n)</code> not worse than <code>O(n)</code>?", a: "It is worse, by a fixed factor of two. Big-O deliberately drops that because it answers a different question: what happens as the input grows without limit. A factor of two never changes, while the difference between <code>O(n)</code> and <code>O(n²)</code> grows without bound — so on a big enough input the shape always dominates the constant. For small, fixed-size data the constant may matter more, and then you measure instead of classifying." },
+    { level: "advanced", q: "You have a loop over a lakh rows, and inside it a lookup against a lakh known IDs. What is the complexity, and how do you fix it?", a: "As written with a list it is <code>O(n × m)</code> — about ten billion comparisons, which will not finish in reasonable time. Building a set from the IDs <b>once, before the loop</b>, costs <code>O(m)</code> and makes each lookup <code>O(1)</code>, giving <code>O(n + m)</code> overall: about two lakh operations instead of ten billion.<br/><br/>The detail worth saying out loud is <b>where</b> the conversion goes. Writing <code>if x in set(all_ids)</code> inside the loop rebuilds the set on every row and is <i>slower</i> than the list version — the work must be hoisted out of the loop to count." },
+  ]},
+];
+
 /* ------------------------------------------------------------------ */
 /* Lessons + their problems                                            */
 /* ------------------------------------------------------------------ */
@@ -4148,6 +4237,11 @@ const pythonLessons = [
       ["You can multiply a string by a number: text * n.", 'With text="x" and n=0, the result is an empty string.'], ["clean-code"]) ]},
 
   { slug: "project-git", order: 41, title: "Project Structure & Git Basics", minutes: 10, content: L38, problems: [] },
+
+  /* DSA starts here — the interview half of the Python track. It sits after
+     project-git on purpose: everything below assumes the language is no longer
+     the hard part, so the lesson can be about the algorithm instead. */
+  { slug: "big-o", order: 42, title: "Big-O — How Fast Does It Grow?", minutes: 16, content: L41, problems: [] },
 ];
 
 /* ===================== STATISTICS lessons ===================== */
@@ -8821,6 +8915,22 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "big-o": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "What does Big-O actually measure?", options: ["How many seconds the code takes", "How the number of steps grows as the input grows", "How much memory your machine has", "How many lines the code is"], correct: 1, why: "It describes the shape of the growth, not a duration. The same algorithm runs at different speeds on different machines and its Big-O never changes — which is exactly why it is worth talking about." },
+    { level: "easy", q: "One loop over <code>n</code> items is", options: ["<code>O(1)</code>", "<code>O(n)</code>", "<code>O(n²)</code>", "<code>O(log n)</code>"], correct: 1, why: "One pass, one step per item: twice the data means twice the work. This is where most ordinary code sits, and it is a perfectly good place to be." },
+    { level: "easy", q: "A loop inside a loop, both over the same <code>n</code> items, is", options: ["<code>O(n)</code>", "<code>O(2n)</code>", "<code>O(n²)</code>", "<code>O(log n)</code>"], correct: 2, why: "The inner loop runs <code>n</code> times for each of the outer loop's <code>n</code> passes, so the steps multiply rather than add. At n = 1000 that is a million steps against a thousand." },
+    { level: "easy", q: "Which of these does NOT get slower as the collection grows?", options: ["<code>x in some_list</code>", "<code>some_list[0]</code>", "Looping over the list", "Sorting the list"], correct: 1, why: "Reaching an item by index is a direct jump — the position is calculated, so the size is irrelevant. That is <code>O(1)</code>. The other three all have to touch every item, or many of them." },
+    // Medium — apply it
+    { level: "medium", q: "Halving a collection until one item is left, starting from 1024 items, takes about how many steps?", options: ["10", "32", "512", "1024"], correct: 0, why: "1024 → 512 → 256 → 128 → 64 → 32 → 16 → 8 → 4 → 2 → 1 is ten halvings. That is <code>O(log n)</code>, and it is why a million items needs only about nineteen steps — the single biggest speed-up in this lesson." },
+    { level: "medium", q: "Why is <code>x in some_set</code> faster than <code>x in some_list</code>?", options: ["Sets are stored in faster memory", "A set is always smaller", "The set calculates where the value would be; the list compares against each item", "Lists are not optimised in Python"], correct: 2, why: "The set hashes the value into a number that says which slot to check, so it looks in one place — <code>O(1)</code>. The list has no idea where anything is, so it walks through comparing — <code>O(n)</code>, and the worst case is a value that is not there, which checks every item." },
+    { level: "medium", q: "Your code handles a 500-row test file instantly and takes hours on 200,000 rows. What is the most likely cause?", options: ["The machine is running out of memory", "A quadratic step, such as a list membership check inside a loop", "Python is slow at reading files", "The file is corrupted"], correct: 1, why: "The work grew far faster than the data did, which is the signature of an <code>O(n²)</code> step. It passed testing precisely because 500 rows is too small for the gap to show — quadratic code is always fast right up to the point where it is not." },
+    { level: "medium", q: "Appending to the end of a list is cheap. Why is <code>list.insert(0, x)</code> expensive?", options: ["It has to copy the whole list", "It has to shift every existing item along by one", "It re-sorts the list", "It converts the list to a tuple first"], correct: 1, why: "Everything after position 0 moves up one slot, so a single insert is <code>O(n)</code> and doing it in a loop is <code>O(n²)</code>. Appending disturbs nothing, so it stays cheap." },
+    // Hard — the traps
+    { level: "hard", q: "You loop over a lakh rows and, inside the loop, write <code>if x in set(all_ids)</code>. Why is this <b>slower</b> than using a list?", options: ["Sets use more memory than lists", "The set is rebuilt from scratch on every single row", "Converting to a set sorts it first", "It is not slower — it is faster"], correct: 1, why: "The conversion is inside the loop, so a fresh set is built a lakh times, each build costing <code>O(m)</code>. That is strictly more work than just scanning the list. The whole benefit depends on hoisting <code>all_ids = set(all_ids)</code> <b>above</b> the loop so it happens once." },
+    { level: "hard", q: "Why does Big-O ignore constant factors — is <code>O(2n)</code> not genuinely worse than <code>O(n)</code>?", options: ["Constants are too hard to measure", "It is worse by a fixed factor, but Big-O answers what happens as input grows without limit", "Modern computers make constants irrelevant", "<code>O(2n)</code> is not a real classification"], correct: 1, why: "Twice the work is twice the work, and on small fixed-size data it may be what matters. But the factor of two never changes, while the gap between <code>O(n)</code> and <code>O(n²)</code> grows without bound — so on a large enough input the shape always dominates the constant. When the constant is what matters, you measure rather than classify." },
+    { level: "hard", q: "<code>for i in range(len(items)): if items[i] in items[i+1:]</code> — beyond being quadratic in time, what else is wrong?", options: ["Nothing else, it is only slow", "The slice copies the rest of the list on every pass, so it is quadratic in memory too", "It skips the last item", "It raises IndexError on the final pass"], correct: 1, why: "<code>items[i+1:]</code> builds a brand new list each time round, so the allocation cost is on top of the comparison cost. Slices are cheap to type and are not free — this is worth remembering every time one appears inside a loop." },
+  ],
   "oop-advanced": [
     // Easy — did the core idea land?
     { level: "easy", q: "Where does a <b>class attribute</b> live?", options: ["On each object, created by <code>__init__</code>", "In the class body, shared by every instance", "In a separate file", "It is created the first time you read it"], correct: 1, why: "It is written in the class body and belongs to the class itself, so every instance sees the same value. An instance attribute is the other one — created with <code>self.x = ...</code>, one per object." },
