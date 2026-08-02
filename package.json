@@ -18,7 +18,8 @@
     "syllabus": "node prisma/check-syllabus.mjs",
     "db:chapters": "node prisma/apply-chapters.mjs",
     "test:8085": "node prisma/test-asm8085.mjs",
-    "test:errors": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-error-help.mjs"
+    "test:errors": "node --experimental-strip-types --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/test-error-help.mjs",
+    "test:sklearn": "node scripts/test-sklearn.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
