@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { play as playCue } from "@/lib/sound";
 
 const LINES = [
   "Another skill locked in. Keep this up daily — the job is not far. 🚀",
@@ -51,6 +52,11 @@ export function Celebrate({
   // Pick the motivational line once on mount (lazy init keeps Math.random out of
   // the render body and stable across re-renders).
   const [line] = useState(() => sub ?? LINES[Math.floor(Math.random() * LINES.length)]);
+
+  // The one cue that gets three notes. This dialog only appears on a genuine
+  // solve, and it is always the result of the student pressing Submit — so the
+  // browser's autoplay gate has already been satisfied by that click.
+  useEffect(() => { playCue("solve"); }, []);
 
   // Escape closes it. Clicking the backdrop already did, but a keyboard user had
   // no way out of a dialog that appears at the best moment in the app.

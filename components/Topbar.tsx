@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MODE_KEY, THEME_KEY, themeNow, scheduleHint } from "@/lib/theme-schedule";
+import { isMuted as soundIsMuted, setMuted as soundSetMuted, play as playCue } from "@/lib/sound";
 
 const titles: Record<string, [string, string]> = {
   "/dashboard": ["{greeting}, {name}", "Today's target — read one topic, then solve five problems."],
@@ -58,6 +59,8 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   const [theme, setTheme] = useState<string>("light");
   const [auto, setAuto] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  // null until the effect below has read localStorage — see the button's comment.
+  const [muted, setMuted] = useState<boolean | null>(null);
   const [toast, setToast] = useState<{ name: string; need: number } | null>(null);
   const themeRef = useRef<HTMLDivElement>(null);
 
@@ -65,6 +68,12 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState<Item[] | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Same external-store case as the theme below: the sound preference lives in
+  // localStorage, which does not exist on the server, so it cannot be read
+  // during render without hydrating to a different icon than was sent.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMuted(soundIsMuted()); }, []);
 
   // Same external-store case as TodoList: the saved theme and the OS dark-mode
   // preference are both browser-only, so this cannot run before mount. It also
@@ -218,6 +227,28 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
             <Link href="/signup" className="btn btn-primary gc-btn">Start free</Link>
           </div>
         )}
+        {/* Read in an effect, like the theme above it: localStorage does not
+            exist on the server, so reading it during render would hydrate to a
+            different icon than the server sent. `muted === null` means "not
+            known yet" and renders nothing, so there is no flash of the wrong
+            state either. */}
+        <button
+          className="icon-btn"
+          onClick={() => { const next = !muted; setMuted(next); soundSetMuted(next); if (!next) playCue("correct"); }}
+          aria-label={muted ? "Turn sound on" : "Turn sound off"}
+          aria-pressed={muted === false}
+          title={muted ? "Sound off" : "Sound on"}
+        >
+          {muted === null ? null : muted ? (
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="m17 9 4 6m0-6-4 6" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M11 5 6 9H3v6h3l5 4V5Z" /><path d="M16 9a4 4 0 0 1 0 6" /><path d="M19 6.5a8 8 0 0 1 0 11" />
+            </svg>
+          )}
+        </button>
         <div className="theme-wrap" ref={themeRef}>
           <button className="icon-btn" onClick={() => setMenuOpen((v) => !v)} aria-label="Choose theme" aria-expanded={menuOpen}>
             <span className="theme-sw" style={{ width: 18, height: 18, background: current.sw }} />

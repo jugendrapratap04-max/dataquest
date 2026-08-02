@@ -9,6 +9,7 @@ import { runTests, type RunResult, type TestCase } from "@/lib/pyodide-runner";
 import { formatDuration } from "@/lib/duration";
 import { Celebrate } from "@/components/Celebrate";
 import { ErrorHelp } from "@/components/ErrorHelp";
+import { play as playCue } from "@/lib/sound";
 
 export type ProblemData = {
   id: string; title: string; difficulty: string; tags: string[];
@@ -116,6 +117,9 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     try {
       const r = await runTests(code, p.functionName, p.tests);
       setResult(r);
+      // Cue the outcome, not the click. `fail` is the softer of the two on
+      // purpose — see lib/sound.ts.
+      playCue(r.compiled && r.passed === r.total && r.total > 0 ? "pass" : "fail");
       if (submit) {
         const passed = r.compiled && r.passed === r.total && r.total > 0;
         const resp = await fetch("/api/submit", {

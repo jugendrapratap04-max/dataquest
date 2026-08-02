@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { play as playCue } from "@/lib/sound";
 
 type Level = "easy" | "medium" | "hard";
 type Q = { q: string; options: string[]; correct: number; why: string; level?: Level };
@@ -64,8 +65,13 @@ function Question({
 export function LessonQuiz({ items }: { items: Q[] }) {
   const [ans, setAns] = useState<(number | null)[]>(() => items.map(() => null));
 
-  const choose = (qi: number, oi: number) =>
+  const choose = (qi: number, oi: number) => {
+    if (ans[qi] !== null) return;              // already answered; stay silent
+    // Deliberately OUTSIDE the state updater: React may call an updater twice
+    // in StrictMode, which would play the cue twice.
+    playCue(oi === items[qi].correct ? "correct" : "wrong");
     setAns((a) => (a[qi] !== null ? a : a.map((v, i) => (i === qi ? oi : v))));
+  };
 
   const answered = ans.filter((a) => a !== null).length;
   const done = answered === items.length;
