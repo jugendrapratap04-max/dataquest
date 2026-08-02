@@ -139,8 +139,8 @@ export const SYLLABUS = [
   { group: "DSA (interview-critical)", topics: [
     { t: "Big-O / complexity", covers: ["big-o"] },
     { t: "Arrays and lists as data structures", covers: ["big-o", "lists-tuples"] },
-    { t: "Stacks", covers: [] },
-    { t: "Queues", covers: [] },
+    { t: "Stacks", covers: ["stacks-queues"] },
+    { t: "Queues", covers: ["stacks-queues"] },
     { t: "Linked lists", covers: [] },
     { t: "Hash tables", covers: [] },
     { t: "Trees", covers: [] },

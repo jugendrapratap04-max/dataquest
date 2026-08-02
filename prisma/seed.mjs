@@ -3807,6 +3807,93 @@ const L41 = [
   ]},
 ];
 
+const L42 = [
+  { t: "objectives", items: [
+    "Build a stack with an ordinary list, and know what LIFO buys you",
+    "Recognise the stack you have been using all along without naming it",
+    "Build a queue, and know why a plain list is the wrong tool for one",
+    "Reach for <code>deque</code> when items leave from the front",
+  ]},
+  { t: "hook", q: "Undo in your editor, the back button in your browser, and the traceback Python prints when your code crashes — all three are the same data structure. Which one?", why: "A <b>stack</b>. Undo takes back the <i>last</i> thing you did, the back button returns to the page you were on <i>most recently</i>, and a traceback lists the function that failed first and the one that started it last. Once you see the shape, you find it everywhere — and you have been using it since your first function call." },
+  { t: "think", q: "A stack and a queue both hold items and hand them back one at a time. What is the only difference?", a: "<b>Which end they come out of.</b><br/><br/>A stack hands back the item that went in <b>last</b> — like a pile of plates, where you take the one on top. A queue hands back the one that went in <b>first</b> — like the line at a ticket counter.<br/><br/>That is the whole distinction, and it is the one the interviewer is checking you can state in a sentence: <b>LIFO</b> versus <b>FIFO</b>. Everything else about them follows from it." },
+
+  { t: "h2", n: "1", text: "A stack — last in, first out" },
+  { t: "def", term: "Stack", en: "A stack is a collection where items are added and removed at the same end, so the last item in is the first one out (LIFO).", hi: "In Python you do not need a special type: a plain list already does exactly this. <code>append</code> puts one on top, <code>pop</code> takes the top one off." },
+  { t: "p", html: "Both operations happen at the <b>end</b> of the list, which is the cheap end — nothing else has to move, so both are <code>O(1)</code>." },
+  { t: "code", file: "stack.py", code: "stack = []\n\nstack.append(\"a\")\nstack.append(\"b\")\nstack.append(\"c\")\nprint(stack)\n\nprint(stack.pop())   # the last one in\nprint(stack.pop())\nprint(stack)", output: "['a', 'b', 'c']\nc\nb\n['a']" },
+  { t: "viz", name: "list-indexer" },
+  { t: "p", html: "Watch the positions in that panel while you think about the next section. Everything a stack does happens at the <b>right-hand end</b>, and that is precisely why it is fast." },
+
+  { t: "h2", n: "2", text: "The stack you already use" },
+  { t: "p", html: "You have been running a stack since your first function call. When <code>a()</code> calls <code>b()</code>, Python pushes a frame for <code>b</code> on top of <code>a</code>'s. When <code>b</code> returns, its frame pops off. That pile is the <b>call stack</b> — and it is why a traceback reads bottom-to-top, and why runaway recursion raises <code>RecursionError</code>: the pile got too tall." },
+  { t: "p", html: "The classic interview use is checking that brackets match. Every opening bracket is pushed; every closing one must match whatever is on top." },
+  { t: "code", file: "brackets.py", code: "def balanced(text):\n    stack = []\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n\n    for ch in text:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in pairs:\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n\n    return not stack\n\nprint(balanced(\"(a[b]{c})\"))\nprint(balanced(\"(a[b)]\"))\nprint(balanced(\"((\"))", output: "True\nFalse\nFalse" },
+  { t: "note", variant: "tip", html: "Three things are being checked at once, and each is a line: a closing bracket with an <b>empty</b> stack (<code>not stack</code>) means one was never opened; a closing bracket that does not match the top means they crossed over; and a non-empty stack at the <b>end</b> means something was never closed. Miss the last line and <code>\"((\"</code> reports as balanced." },
+
+  { t: "h2", n: "3", text: "A queue — first in, first out" },
+  { t: "def", term: "Queue", en: "A queue is a collection where items are added at one end and removed from the other, so the first item in is the first one out (FIFO).", hi: "The ticket counter. Whoever arrived first is served first, and joining means going to the back." },
+  { t: "p", html: "Python ships one that is built for it. <code>deque</code> — a double-ended queue — is cheap at <b>both</b> ends: <code>append</code> to join the back, <code>popleft</code> to serve the front." },
+  { t: "code", file: "queue.py", code: "from collections import deque\n\nq = deque()\nq.append(\"first\")\nq.append(\"second\")\nq.append(\"third\")\nprint(list(q))\n\nprint(q.popleft())   # the one that arrived first\nprint(q.popleft())\nprint(list(q))", output: "['first', 'second', 'third']\nfirst\nsecond\n['third']" },
+  { t: "analogy", concept: "Stack vs queue", real: "A pile of plates and a ticket counter", html: "Plates come out of the dishwasher and go on a <b>pile</b>. You take the top one — the one put down most recently. The plate at the bottom might sit there for weeks. That is a <b>stack</b>.<br/><br/>At a <b>ticket counter</b> the person who arrived first is served first, and joining means going to the back. Nobody waits forever. That is a <b>queue</b>.<br/><br/>Which one you want is a real decision: a stack is right for undo and for \"deal with the newest thing first\", a queue for anything where waiting your turn matters." },
+
+  { t: "h2", n: "4", text: "Why a plain list is the wrong queue" },
+  { t: "p", html: "A list <i>can</i> do it — <code>append</code> to the back, <code>pop(0)</code> to take from the front. It gives the right answer and it is a trap, because removing from the <b>front</b> means every remaining item shifts down one position." },
+  { t: "code", file: "shifting.py", code: "def shift_cost(n):\n    # each pop(0) moves every remaining item along by one\n    steps = 0\n    remaining = n\n    while remaining > 0:\n        steps += remaining - 1\n        remaining -= 1\n    return steps\n\nprint(shift_cost(5))\nprint(shift_cost(100))\nprint(shift_cost(1000))", output: "10\n4950\n499500" },
+  { t: "note", variant: "warn", html: "Emptying a 1000-item queue with <code>pop(0)</code> costs about half a million item-moves; a <code>deque</code> costs 1000. That is the <code>O(n²)</code>-versus-<code>O(n)</code> difference from the Big-O lesson, in the one place beginners meet it first.<br/><br/>The rule is simple enough to memorise: <b>items leaving from the front means <code>deque</code>, not <code>list</code></b>. Popping from the end is fine — that is a stack, and a list is perfect for it." },
+
+  { t: "h2", n: "5", text: "Choosing between them" },
+  { t: "p", html: "Ask one question: <b>which item should come out next — the newest or the oldest?</b>" },
+  { t: "code", file: "choosing.py", code: "from collections import deque\n\n# newest first -> stack -> a list is fine\nhistory = []\nhistory.append(\"page1\")\nhistory.append(\"page2\")\nprint(\"back to:\", history.pop())\n\n# oldest first -> queue -> use a deque\njobs = deque([\"job1\", \"job2\"])\njobs.append(\"job3\")\nprint(\"running:\", jobs.popleft())\nprint(\"waiting:\", list(jobs))", output: "back to: page2\nrunning: job1\nwaiting: ['job2', 'job3']" },
+  { t: "note", variant: "key", html: "💼 <b>On the job:</b> queues are how work gets shared out — a job queue, a message queue, rows waiting to be processed. Stacks are how you walk a structure without recursion: pushing folders to visit is how you search a directory tree, and swapping that stack for a queue changes the search from depth-first to breadth-first without touching another line. Same code, one data structure changed." },
+
+  { t: "trace", intro: "A stack and a queue side by side. Work out each value before opening the answer — the whole lesson is in the difference between lines 4 and 8.", code: "stack = []\nstack.append(1)\nstack.append(2)\ntop = stack.pop()\nsize = len(stack)\nfrom collections import deque\nq = deque([1, 2, 3])\nfirst = q.popleft()\nleft = len(q)", steps: [
+    { q: "After line 4, <code>top</code> is", answer: "2", why: "<code>pop()</code> with no argument takes from the <b>end</b> — the item added most recently. That is the stack, and 2 went in after 1." },
+    { q: "After line 5, <code>size</code> is", answer: "1", why: "Two went in, one came out. <code>pop</code> removes as well as returns, which is what makes it different from just reading <code>stack[-1]</code>." },
+    { q: "After line 9, <code>left</code> is", answer: "2", why: "<code>popleft()</code> took the <b>first</b> item, 1, leaving two behind. Same size change as the stack, opposite end — and on a long queue that choice of end is the whole performance difference." },
+  ]},
+
+  { t: "drills", intro: "One idea each. Write it before opening the answer.", items: [
+    { task: "Push two items onto a stack and print it.", code: "s = []\ns.append(\"a\")\ns.append(\"b\")\nprint(s)", out: "['a', 'b']" },
+    { task: "Pop the top item off a stack and print it.", code: "s = [\"a\", \"b\"]\nprint(s.pop())", out: "b" },
+    { task: "Look at the top of a stack <b>without</b> removing it.", code: "s = [\"a\", \"b\"]\nprint(s[-1])\nprint(s)", out: "b\n['a', 'b']" },
+    { task: "Print whether a stack is empty.", code: "s = []\nprint(len(s) == 0)", out: "True" },
+    { task: "Reverse a word using a stack.", code: "s = list(\"stack\")\nout = \"\"\nwhile s:\n    out += s.pop()\nprint(out)", out: "kcats" },
+    { task: "Make a queue with a deque and print it as a list.", code: "from collections import deque\nq = deque([\"a\", \"b\"])\nprint(list(q))", out: "['a', 'b']" },
+    { task: "Serve the front of a queue.", code: "from collections import deque\nq = deque([\"a\", \"b\"])\nprint(q.popleft())\nprint(list(q))", out: "a\n['b']" },
+    { task: "Join the back of a queue, then serve one.", code: "from collections import deque\nq = deque([\"a\"])\nq.append(\"b\")\nprint(q.popleft())", out: "a" },
+    { task: "Empty a queue in arrival order.", code: "from collections import deque\nq = deque([1, 2, 3])\nout = []\nwhile q:\n    out.append(q.popleft())\nprint(out)", out: "[1, 2, 3]" },
+    { task: "Empty a stack, showing the reversed order.", code: "s = [1, 2, 3]\nout = []\nwhile s:\n    out.append(s.pop())\nprint(out)", out: "[3, 2, 1]" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "queue = []\n...\nnext_item = queue.pop()", why: "<code>pop()</code> with no argument takes from the <b>end</b>, so this serves the newest arrival first. The code runs perfectly and the order is silently backwards — the newest customer is served and the first one waits forever.", fix: "next_item = queue.pop(0)   # better: use a deque and popleft()" },
+    { bad: "queue.pop(0)   # inside a loop over a long queue", why: "Right answer, wrong cost. Every removal shifts the whole remaining list down one position, so emptying an n-item queue is <code>O(n²)</code>. It is fine on ten items and unusable on a lakh.", fix: "from collections import deque\nqueue = deque(...)\nqueue.popleft()" },
+    { bad: "top = stack[-1]\n# ... assuming the item is now gone", why: "<code>stack[-1]</code> <b>reads</b> the top without removing it. If you meant to take it, the item is still there and the next pass sees it again — an infinite loop in the making.", fix: "top = stack.pop()   # reads AND removes" },
+    { bad: "if stack.pop() == expected:", why: "Popping an <b>empty</b> stack raises <code>IndexError</code>. In bracket-matching and tree-walking code the empty case is not rare — it is the exact case that means the input was malformed, which is what you were checking for.", fix: "if stack and stack.pop() == expected:" },
+  ]},
+
+  { t: "debug", intro: "Customers are served in the order they arrived — or so this claims. It runs cleanly and serves them in the wrong order. Read it before opening the fix.", code: "queue = []\nqueue.append(\"Priya\")\nqueue.append(\"Rahul\")\nqueue.append(\"Sana\")\n\nserved = []\nwhile queue:\n    served.append(queue.pop())\n\nprint(served)", symptom: "prints ['Sana', 'Rahul', 'Priya'] — Sana arrived last and was served first", q: "The names were appended in the right order. So how did Sana end up being served first?", fix: "queue = []\nqueue.append(\"Priya\")\nqueue.append(\"Rahul\")\nqueue.append(\"Sana\")\n\nserved = []\nwhile queue:\n    served.append(queue.pop(0))\n\nprint(served)", why: "<code>pop()</code> with no argument always takes from the <b>end</b> of the list. That is exactly right for a stack and exactly wrong for a queue — so this code built a perfectly good stack while the variable was called <code>queue</code>.<br/><br/>Nothing errors, because both are legal operations on a list. The only symptom is an order that is backwards, and on a list of three that is easy to miss in a log file.<br/><br/><code>pop(0)</code> fixes the order and is the right answer to the question asked. But note what it costs: every removal now shifts the remaining names down a position, so on a long queue this is the <code>O(n²)</code> trap from section 4. For anything beyond a handful of items the real fix is <code>deque</code> and <code>popleft()</code> — correct order <b>and</b> correct cost." },
+
+  { t: "recap", items: [
+    "A <b>stack</b> is LIFO — <code>append</code> and <code>pop</code> at the end; a plain list is ideal",
+    "A <b>queue</b> is FIFO — items leave from the opposite end to the one they joined",
+    "<code>pop()</code> takes from the end, <code>pop(0)</code> from the front — the bug is silent, not a crash",
+    "<code>pop(0)</code> shifts every remaining item, so a list queue is <code>O(n²)</code> to empty",
+    "Items leaving from the front means <code>collections.deque</code> and <code>popleft()</code>",
+    "<code>stack[-1]</code> reads the top; <code>stack.pop()</code> reads <b>and removes</b>",
+    "Popping an empty stack raises <code>IndexError</code> — check <code>if stack</code> first",
+    "The call stack is a stack: it is why tracebacks read bottom-up and why recursion can overflow",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "What is the difference between a stack and a queue?", a: "A stack is <b>LIFO</b> — the last item added is the first removed, like a pile of plates. A queue is <b>FIFO</b> — the first added is the first removed, like a ticket line. The only real difference is which end items leave from, and everything else follows from that." },
+    { level: "beginner", q: "How do you implement a stack in Python?", a: "A plain list. <code>append()</code> to push and <code>pop()</code> to take the top off — both operate on the end of the list, so both are <code>O(1)</code>. There is no need for a special type, and reaching for one is usually a sign of over-engineering." },
+    { level: "intermediate", q: "Why is a list a bad queue, and what do you use instead?", a: "Removing from the front with <code>pop(0)</code> shifts every remaining item down one position, so it is <code>O(n)</code> per removal and <code>O(n²)</code> to empty the queue. <code>collections.deque</code> is built for this: <code>append</code> and <code>popleft</code> are both <code>O(1)</code> because it is not stored as one contiguous block that has to be kept packed." },
+    { level: "intermediate", q: "Give a real use for each.", a: "Stack: undo history, the browser back button, matching brackets in a parser, and Python's own call stack. Queue: a job or message queue, requests waiting to be handled, and breadth-first search. The nice detail is that a graph search is the <b>same code</b> either way — swap the stack for a queue and depth-first becomes breadth-first." },
+    { level: "advanced", q: "Why is <code>deque.popleft()</code> <code>O(1)</code> when <code>list.pop(0)</code> is <code>O(n)</code>?", a: "A list is one contiguous block of references, and it guarantees that index <code>i</code> is always at a fixed offset — so removing the front means physically moving everything else down to keep that promise. A deque is a linked sequence of small blocks, so removing from either end only updates a pointer and a count; nothing moves.<br/><br/>The trade-off is the one worth naming: a deque gives up <code>O(1)</code> access by arbitrary index. <code>d[500]</code> has to walk the blocks. So it is the right choice when you work at the ends and the wrong one when you index into the middle." },
+  ]},
+];
+
 /* ------------------------------------------------------------------ */
 /* Lessons + their problems                                            */
 /* ------------------------------------------------------------------ */
@@ -4242,6 +4329,7 @@ const pythonLessons = [
      project-git on purpose: everything below assumes the language is no longer
      the hard part, so the lesson can be about the algorithm instead. */
   { slug: "big-o", order: 42, title: "Big-O — How Fast Does It Grow?", minutes: 16, content: L41, problems: [] },
+  { slug: "stacks-queues", order: 43, title: "Stacks & Queues", minutes: 16, content: L42, problems: [] },
 ];
 
 /* ===================== STATISTICS lessons ===================== */
@@ -8915,6 +9003,22 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "stacks-queues": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "A stack hands back which item?", options: ["The one added first", "The one added last", "The smallest one", "A random one"], correct: 1, why: "Last in, first out — like taking the top plate off a pile. The item at the bottom is the one that has been waiting longest, and it comes out last." },
+    { level: "easy", q: "A queue hands back which item?", options: ["The one added first", "The one added last", "The largest one", "Whichever is at index 1"], correct: 0, why: "First in, first out — the ticket counter. Whoever arrived first is served first, which is the whole point of a queue and the reason waiting your turn works." },
+    { level: "easy", q: "Which two list methods give you a stack?", options: ["<code>insert</code> and <code>remove</code>", "<code>append</code> and <code>pop</code>", "<code>append</code> and <code>pop(0)</code>", "<code>extend</code> and <code>clear</code>"], correct: 1, why: "Both work on the end of the list, which is the cheap end — nothing else has to move, so both are <code>O(1)</code>. A plain list is a perfectly good stack and needs no special type." },
+    { level: "easy", q: "What does <code>stack[-1]</code> do?", options: ["Removes and returns the top item", "Reads the top item without removing it", "Returns the first item", "Raises an error on a stack"], correct: 1, why: "It reads only. <code>pop()</code> is the one that reads <b>and</b> removes — confusing the two is how you end up with a loop that sees the same item forever." },
+    // Medium — apply it
+    { level: "medium", q: "You write <code>queue.pop()</code> on a list you are using as a queue. What happens?", options: ["<code>IndexError</code>", "It works correctly", "It serves the newest arrival first, with no error", "It empties the whole list"], correct: 2, why: "<code>pop()</code> with no argument takes from the end, so the code builds a perfectly good stack while the variable is called <code>queue</code>. Both operations are legal on a list, so nothing errors — the only symptom is an order that is silently backwards." },
+    { level: "medium", q: "Why is emptying an n-item queue with <code>pop(0)</code> <code>O(n²)</code>?", options: ["Because pop is slow in Python", "Because each removal shifts every remaining item down one position", "Because the list has to be re-sorted", "Because it copies the list each time"], correct: 1, why: "A list guarantees that index <code>i</code> sits at a fixed offset, so removing the front means physically moving everything else down to keep that promise. One removal is <code>O(n)</code>; doing it n times is <code>O(n²)</code>." },
+    { level: "medium", q: "Items need to leave from the front of a collection. What should you use?", options: ["<code>list</code> with <code>pop(0)</code>", "<code>collections.deque</code> with <code>popleft()</code>", "<code>set</code>", "<code>tuple</code>"], correct: 1, why: "A deque is cheap at <b>both</b> ends — <code>append</code> and <code>popleft</code> are both <code>O(1)</code>, because it is a linked sequence of blocks rather than one contiguous run that must be kept packed." },
+    { level: "medium", q: "In the bracket-matching example, why does the function end with <code>return not stack</code>?", options: ["To reset the stack for the next call", "Because a non-empty stack means something was opened and never closed", "To convert the stack to a boolean for speed", "It is optional and could be removed"], correct: 1, why: "Anything left on the stack at the end was pushed by an opening bracket that never met its closing partner. Drop that line and <code>\"((\"</code> is reported as balanced — the loop finished without complaint because nothing ever contradicted it." },
+    // Hard — the traps
+    { level: "hard", q: "Which structure is Python's own call stack, and what does it explain?", options: ["A queue — it explains why functions run in order", "A stack — it explains why tracebacks read bottom-up and why recursion can overflow", "A set — it explains why function names must be unique", "A dictionary — it explains variable lookup"], correct: 1, why: "Each call pushes a frame and each return pops one. That is why the traceback shows the failing function first and the one that started it last, and why runaway recursion raises <code>RecursionError</code> — the pile simply got too tall." },
+    { level: "hard", q: "You have a graph search using a stack. You swap it for a queue and change nothing else. What happens?", options: ["It breaks", "Depth-first search becomes breadth-first search", "It becomes faster but returns the same order", "It visits each node twice"], correct: 1, why: "The structure decides which node you look at next: a stack keeps diving into the most recently found path, a queue works outward level by level. It is one of the neatest results in this area — the same code, one data structure changed, a completely different traversal." },
+    { level: "hard", q: "A deque makes <code>popleft()</code> <code>O(1)</code>. What does it give up in exchange?", options: ["Nothing — it is strictly better than a list", "<code>O(1)</code> access by arbitrary index; <code>d[500]</code> has to walk the blocks", "It cannot hold strings", "It has a fixed maximum size"], correct: 1, why: "A list is one contiguous block, which is exactly what makes index access instant and front-removal expensive. A deque is a linked sequence of small blocks — the opposite bargain. So a deque is right when you work at the ends and wrong when you index into the middle." },
+  ],
   "big-o": [
     // Easy — did the core idea land?
     { level: "easy", q: "What does Big-O actually measure?", options: ["How many seconds the code takes", "How the number of steps grows as the input grows", "How much memory your machine has", "How many lines the code is"], correct: 1, why: "It describes the shape of the growth, not a duration. The same algorithm runs at different speeds on different machines and its Big-O never changes — which is exactly why it is worth talking about." },
