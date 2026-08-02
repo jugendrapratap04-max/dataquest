@@ -146,6 +146,33 @@ function Block({ b, n }: { b: any; n: number }) {
         </div>
       );
 
+    // The book used to drop `faded` entirely. On screen it is an interactive
+    // fill-in-the-blank, so it was filtered out with the other interactive
+    // blocks — but unlike a hook or a quiz prompt, it carries teaching that
+    // exists nowhere else: it is the middle rung of the worked → faded → blank
+    // page ladder. A reader of the printed notes went straight from the solved
+    // example to the unaided exercises.
+    //
+    // Paper cannot take typed answers, so it becomes a static exercise: the code
+    // with its blanks, then the answers with the reason each one is what it is.
+    case "faded":
+      return (
+        <div className="bk-ex">
+          <h4>Fill in the blanks</h4>
+          {b.intro && <p dangerouslySetInnerHTML={html(b.intro)} />}
+          <pre dangerouslySetInnerHTML={html(highlightPython(b.code))} />
+          {b.output && <div className="bk-out">Output:{"\n"}{b.output}</div>}
+          <ol>
+            {b.blanks.map((k: any, i: number) => (
+              <li key={i}>
+                <code>{k.answer}</code>
+                {k.why && <span dangerouslySetInnerHTML={html(" — " + k.why)} />}
+              </li>
+            ))}
+          </ol>
+        </div>
+      );
+
     case "quiz":
       return (
         <div className="bk-ex">
@@ -190,13 +217,17 @@ function Block({ b, n }: { b: any; n: number }) {
       return <p className="bk-viz">↗ This part has an interactive visualisation — open the lesson online to use it.</p>;
 
     default:
-      return null; // hook, think, faded, objectives handled separately
+      // `objectives` is rendered by BookChapter below, as the chapter opener.
+      // `hook` and `think` are deliberately dropped: both are questions posed to
+      // a reader who can answer interactively, and neither carries teaching the
+      // rest of the chapter does not repeat.
+      return null;
   }
 }
 
 export function BookChapter({ n, title, blocks, slug }: { n: number; title: string; blocks: any[]; slug: string }) {
   const objectives = blocks.find((b) => b.t === "objectives");
-  const body = blocks.filter((b) => !["objectives", "hook", "think", "faded"].includes(b.t));
+  const body = blocks.filter((b) => !["objectives", "hook", "think"].includes(b.t));
 
   return (
     <section className="bk-chapter" id={slug}>

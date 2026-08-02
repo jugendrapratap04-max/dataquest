@@ -22,13 +22,24 @@ const prisma = new PrismaClient();
 // chapter. Only Python is split for real so far — it is the only subject whose
 // 39 lessons are all written.
 const PLANS = {
+  // ⚠️ `upto` is a lesson ORDER, so INSERTING a lesson mid-track silently
+  // changes which chapter every later lesson belongs to, and anything past the
+  // last `upto` gets no chapter at all — which means it vanishes from /book
+  // while still looking fine everywhere else. That is exactly what happened
+  // when the track went 39 → 47: two lessons were inserted mid-track and six
+  // appended, and all eight ended up chapterless.
+  //
+  // So: after inserting or appending a lesson, re-check these boundaries and
+  // re-run `npm run db:chapters`. Boundaries below are correct for the 47-lesson
+  // track — verify with the order list before trusting them again.
   python: [
     { slug: "py-foundations", title: "Foundations", upto: 8, summary: "Running code, variables, operators, conditionals, loops and the core collections." },
-    { slug: "py-working-with-data", title: "Working with data", upto: 17, summary: "Functions, strings, comprehensions, objects, errors, files, modules and booleans." },
-    { slug: "py-everyday-python", title: "Everyday Python", upto: 23, summary: "Numbers, formatting, lambdas, scope, JSON, dates and the wider operator set." },
-    { slug: "py-objects-and-flow", title: "Objects and control", upto: 30, summary: "Match-case, recursion, inheritance, encapsulation, dunder methods, generators, decorators and regex." },
-    { slug: "py-standard-library", title: "The standard library", upto: 35, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
-    { slug: "py-shipping-code", title: "Shipping code", upto: 39, summary: "Testing, debugging and logging, clean code, project structure and git." },
+    { slug: "py-working-with-data", title: "Working with data", upto: 18, summary: "Functions, strings, comprehensions, objects, errors, files, modules and booleans." },
+    { slug: "py-everyday-python", title: "Everyday Python", upto: 24, summary: "Numbers, formatting, lambdas, scope, JSON, dates, the wider operator set and match-case." },
+    { slug: "py-objects-and-flow", title: "Objects and control", upto: 32, summary: "Recursion, inheritance, encapsulation, dunder methods, class attributes and the MRO, generators, decorators and regex." },
+    { slug: "py-standard-library", title: "The standard library", upto: 37, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
+    { slug: "py-shipping-code", title: "Shipping code", upto: 41, summary: "Testing, debugging and logging, clean code, project structure and git." },
+    { slug: "py-dsa", title: "Data structures & algorithms", upto: 47, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, and the Python reference." },
   ],
   // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at
