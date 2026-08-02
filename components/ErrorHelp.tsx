@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { explainError } from "@/lib/error-help";
+import { explainError, explainSqlError } from "@/lib/error-help";
 
 /**
  * The plain-English explanation shown under a raw Python error.
@@ -25,8 +25,8 @@ function withCode(text: string) {
   );
 }
 
-export function ErrorHelp({ error }: { error?: string }) {
-  const help = explainError(error);
+export function ErrorHelp({ error, dialect = "python" }: { error?: string; dialect?: "python" | "sql" }) {
+  const help = dialect === "sql" ? explainSqlError(error) : explainError(error);
   if (!help) return null;
 
   return (

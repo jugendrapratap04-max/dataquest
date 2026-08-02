@@ -299,6 +299,84 @@ const RULES: Rule[] = [
   },
 ];
 
+/* SQLite messages, as sql.js reports them to the SQL workbench.
+ *
+ * Shorter than the Python list on purpose: SQLite says "near X: syntax error"
+ * for most malformed statements, so there are far fewer distinct messages to
+ * map. The ones here are the ones a learner actually hits. */
+const SQL_RULES: Rule[] = [
+  {
+    test: /no such column: (.+)/i,
+    build: (m) => ({
+      title: `There is no column called “${q(m[1])}”`,
+      what: `Either it is spelled differently in the table, or it is a piece of text that lost its quotes. In SQL, 'Delhi' in single quotes is a value; Delhi without them is a column name — which is why a missing quote produces this exact message.`,
+      fix: `Check the spelling against the schema panel. If you meant text, wrap it in single quotes: 'Delhi', not "Delhi" and not Delhi.`,
+      lesson: "sql-where",
+      lessonLabel: "WHERE & Filtering",
+    }),
+  },
+  {
+    test: /no such table: (.+)/i,
+    build: (m) => ({
+      title: `There is no table called “${q(m[1])}”`,
+      what: `The name does not match anything in this database. Table names here are exactly as shown in the schema panel beside the editor.`,
+      fix: `Open the schema panel and copy the name from there — plural and singular are easy to mix up.`,
+      lesson: "sql-intro",
+      lessonLabel: "SQL & SELECT",
+    }),
+  },
+  {
+    test: /ambiguous column name: (.+)/i,
+    build: (m) => ({
+      title: `“${q(m[1])}” exists in more than one joined table`,
+      what: `Once two tables are joined, a column name that appears in both is no longer enough to identify which one you mean, so SQLite refuses rather than guessing.`,
+      fix: `Put the table in front of it — ${q(m[1]).includes(".") ? q(m[1]) : `employees.${q(m[1])}`} — or give each table a short alias and use that.`,
+      lesson: "sql-joins",
+      lessonLabel: "JOINs",
+    }),
+  },
+  {
+    test: /misuse of aggregate/i,
+    build: () => ({
+      title: "An aggregate cannot go in WHERE",
+      what: "WHERE is applied to individual rows *before* any grouping happens, so at that point COUNT and SUM do not exist yet. HAVING runs after the grouping, which is where a condition on an aggregate belongs.",
+      fix: "Move the condition to HAVING: `GROUP BY city HAVING COUNT(*) > 5`.",
+      lesson: "sql-groupby",
+      lessonLabel: "Aggregations & GROUP BY",
+    }),
+  },
+  {
+    test: /no such function: (.+)/i,
+    build: (m) => ({
+      title: `SQLite has no function called “${q(m[1])}”`,
+      what: `SQL dialects differ more than they look. Functions common in MySQL or PostgreSQL are often absent here — this playground runs SQLite.`,
+      fix: `Check the spelling first. For dates SQLite uses \`strftime\`, and for text joining it uses \`||\` rather than a CONCAT function.`,
+      lesson: "sql-intro",
+      lessonLabel: "SQL & SELECT",
+    }),
+  },
+  {
+    test: /near ["“']?([^"“']*)["”']?: syntax error/i,
+    build: (m) => ({
+      title: `SQLite stopped reading at “${q(m[1])}”`,
+      what: `Something before or at that word is not valid SQL. The usual causes are a missing comma between selected columns, a keyword in the wrong order, or an unclosed bracket or quote. SQLite reports where it gave up, which is often just after the real mistake.`,
+      fix: `Read the word named above and the few before it. Keyword order is fixed: SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT.`,
+      lesson: "sql-intro",
+      lessonLabel: "SQL & SELECT",
+    }),
+  },
+  {
+    test: /incomplete input/i,
+    build: () => ({
+      title: "The statement is not finished",
+      what: "SQLite reached the end while still expecting more — usually an unclosed bracket or an unclosed quote, which swallows the rest of the query.",
+      fix: "Count your brackets and quotes. Every `(` needs a `)` and every `'` needs a closing `'`.",
+      lesson: "sql-intro",
+      lessonLabel: "SQL & SELECT",
+    }),
+  },
+];
+
 /**
  * Explain a raw Python error. Returns null when we have nothing useful to add —
  * showing a vague guess would be worse than showing the real message alone.
@@ -306,6 +384,16 @@ const RULES: Rule[] = [
 export function explainError(raw: string | undefined): ErrorHelp | null {
   if (!raw) return null;
   for (const rule of RULES) {
+    const m = raw.match(rule.test);
+    if (m) return rule.build(m);
+  }
+  return null;
+}
+
+/** Same contract, for the SQL workbench. */
+export function explainSqlError(raw: string | undefined): ErrorHelp | null {
+  if (!raw) return null;
+  for (const rule of SQL_RULES) {
     const m = raw.match(rule.test);
     if (m) return rule.build(m);
   }

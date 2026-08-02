@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { runSql, type ResultSet, type SqlRunResult } from "@/lib/sql-runner";
 import { readSchema } from "@/lib/sql-schema";
 import { Celebrate } from "@/components/Celebrate";
+import { ErrorHelp } from "@/components/ErrorHelp";
 
 export type SqlProblemData = {
   id: string; title: string; difficulty: string; tags: string[];
@@ -261,6 +262,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your query has an error</div>
                     <div className="console-out">{result.error}</div>
+                    <ErrorHelp error={result.error} dialect="sql" />
                   </>
                 ) : (
                   <>

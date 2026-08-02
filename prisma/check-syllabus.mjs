@@ -19,6 +19,10 @@ const MIN_WORDS = 400;
 // A rebuilt lesson runs about 1,800-2,300 words. This is the floor for the
 // stricter 'full standard' measure below, not for the syllabus mapping.
 const FULL_WORDS = 1200;
+// docs/LEARNING-SPEC.md §3: a topic needs at least two practice problems, and
+// the unlock gate reads that same number. See the note on `full` below for why
+// this is measured there rather than only reported.
+const MIN_PROBLEMS = 2;
 const TEACHING = ["hook", "def", "mistakes", "recap", "interview"];
 
 const strip = (s) => s.replace(/<[^>]*>/g, " ");
@@ -40,13 +44,22 @@ function measure(lesson) {
     // because 400 words, one visual and four teaching blocks were all it asked
     // for. The written standard is more than that: a quiz, practice drills and
     // a debug task, on a lesson with real depth. This measures THAT.
+    //
+    // `problems` is in the list for the same reason, added after this tool
+    // reported "134/134, every lesson at the FULL standard" while eight new
+    // lessons had ZERO practice problems and were already live. Everything the
+    // bar checked was inside contentJson, so a lesson could be perfect prose
+    // with nothing to practise and still pass. The platform's promise is "read
+    // it, then practise THAT topic" — a measure that cannot see the practice
+    // half cannot tell you the promise is being kept.
     full:
       words >= FULL_WORDS &&
       blocks.filter((b) => b.t === "viz").length >= 1 &&
       TEACHING.filter((t) => types.has(t)).length >= 4 &&
       types.has("quiz") &&
       types.has("drills") &&
-      types.has("debug"),
+      types.has("debug") &&
+      lesson._count.problems >= MIN_PROBLEMS,
   };
 }
 
