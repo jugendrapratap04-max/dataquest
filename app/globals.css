@@ -802,6 +802,16 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .verdict { display:flex; align-items:center; gap:9px; font-weight:700; font-size:14px; margin-bottom:12px; } .verdict.ok { color:var(--good); } .verdict.no { color:var(--bad); } .verdict svg { width:18px; height:18px; }
 .tcase { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(255,255,255,.04); margin-bottom:7px; font-family:var(--mono); font-size:12px; color:#C6CDDA; } .tcase .st { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px; flex:none; } .tcase.ok .st { background:var(--good); color:#04240F; } .tcase.no .st { background:var(--bad); color:#fff; } .tcase .io b { color:#C6CDDA; } .tcase .ms { margin-left:auto; color:#6B7688; }
 .console-out { font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; word-break:break-word; } .console-out b { color:var(--code-str); }
+/* The plain-English explanation under a raw Python error (components/ErrorHelp).
+   Deliberately quieter than the error itself — it is help, not another alarm. */
+.err-help { margin-top:12px; padding:12px 14px; border-radius:10px; border:1px solid var(--line); border-left:3px solid var(--accent); background:color-mix(in srgb, var(--accent) 7%, transparent); }
+.eh-title { font-weight:650; font-size:13.5px; line-height:1.45; margin-bottom:7px; }
+.err-help p { font-size:13px; line-height:1.6; margin:0 0 7px; color:var(--muted); }
+.err-help code { font-family:var(--mono); font-size:12px; padding:1px 4px; border-radius:4px; background:color-mix(in srgb, var(--fg) 8%, transparent); }
+.eh-fix b { color:var(--fg); }
+.eh-link { display:inline-block; font-size:12.5px; font-weight:600; color:var(--accent); text-decoration:none; }
+.eh-link:hover { text-decoration:underline; }
+
 .respane { display:none; } .respane.active { display:block; }
 /* The PNG matplotlib handed back. It keeps its own white background — a chart's
    own colours are chosen against white, and re-tinting it to match a dark UI is

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { runTests, type RunResult, type TestCase } from "@/lib/pyodide-runner";
 import { formatDuration } from "@/lib/duration";
 import { Celebrate } from "@/components/Celebrate";
+import { ErrorHelp } from "@/components/ErrorHelp";
 
 export type ProblemData = {
   id: string; title: string; difficulty: string; tags: string[];
@@ -262,6 +263,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your code has an error</div>
                     <div className="console-out">{result.error}</div>
+                    <ErrorHelp error={result.error} />
                   </>
                 ) : (
                   <>
@@ -277,6 +279,11 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                         {!c.pass && !c.error && <span className="ms">expected {fmt(c.expected)}</span>}
                       </div>
                     ))}
+                    {/* The commoner path: the code compiled, then a test case
+                        raised. Explain the first one — several cases usually
+                        fail for the same single reason, so repeating it per
+                        case would bury the tests under identical panels. */}
+                    <ErrorHelp error={result.cases.find((c) => c.error)?.error} />
                   </>
                 )
               )}
