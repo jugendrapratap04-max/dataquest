@@ -4151,6 +4151,102 @@ const L45 = [
   ]},
 ];
 
+const L46 = [
+  { t: "objectives", items: [
+    "Find any method yourself with <code>dir()</code> and <code>help()</code> instead of memorising",
+    "Recognise the built-in functions worth knowing by name",
+    "Look up the methods of strings, lists, dicts, sets and files in one place",
+    "Read the exception hierarchy, and know which errors to catch",
+  ]},
+  { t: "hook", q: "Roughly how many methods does a Python string have? And how many do you think a working data professional has memorised?", why: "Around forty-five. And the honest answer to the second question is <b>maybe twelve</b> — the rest get looked up, every time, forever.<br/><br/>This page is the lookup. But the first section is the more valuable one, because it means you never actually need this page: Python can list its own methods, and it can explain them to you, without leaving the editor." },
+  { t: "think", q: "You have a value and you cannot remember what you can do with it. What is faster than searching the web?", a: "Asking the value itself.<br/><br/><code>dir(x)</code> lists everything <code>x</code> can do. <code>help(x.method)</code> prints what that method does and what it returns. Both work offline, both are always correct for <b>your</b> version of Python, and neither can hand you an answer from a different language the way a search result can.<br/><br/>This is the difference between a beginner and someone who looks like they know Python: not more memory, just the habit of asking the interpreter first." },
+
+  { t: "h2", n: "1", text: "Ask Python instead of memorising" },
+  { t: "p", html: "Every value carries its own list of abilities. Names with double underscores are Python's internal machinery, so filter those out and what remains is the useful list." },
+  { t: "code", file: "discover.py", code: "s = \"hello\"\n\npublic = [m for m in dir(s) if not m.startswith(\"_\")]\n\nprint(\"upper\" in public, \"strip\" in public, \"sort\" in public)\nprint(sorted(public)[:5])\nprint(len(public) > 30)", output: "True True False\n['capitalize', 'casefold', 'center', 'count', 'encode']\nTrue" },
+  { t: "note", variant: "key", html: "Read the first line of output again: <code>sort</code> is <b>not</b> a string method. That is <code>dir()</code> answering a real question in one second — \"does this type do that?\" — which is exactly the question you have when a method call fails with <code>AttributeError</code>.<br/><br/>In the practice editor, <code>print(dir(x))</code> and <code>print(help(x.strip))</code> both work. Use them." },
+  { t: "viz", name: "object-inspector" },
+  { t: "p", html: "That panel does visually what <code>dir()</code> does textually — shows what is actually attached to a value. Same question, two ways of asking it." },
+
+  { t: "h2", n: "2", text: "Built-in functions" },
+  { t: "p", html: "These need no import and work on many types. This is very nearly the whole list you will use in ordinary work." },
+  { t: "code", file: "builtins.py", code: "nums = [4, 1, 3]\n\nprint(len(nums), sum(nums), min(nums), max(nums))\nprint(sorted(nums), list(reversed(nums)))\nprint(abs(-5), round(3.7), pow(2, 3))\nprint(int(\"42\"), float(\"1.5\"), str(42), bool(\"\"))\nprint(list(range(3)), list(enumerate(\"ab\")))\nprint(list(zip([1, 2], \"ab\")))\nprint(type(nums).__name__, isinstance(nums, list))\nprint(any([False, True]), all([True, True]))", output: "3 8 1 4\n[1, 3, 4] [3, 1, 4]\n5 4 8\n42 1.5 42 False\n[0, 1, 2] [(0, 'a'), (1, 'b')]\n[(1, 'a'), (2, 'b')]\nlist True\nTrue True" },
+
+  { t: "h2", n: "3", text: "String methods" },
+  { t: "p", html: "Every one of these returns a <b>new</b> string. None of them changes the original, because strings cannot be changed at all — if you do not store the result, the work is lost." },
+  { t: "code", file: "strmethods.py", code: "s = \"  Data Science  \"\n\nprint(repr(s.strip()), repr(s.lstrip()), repr(s.rstrip()))\nprint(s.strip().lower(), \"|\", s.strip().upper())\nprint(s.strip().replace(\" \", \"-\"))\nprint(s.strip().split(\" \"))\nprint(\"-\".join([\"a\", \"b\"]))\nprint(s.strip().startswith(\"Data\"), s.strip().endswith(\"ce\"))\nprint(s.strip().find(\"Sci\"), s.strip().count(\"a\"))\nprint(\"42\".isdigit(), \"ab\".isalpha(), \"  \".isspace())\nprint(\"x\".zfill(3), \"ab\".center(6, \".\"))", output: "'Data Science' 'Data Science  ' '  Data Science'\ndata science | DATA SCIENCE\nData-Science\n['Data', 'Science']\na-b\nTrue True\n5 2\nTrue True True\n00x ..ab.." },
+
+  { t: "h2", n: "4", text: "List and tuple methods" },
+  { t: "p", html: "The opposite rule applies here: most list methods change the list <b>in place</b> and return <code>None</code>. A tuple has only two methods, because everything else would modify it." },
+  { t: "code", file: "listmethods.py", code: "nums = [3, 1, 2]\n\nnums.append(4)\nnums.insert(0, 0)\nnums.extend([5])\nprint(nums)\n\nnums.remove(0)              # by VALUE\nprint(nums.pop(), nums)     # by index, and hands it back\nprint(nums.index(2), nums.count(1))\n\nnums.sort()\nprint(nums)\nnums.reverse()\nprint(nums)\nprint(nums.copy(), len(nums))\n\nt = (1, 2, 2)\nprint(t.count(2), t.index(2))", output: "[0, 3, 1, 2, 4, 5]\n5 [3, 1, 2, 4]\n2 1\n[1, 2, 3, 4]\n[4, 3, 2, 1]\n[4, 3, 2, 1] 4\n2 1" },
+
+  { t: "h2", n: "5", text: "Dictionary and set methods" },
+  { t: "code", file: "dictset.py", code: "d = {\"a\": 1, \"b\": 2}\n\nprint(list(d.keys()), list(d.values()))\nprint(list(d.items())[0])\nprint(d.get(\"z\"), d.get(\"z\", 0))\n\nd.setdefault(\"c\", 3)\nd.update({\"a\": 9})\nprint(d)\nprint(d.pop(\"a\"), d.popitem())\nd.clear()\nprint(d)\n\ns = {1, 2}\ns.add(3)\ns.update([4])\ns.discard(9)                       # absent: no error\nprint(sorted(s))\nprint(sorted(s | {5}), sorted(s & {1, 2}))\nprint(s.issubset({1, 2, 3, 4, 5}), s.isdisjoint({9}))", output: "['a', 'b'] [1, 2]\n('a', 1)\nNone 0\n{'a': 9, 'b': 2, 'c': 3}\n9 ('c', 3)\n{}\n[1, 2, 3, 4]\n[1, 2, 3, 4, 5] [1, 2]\nTrue True" },
+
+  { t: "h2", n: "6", text: "File methods" },
+  { t: "p", html: "<code>pathlib</code> for questions about the path, <code>open()</code> for reading and writing. Note the cleanup at the end — a file written by a script is a real file." },
+  { t: "code", file: "filemethods.py", code: "from pathlib import Path\n\np = Path(\"ref_demo.txt\")\np.write_text(\"line one\\nline two\\n\")\n\nprint(p.exists(), p.name, p.suffix, p.stem)\nprint(p.read_text().count(\"line\"))\n\nwith open(p) as f:\n    print(f.readline().strip())\n    print([l.strip() for l in f.readlines()])\n\nwith open(p, \"a\") as f:\n    f.write(\"line three\\n\")\nprint(len(p.read_text().splitlines()))\n\np.unlink()\nprint(p.exists())", output: "True ref_demo.txt .txt ref_demo\n2\nline one\n['line two']\n3\nFalse" },
+
+  { t: "h2", n: "7", text: "Keywords" },
+  { t: "p", html: "The words the language reserves for itself. You cannot use one as a variable name — and the useful trick is that Python will tell you which they are." },
+  { t: "code", file: "keywords.py", code: "import keyword\n\nprint(len(keyword.kwlist) > 30)\nprint(\"if\" in keyword.kwlist, \"print\" in keyword.kwlist)\nprint(keyword.iskeyword(\"class\"), keyword.iskeyword(\"data\"))\nprint(sorted(keyword.kwlist)[:6])", output: "True\nTrue False\nTrue False\n['False', 'None', 'True', 'and', 'as', 'assert']" },
+  { t: "note", variant: "tip", html: "<code>print</code> is <b>not</b> a keyword — it is an ordinary built-in function, which is why <code>print = 5</code> is legal and then breaks every later <code>print()</code> call. <code>class</code> and <code>if</code> are keywords, so <code>class = 5</code> is a <code>SyntaxError</code> caught immediately. That is the difference between the two lists, and it is why shadowing a built-in is the more dangerous mistake." },
+
+  { t: "h2", n: "8", text: "Exceptions" },
+  { t: "p", html: "Exceptions form a family tree, and catching a parent catches all its children. That is what lets you write <code>except LookupError</code> to handle both a missing dictionary key and an out-of-range index." },
+  { t: "code", file: "exceptions.py", code: "print(issubclass(ValueError, Exception))\nprint(issubclass(KeyError, LookupError), issubclass(IndexError, LookupError))\nprint(issubclass(ZeroDivisionError, ArithmeticError))\n\nfor bad in [\"int('x')\", \"[1][5]\", \"{}['k']\", \"1/0\", \"'a'+1\"]:\n    try:\n        eval(bad)\n    except Exception as e:\n        print(bad, \"->\", type(e).__name__)", output: "True\nTrue True\nTrue\nint('x') -> ValueError\n[1][5] -> IndexError\n{}['k'] -> KeyError\n1/0 -> ZeroDivisionError\n'a'+1 -> TypeError" },
+  { t: "note", variant: "warn", html: "The ones you will meet most: <code>ValueError</code> (right type, unusable value), <code>TypeError</code> (wrong type entirely), <code>KeyError</code> and <code>IndexError</code> (not there), <code>AttributeError</code> (no such method), <code>FileNotFoundError</code>, <code>ZeroDivisionError</code>.<br/><br/>Catch the <b>specific</b> one. <code>except Exception</code> swallows genuine coding bugs alongside the expected failure, and the bug then hides for months." },
+  { t: "analogy", concept: "dir() and help()", real: "The buttons on an unfamiliar machine", html: "Handed a washing machine you have never used, you do not memorise the manual — you look at the <b>panel</b>. Every button it can do is right there, and the label tells you roughly what each does.<br/><br/><code>dir(x)</code> is the panel and <code>help(x.method)</code> is the label. The reason this matters is that a search result describes <i>a</i> washing machine; <code>dir()</code> describes the one in front of you, in your version of Python, right now." },
+
+  { t: "trace", intro: "Look-ups and return values. Two of these three are the traps this page exists to prevent.", code: "s = \"  Data  \"\na = s.strip()\nb = a.lower()\nc = a.find(\"t\")\nd = a.find(\"z\")\nnums = [3, 1, 2]\nnums.sort()\ne = nums.index(3)", steps: [
+    { q: "After line 4, <code>c</code> is", answer: "2", why: "<code>\"Data\"</code> indexed from 0: D is 0, a is 1, t is 2. <code>find</code> returns the <b>position</b>, not True or False." },
+    { q: "After line 5, <code>d</code> is", answer: "-1", why: "<code>find</code> returns <code>-1</code> when the text is absent — it does not raise and it does not return <code>None</code>. Since <code>-1</code> is <b>truthy</b>, <code>if a.find(\"z\"):</code> is True for a value that was never found. That is the debug task below. (<code>index</code> is the version that raises instead.)" },
+    { q: "After line 8, <code>e</code> is", answer: "2", why: "Line 7 sorted the list in place to <code>[1, 2, 3]</code>, so 3 now sits at position 2. Worth noticing that <code>nums.sort()</code> returned <code>None</code> and the list changed anyway — the opposite of how every string method behaves." },
+  ]},
+
+  { t: "drills", intro: "Look-ups, one each. Try to answer before opening it.", items: [
+    { task: "List the public methods of an integer and check that <code>upper</code> is not among them.", code: "print(\"upper\" in [m for m in dir(5) if not m.startswith(\"_\")])", out: "False" },
+    { task: "Print the sum, smallest and largest of a list in one line.", code: "n = [4, 1, 3]\nprint(sum(n), min(n), max(n))", out: "8 1 4" },
+    { task: "Pair each item with its position.", code: "print(list(enumerate([\"a\", \"b\"])))", out: "[(0, 'a'), (1, 'b')]" },
+    { task: "Join two lists item by item.", code: "print(list(zip([1, 2], \"ab\")))", out: "[(1, 'a'), (2, 'b')]" },
+    { task: "Check whether any and all items are true.", code: "print(any([False, True]), all([False, True]))", out: "True False" },
+    { task: "Split a sentence and join it back with dashes.", code: "parts = \"a b c\".split(\" \")\nprint(\"-\".join(parts))", out: "a-b-c" },
+    { task: "Show what <code>find</code> returns when the text is absent.", code: "print(\"abc\".find(\"z\"))", out: "-1" },
+    { task: "Read a key safely with a default.", code: "print({\"a\": 1}.get(\"z\", 0))", out: "0" },
+    { task: "Show that a keyword is reserved but <code>print</code> is not.", code: "import keyword\nprint(keyword.iskeyword(\"class\"), keyword.iskeyword(\"print\"))", out: "True False" },
+    { task: "Show that <code>KeyError</code> is a kind of <code>LookupError</code>.", code: "print(issubclass(KeyError, LookupError))", out: "True" },
+  ]},
+
+  { t: "mistakes", items: [
+    { bad: "if text.find(\"x\"):", why: "<code>find</code> returns <code>-1</code> when nothing is found, and <code>-1</code> is <b>truthy</b> — so this branch runs precisely when the text is absent. Reading a method list without reading its <b>return value</b> is how this happens.", fix: "if text.find(\"x\") != -1:\n# or simply: if \"x\" in text:" },
+    { bad: "text.strip()   # on its own line", why: "String methods never change the original — they hand back a new string. On its own line the result is discarded and nothing happens, with no error to tell you.", fix: "text = text.strip()" },
+    { bad: "nums = nums.sort()", why: "The mirror image of the mistake above. List methods mostly change the list in place and return <code>None</code>, so this throws the list away. <b>Strings return, lists mutate</b> — remembering which is which prevents both.", fix: "nums.sort()   # on its own line" },
+    { bad: "except Exception:\n    pass", why: "This catches the failure you expected and also every genuine bug — a typo'd attribute, a wrong type — and silently discards them. Debugging then starts months later with no traceback and no idea where the problem is.", fix: "except KeyError:\n    ...   # the one you actually expect" },
+  ]},
+
+  { t: "debug", intro: "This checks whether a word appears in some text. It runs cleanly and gets the answer exactly backwards. Read it before opening the fix.", code: "text = \"Data Science\"\n\npos = text.find(\"Python\")\n\nif pos:\n    print(\"found at\", pos)\nelse:\n    print(\"not found\")", symptom: "prints found at -1 — but 'Python' is not in the text at all", q: "<code>find</code> correctly reported that nothing was found. So why did the <code>if</code> take the wrong branch?", fix: "text = \"Data Science\"\n\npos = text.find(\"Python\")\n\nif pos != -1:\n    print(\"found at\", pos)\nelse:\n    print(\"not found\")", why: "<code>find</code> returns the <b>position</b>, and <code>-1</code> is its way of saying \"not here\". The bug is that <code>-1</code> is a perfectly ordinary non-zero number, and every non-zero number is <b>truthy</b> — so <code>if pos:</code> is True for the one answer that means failure.<br/><br/>Worse, it is <b>False</b> when the word is found at position 0, at the very start of the text. So this code is wrong in both directions and right only by accident in the middle.<br/><br/>This is the exact reason this page teaches <code>help()</code> before it lists any methods. A method list tells you <code>find</code> exists; only the return value tells you what it hands back and what it does when it fails. Reading <code>help(str.find)</code> once would have shown the <code>-1</code>.<br/><br/>And for this particular job, the idiomatic answer is shorter than either version: <code>if \"Python\" in text:</code>." },
+
+  { t: "recap", items: [
+    "<code>dir(x)</code> lists what a value can do; <code>help(x.method)</code> explains one of them — both offline, both correct for your version",
+    "Filter out names starting with <code>_</code> to see the useful list",
+    "<b>String methods return a new string</b> — assign the result or lose it",
+    "<b>List methods mostly mutate and return <code>None</code></b> — do not assign the result",
+    "<code>find</code> returns <code>-1</code> when absent; <code>index</code> raises instead",
+    "<code>-1</code> is truthy and position <code>0</code> is falsy, so never test a position with a bare <code>if</code>",
+    "<code>d.get(k, default)</code> is the safe read; <code>.discard()</code> is the safe set removal",
+    "<code>print</code> is a built-in, not a keyword — which is why it can be shadowed by accident",
+    "Exceptions form a hierarchy; catch the <b>specific</b> one, never a bare <code>except Exception</code>",
+  ]},
+
+  { t: "interview", items: [
+    { level: "beginner", q: "How do you find out what methods a value has?", a: "<code>dir(value)</code> lists them, and <code>help(value.method)</code> explains one. Filtering out names beginning with an underscore leaves the public list. It is worth saying in an interview because it shows you debug by asking the interpreter rather than guessing." },
+    { level: "beginner", q: "What is the difference between <code>find</code> and <code>index</code> on a string?", a: "Both return the position of the first match. <code>find</code> returns <code>-1</code> when there is no match; <code>index</code> raises <code>ValueError</code>. Use <code>find</code> when absence is normal and <code>index</code> when absence means a bug you want to hear about — and if you only need yes or no, use <code>in</code>." },
+    { level: "intermediate", q: "Why do string methods return values while list methods usually do not?", a: "Strings are <b>immutable</b>, so a method physically cannot change one — it has to build and return a new string. Lists are mutable, so their methods change the object in place and return <code>None</code> by convention, signalling that the work already happened. It is the single most common source of accidentally throwing data away, in both directions." },
+    { level: "intermediate", q: "Why is catching <code>Exception</code> broadly a bad idea?", a: "It catches the failure you anticipated together with every real bug — a misspelled attribute, a wrong type, a typo — and hides both. The traceback that would have located the problem is gone, so the bug surfaces much later somewhere unrelated. Catch the specific class, and let anything unexpected crash loudly where it happened." },
+    { level: "advanced", q: "<code>if text.find(\"x\"):</code> is wrong in two different ways. What are they?", a: "<code>find</code> returns a <b>position</b>, not a boolean. When the substring is absent it returns <code>-1</code>, which is non-zero and therefore <b>truthy</b> — so the found branch runs on failure. And when the substring is at position <code>0</code> it returns <code>0</code>, which is <b>falsy</b> — so the not-found branch runs on success.<br/><br/>It is only accidentally correct for matches somewhere in the middle, which is why it survives testing. The fix is <code>!= -1</code>, or better, <code>if \"x\" in text:</code> — the general lesson being that any function returning an index needs an explicit comparison, never a truthiness test." },
+  ]},
+];
+
 /* ------------------------------------------------------------------ */
 /* Lessons + their problems                                            */
 /* ------------------------------------------------------------------ */
@@ -4590,6 +4686,7 @@ const pythonLessons = [
   { slug: "linked-lists-hashing", order: 44, title: "Linked Lists & Hash Tables", minutes: 18, content: L43, problems: [] },
   { slug: "trees-graphs", order: 45, title: "Trees, Binary Search Trees & Graphs", minutes: 18, content: L44, problems: [] },
   { slug: "searching-sorting", order: 46, title: "Searching & Sorting", minutes: 18, content: L45, problems: [] },
+  { slug: "python-reference", order: 47, title: "The Python Reference — Look It Up", minutes: 16, content: L46, problems: [] },
 ];
 
 /* ===================== STATISTICS lessons ===================== */
@@ -9263,6 +9360,22 @@ async function main() {
  *  Appended to a lesson's content by lessonContent(), so quizzes live in one
  *  place instead of scattered through every lesson array. */
 export const QUIZZES = {
+  "python-reference": [
+    // Easy — did the core idea land?
+    { level: "easy", q: "How do you list everything a value can do?", options: ["<code>type(x)</code>", "<code>dir(x)</code>", "<code>list(x)</code>", "<code>vars(x)</code>"], correct: 1, why: "<code>dir(x)</code> lists every attribute and method. Filter out names starting with an underscore and what remains is the useful public list — and it is always correct for your version of Python." },
+    { level: "easy", q: "What does <code>help(str.strip)</code> give you?", options: ["The source code", "An explanation of what it does and returns", "A list of all string methods", "Nothing — it only works on modules"], correct: 1, why: "It prints the docstring: what the method does, what arguments it takes, and what it hands back. That last part is the one people skip, and it is where most method bugs come from." },
+    { level: "easy", q: "<code>\"abc\".find(\"z\")</code> returns what?", options: ["<code>None</code>", "<code>False</code>", "<code>-1</code>", "It raises ValueError"], correct: 2, why: "<code>find</code> returns the position, and <code>-1</code> is its way of saying not-here. <code>index</code> is the version that raises <code>ValueError</code> instead." },
+    { level: "easy", q: "Is <code>print</code> a Python keyword?", options: ["Yes", "No — it is an ordinary built-in function"], correct: 1, why: "Which is why <code>print = 5</code> is perfectly legal and then breaks every later <code>print()</code> call. <code>class = 5</code> is a <code>SyntaxError</code> caught instantly, because <code>class</code> genuinely is reserved — shadowing a built-in is the more dangerous of the two." },
+    // Medium — apply it
+    { level: "medium", q: "<code>text.strip()</code> on its own line. What happens?", options: ["The text is trimmed", "Nothing — the new string is discarded", "It raises an error", "It trims and returns None"], correct: 1, why: "Strings are immutable, so a method cannot change one — it builds and returns a new string. On its own line that result is thrown away, silently. You must write <code>text = text.strip()</code>." },
+    { level: "medium", q: "<code>nums = nums.sort()</code>. What is <code>nums</code> afterwards?", options: ["The sorted list", "<code>None</code>", "The original unsorted list", "A copy"], correct: 1, why: "The mirror image of the previous question. List methods mostly change the list in place and return <code>None</code>, so this throws the list away. Strings return, lists mutate — remembering which is which prevents both bugs." },
+    { level: "medium", q: "Which is the safe way to read a possibly-missing dictionary key?", options: ["<code>d[key]</code>", "<code>d.get(key, default)</code>", "<code>d.pop(key)</code>", "<code>d.setdefault(key)</code>"], correct: 1, why: "<code>d[key]</code> raises <code>KeyError</code> and stops the program; <code>.get</code> returns <code>None</code> or a default you choose. On a large file that difference is the whole job dying partway through versus finishing." },
+    { level: "medium", q: "<code>except LookupError</code> catches which of these?", options: ["Only KeyError", "Only IndexError", "Both KeyError and IndexError", "Neither — LookupError is unrelated"], correct: 2, why: "Exceptions form a family tree and both are children of <code>LookupError</code>. Catching a parent catches all its children, which is what lets one branch handle a missing dictionary key and an out-of-range index together." },
+    // Hard — the traps
+    { level: "hard", q: "<code>if text.find(\"x\"):</code> is wrong in <b>two</b> directions. Which pair?", options: ["It fails on empty strings and on numbers", "It runs the found branch when absent (-1 is truthy) AND the not-found branch when found at position 0 (0 is falsy)", "It only works on lowercase text", "It raises when the text is missing"], correct: 1, why: "<code>find</code> returns a position, not a boolean. <code>-1</code> is non-zero so it is truthy, and <code>0</code> is falsy — so the code is correct only by accident, for matches somewhere in the middle. That is exactly why it survives testing." },
+    { level: "hard", q: "Why is <code>except Exception: pass</code> dangerous?", options: ["It is slow", "It swallows genuine bugs along with the expected failure, destroying the traceback", "It only catches the first error", "It prevents the program from exiting"], correct: 1, why: "A typo'd attribute or a wrong type raises just like the failure you anticipated, and both get discarded silently. The traceback that would have located the problem is gone, so the bug resurfaces much later somewhere unrelated. Catch the specific class." },
+    { level: "hard", q: "Why is asking <code>dir()</code> better than searching the web for what a value can do?", options: ["It is faster to type", "It describes YOUR value in YOUR version of Python, and works offline", "Search engines are often wrong about Python", "It also shows the source code"], correct: 1, why: "A search result describes some version of some type, sometimes from a different language entirely. <code>dir()</code> describes the object actually in front of you, right now — which is why it settles \"does this type have that method?\" in one second when an <code>AttributeError</code> appears." },
+  ],
   "searching-sorting": [
     // Easy — did the core idea land?
     { level: "easy", q: "What is the complexity of linear search?", options: ["<code>O(1)</code>", "<code>O(log n)</code>", "<code>O(n)</code>", "<code>O(n²)</code>"], correct: 2, why: "It may look at every item, and a value that is not present forces exactly that — the whole list must be checked before it can say no. That absent case is linear search's worst case." },

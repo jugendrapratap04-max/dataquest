@@ -151,14 +151,14 @@ export const SYLLABUS = [
     { t: "Bubble / selection / insertion sort", covers: ["searching-sorting"] },
     { t: "Merge / quick sort", covers: ["searching-sorting"] },
   ]},
-  { group: "Reference (lookup pages, we have none)", topics: [
-    { t: "Built-in functions reference", covers: [] },
-    { t: "String methods reference", covers: [] },
-    { t: "List / tuple methods reference", covers: [] },
-    { t: "Dict / set methods reference", covers: [] },
-    { t: "File methods reference", covers: [] },
-    { t: "Keywords reference", covers: [] },
-    { t: "Exceptions reference", covers: [] },
+  { group: "Reference (lookup pages)", topics: [
+    { t: "Built-in functions reference", covers: ["python-reference"] },
+    { t: "String methods reference", covers: ["python-reference"] },
+    { t: "List / tuple methods reference", covers: ["python-reference"] },
+    { t: "Dict / set methods reference", covers: ["python-reference"] },
+    { t: "File methods reference", covers: ["python-reference"] },
+    { t: "Keywords reference", covers: ["python-reference"] },
+    { t: "Exceptions reference", covers: ["python-reference"] },
   ]},
   { group: "Beyond W3Schools (our own edge)", topics: [
     { t: "Testing — unittest / pytest", covers: ["testing"] },
