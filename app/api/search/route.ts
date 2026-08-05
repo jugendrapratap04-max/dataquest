@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { buildSearchIndex } from "@/lib/search-index";
+import { search } from "@/lib/search-index";
 
-// Lightweight search index: lessons, their TOPICS, and problems.
+// Search: lesson topics, whole lessons, and problems.
 //
 // Public on purpose. It used to 401 for signed-out visitors while the topbar
 // still rendered the search box for them — so a guest browsing the lessons (which
@@ -9,18 +9,20 @@ import { buildSearchIndex } from "@/lib/search-index";
 // "Nothing found", and fired two 401s per page load. Nothing here is private:
 // every title and slug it returns is reachable without an account.
 //
-// Topics are the reason this file grew a lib. Matching lesson titles alone made
-// most of the course unfindable — "frozenset", "deque" and "popleft" are all
-// taught and none of them appears in any lesson title — and a term that did
-// match dropped the student on topic 1 of eighteen. See lib/search-index.ts for
-// why it indexes code identifiers rather than the prose.
-export async function GET() {
-  const data = await buildSearchIndex();
+// This used to hand the browser the entire index to filter locally, which capped
+// what could be searched at whatever fitted in a download — titles, then titles
+// plus a few code identifiers. Anything a student typed that nobody had thought
+// to index simply did not exist. Searching here instead removes that ceiling:
+// the full text of every topic stays in this process, the browser downloads
+// nothing up front, and a query comes back with eight small rows.
+export async function GET(req: Request) {
+  const q = new URL(req.url).searchParams.get("q") ?? "";
+  const results = await search(q);
 
-  return NextResponse.json(data, {
-    // The index changes only when db:lessons or db:content runs. Letting the
-    // browser reuse it for a few minutes costs nothing and keeps the search box
-    // instant on every page after the first.
-    headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" },
-  });
+  return NextResponse.json(
+    { results },
+    // Same query, same answer until content changes. Worth caching: a student
+    // backspacing over a word re-sends queries they have already made.
+    { headers: { "Cache-Control": "public, max-age=120, stale-while-revalidate=600" } },
+  );
 }

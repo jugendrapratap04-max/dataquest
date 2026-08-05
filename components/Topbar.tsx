@@ -72,7 +72,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
 
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState<Item[] | null>(null);
+  const [results, setResults] = useState<Item[]>([]);
   const wrapRef = useRef<HTMLDivElement>(null);
 
   // Same external-store case as the theme below: the sound preference lives in
@@ -137,30 +137,38 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
       if (themeRef.current && !themeRef.current.contains(e.target as Node)) setMenuOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
-    // preload the search index once
-    (async () => {
-      try {
-        const d = await fetch("/api/search").then((r) => r.json());
-        // Topics arrive grouped by lesson and one-letter keyed, to keep the
-        // payload down — see lib/search-index.ts. Flatten once, here.
-        type Group = { s: string; b: string; t: [string, string?][] };
-        const topics: Item[] = (d.topicGroups ?? []).flatMap((g: Group) =>
-          g.t.map(([title, k], i) => ({
-            title, slug: g.s, sub: g.b, k, t: i + 1, kind: "topic" as const,
-          })),
-        );
-        // Topics first: they are the most specific answer to a query. A student
-        // searching "frozenset" wants the topic that teaches it, not the lesson
-        // it happens to sit in.
-        setIndex([
-          ...topics,
-          ...d.lessons.map((l: Item) => ({ ...l, kind: "lesson" as const })),
-          ...d.problems.map((p: Item) => ({ ...p, kind: "problem" as const })),
-        ]);
-      } catch { setIndex([]); }
-    })();
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
+
+  /* Ask the server, rather than downloading the index and filtering here.
+   *
+   * Filtering locally is what capped search at titles and a few code
+   * identifiers — the whole index had to fit in a download. Now the full text of
+   * every topic is searched, the browser fetches nothing until someone types,
+   * and each answer is eight rows.
+   *
+   * Debounced so a word costs one request, not one per letter, and every
+   * in-flight request is abandoned when the next keystroke arrives — otherwise
+   * a slow early response can land after a fast later one and overwrite the
+   * results with answers to a query the student has already moved past. */
+  useEffect(() => {
+    // Too short to be a query. Nothing is cleared here on purpose — the dropdown
+    // is gated on the same length below, so there is no state to reset and no
+    // synchronous setState in an effect.
+    const needle = q.trim();
+    if (needle.length < 2) return;
+
+    const ctl = new AbortController();
+    const id = setTimeout(async () => {
+      try {
+        const d = await fetch(`/api/search?q=${encodeURIComponent(needle)}`, { signal: ctl.signal })
+          .then((r) => r.json());
+        setResults(d.results ?? []);
+      } catch { /* aborted, or offline — leave the last results alone */ }
+    }, 140);
+
+    return () => { clearTimeout(id); ctl.abort(); };
+  }, [q]);
 
   // Picking a theme turns auto off. That is the rule the whole feature rests on:
   // the clock may choose for somebody who has not chosen, and never for somebody
@@ -193,28 +201,6 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     setTimeout(() => setToast(null), 2600);
   };
 
-  /* Title, then the lesson it belongs to, then the identifiers taken from its
-   * code — that last one is why "frozenset", "deque" and "popleft" now find
-   * anything at all. A title-only match made most of the course invisible.
-   *
-   * A hit on the title outranks a hit on a keyword, so typing "set" gives the
-   * topics actually about sets before every topic that merely mentions one. */
-  const results = (() => {
-    if (!q.trim() || !index) return [];
-    const needle = q.trim().toLowerCase();
-    const scored = index
-      .map((it) => {
-        const title = it.title.toLowerCase();
-        if (title.startsWith(needle)) return { it, rank: 0 };
-        if (title.includes(needle)) return { it, rank: 1 };
-        if (it.sub.toLowerCase().includes(needle)) return { it, rank: 2 };
-        if (it.k?.includes(needle)) return { it, rank: 3 };
-        return null;
-      })
-      .filter(Boolean) as { it: Item; rank: number }[];
-    return scored.sort((a, b) => a.rank - b.rank).slice(0, 8).map((s) => s.it);
-  })();
-
   const hrefFor = (it: Item) =>
     it.kind === "problem" ? `/practice/${it.slug}`
       : it.kind === "topic" && it.t && it.t > 1 ? `/learn/${it.slug}?t=${it.t}`
@@ -246,7 +232,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
               placeholder="Search topics, lessons, problems…"
             />
           </div>
-          {open && q.trim() && (
+          {open && q.trim().length >= 2 && (
             <div className="search-drop">
               {results.length === 0 ? (
                 <div className="search-empty">Nothing found</div>

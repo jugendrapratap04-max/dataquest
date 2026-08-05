@@ -22,48 +22,57 @@ import { lessonOutline } from "@/lib/lesson-outline";
 export type SearchLesson = { title: string; slug: string; sub: string };
 export type SearchProblem = { title: string; slug: string; sub: string };
 
-/* Topics are grouped by lesson, and the field names are one letter.
+/* A topic, with every word it contains, kept on the SERVER only.
  *
- * Flat objects were the obvious shape and cost 170 KB: 1,184 of them, each
- * repeating its lesson's slug, its lesson's full title, and the JSON key names
- * "title"/"slug"/"sub"/"t"/"k". The key names alone were ~35 KB. Grouping emits
- * the slug and lesson title once each and turns every topic into a two-element
- * array, which more than halves the payload for identical information.
+ * The index used to be shipped whole to the browser and filtered there, which
+ * is why it could only carry titles and code identifiers — anything more was
+ * megabytes. That made "search everything" impossible by construction: a
+ * student could only find a topic by a word someone had chosen to index.
  *
- *   s = lesson slug   b = lesson title   t = [[topic title, identifiers?], ...]
- *
- * The ?t= value is the position in `t` plus one, so it does not need storing. */
-export type SearchTopicGroup = { s: string; b: string; t: [string, string?][] };
+ * Searching on the server removes the ceiling. The full text never leaves this
+ * process, the browser downloads nothing up front, and a query returns eight
+ * small rows. It costs one round trip per search instead of one large download
+ * per session — a better trade on a phone, and the only one that can honestly
+ * be called searching everything.
+ */
+type Searchable = {
+  title: string;
+  slug: string;
+  /** ?t= value; 0 for a whole lesson that is not split. */
+  t: number;
+  sub: string;
+  kind: "topic" | "lesson" | "problem";
+  /** Every word in the topic, lower-cased. Never serialised. */
+  text: string;
+};
 
-type Index = { lessons: SearchLesson[]; topicGroups: SearchTopicGroup[]; problems: SearchProblem[] };
+export type SearchHit = { title: string; slug: string; sub: string; kind: string; t?: number };
+
+type Index = { lessons: SearchLesson[]; rows: Searchable[]; problems: SearchProblem[] };
 
 let cache: { at: number; data: Index } | null = null;
 const TTL_MS = 10 * 60 * 1000;
 
-/* Words that would match everything and help nobody. Python keywords and the
- * handful of builtins that appear in nearly every example. */
-const NOISE = new Set([
-  "def", "return", "print", "for", "in", "if", "else", "elif", "while", "import",
-  "from", "class", "self", "true", "false", "none", "and", "or", "not", "is",
-  "int", "str", "len", "range", "list", "dict", "set", "type", "pass", "try",
-  "except", "with", "as", "the", "out", "res", "val", "tmp", "foo", "bar",
-]);
+const stripTags = (s: string) => s.replace(/<[^>]*>/g, " ");
 
-/** Identifiers a student might plausibly search for, from a topic's code. */
-function identifiers(blocks: { t: string; [k: string]: unknown }[]): string {
-  const found = new Set<string>();
-  for (const b of blocks) {
-    const src = typeof b.code === "string" ? b.code : "";
-    if (!src) continue;
-    for (const w of src.match(/[A-Za-z_][A-Za-z0-9_]{2,}/g) ?? []) {
-      const lower = w.toLowerCase();
-      if (NOISE.has(lower)) continue;
-      found.add(lower);
-      if (found.size >= 10) break;      // a cap keeps the payload honest
-    }
-    if (found.size >= 10) break;
+/** Every human-readable string in a block, however deeply nested. */
+function textOf(v: unknown): string {
+  if (typeof v === "string") return stripTags(v) + " ";
+  if (Array.isArray(v)) return v.map(textOf).join("");
+  if (v && typeof v === "object") {
+    return Object.entries(v as Record<string, unknown>)
+      // `t` is the block type ("p", "code") — a word every block would match on.
+      .filter(([k]) => k !== "t")
+      .map(([, x]) => textOf(x))
+      .join("");
   }
-  return [...found].join(" ");
+  return "";
+}
+
+/** Prose AND code, collapsed to lower-case words. This is the whole point:
+ *  anything written in a topic can be searched for, not a curated subset. */
+function searchableText(blocks: unknown[]): string {
+  return blocks.map(textOf).join(" ").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 export async function buildSearchIndex(): Promise<Index> {
@@ -79,20 +88,26 @@ export async function buildSearchIndex(): Promise<Index> {
   });
 
   const outLessons: SearchLesson[] = [];
-  const topicGroups: SearchTopicGroup[] = [];
+  const rows: Searchable[] = [];
 
   for (const l of lessons) {
     const sub = l.track.title.split(" — ")[0];
     outLessons.push({ title: l.title, slug: l.slug, sub });
 
     let blocks: { t: string; [k: string]: unknown }[] = [];
-    try { blocks = JSON.parse(l.contentJson || "[]"); } catch { continue; }
+    try { blocks = JSON.parse(l.contentJson || "[]"); } catch { blocks = []; }
     const rest = blocks.filter((b) => b.t !== "objectives");
     const { outline, anchors } = lessonOutline(rest);
 
-    // Under four entries the lesson renders whole and has no ?t= to link to,
-    // so indexing its topics would produce links that go nowhere useful.
-    if (outline.length < 4) continue;
+    // Under four entries the lesson renders whole and has no ?t= to link to, so
+    // it is searchable as one row rather than as topics that go nowhere useful.
+    if (outline.length < 4) {
+      rows.push({
+        title: l.title, slug: l.slug, t: 0, sub, kind: "lesson",
+        text: `${l.title} ${sub} ${searchableText(rest)}`.toLowerCase(),
+      });
+      continue;
+    }
 
     // Same walk the lesson page does: each anchor starts the next topic.
     const groups: (typeof rest)[] = outline.map(() => []);
@@ -102,25 +117,72 @@ export async function buildSearchIndex(): Promise<Index> {
       groups[Math.max(0, seen)]?.push(b);
     });
 
-    topicGroups.push({
-      s: l.slug,
-      b: l.title,
-      t: outline.map((o, i) => {
-        const k = identifiers(groups[i] ?? []);
-        // Drop identifiers the title already carries — indexing "frozenset"
-        // twice for "frozenset — a set that can be a key" buys nothing.
-        const title = o.label.toLowerCase();
-        const useful = k.split(" ").filter((w) => w && !title.includes(w)).join(" ");
-        return useful ? [o.label, useful] : [o.label];
-      }),
+    outline.forEach((o, i) => {
+      rows.push({
+        title: o.label,
+        slug: l.slug,
+        t: i + 1,
+        sub: l.title,
+        kind: "topic",
+        // The lesson title goes in too, so "python strings" finds a topic of
+        // the strings lesson even though neither word is in the topic's own
+        // heading.
+        text: `${o.label} ${l.title} ${sub} ${searchableText(groups[i] ?? [])}`.toLowerCase(),
+      });
+    });
+  }
+
+  for (const p of problems) {
+    rows.push({
+      title: p.title, slug: p.slug, t: 0, sub: p.difficulty, kind: "problem",
+      text: `${p.title} ${p.difficulty}`.toLowerCase(),
     });
   }
 
   const data: Index = {
     lessons: outLessons,
-    topicGroups,
+    rows,
     problems: problems.map((p) => ({ title: p.title, slug: p.slug, sub: p.difficulty })),
   };
   cache = { at: Date.now(), data };
   return data;
+}
+
+/**
+ * Rank rows against a query.
+ *
+ * A hit in the TITLE outranks a hit in the body, so typing "slicing" gives the
+ * topic called Slicing before the twelve topics that mention it in passing.
+ * Body matches still appear — that is the whole reason for full text — but
+ * underneath, where they belong.
+ */
+export async function search(q: string, limit = 8): Promise<SearchHit[]> {
+  const needle = q.trim().toLowerCase();
+  if (needle.length < 2) return [];
+
+  const { rows } = await buildSearchIndex();
+  const scored: { row: Searchable; rank: number }[] = [];
+
+  for (const row of rows) {
+    const title = row.title.toLowerCase();
+    let rank: number;
+    if (title.startsWith(needle)) rank = 0;
+    else if (title.includes(needle)) rank = 1;
+    else if (row.sub.toLowerCase().includes(needle)) rank = 2;
+    else if (row.text.includes(needle)) rank = 3;
+    else continue;
+
+    // A topic is a more precise answer than the whole lesson or a problem, so
+    // it wins a tie.
+    scored.push({ row, rank: rank * 2 + (row.kind === "topic" ? 0 : 1) });
+  }
+
+  scored.sort((a, b) => a.rank - b.rank);
+  return scored.slice(0, limit).map(({ row }) => ({
+    title: row.title,
+    slug: row.slug,
+    sub: row.sub,
+    kind: row.kind,
+    ...(row.t > 1 ? { t: row.t } : {}),
+  }));
 }
