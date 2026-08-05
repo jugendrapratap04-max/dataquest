@@ -464,3 +464,39 @@ export const dijkstraProblems = [
     ["One run of Dijkstra already computes all of these — the goal was never needed.", "Return pairs as two-element LISTS, and sort them. A dict would arrive in JS as a Map and grade as empty.", "Only nodes that were actually reached belong in the answer."],
     ["graph", "dijkstra"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Bellman-Ford and minimum spanning trees.
+ *
+ * Edges are [u, v, w] triples rather than an adjacency dict, which is how both
+ * algorithms actually want them: Bellman-Ford sweeps the whole edge list, and
+ * Kruskal sorts it.
+ * ------------------------------------------------------------------------- */
+export const bellmanMstProblems = [
+  PP("bellman-ford-mst", "Medium", 448, "bellman-cost", "Cheapest, Even With Negative Edges", "bellman_ford_cost",
+    "`nodes` is the list of node names and `edges` is a list of `[from, to, weight]` triples, **directed**. Weights may be negative; assume there is no negative cycle.\n\nReturn the cheapest total cost from `start` to `goal`, or `-1` if `goal` cannot be reached.\n\nDijkstra is not safe here — it marks a node final on the way past and a negative edge can improve it afterwards. Relax every edge instead, `len(nodes) - 1` times.",
+    [{ input: 'nodes=["A","B","C","D"], edges=[["A","B",1],["A","C",2],["C","B",-2],["B","D",6]], start="A", goal="D"', output: "6" }, { input: 'goal unreachable', output: "-1" }],
+    "def bellman_ford_cost(nodes, edges, start, goal):\n    pass\n",
+    "def bellman_ford_cost(nodes, edges, start, goal):\n    best = {n: float(\"inf\") for n in nodes}\n    best[start] = 0\n    for _ in range(len(nodes) - 1):\n        changed = False\n        for u, v, w in edges:\n            if best[u] + w < best[v]:\n                best[v] = best[u] + w\n                changed = True\n        if not changed:\n            break\n    return -1 if best[goal] == float(\"inf\") else best[goal]\n",
+    [{ args: [["A", "B", "C", "D"], [["A", "B", 1], ["A", "C", 2], ["C", "B", -2], ["B", "D", 6]], "A", "D"], expected: 6 }, { args: [["A", "B", "C", "D"], [["A", "B", 1], ["A", "C", 2], ["C", "B", -2], ["B", "D", 6]], "A", "B"], expected: 0 }, { args: [["A", "B", "C", "D"], [["A", "B", 1], ["A", "C", 2], ["C", "B", -2], ["B", "D", 6]], "A", "A"], expected: 0 }, { args: [["A", "B"], [], "A", "B"], expected: -1 }, { args: [["A", "B", "C"], [["A", "B", 5], ["B", "C", 5]], "A", "C"], expected: 10 }],
+    ["Start every node at `float(\"inf\")` and the source at 0 — then `best[u] + w < best[v]` needs no special case, because infinity plus anything is still infinity.", "`len(nodes) - 1` rounds exactly. One fewer and the longest path never finishes forming, with nothing raised.", "A node still at infinity at the end was never reached — return -1, not the infinity."],
+    ["graph", "bellman-ford"]),
+
+  PP("bellman-ford-mst", "Hard", 449, "negative-cycle", "Is There No Answer At All", "has_negative_cycle",
+    "Same `nodes` and directed `edges`. Return `True` if the part of the graph reachable from `start` contains a **negative cycle** — a loop whose weights sum below zero, so going round forever keeps making any total cheaper.\n\nA negative *edge* is not a negative *cycle*: `A→B 1, B→C -1, C→A 1` sums to +1 and is perfectly fine. Only the round trip decides.",
+    [{ input: 'edges=[["A","B",1],["B","C",-3],["C","A",1]]', output: "True" }, { input: 'edges=[["A","B",1],["B","C",-1],["C","A",1]]', output: "False" }],
+    "def has_negative_cycle(nodes, edges, start):\n    pass\n",
+    "def has_negative_cycle(nodes, edges, start):\n    best = {n: float(\"inf\") for n in nodes}\n    best[start] = 0\n    for _ in range(len(nodes) - 1):\n        for u, v, w in edges:\n            if best[u] + w < best[v]:\n                best[v] = best[u] + w\n    for u, v, w in edges:\n        if best[u] + w < best[v]:\n            return True\n    return False\n",
+    [{ args: [["A", "B", "C"], [["A", "B", 1], ["B", "C", -3], ["C", "A", 1]], "A"], expected: true }, { args: [["A", "B", "C"], [["A", "B", 1], ["B", "C", -1], ["C", "A", 1]], "A"], expected: false }, { args: [["A", "B"], [["A", "B", 3]], "A"], expected: false }, { args: [["A", "B", "C", "D"], [["A", "B", 1], ["A", "C", 2], ["C", "B", -2], ["B", "D", 6]], "A"], expected: false }],
+    ["Run the ordinary `len(nodes) - 1` rounds first, then ONE more pass over the edges.", "After V-1 rounds nothing should still be improving. If an edge still relaxes, a loop is paying you to go round it.", "Do not test `any(w < 0 for ...)` — that rejects negative edges, which are legal. Only the round trip decides."],
+    ["graph", "bellman-ford"]),
+
+  PP("bellman-ford-mst", "Hard", 450, "mst-total", "Connect Everything, Cheaply", "mst_total",
+    "`edges` is a list of `[u, v, weight]` triples, **undirected** this time. Return the total weight of the minimum spanning tree — the cheapest set of edges that keeps every node connected with no cycles.\n\nReturn `-1` if the graph cannot be connected at all. A single node with no edges has a tree of total 0.\n\nSort the edges by weight and take each one whose two ends are not already connected. A spanning tree of `n` nodes has exactly `n - 1` edges, which is also how you detect the disconnected case.",
+    [{ input: 'nodes=["A","B","C","D"], edges=[["A","B",10],["B","C",10],["A","C",19],["C","D",5]]', output: "25" }, { input: 'nodes=["A","B","C"], edges=[["A","B",1]]', output: "-1" }],
+    "def mst_total(nodes, edges):\n    pass\n",
+    "def mst_total(nodes, edges):\n    parent = {n: n for n in nodes}\n\n    def find(x):\n        while parent[x] != x:\n            parent[x] = parent[parent[x]]\n            x = parent[x]\n        return x\n\n    taken = 0\n    total = 0\n    for w, u, v in sorted((w, u, v) for u, v, w in edges):\n        ru, rv = find(u), find(v)\n        if ru == rv:\n            continue\n        parent[ru] = rv\n        taken += 1\n        total += w\n    return total if taken == len(nodes) - 1 else -1\n",
+    [{ args: [["A", "B", "C", "D"], [["A", "B", 10], ["B", "C", 10], ["A", "C", 19], ["C", "D", 5]]], expected: 25 }, { args: [["A", "B"], [["A", "B", 3]]], expected: 3 }, { args: [["A"], []], expected: 0 }, { args: [["A", "B", "C"], [["A", "B", 1]]], expected: -1 }, { args: [["A", "B", "C"], [["A", "B", 1], ["B", "C", 2], ["A", "C", 5]]], expected: 3 }],
+    ["Sort as `(w, u, v)` so the weight decides the order.", "Each node points at a parent; a group is named by whoever points at themselves. Join two groups by pointing one root at the other.", "Count the edges you take. Fewer than `len(nodes) - 1` means the graph was in more than one piece — return -1."],
+    ["graph", "mst"]),
+];

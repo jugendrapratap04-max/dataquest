@@ -12,7 +12,7 @@ import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
 import { mpProblems } from "./mp-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
-import { dsaProblems, treeTraversalProblems, balancedTreeProblems, countingRadixProblems, linkedListSetProblems, cycleProblems, dijkstraProblems } from "./dsa-problems.mjs";
+import { dsaProblems, treeTraversalProblems, balancedTreeProblems, countingRadixProblems, linkedListSetProblems, cycleProblems, dijkstraProblems, bellmanMstProblems } from "./dsa-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
 const prisma = new PrismaClient();
@@ -30,6 +30,7 @@ const SETS = [
   ["linked list shapes + sets", linkedListSetProblems],
   ["cycle detection", cycleProblems],
   ["shortest path / Dijkstra", dijkstraProblems],
+  ["Bellman-Ford + MST", bellmanMstProblems],
 ];
 
 // Push the seed's problem definitions onto rows that already exist in the
