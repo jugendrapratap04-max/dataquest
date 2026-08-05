@@ -110,9 +110,76 @@ const runPy = (code) => {
   }
 };
 
+// A lesson whose snippets import scikit-learn or scipy cannot be checked by the
+// local interpreter: neither is installed there. Installing them would not fix
+// it either — the student's browser loads the pinned wheels in public/pyodide,
+// and local CPython would verify against different versions of numpy, pandas and
+// sklearn than the ones they actually run.
+//
+// So those lessons run in OUR Pyodide, from the same folder the app serves. Same
+// arrangement as the SQL and 8085 engines above, for the same reason: a claimed
+// output should be one the student can reproduce, not the author's word for it.
+//
+// Only sklearn and scipy are listed. numpy, pandas and matplotlib exist locally
+// AND in Pyodide, and eleven verified lessons already depend on the local ones —
+// moving those is a separate change with its own risk.
+const BROWSER_ONLY = ["sklearn", "scipy"];
+const needsPyodide = BROWSER_ONLY.some((p) =>
+  new RegExp(`(import|from) ${p}\\b`).test(JSON.stringify(lesson.content))
+);
+
+let runPyodide = null;
+if (needsPyodide) {
+  const { loadPyodide } = await import("pyodide");
+  const { sep } = await import("node:path");
+  const py = await loadPyodide({ indexURL: join(process.cwd(), "public", "pyodide") + sep });
+  py.setStderr({ batched: () => {} });
+
+  // Packages are loaded ONCE, from every snippet in the lesson at once, so the
+  // per-snippet call below can stay synchronous like the other two engines.
+  // loadPackagesFromImports also narrates onto stdout ("Loading numpy, scipy…"),
+  // which would land in the captured output — silence stdout across it, exactly
+  // as lib/pyodide-runner.ts does for the student.
+  py.setStdout({ batched: () => {} });
+  const snippets = [];
+  for (const b of lesson.content) {
+    for (const v of [b.code, b.full, b.fix]) if (typeof v === "string") snippets.push(v);
+    for (const s of b.steps ?? []) if (typeof s.code === "string") snippets.push(s.code);
+    for (const i of b.items ?? []) if (typeof i.code === "string") snippets.push(i.code);
+  }
+  // Import LINES only, not the snippets joined together: concatenating separate
+  // programs usually is not valid Python, and loadPackagesFromImports tokenises
+  // what it is given. A list of import statements always parses.
+  const importLines = [
+    ...new Set((snippets.join("\n").match(/^[ \t]*(?:import|from)\s+[^\n]+/gm) ?? []).map((s) => s.trim())),
+  ];
+  await py.loadPackagesFromImports(importLines.join("\n"));
+
+  let buf = "";
+  runPyodide = (code) => {
+    buf = "";
+    // A fresh namespace per snippet. One Pyodide instance is reused for speed,
+    // but each snippet must start clean or a name defined in an earlier block
+    // silently rescues a later one that forgot to define it — which is exactly
+    // the mistake this tool exists to catch.
+    const ns = py.globals.get("dict")();
+    try {
+      py.setStdout({ batched: (s) => { buf += s + "\n"; } });
+      py.runPython(code, { globals: ns });
+      return { ok: true, out: buf.replace(/\r\n/g, "\n").trimEnd() };
+    } catch (e) {
+      const last = String(e?.message ?? e).split("\n").filter(Boolean).pop() ?? "";
+      return { ok: false, out: last };
+    } finally {
+      py.setStdout({ batched: () => {} });
+      ns.destroy();
+    }
+  };
+}
+
 /** Whichever engine this lesson is written in. A case may carry a `show` list,
- *  which only the 8085 engine reads — the other two ignore the second argument. */
-const run = runAsm ?? runSql ?? runPy;
+ *  which only the 8085 engine reads — the others ignore the second argument. */
+const run = runAsm ?? runSql ?? runPyodide ?? runPy;
 
 const cases = [];
 for (const b of lesson.content) {

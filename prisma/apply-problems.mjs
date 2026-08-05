@@ -13,6 +13,7 @@ import { vizProblems } from "./viz-problems.mjs";
 import { mpProblems } from "./mp-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
 import { dsaProblems, treeTraversalProblems, balancedTreeProblems, countingRadixProblems, linkedListSetProblems, cycleProblems, dijkstraProblems, bellmanMstProblems, dpBasicsProblems, knapsackProblems, greedyProblems, flowTspProblems } from "./dsa-problems.mjs";
+import { mlProblems } from "./ml-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
 const prisma = new PrismaClient();
@@ -35,6 +36,7 @@ const SETS = [
   ["DP + knapsack", knapsackProblems],
   ["greedy algorithms", greedyProblems],
   ["max flow + TSP", flowTspProblems],
+  ["machine learning", mlProblems],
 ];
 
 // Push the seed's problem definitions onto rows that already exist in the
