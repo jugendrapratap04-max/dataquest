@@ -15,9 +15,20 @@ import { lessonOutline } from "@/lib/lesson-outline";
 import { Fragment } from "react";
 import { RailControls } from "@/components/LayoutControls";
 import { VizBlock } from "@/components/viz/VizBlock";
+import { LiveCode } from "@/components/LiveCode";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function Block({ b }: { b: any }) {
+/* Subjects whose `code` blocks are plain Python printing to stdout, and are
+ * therefore safe to hand to the student as editable examples.
+ *
+ * `viz` is left out deliberately: its examples draw with matplotlib, and the
+ * result is a figure rather than printed text, so running one here would show an
+ * empty output box and teach the wrong thing. It needs the figure path
+ * (runPythonWithFigure) before it can join. `sql` and `microprocessor` are not
+ * Python at all. */
+const LIVE_TRACKS = new Set(["python", "statistics", "pandas"]);
+
+function Block({ b, pyLive = false }: { b: any; pyLive?: boolean }) {
   switch (b.t) {
     case "objectives":
       return (
@@ -118,6 +129,9 @@ function Block({ b }: { b: any }) {
     case "psoft":
       return <p className="soft" dangerouslySetInnerHTML={{ __html: b.html }} />;
     case "code":
+      // Every code block is verified runnable by `npm run verify:lesson`, so on
+      // a Python subject it can simply be handed over as an editable example.
+      if (pyLive) return <LiveCode file={b.file} code={b.code} output={b.output} runnable />;
       return (
         <div className="code">
           <div className="bar">
@@ -483,7 +497,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           {rest.map((b, i) => (
             <Fragment key={i}>
               {anchors.get(i) && <span id={anchors.get(i)} className="anchor" aria-hidden="true" />}
-              <Block b={b} />
+              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} />
             </Fragment>
           ))}
         </div>

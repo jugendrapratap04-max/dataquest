@@ -802,6 +802,27 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .verdict { display:flex; align-items:center; gap:9px; font-weight:700; font-size:14px; margin-bottom:12px; } .verdict.ok { color:var(--good); } .verdict.no { color:var(--bad); } .verdict svg { width:18px; height:18px; }
 .tcase { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(255,255,255,.04); margin-bottom:7px; font-family:var(--mono); font-size:12px; color:#C6CDDA; } .tcase .st { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px; flex:none; } .tcase.ok .st { background:var(--good); color:#04240F; } .tcase.no .st { background:var(--bad); color:#fff; } .tcase .io b { color:#C6CDDA; } .tcase .ms { margin-left:auto; color:#6B7688; }
 .console-out { font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; word-break:break-word; } .console-out b { color:var(--code-str); }
+/* Editable lesson examples (components/LiveCode). The read-only state must look
+   exactly like a normal `.code` block — the invitation is the button, not a
+   different-looking box, so nothing shouts until the student chooses to engage. */
+.code.live .bar { display:flex; align-items:center; gap:7px; }
+.lc-try { margin-left:auto; font-size:11.5px; font-weight:650; padding:2px 9px; border-radius:6px; cursor:pointer;
+          color:var(--accent); background:color-mix(in srgb, var(--accent) 13%, transparent);
+          border:1px solid color-mix(in srgb, var(--accent) 32%, transparent); }
+.lc-try:hover { background:color-mix(in srgb, var(--accent) 22%, transparent); }
+.lc-acts { margin-left:auto; display:flex; gap:6px; }
+.lc-run, .lc-reset { font-size:11.5px; font-weight:650; padding:2px 10px; border-radius:6px; cursor:pointer; border:1px solid transparent; }
+.lc-run { color:#fff; background:var(--accent); }
+.lc-run:disabled, .lc-reset:disabled { opacity:.45; cursor:default; }
+.lc-reset { color:var(--muted); background:transparent; border-color:var(--line); }
+.lc-reset:not(:disabled):hover { color:var(--fg); }
+.lc-area { display:block; width:100%; box-sizing:border-box; resize:vertical; border:0; outline:0;
+           padding:13px 15px; font-family:var(--mono); font-size:13px; line-height:1.65;
+           color:var(--code-fg, #E6E9EF); background:transparent; tab-size:4; }
+.code.live.editing { outline:1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.lc-hint { padding:7px 15px 11px; font-size:12px; color:var(--muted); }
+.out.err { color:#FF8B8B; white-space:pre-wrap; font-family:var(--mono); font-size:12.5px; }
+
 /* The keyboard hint inside the Run / Submit buttons. Deliberately low-contrast:
    it should be findable when you look for it and invisible when you are not. */
 .kb { margin-left:7px; padding:1px 5px; border-radius:5px; font-family:var(--mono); font-size:10.5px; line-height:1.5;
