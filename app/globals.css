@@ -709,8 +709,12 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
 .obj { padding:18px 20px; margin-bottom:24px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
 .obj ul { margin:0; padding:0; list-style:none; display:grid; gap:9px; } .obj li { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; } .obj li svg { width:17px; height:17px; color:var(--teal); flex:none; margin-top:2px; }
-.prose { line-height:1.65; } .prose h2 { font-size:19px; margin:30px 0 12px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--mono); font-size:13px; color:var(--accent-2); background:var(--accent-soft); width:26px; height:26px; border-radius:8px; display:grid; place-items:center; flex:none; }
-.prose p { margin:0 0 14px; } .prose p.soft { color:var(--ink-soft); }
+/* Margins deliberately absent here. Spacing is set once, for every block type,
+   in the layout system at the bottom of this file; a `.prose h2` rule outranks
+   `.prose > *` on specificity, so a margin left here would quietly win and the
+   rhythm would drift again. */
+.prose { line-height:1.65; } .prose h2 { font-size:19px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--mono); font-size:13px; color:var(--accent-2); background:var(--accent-soft); width:26px; height:26px; border-radius:8px; display:grid; place-items:center; flex:none; }
+.prose p.soft { color:var(--ink-soft); }
 .prose code, .kbd { font-family:var(--mono); font-size:.9em; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--accent-2); }
 /* Fenced blocks inside a problem description (mdLite). The inner <code> has to
    opt out of the inline pill above, or every block gets a border and a tint. */
@@ -1233,9 +1237,8 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lsum-stats span { font-size:11.5px; color:var(--ink-faint); }
 .lsum-next { font-size:13px; color:var(--ink-soft); margin:12px 0 0; }
 
-/* Breathing room between major concepts — the page was one long wall of text. */
-.prose h2 { margin-top:44px; padding-top:26px; border-top:1px solid var(--line); }
-.prose h2:first-of-type { margin-top:24px; }
+/* Breathing room between major concepts lives in the layout system at the
+   bottom of this file, together with every other gap on the page. */
 
 /* ---- Scaffolding ladder: worked example -> faded -> trace -> debug ---- */
 .worked { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
@@ -2167,30 +2170,12 @@ select.inp { cursor:pointer; }
   html[data-focus="1"] .wrap { max-width: none; padding-left: 44px; padding-right: 44px; }
 
   /* -- wide media, narrow text ------------------------------------------
-   * Applied whenever the lesson column has actually widened. Measured rather
-   * than guessed: at 13.5px the average character is 6.12px, so a full-width
-   * paragraph runs to 140+ characters where comfortable is 60-90 — and the
-   * un-collapsed 521px column was already a fine 82. The paragraphs were never
-   * what felt cramped. The diagrams and code blocks were, so those take the
-   * whole width and the text keeps a readable measure. */
+   * The reading measure itself now lives in the layout system at the bottom of
+   * this file, where it applies to every block type instead of to a list of
+   * seven — see the note there. All that belongs here is how wide the lesson
+   * column may grow once the rail is out of the way. */
   html[data-rail="off"] .learn-layout,
   html[data-focus="1"] .learn-layout { max-width: 1180px; margin: 0 auto; }
-  html[data-rail="off"] .prose > p,
-  html[data-rail="off"] .prose > h2,
-  html[data-rail="off"] .prose > .note,
-  html[data-rail="off"] .prose > .def,
-  html[data-rail="off"] .prose > .hook,
-  html[data-rail="off"] .prose > .analogy,
-  html[data-rail="off"] .prose > details.think,
-  html[data-focus="1"] .prose > p,
-  html[data-focus="1"] .prose > h2,
-  html[data-focus="1"] .prose > .note,
-  html[data-focus="1"] .prose > .def,
-  html[data-focus="1"] .prose > .hook,
-  html[data-focus="1"] .prose > .analogy,
-  html[data-focus="1"] .prose > details.think { max-width: 680px; margin-inline: auto; }
-  html[data-rail="off"] .prose > p,
-  html[data-focus="1"] .prose > p { font-size: 15px; line-height: 1.72; }
 }
 
 /* -- the controls themselves ---------------------------------------------- */
@@ -2416,3 +2401,101 @@ select.inp { cursor:pointer; }
   .pf-row { flex-direction:column; gap:6px; }
   .pf-lbl { width:auto; padding-top:0; }
 }
+
+/* ==========================================================================
+   ONE LAYOUT FOR EVERY LESSON
+   --------------------------------------------------------------------------
+   Deliberately the LAST thing in this file. Every block type used to set its
+   own margins — h2 24/12, def 20/20, p 0/14, analogy 18/18, viz 6/22 — and the
+   gaps between them measured 14px, 18px and 20px within one screen. A rule
+   written earlier would have lost to those on source order at equal
+   specificity, which is exactly how the spacing drifted in the first place.
+
+   The horizontal rule replaces a list. The old CSS named the blocks that should
+   keep a readable measure (p, h2, note, def, hook, analogy, think) and centred
+   them with `margin-inline:auto`. Everything NOT on that list — code, viz,
+   quizzes, drills, mistakes, recaps, worked examples — took the full column, so
+   in a widened column a paragraph started at x=165 and the code block directly
+   under it started at x=44. Measured, not guessed: a 121px step, on every
+   lesson, in every course.
+
+   Two changes fix it for all of them at once:
+     1. Blocks are LEFT-aligned to a shared edge, never centred. One vertical
+        line down the page, which is what every documentation site does.
+     2. The narrow measure is the DEFAULT and full width is the exception. The
+        old list could only ever be incomplete — every block type added after it
+        was written broke the alignment automatically. This way a new type
+        inherits the column and stays in line.
+   ========================================================================== */
+.prose {
+  --measure: 760px;        /* the reading column every block shares */
+  --step: 22px;            /* the single gap between two blocks */
+  --step-section: 44px;    /* the larger gap that opens a new concept */
+}
+
+.prose > * {
+  max-width: var(--measure);
+  margin-inline: 0;        /* left-aligned; never centred */
+  margin-top: 0;
+  margin-bottom: var(--step);
+}
+.prose > *:last-child { margin-bottom: 0; }
+
+/* A heading opens a concept, so it takes the larger step and keeps its rule. */
+.prose > h2 {
+  max-width: var(--measure);
+  margin-top: var(--step-section);
+  margin-bottom: 14px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+.prose > h2:first-of-type { margin-top: 0; }
+
+/* A caption belongs to the thing above it, not to the next block. */
+.prose > p.soft { margin-top: calc(var(--step) * -0.5); }
+
+/* The only blocks that need more room than the measure. They grow to the RIGHT
+   from the same left edge, so widening one never moves the line. */
+.prose > .viz,
+.prose > .memsetup,
+.prose > .sqlsetup,
+.prose > .trace,
+.prose > .dtypes,
+.prose > .psoft { max-width: 100%; }
+
+/* Widened column: a longer measure for comfortable reading, same left edge.
+   These carry an attribute selector, so they outrank the rules above whatever
+   the source order. */
+@media (min-width: 1100px) {
+  html[data-rail="off"] .prose,
+  html[data-focus="1"] .prose { --measure: 820px; }
+  html[data-rail="off"] .prose > p,
+  html[data-focus="1"] .prose > p { font-size: 15px; line-height: 1.72; }
+}
+
+/* Phones: the measure is irrelevant below it, but the rhythm still applies. */
+@media (max-width: 640px) {
+  .prose { --step: 18px; --step-section: 34px; }
+  .prose > h2 { padding-top: 20px; }
+}
+
+/* The same rhythm for the written-notes view.
+   Its horizontal alignment was already sound — one left edge, one width — but
+   the gaps between blocks measured 10, 12, 14, 16, 20 and 30px in a single
+   chapter, for the same reason the lesson page did: every block set its own.
+   Scoped to two classes rather than one on purpose. The rule that sets a
+   12px bottom margin on every paragraph under .book also styles the paragraphs
+   INSIDE the cards, and one class plus one element outranks one class. Adding
+   .book in front takes the top-level rhythm back without touching paragraphs
+   nested in a definition or a worked example, which want their own spacing.
+
+   Braces are kept out of this comment deliberately: the dev-time CSS pass
+   parses them even in here, and the first version of this note took the whole
+   stylesheet down with an "invalid dangling combinator" that the production
+   build did not reproduce. */
+.bk-chapter { --step: 20px; --step-section: 40px; }
+.book .bk-chapter > * { margin-top: 0; margin-bottom: var(--step); }
+.book .bk-chapter > *:last-child { margin-bottom: 0; }
+.book .bk-chapter > .bk-h { margin-top: var(--step-section); }
+.book .bk-chapter > .bk-title { margin-top: 0; }
+@media (max-width: 640px) { .bk-chapter { --step: 16px; --step-section: 30px; } }
