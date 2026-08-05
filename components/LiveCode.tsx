@@ -31,12 +31,27 @@ import { play as playCue } from "@/lib/sound";
  * fetched on the first Run, not on page load, so a student who only reads pays
  * nothing at all.
  */
+/* Has Pyodide been loaded yet in this tab?
+ *
+ * Module scope on purpose: the runtime is a singleton, so the first Run anywhere
+ * on the page pays for the download and every block afterwards is instant. A
+ * per-component flag would promise the wait again on each block that had not yet
+ * been used, which is the opposite of true.
+ *
+ * It exists because the wait is otherwise unexplained. A student clicks Run,
+ * gets "Running…", and has no way to tell a slow download from a hang — and on
+ * the ML lessons that download now includes scikit-learn and scipy, so it is the
+ * longest it has ever been. Saying so once costs a line and removes the only
+ * reason to conclude the button is broken. */
+let warmed = false;
+
 export function LiveCode({
   file, code, output, runnable, lessonSlug,
 }: { file: string; code: string; output?: string; runnable: boolean; lessonSlug?: string }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(code);
   const [busy, setBusy] = useState(false);
+  const [cold, setCold] = useState(false);
   const [result, setResult] = useState<{ stdout: string; error?: string } | null>(null);
   const areaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -45,9 +60,11 @@ export function LiveCode({
   async function run() {
     setBusy(true);
     setResult(null);
+    setCold(!warmed);
     try {
       const { runPython } = await import("@/lib/pyodide-runner");
       const r = await runPython(draft);
+      warmed = true;
       setResult(r);
       playCue(r.error ? "fail" : "pass");
     } catch (e) {
@@ -55,6 +72,7 @@ export function LiveCode({
       playCue("fail");
     } finally {
       setBusy(false);
+      setCold(false);
     }
   }
 
@@ -126,6 +144,13 @@ export function LiveCode({
         />
       ) : (
         <pre dangerouslySetInnerHTML={{ __html: highlightPython(code) }} />
+      )}
+
+      {busy && cold && (
+        <div className="lc-cold">
+          Downloading Python and its libraries — this happens once, and takes up
+          to a minute. Every Run after it is immediate.
+        </div>
       )}
 
       {/* Before the first Run, keep showing the output the lesson claims — it is

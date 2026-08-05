@@ -29,6 +29,26 @@ function Block({ b, n }: { b: any; n: number }) {
     case "psoft":
       return <p dangerouslySetInnerHTML={html(b.html)} />;
 
+    // The form, then a key to it. Static on paper as on screen — nothing here
+    // is interactive, so the printed notes carry it unchanged.
+    case "syntax":
+      return (
+        <div className="bk-syntax">
+          <h4>Syntax</h4>
+          {b.intro && <p dangerouslySetInnerHTML={html(b.intro)} />}
+          <pre className="bk-sxform">{b.form}</pre>
+          <dl>
+            {b.parts.map((p: any, i: number) => (
+              <div key={i}>
+                <dt><code>{p.bit}</code></dt>
+                <dd dangerouslySetInnerHTML={html(p.says)} />
+              </div>
+            ))}
+          </dl>
+          {b.note && <p dangerouslySetInnerHTML={html(b.note)} />}
+        </div>
+      );
+
     case "analogy":
       return (
         <p className="bk-analogy">

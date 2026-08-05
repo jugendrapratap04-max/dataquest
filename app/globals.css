@@ -898,6 +898,10 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
            padding:13px 15px; font-family:var(--mono); font-size:13px; line-height:1.65;
            color:var(--code-fg, #E6E9EF); background:transparent; tab-size:4; }
 .code.live.editing { outline:1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+/* Shown only while the very first Run downloads the runtime. Sits where the
+   output box will land, so nothing jumps when the result replaces it. */
+.lc-cold { padding:11px 15px; font-size:12.5px; line-height:1.55; color:var(--muted);
+           border-top:1px solid var(--line); }
 .lc-hint { padding:7px 15px 11px; font-size:12px; color:var(--muted); }
 /* 25px-tall buttons are fine under a mouse and a poor target under a thumb.
    The bar cannot take a full 44px without dominating the code block, but 36
@@ -2499,3 +2503,38 @@ select.inp { cursor:pointer; }
 .book .bk-chapter > .bk-h { margin-top: var(--step-section); }
 .book .bk-chapter > .bk-title { margin-top: 0; }
 @media (max-width: 640px) { .bk-chapter { --step: 16px; --step-section: 30px; } }
+
+/* --- Syntax: the form, then a key to every part of it --------------------
+   The section the platform never had — no lesson on any course carried one,
+   because the block type did not exist. Styled as a quiet reference panel
+   rather than a runnable example: the form contains placeholders like
+   "condition" and "body" that are not valid code, so it must not look like
+   something you can press Run on. */
+.syntax h3 { font-size:14px; margin:0 0 10px; }
+.sx-intro { font-size:13px; color:var(--ink-soft); margin:0 0 12px; }
+.sx-form { font-family:var(--mono); font-size:13.5px; line-height:1.8; background:var(--panel-2);
+  border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line)); border-radius:9px;
+  padding:13px 15px; margin:0; overflow-x:auto; white-space:pre; color:var(--ink); }
+.sx-sub { font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); margin:16px 0 9px; }
+.sx-parts { margin:0; display:grid; gap:9px; }
+.sx-part { display:grid; grid-template-columns:minmax(78px,150px) 1fr; gap:12px; align-items:baseline; }
+.sx-part dt { margin:0; }
+.sx-part dt code { font-family:var(--mono); font-size:12.5px; background:var(--accent-soft);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line)); color:var(--accent-2);
+  border-radius:5px; padding:2px 7px; display:inline-block; word-break:break-word; }
+.sx-part dd { margin:0; font-size:13px; color:var(--ink-soft); line-height:1.6; }
+.sx-note { font-size:12.5px; color:var(--ink-faint); margin:14px 0 0; line-height:1.6; }
+@media (max-width: 560px) {
+  .sx-part { grid-template-columns:1fr; gap:3px; }
+  .sx-part dd { padding-left:2px; }
+}
+
+/* Same panel in the written notes. */
+.bk-syntax h4 { margin:0 0 8px; }
+.bk-sxform { font-family:var(--mono); font-size:12.5px; line-height:1.75; background:var(--panel-2);
+  border:1px dashed var(--line); border-radius:8px; padding:10px 12px; margin:0 0 12px;
+  overflow-x:auto; white-space:pre; }
+.bk-syntax dl { margin:0; display:grid; gap:6px; }
+.bk-syntax dl > div { display:grid; grid-template-columns:minmax(70px,140px) 1fr; gap:10px; align-items:baseline; }
+.bk-syntax dt { margin:0; }
+.bk-syntax dd { margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.7; }

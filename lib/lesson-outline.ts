@@ -19,12 +19,16 @@ const EFFORT: Record<string, number> = {
 // Seconds per item for blocks that are lists of things to do.
 const PER_ITEM: Record<string, number> = {
   drills: 25, quiz: 25, mistakes: 15, interview: 15, dtypes: 5, objectives: 0, recap: 3,
+  // A syntax breakdown is read a part at a time, checking each one back against
+  // the form above it — slower than prose, faster than working an example.
+  syntax: 6,
 };
 
 // Sections a student navigates to that are not <h2> headings — the practice and
 // wrap-up blocks. Listing them in the outline is the point: a student can see
 // there is a quiz waiting, and jump straight to it on a second visit.
 const LANDMARKS: Record<string, string> = {
+  syntax: "Syntax",
   worked: "Worked example",
   faded: "Fill the blanks",
   trace: "Trace the code",
@@ -49,7 +53,7 @@ function words(v: any): number {
 // Blocks a student reads straight through. Everything else — code, the ladder,
 // drills, mistakes, interview answers, the quiz — is worked through, not read,
 // so its words count towards practice time rather than reading time.
-const PROSE = new Set(["h2", "p", "psoft", "note", "def", "hook", "think", "analogy", "recap", "dtypes", "objectives"]);
+const PROSE = new Set(["h2", "p", "psoft", "note", "def", "hook", "think", "analogy", "recap", "dtypes", "objectives", "syntax"]);
 
 /** Split deliberately: reading time and doing time are different promises. A
  *  student who sees one big number assumes it is all reading and leaves. */

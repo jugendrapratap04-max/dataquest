@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { pathToFileURL } from "url";
+import { SYNTAX } from "./syntax-blocks.mjs";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
@@ -12803,10 +12804,34 @@ export const QUIZZES = {
 // entry instead of being pasted into each lesson array. Skips adding when the
 // lesson already carries an inline quiz.
 export function lessonContent(l) {
+  let content = withSyntax(l);
   const q = QUIZZES[l.slug];
-  return q && !l.content.some((b) => b.t === "quiz")
-    ? [...l.content, { t: "quiz", items: q }]
-    : l.content;
+  return q && !content.some((b) => b.t === "quiz")
+    ? [...content, { t: "quiz", items: q }]
+    : content;
+}
+
+/* Slot the Syntax section in, if this lesson has one written.
+ *
+ * Position is not cosmetic. It goes immediately BEFORE the lesson's first code
+ * block, which puts it exactly where a beginner needs it: after the definition
+ * and the reason, before the first example they are asked to read. Dropped at
+ * the end it would be a reference appendix nobody reaches; put at the very top
+ * it would be punctuation with nothing attached to it yet.
+ *
+ * A lesson with no code block at all — the reference and theory ones — gets it
+ * after its definition instead, and a lesson with neither gets it first. */
+function withSyntax(l) {
+  const block = SYNTAX[l.slug];
+  if (!block || l.content.some((b) => b.t === "syntax")) return l.content;
+
+  const firstCode = l.content.findIndex((b) => b.t === "code");
+  const lastDef = l.content.map((b) => b.t).lastIndexOf("def");
+  const at = firstCode !== -1 ? firstCode : lastDef !== -1 ? lastDef + 1 : 0;
+
+  const out = [...l.content];
+  out.splice(at, 0, { t: "syntax", ...block });
+  return out;
 }
 
 /** Lesson content, keyed by track slug. Exported so apply-lessons.mjs can refresh

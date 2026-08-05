@@ -5,7 +5,7 @@
  *   trace  -> first N lines + print(var) must equal the claimed answer
  *   debug  -> broken code must raise the claimed symptom; the fix must run clean
  * Usage: npm run verify:lesson -- <track> <lesson-slug> */
-import { trackLessons } from "./seed.mjs";
+import { trackLessons, lessonContent } from "./seed.mjs";
 import { execFileSync } from "node:child_process";
 import { writeFileSync, mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -15,8 +15,14 @@ import { join } from "node:path";
 const SENTINEL = "__TRACE_VALUE__";
 
 const [track, slug] = process.argv.slice(2);
-const lesson = (trackLessons[track] ?? []).find((l) => l.slug === slug);
-if (!lesson) { console.error(`no lesson ${track}/${slug}`); process.exit(1); }
+const found = (trackLessons[track] ?? []).find((l) => l.slug === slug);
+if (!found) { console.error(`no lesson ${track}/${slug}`); process.exit(1); }
+
+// Check what the STUDENT sees, not what the author typed. The quiz and the
+// syntax section are merged in by lessonContent(), and reading `found.content`
+// directly meant neither was ever verified — a syntax breakdown could name a
+// part that was not in its form and nothing would say so.
+const lesson = { ...found, content: lessonContent(found) };
 
 // A SQL lesson is one carrying a `sqlsetup` block: the CREATE TABLE + INSERT
 // its examples run against. Its snippets are queries, not Python, so they go to
@@ -323,5 +329,46 @@ for (const c of cases) {
     else console.log(`  ok   ${c.what}`);
   }
 }
-console.log(`\n${cases.length - bad}/${cases.length} checks passed.`);
+/* ---- syntax blocks: checked by reading, not by running ------------------
+ *
+ * A `form` is not runnable. It is the SHAPE of a statement, with placeholders
+ * like `condition` and `body` standing where real code goes, so feeding it to
+ * python would report a SyntaxError on a block that is perfectly correct.
+ *
+ * What can go wrong instead is the breakdown drifting from the form: naming a
+ * part that is not in it, or leaving one of its parts unexplained. Both read as
+ * plausible and neither shows up anywhere else — a student following a key to a
+ * form that does not match it has no way to tell which of the two is wrong. */
+let sxChecked = 0;
+for (const b of lesson.content.filter((x) => x.t === "syntax")) {
+  let broke = 0;
+  const say = (msg) => { bad++; broke++; console.log(` FAIL  syntax block: ${msg}`); };
+  sxChecked++;
+  if (typeof b.form !== "string" || !b.form.trim()) { say("no `form`"); continue; }
+  if (!Array.isArray(b.parts) || b.parts.length === 0) { say("no `parts` — a form with no key is a picture"); continue; }
+
+  const form = b.form;
+  for (const p of b.parts) {
+    if (!p.bit || !String(p.says ?? "").trim()) { say(`part ${JSON.stringify(p.bit)} has no explanation`); continue; }
+    // Punctuation-only bits ("(", ":") are matched literally; word-like bits
+    // must appear as a whole word so `in` does not match inside `int`.
+    const bit = String(p.bit);
+    const hit = /^\w[\w.]*$/.test(bit)
+      ? new RegExp(`\\b${bit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(form)
+      : form.includes(bit);
+    if (!hit) say(`the breakdown names \`${bit}\`, which does not appear in the form`);
+  }
+
+  // The reverse gap is quieter and just as bad: a form introducing a keyword the
+  // breakdown never mentions is the part the beginner was going to ask about.
+  const named = new Set(b.parts.map((p) => String(p.bit)));
+  const keywords = (form.match(/\b(def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|lambda|yield|global|nonlocal|assert|del|pass|break|continue|in|is|not|and|or)\b/g) ?? []);
+  for (const k of new Set(keywords)) {
+    if (!named.has(k)) say(`the form uses \`${k}\` but the breakdown never says what it does`);
+  }
+  if (!broke) console.log(`  ok   syntax block: ${b.parts.length} parts, all present in the form`);
+}
+
+const total = cases.length + sxChecked;
+console.log(`\n${total - bad}/${total} checks passed.`);
 process.exit(bad ? 1 : 0);

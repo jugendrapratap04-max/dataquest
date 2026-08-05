@@ -28,8 +28,18 @@ import { LiveCode } from "@/components/LiveCode";
  * result is a figure rather than printed text, so running one here would show an
  * empty output box and teach the wrong thing. It needs the figure path
  * (runPythonWithFigure) before it can join. `sql` and `microprocessor` are not
- * Python at all. */
-const LIVE_TRACKS = new Set(["python", "statistics", "pandas"]);
+ * Python at all.
+ *
+ * `ml` joined once its examples were verified the same way as everyone else's.
+ * They import scikit-learn and scipy rather than the standard library, which is
+ * fine here for one reason: runPython calls loadPackagesFromImports, and those
+ * wheels are vendored in public/pyodide alongside numpy and pandas — the same
+ * ones the ML practice problems already run against. What it does change is the
+ * wait. A few ML blocks fit hundreds of models (200 bagged trees, a 20-repeat
+ * tuning sweep) and take seconds even after Pyodide is warm, which is a real
+ * cost and still a far better deal than a beginner having to believe the
+ * printed output of an algorithm this lesson exists to make them distrust. */
+const LIVE_TRACKS = new Set(["python", "statistics", "pandas", "ml"]);
 
 // `lessonId` and `lessonSlug` are threaded through so two block types can say
 // where they are: the quiz files each answer against its lesson, and a runnable
@@ -84,6 +94,43 @@ function Block({
           <div className="def-term">{b.term}</div>
           <div className="def-en">{b.en}</div>
           {b.hi && <div className="def-hi" dangerouslySetInnerHTML={{ __html: b.hi }} />}
+        </div>
+      );
+
+    /* The form of the thing, then every part of that form named.
+     *
+     * The section the platform never had. Every lesson jumped from "here is the
+     * idea" straight to a worked example, which reads fine to somebody who
+     * already knows the shape and leaves a beginner copying punctuation they
+     * cannot name. A student who has not been told that the colon opens a block
+     * and the indent is what closes it is not going to deduce it from an
+     * example that happens to contain both.
+     *
+     * Deliberately ONE block covering both "Syntax" and "Syntax breakdown". The
+     * two are useless apart — a form with no key is a picture, a key with no
+     * form is a glossary — and keeping them together means they cannot drift
+     * onto different lessons or be added one without the other.
+     *
+     * `form` is plain text, never highlighted as runnable code: it contains
+     * placeholders like `condition` and `body` that are not valid Python, so
+     * running it through the highlighter would colour them as if they were.
+     */
+    case "syntax":
+      return (
+        <div className="card syntax">
+          <h3>🧩 Syntax</h3>
+          {b.intro && <p className="sx-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
+          <pre className="sx-form">{b.form}</pre>
+          <div className="sx-sub">What each part means</div>
+          <dl className="sx-parts">
+            {b.parts.map((p: any, i: number) => (
+              <div className="sx-part" key={i}>
+                <dt><code>{p.bit}</code></dt>
+                <dd dangerouslySetInnerHTML={{ __html: p.says }} />
+              </div>
+            ))}
+          </dl>
+          {b.note && <p className="sx-note" dangerouslySetInnerHTML={{ __html: b.note }} />}
         </div>
       );
 
