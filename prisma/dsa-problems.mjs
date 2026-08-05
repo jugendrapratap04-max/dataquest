@@ -252,3 +252,37 @@ export const dsaProblems = [
     ["`text.find(needle)` gives the position, or -1 when absent.", "Never write `if pos:` — -1 is truthy and 0 is falsy, so both ends are wrong.", "Compare with `!= -1` explicitly."],
     ["string", "find"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Tree traversals. Added with the lesson, because `npm run syllabus` now counts
+ * practice — a lesson without it is reported below standard, which is the whole
+ * reason that check exists.
+ * ------------------------------------------------------------------------- */
+export const treeTraversalProblems = [
+  PP("tree-traversals", "Medium", 430, "preorder-values", "Save It Root First", "preorder_values",
+    "Insert every value of `values` into a binary search tree, then return its **pre-order** walk: node, then left, then right.\n\nThis is the order you would save a tree in, because the root comes out first.",
+    [{ input: "values=[50,30,70,20,40]", output: "[50, 30, 20, 40, 70]" }],
+    "def preorder_values(values):\n    pass\n",
+    "def preorder_values(values):\n    class N:\n        def __init__(self, v):\n            self.value = v\n            self.left = None\n            self.right = None\n\n    def insert(root, v):\n        if root is None:\n            return N(v)\n        if v < root.value:\n            root.left = insert(root.left, v)\n        else:\n            root.right = insert(root.right, v)\n        return root\n\n    def walk(node, out):\n        if node is None:\n            return out\n        out.append(node.value)\n        walk(node.left, out)\n        walk(node.right, out)\n        return out\n\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return walk(root, [])\n",
+    [{ args: [[50, 30, 70, 20, 40]], expected: [50, 30, 20, 40, 70] }, { args: [[1, 2, 3]], expected: [1, 2, 3] }, { args: [[]], expected: [] }, { args: [[5]], expected: [5] }],
+    ["Append the node's value BEFORE recursing into either subtree.", "`if node is None: return out` must be the first line.", "Insert returns the root, so write `root = insert(root, v)`."],
+    ["tree", "traversal"]),
+
+  PP("tree-traversals", "Medium", 431, "postorder-values", "Children Before Parent", "postorder_values",
+    "Same tree, but return the **post-order** walk: left, then right, then the node.\n\nThis is the order anything bottom-up needs — deleting a tree, or evaluating an expression.",
+    [{ input: "values=[50,30,70,20,40]", output: "[20, 40, 30, 70, 50]" }],
+    "def postorder_values(values):\n    pass\n",
+    "def postorder_values(values):\n    class N:\n        def __init__(self, v):\n            self.value = v\n            self.left = None\n            self.right = None\n\n    def insert(root, v):\n        if root is None:\n            return N(v)\n        if v < root.value:\n            root.left = insert(root.left, v)\n        else:\n            root.right = insert(root.right, v)\n        return root\n\n    def walk(node, out):\n        if node is None:\n            return out\n        walk(node.left, out)\n        walk(node.right, out)\n        out.append(node.value)\n        return out\n\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return walk(root, [])\n",
+    [{ args: [[50, 30, 70, 20, 40]], expected: [20, 40, 30, 70, 50] }, { args: [[1, 2, 3]], expected: [3, 2, 1] }, { args: [[]], expected: [] }],
+    ["The append goes AFTER both recursive calls.", "The root is always the last value in a post-order walk.", "Only the position of the append changes between the three traversals."],
+    ["tree", "traversal"]),
+
+  PP("tree-traversals", "Medium", 432, "tree-height", "How Tall Is It", "tree_height",
+    "Insert every value into a binary search tree and return its **height** — the number of levels, counting the root as 1. An empty tree has height 0.\n\nA node's height depends on its children, so this has to be worked out bottom-up.",
+    [{ input: "values=[50,30,70,20]", output: "3" }, { input: "values=[]", output: "0" }],
+    "def tree_height(values):\n    pass\n",
+    "def tree_height(values):\n    class N:\n        def __init__(self, v):\n            self.value = v\n            self.left = None\n            self.right = None\n\n    def insert(root, v):\n        if root is None:\n            return N(v)\n        if v < root.value:\n            root.left = insert(root.left, v)\n        else:\n            root.right = insert(root.right, v)\n        return root\n\n    def height(node):\n        if node is None:\n            return 0\n        return max(height(node.left), height(node.right)) + 1\n\n    root = None\n    for v in values:\n        root = insert(root, v)\n    return height(root)\n",
+    [{ args: [[50, 30, 70, 20]], expected: 3 }, { args: [[]], expected: 0 }, { args: [[1]], expected: 1 }, { args: [[1, 2, 3, 4]], expected: 4 }],
+    ["An empty node contributes 0 — that is the base case.", "A node's height is the taller of its two children, plus one.", "Sorted input builds a one-sided tree, so [1,2,3,4] has height 4."],
+    ["tree", "recursion"]),
+];
