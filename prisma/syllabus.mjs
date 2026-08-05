@@ -181,11 +181,11 @@ export const SYLLABUS = [
   { group: "DSA — linked structures and hashing", topics: [
     { t: "Linked lists — nodes and traversal", covers: ["linked-lists-hashing"] },
     { t: "Linked lists in memory — why no index", covers: ["linked-lists-hashing"] },
-    { t: "Linked list types — singly, doubly, circular", covers: [] },
-    { t: "Linked list operations — insert and delete at a position", covers: [] },
+    { t: "Linked list types — singly, doubly, circular", covers: ["linked-list-shapes-sets"] },
+    { t: "Linked list operations — insert and delete at a position", covers: ["linked-list-shapes-sets"] },
     { t: "Hash tables and hash functions", covers: ["linked-lists-hashing"] },
     { t: "Hash maps", covers: ["linked-lists-hashing"] },
-    { t: "Hash sets", covers: [] },
+    { t: "Hash sets", covers: ["linked-list-shapes-sets"] },
   ]},
   { group: "DSA — trees", topics: [
     { t: "Trees", covers: ["trees-graphs"] },
@@ -239,6 +239,8 @@ export const SYLLABUS = [
   { group: "Beyond W3Schools (our own edge)", topics: [
     { t: "Why comparison sorts cannot beat O(n log n)", covers: ["counting-radix-sort"] },
     { t: "Stability — the property radix sort silently dies without", covers: ["counting-radix-sort"] },
+    { t: "Why a circular list breaks every `while node is not None` walk", covers: ["linked-list-shapes-sets"] },
+    { t: "When a hash set silently merges keys — 1, True, and computed floats", covers: ["linked-list-shapes-sets"] },
     { t: "Testing — unittest / pytest", covers: ["testing"] },
     { t: "Debugging and logging", covers: ["debugging-logging"] },
     { t: "Clean code, PEP 8, type hints", covers: ["clean-code"] },

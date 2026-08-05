@@ -350,3 +350,39 @@ export const countingRadixProblems = [
     ["Each round is a stable counting sort on the digit `(n // place) % 10`.", "`place` starts at 1 and multiplies by 10; stop when `max(...) // place` reaches 0. A list of just [0] does no passes at all.", "If the inner pass is unstable the result comes out wrong with nothing raised — place backwards, from a running total."],
     ["sorting", "radix"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Linked list positions and hash sets.
+ *
+ * A linked list cannot be an argument — the tests are JSON — so each of these
+ * takes a plain list, builds the chain, does the pointer work, and walks it back
+ * out. That is deliberate: the walk is what proves the links survived.
+ * ------------------------------------------------------------------------- */
+export const linkedListSetProblems = [
+  PP("linked-list-shapes-sets", "Medium", 439, "insert-at-position", "Insert Without Losing The Tail", "insert_at_position",
+    "Build a singly linked list from `values`, insert `value` so it ends up at index `pos`, then walk the list and return its values as a plain list.\n\nYou must build and rewire real nodes — the point is the two-line order that keeps the rest of the chain reachable. `pos` is always valid, and `pos == len(values)` means append.",
+    [{ input: "values=[10,20,30], pos=1, value=15", output: "[10, 15, 20, 30]" }, { input: "values=[10,20,30], pos=0, value=5", output: "[5, 10, 20, 30]" }],
+    "def insert_at_position(values, pos, value):\n    pass\n",
+    "def insert_at_position(values, pos, value):\n    class Node:\n        def __init__(self, v):\n            self.value = v\n            self.next = None\n\n    head = None\n    tail = None\n    for v in values:\n        node = Node(v)\n        if head is None:\n            head = node\n        else:\n            tail.next = node\n        tail = node\n\n    def walk(node):\n        out = []\n        while node is not None:\n            out.append(node.value)\n            node = node.next\n        return out\n\n    fresh = Node(value)\n    if pos == 0:\n        fresh.next = head\n        return walk(fresh)\n\n    before = head\n    for _ in range(pos - 1):\n        before = before.next\n    fresh.next = before.next\n    before.next = fresh\n    return walk(head)\n",
+    [{ args: [[10, 20, 30], 1, 15], expected: [10, 15, 20, 30] }, { args: [[10, 20, 30], 0, 5], expected: [5, 10, 20, 30] }, { args: [[10, 20, 30], 3, 40], expected: [10, 20, 30, 40] }, { args: [[], 0, 7], expected: [7] }, { args: [[9], 1, 8], expected: [9, 8] }],
+    ["`fresh.next = before.next` comes FIRST. The next line destroys the only reference to the tail.", "Position 0 has no node in front of it, so the head itself changes — return a walk starting at the new node.", "Walk `pos - 1` steps to reach the node the new one goes AFTER."],
+    ["linked-list", "insert"]),
+
+  PP("linked-list-shapes-sets", "Medium", 440, "delete-at-position", "Route Around It", "delete_at_position",
+    "Build a singly linked list from `values`, remove the node at index `pos`, then walk the list and return its values.\n\nNothing is erased — you make the node unreachable by pointing the one before it past it. `pos` is always valid.",
+    [{ input: "values=[10,20,30], pos=1", output: "[10, 30]" }, { input: "values=[10,20,30], pos=0", output: "[20, 30]" }],
+    "def delete_at_position(values, pos):\n    pass\n",
+    "def delete_at_position(values, pos):\n    class Node:\n        def __init__(self, v):\n            self.value = v\n            self.next = None\n\n    head = None\n    tail = None\n    for v in values:\n        node = Node(v)\n        if head is None:\n            head = node\n        else:\n            tail.next = node\n        tail = node\n\n    def walk(node):\n        out = []\n        while node is not None:\n            out.append(node.value)\n            node = node.next\n        return out\n\n    if pos == 0:\n        return walk(head.next)\n\n    before = head\n    for _ in range(pos - 1):\n        before = before.next\n    before.next = before.next.next\n    return walk(head)\n",
+    [{ args: [[10, 20, 30], 1], expected: [10, 30] }, { args: [[10, 20, 30], 0], expected: [20, 30] }, { args: [[10, 20, 30], 2], expected: [10, 20] }, { args: [[7], 0], expected: [] }],
+    ["`before.next = before.next.next` skips the doomed node. There is nothing to delete.", "Deleting position 0 means the head moves — return a walk starting at `head.next`.", "Removing the only node leaves an empty list, so the walk returns `[]`."],
+    ["linked-list", "delete"]),
+
+  PP("linked-list-shapes-sets", "Medium", 441, "first-repeat", "The First One You Have Seen Before", "first_repeat",
+    "Return the **first** value in `nums` that has already appeared earlier in the list. Return `-1` if every value is unique.\n\nDo it in one pass with a set. A nested loop gets the same answer and costs `O(n^2)` — the whole point of a hash set is that asking \"have I seen this?\" is one calculation, not a scan.",
+    [{ input: "nums=[1,2,3,2,1]", output: "2" }, { input: "nums=[1,2,3]", output: "-1" }],
+    "def first_repeat(nums):\n    pass\n",
+    "def first_repeat(nums):\n    seen = set()\n    for n in nums:\n        if n in seen:\n            return n\n        seen.add(n)\n    return -1\n",
+    [{ args: [[1, 2, 3, 2, 1]], expected: 2 }, { args: [[1, 2, 3]], expected: -1 }, { args: [[]], expected: -1 }, { args: [[5, 5]], expected: 5 }, { args: [[1, 2, 1, 2]], expected: 1 }],
+    ["Check membership BEFORE adding, or every value looks like a repeat of itself.", "`n in seen` on a set is one hash and one lookup, however large the set gets.", "The answer is the first value whose second copy you reach — [1,2,1,2] gives 1, not 2."],
+    ["set", "hashing"]),
+];
