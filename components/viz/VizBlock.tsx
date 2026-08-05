@@ -1,215 +1,141 @@
 "use client";
 
-import { CodeRunner } from "./CodeRunner";
-import { TestLab } from "./TestLab";
-import { SpreadLab } from "./SpreadLab";
-import { ProbabilityLab } from "./ProbabilityLab";
-import { LogLevels } from "./LogLevels";
-import { StyleLab } from "./StyleLab";
-import { GitFlow } from "./GitFlow";
-import { ConditionFlow } from "./ConditionFlow";
-import { CollectionBench } from "./CollectionBench";
-import { FunctionMachine } from "./FunctionMachine";
-import { FloatLab } from "./FloatLab";
-import { FileLab } from "./FileLab";
-import { ImportLab } from "./ImportLab";
-import { FormatLab } from "./FormatLab";
-import { LambdaLab } from "./LambdaLab";
-import { ScopeLab } from "./ScopeLab";
-import { JsonBridge } from "./JsonBridge";
-import { StrftimeLab } from "./StrftimeLab";
-import { BitwiseLab } from "./BitwiseLab";
-import { MatchLab } from "./MatchLab";
-import { RecursionLab } from "./RecursionLab";
-import { InheritanceLab } from "./InheritanceLab";
-import { EncapsulationLab } from "./EncapsulationLab";
-import { DunderLab } from "./DunderLab";
-import { GeneratorLab } from "./GeneratorLab";
-import { DecoratorLab } from "./DecoratorLab";
-import { RegexLab } from "./RegexLab";
-import { ConcurrencyLab } from "./ConcurrencyLab";
-import { AsyncLab } from "./AsyncLab";
-import { CounterLab } from "./CounterLab";
-import { PathLab } from "./PathLab";
-import { StorageLab } from "./StorageLab";
-import { VariablesPlayground } from "./VariablesPlayground";
-import { CastingLab } from "./CastingLab";
-import { OperatorLab } from "./OperatorLab";
-import { LoopVisualizer } from "./LoopVisualizer";
-import { ListIndexer } from "./ListIndexer";
-import { StringSlicer } from "./StringSlicer";
-import { ComprehensionBuilder } from "./ComprehensionBuilder";
-import { ObjectInspector } from "./ObjectInspector";
-import { ExceptionFlow } from "./ExceptionFlow";
-import { TruthinessTester } from "./TruthinessTester";
-import { CentralTendency } from "./CentralTendency";
-import { BellCurve } from "./BellCurve";
-import { BoxPlot } from "./BoxPlot";
-import { BayesGrid } from "./BayesGrid";
-import { DistributionLab } from "./DistributionLab";
-import { SamplingLab } from "./SamplingLab";
-import { PValueLab } from "./PValueLab";
-import { ABTestLab } from "./ABTestLab";
-import { VectorizeLab } from "./VectorizeLab";
-import { FilterLab } from "./FilterLab";
-import { MissingDataLab } from "./MissingDataLab";
-import { GroupByLab, GroupByLabSql } from "./GroupByLab";
-import { CleaningLab } from "./CleaningLab";
-import { SelectLab } from "./SelectLab";
-import { WhereLab } from "./WhereLab";
-import { OrderLimitLab } from "./OrderLimitLab";
-import { JoinLab } from "./JoinLab";
-import { WindowLab } from "./WindowLab";
-import { ScatterCorrelation } from "./ScatterCorrelation";
-import { DataFrameAnatomy } from "./DataFrameAnatomy";
-import { ChartLab } from "./ChartLab";
-import { AnscombeLab } from "./AnscombeLab";
-import { SeabornLab } from "./SeabornLab";
-import { ChartChoiceLab } from "./ChartChoiceLab";
-import { EdaWalkthroughLab } from "./EdaWalkthroughLab";
-import { Asm8085Lab } from "./Asm8085Lab";
-import { CpuEvolutionLab } from "./CpuEvolutionLab";
-import { Arch8085Lab } from "./Arch8085Lab";
-import { MemoryStreetLab, MemoryRwLab, AddressWidthLab } from "./MemoryLabs";
-import { ProgramBytesLab, InstructionBytesLab, ByteOrderLab } from "./ProgramBytesLab";
-import { BinaryAddLab, RolloverLab, FlagAnswersLab } from "./CarryLabs";
-import { BitSwitchLab, DoublingLab, HexLab } from "./BitBasicsLab";
-import { ProgrammableLab } from "./ProgrammableLab";
-import { MultiByteLab, MicroFamilyLab } from "./EvolutionLabs";
-import { AluPathLab, MemoryModelLab } from "./CpuBlockLabs";
-import { BusLab, TristateLab } from "./BusLabs";
-import { RegisterLab, PairLab, OpcodeBitsLab } from "./RegisterLabs";
-import { FlagLab, FlagEffectsLab, DaaLab } from "./FlagLabs";
-import { PinLab, AleLab, ControlSignalLab } from "./PinLabs";
-import { DecodeLab, Decoder138Lab, FoldbackLab } from "./DecodeLabs";
-import { MachineCycleLab, TimingLab, WaitStateLab } from "./TimingLabs";
-import { InstrGroupLab, HandAssembleLab } from "./InstructionLabs";
-import { AddressingLab, IndirectLab } from "./AddressingLabs";
-import { TransferMapLab, PairMoveLab } from "./TransferLabs";
-import { SubBorrowLab, SignedLab } from "./ArithmeticLabs";
-import { MaskLab, RotateLab, CompareLab } from "./LogicalLabs";
-import { StackLab, CallReturnLab, ConditionLab } from "./StackLabs";
+import dynamic from "next/dynamic";
+
+/* Every visualization is loaded ON DEMAND.
+ *
+ * These were static imports, so the bundler put all 91 of them in one chunk and
+ * every lesson page downloaded the lot — 232 KB measured, about 70% of the
+ * page's JavaScript. A lesson renders at most one or two of them.
+ *
+ * next/dynamic gives each its own chunk, fetched only when a lesson actually
+ * contains that block. Server rendering stays on, so nothing the reader sees
+ * changes — only when the code behind it arrives.
+ *
+ * Several files export more than one lab (CarryLabs, MemoryLabs, BitBasicsLab),
+ * so two keys can point into the same chunk. That is correct and costs nothing:
+ * the second one is already downloaded. */
 
 const REGISTRY: Record<string, React.ComponentType> = {
-  "code-runner": CodeRunner,
-  "condition-flow": ConditionFlow,
-  "collection-bench": CollectionBench,
-  "function-machine": FunctionMachine,
-  "float-lab": FloatLab,
-  "file-lab": FileLab,
-  "import-lab": ImportLab,
-  "format-lab": FormatLab,
-  "lambda-lab": LambdaLab,
-  "scope-lab": ScopeLab,
-  "json-bridge": JsonBridge,
-  "strftime-lab": StrftimeLab,
-  "bitwise-lab": BitwiseLab,
-  "match-lab": MatchLab,
-  "recursion-lab": RecursionLab,
-  "inheritance-lab": InheritanceLab,
-  "encapsulation-lab": EncapsulationLab,
-  "dunder-lab": DunderLab,
-  "generator-lab": GeneratorLab,
-  "decorator-lab": DecoratorLab,
-  "regex-lab": RegexLab,
-  "concurrency-lab": ConcurrencyLab,
-  "async-lab": AsyncLab,
-  "counter-lab": CounterLab,
-  "path-lab": PathLab,
-  "storage-lab": StorageLab,
-  "variables-playground": VariablesPlayground,
-  "casting-lab": CastingLab,
-  "operator-lab": OperatorLab,
-  "loop-visualizer": LoopVisualizer,
-  "list-indexer": ListIndexer,
-  "string-slicer": StringSlicer,
-  "comprehension-builder": ComprehensionBuilder,
-  "object-inspector": ObjectInspector,
-  "exception-flow": ExceptionFlow,
-  "truthiness-tester": TruthinessTester,
-  "central-tendency": CentralTendency,
-  "bell-curve": BellCurve,
-  "box-plot": BoxPlot,
-  "bayes-grid": BayesGrid,
-  "distribution-lab": DistributionLab,
-  "sampling-lab": SamplingLab,
-  "p-value-lab": PValueLab,
-  "ab-test-lab": ABTestLab,
-  "vectorize-lab": VectorizeLab,
-  "filter-lab": FilterLab,
-  "missing-data-lab": MissingDataLab,
-  "groupby-lab": GroupByLab,
-  "groupby-lab-sql": GroupByLabSql,
-  "cleaning-lab": CleaningLab,
-  "select-lab": SelectLab,
-  "where-lab": WhereLab,
-  "order-limit-lab": OrderLimitLab,
-  "join-lab": JoinLab,
-  "window-lab": WindowLab,
-  "scatter-correlation": ScatterCorrelation,
-  "dataframe-anatomy": DataFrameAnatomy,
-  "chart-lab": ChartLab,
-  "anscombe-lab": AnscombeLab,
-  "seaborn-lab": SeabornLab,
-  "chart-choice-lab": ChartChoiceLab,
-  "eda-walkthrough-lab": EdaWalkthroughLab,
-  "asm8085-lab": Asm8085Lab,
-  "cpu-evolution-lab": CpuEvolutionLab,
-  "arch-8085-lab": Arch8085Lab,
-  "programmable-lab": ProgrammableLab,
-  "multi-byte-lab": MultiByteLab,
-  "micro-family-lab": MicroFamilyLab,
-  "alu-path-lab": AluPathLab,
-  "memory-model-lab": MemoryModelLab,
-  "bus-lab": BusLab,
-  "tristate-lab": TristateLab,
-  "register-lab": RegisterLab,
-  "pair-lab": PairLab,
-  "opcode-bits-lab": OpcodeBitsLab,
-  "flag-lab": FlagLab,
-  "flag-effects-lab": FlagEffectsLab,
-  "daa-lab": DaaLab,
-  "pin-lab": PinLab,
-  "ale-lab": AleLab,
-  "control-signal-lab": ControlSignalLab,
-  "decode-lab": DecodeLab,
-  "decoder-138-lab": Decoder138Lab,
-  "foldback-lab": FoldbackLab,
-  "machine-cycle-lab": MachineCycleLab,
-  "timing-lab": TimingLab,
-  "wait-state-lab": WaitStateLab,
-  "instr-group-lab": InstrGroupLab,
-  "hand-assemble-lab": HandAssembleLab,
-  "addressing-lab": AddressingLab,
-  "indirect-lab": IndirectLab,
-  "transfer-map-lab": TransferMapLab,
-  "pair-move-lab": PairMoveLab,
-  "sub-borrow-lab": SubBorrowLab,
-  "signed-lab": SignedLab,
-  "mask-lab": MaskLab,
-  "rotate-lab": RotateLab,
-  "compare-lab": CompareLab,
-  "stack-lab": StackLab,
-  "call-return-lab": CallReturnLab,
-  "condition-lab": ConditionLab,
-  "memory-street-lab": MemoryStreetLab,
-  "memory-rw-lab": MemoryRwLab,
-  "address-width-lab": AddressWidthLab,
-  "instruction-bytes-lab": InstructionBytesLab,
-  "program-bytes-lab": ProgramBytesLab,
-  "byte-order-lab": ByteOrderLab,
-  "binary-add-lab": BinaryAddLab,
-  "rollover-lab": RolloverLab,
-  "flag-answers-lab": FlagAnswersLab,
-  "bit-switch-lab": BitSwitchLab,
-  "doubling-lab": DoublingLab,
-  "hex-lab": HexLab,
-  "test-lab": TestLab,
-  "spread-lab": SpreadLab,
-  "probability-lab": ProbabilityLab,
-  "log-levels": LogLevels,
-  "style-lab": StyleLab,
-  "git-flow": GitFlow,
+  "code-runner": dynamic(() => import("./CodeRunner").then((m) => m.CodeRunner)),
+  "condition-flow": dynamic(() => import("./ConditionFlow").then((m) => m.ConditionFlow)),
+  "collection-bench": dynamic(() => import("./CollectionBench").then((m) => m.CollectionBench)),
+  "function-machine": dynamic(() => import("./FunctionMachine").then((m) => m.FunctionMachine)),
+  "float-lab": dynamic(() => import("./FloatLab").then((m) => m.FloatLab)),
+  "file-lab": dynamic(() => import("./FileLab").then((m) => m.FileLab)),
+  "import-lab": dynamic(() => import("./ImportLab").then((m) => m.ImportLab)),
+  "format-lab": dynamic(() => import("./FormatLab").then((m) => m.FormatLab)),
+  "lambda-lab": dynamic(() => import("./LambdaLab").then((m) => m.LambdaLab)),
+  "scope-lab": dynamic(() => import("./ScopeLab").then((m) => m.ScopeLab)),
+  "json-bridge": dynamic(() => import("./JsonBridge").then((m) => m.JsonBridge)),
+  "strftime-lab": dynamic(() => import("./StrftimeLab").then((m) => m.StrftimeLab)),
+  "bitwise-lab": dynamic(() => import("./BitwiseLab").then((m) => m.BitwiseLab)),
+  "match-lab": dynamic(() => import("./MatchLab").then((m) => m.MatchLab)),
+  "recursion-lab": dynamic(() => import("./RecursionLab").then((m) => m.RecursionLab)),
+  "inheritance-lab": dynamic(() => import("./InheritanceLab").then((m) => m.InheritanceLab)),
+  "encapsulation-lab": dynamic(() => import("./EncapsulationLab").then((m) => m.EncapsulationLab)),
+  "dunder-lab": dynamic(() => import("./DunderLab").then((m) => m.DunderLab)),
+  "generator-lab": dynamic(() => import("./GeneratorLab").then((m) => m.GeneratorLab)),
+  "decorator-lab": dynamic(() => import("./DecoratorLab").then((m) => m.DecoratorLab)),
+  "regex-lab": dynamic(() => import("./RegexLab").then((m) => m.RegexLab)),
+  "concurrency-lab": dynamic(() => import("./ConcurrencyLab").then((m) => m.ConcurrencyLab)),
+  "async-lab": dynamic(() => import("./AsyncLab").then((m) => m.AsyncLab)),
+  "counter-lab": dynamic(() => import("./CounterLab").then((m) => m.CounterLab)),
+  "path-lab": dynamic(() => import("./PathLab").then((m) => m.PathLab)),
+  "storage-lab": dynamic(() => import("./StorageLab").then((m) => m.StorageLab)),
+  "variables-playground": dynamic(() => import("./VariablesPlayground").then((m) => m.VariablesPlayground)),
+  "casting-lab": dynamic(() => import("./CastingLab").then((m) => m.CastingLab)),
+  "operator-lab": dynamic(() => import("./OperatorLab").then((m) => m.OperatorLab)),
+  "loop-visualizer": dynamic(() => import("./LoopVisualizer").then((m) => m.LoopVisualizer)),
+  "list-indexer": dynamic(() => import("./ListIndexer").then((m) => m.ListIndexer)),
+  "string-slicer": dynamic(() => import("./StringSlicer").then((m) => m.StringSlicer)),
+  "comprehension-builder": dynamic(() => import("./ComprehensionBuilder").then((m) => m.ComprehensionBuilder)),
+  "object-inspector": dynamic(() => import("./ObjectInspector").then((m) => m.ObjectInspector)),
+  "exception-flow": dynamic(() => import("./ExceptionFlow").then((m) => m.ExceptionFlow)),
+  "truthiness-tester": dynamic(() => import("./TruthinessTester").then((m) => m.TruthinessTester)),
+  "central-tendency": dynamic(() => import("./CentralTendency").then((m) => m.CentralTendency)),
+  "bell-curve": dynamic(() => import("./BellCurve").then((m) => m.BellCurve)),
+  "box-plot": dynamic(() => import("./BoxPlot").then((m) => m.BoxPlot)),
+  "bayes-grid": dynamic(() => import("./BayesGrid").then((m) => m.BayesGrid)),
+  "distribution-lab": dynamic(() => import("./DistributionLab").then((m) => m.DistributionLab)),
+  "sampling-lab": dynamic(() => import("./SamplingLab").then((m) => m.SamplingLab)),
+  "p-value-lab": dynamic(() => import("./PValueLab").then((m) => m.PValueLab)),
+  "ab-test-lab": dynamic(() => import("./ABTestLab").then((m) => m.ABTestLab)),
+  "vectorize-lab": dynamic(() => import("./VectorizeLab").then((m) => m.VectorizeLab)),
+  "filter-lab": dynamic(() => import("./FilterLab").then((m) => m.FilterLab)),
+  "missing-data-lab": dynamic(() => import("./MissingDataLab").then((m) => m.MissingDataLab)),
+  "groupby-lab": dynamic(() => import("./GroupByLab").then((m) => m.GroupByLab)),
+  "groupby-lab-sql": dynamic(() => import("./GroupByLab").then((m) => m.GroupByLabSql)),
+  "cleaning-lab": dynamic(() => import("./CleaningLab").then((m) => m.CleaningLab)),
+  "select-lab": dynamic(() => import("./SelectLab").then((m) => m.SelectLab)),
+  "where-lab": dynamic(() => import("./WhereLab").then((m) => m.WhereLab)),
+  "order-limit-lab": dynamic(() => import("./OrderLimitLab").then((m) => m.OrderLimitLab)),
+  "join-lab": dynamic(() => import("./JoinLab").then((m) => m.JoinLab)),
+  "window-lab": dynamic(() => import("./WindowLab").then((m) => m.WindowLab)),
+  "scatter-correlation": dynamic(() => import("./ScatterCorrelation").then((m) => m.ScatterCorrelation)),
+  "dataframe-anatomy": dynamic(() => import("./DataFrameAnatomy").then((m) => m.DataFrameAnatomy)),
+  "chart-lab": dynamic(() => import("./ChartLab").then((m) => m.ChartLab)),
+  "anscombe-lab": dynamic(() => import("./AnscombeLab").then((m) => m.AnscombeLab)),
+  "seaborn-lab": dynamic(() => import("./SeabornLab").then((m) => m.SeabornLab)),
+  "chart-choice-lab": dynamic(() => import("./ChartChoiceLab").then((m) => m.ChartChoiceLab)),
+  "eda-walkthrough-lab": dynamic(() => import("./EdaWalkthroughLab").then((m) => m.EdaWalkthroughLab)),
+  "asm8085-lab": dynamic(() => import("./Asm8085Lab").then((m) => m.Asm8085Lab)),
+  "cpu-evolution-lab": dynamic(() => import("./CpuEvolutionLab").then((m) => m.CpuEvolutionLab)),
+  "arch-8085-lab": dynamic(() => import("./Arch8085Lab").then((m) => m.Arch8085Lab)),
+  "programmable-lab": dynamic(() => import("./ProgrammableLab").then((m) => m.ProgrammableLab)),
+  "multi-byte-lab": dynamic(() => import("./EvolutionLabs").then((m) => m.MultiByteLab)),
+  "micro-family-lab": dynamic(() => import("./EvolutionLabs").then((m) => m.MicroFamilyLab)),
+  "alu-path-lab": dynamic(() => import("./CpuBlockLabs").then((m) => m.AluPathLab)),
+  "memory-model-lab": dynamic(() => import("./CpuBlockLabs").then((m) => m.MemoryModelLab)),
+  "bus-lab": dynamic(() => import("./BusLabs").then((m) => m.BusLab)),
+  "tristate-lab": dynamic(() => import("./BusLabs").then((m) => m.TristateLab)),
+  "register-lab": dynamic(() => import("./RegisterLabs").then((m) => m.RegisterLab)),
+  "pair-lab": dynamic(() => import("./RegisterLabs").then((m) => m.PairLab)),
+  "opcode-bits-lab": dynamic(() => import("./RegisterLabs").then((m) => m.OpcodeBitsLab)),
+  "flag-lab": dynamic(() => import("./FlagLabs").then((m) => m.FlagLab)),
+  "flag-effects-lab": dynamic(() => import("./FlagLabs").then((m) => m.FlagEffectsLab)),
+  "daa-lab": dynamic(() => import("./FlagLabs").then((m) => m.DaaLab)),
+  "pin-lab": dynamic(() => import("./PinLabs").then((m) => m.PinLab)),
+  "ale-lab": dynamic(() => import("./PinLabs").then((m) => m.AleLab)),
+  "control-signal-lab": dynamic(() => import("./PinLabs").then((m) => m.ControlSignalLab)),
+  "decode-lab": dynamic(() => import("./DecodeLabs").then((m) => m.DecodeLab)),
+  "decoder-138-lab": dynamic(() => import("./DecodeLabs").then((m) => m.Decoder138Lab)),
+  "foldback-lab": dynamic(() => import("./DecodeLabs").then((m) => m.FoldbackLab)),
+  "machine-cycle-lab": dynamic(() => import("./TimingLabs").then((m) => m.MachineCycleLab)),
+  "timing-lab": dynamic(() => import("./TimingLabs").then((m) => m.TimingLab)),
+  "wait-state-lab": dynamic(() => import("./TimingLabs").then((m) => m.WaitStateLab)),
+  "instr-group-lab": dynamic(() => import("./InstructionLabs").then((m) => m.InstrGroupLab)),
+  "hand-assemble-lab": dynamic(() => import("./InstructionLabs").then((m) => m.HandAssembleLab)),
+  "addressing-lab": dynamic(() => import("./AddressingLabs").then((m) => m.AddressingLab)),
+  "indirect-lab": dynamic(() => import("./AddressingLabs").then((m) => m.IndirectLab)),
+  "transfer-map-lab": dynamic(() => import("./TransferLabs").then((m) => m.TransferMapLab)),
+  "pair-move-lab": dynamic(() => import("./TransferLabs").then((m) => m.PairMoveLab)),
+  "sub-borrow-lab": dynamic(() => import("./ArithmeticLabs").then((m) => m.SubBorrowLab)),
+  "signed-lab": dynamic(() => import("./ArithmeticLabs").then((m) => m.SignedLab)),
+  "mask-lab": dynamic(() => import("./LogicalLabs").then((m) => m.MaskLab)),
+  "rotate-lab": dynamic(() => import("./LogicalLabs").then((m) => m.RotateLab)),
+  "compare-lab": dynamic(() => import("./LogicalLabs").then((m) => m.CompareLab)),
+  "stack-lab": dynamic(() => import("./StackLabs").then((m) => m.StackLab)),
+  "call-return-lab": dynamic(() => import("./StackLabs").then((m) => m.CallReturnLab)),
+  "condition-lab": dynamic(() => import("./StackLabs").then((m) => m.ConditionLab)),
+  "memory-street-lab": dynamic(() => import("./MemoryLabs").then((m) => m.MemoryStreetLab)),
+  "memory-rw-lab": dynamic(() => import("./MemoryLabs").then((m) => m.MemoryRwLab)),
+  "address-width-lab": dynamic(() => import("./MemoryLabs").then((m) => m.AddressWidthLab)),
+  "instruction-bytes-lab": dynamic(() => import("./ProgramBytesLab").then((m) => m.InstructionBytesLab)),
+  "program-bytes-lab": dynamic(() => import("./ProgramBytesLab").then((m) => m.ProgramBytesLab)),
+  "byte-order-lab": dynamic(() => import("./ProgramBytesLab").then((m) => m.ByteOrderLab)),
+  "binary-add-lab": dynamic(() => import("./CarryLabs").then((m) => m.BinaryAddLab)),
+  "rollover-lab": dynamic(() => import("./CarryLabs").then((m) => m.RolloverLab)),
+  "flag-answers-lab": dynamic(() => import("./CarryLabs").then((m) => m.FlagAnswersLab)),
+  "bit-switch-lab": dynamic(() => import("./BitBasicsLab").then((m) => m.BitSwitchLab)),
+  "doubling-lab": dynamic(() => import("./BitBasicsLab").then((m) => m.DoublingLab)),
+  "hex-lab": dynamic(() => import("./BitBasicsLab").then((m) => m.HexLab)),
+  "test-lab": dynamic(() => import("./TestLab").then((m) => m.TestLab)),
+  "spread-lab": dynamic(() => import("./SpreadLab").then((m) => m.SpreadLab)),
+  "probability-lab": dynamic(() => import("./ProbabilityLab").then((m) => m.ProbabilityLab)),
+  "log-levels": dynamic(() => import("./LogLevels").then((m) => m.LogLevels)),
+  "style-lab": dynamic(() => import("./StyleLab").then((m) => m.StyleLab)),
+  "git-flow": dynamic(() => import("./GitFlow").then((m) => m.GitFlow)),
 };
 
 // Renders an interactive visualization by key (from lesson content blocks).

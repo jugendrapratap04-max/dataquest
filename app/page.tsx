@@ -83,6 +83,7 @@ export default async function LandingPage() {
 
   return (
     <div className="lp">
+      <a href="#main" className="skip-link">Skip to content</a>
       <header className="lp-nav">
         <div className="lp-brand">
           <div className="mark">D</div>
@@ -95,6 +96,11 @@ export default async function LandingPage() {
         </nav>
       </header>
 
+      {/* The landing page had a header, sections and a footer, and no <main>.
+          Assistive technology uses it to answer "where does the content start" —
+          without one there is nothing to jump to, and the reader tabs through
+          the whole nav on every visit. */}
+      <main id="main">
       <section className="lp-hero">
         <div className="lp-hero-copy">
           <div className="lp-eyebrow">Free · Nothing to install · Runs in your browser</div>
@@ -178,6 +184,7 @@ export default async function LandingPage() {
         <p>Make an account, open the first lesson, and write something that runs today.</p>
         <Link href="/signup" className="btn btn-primary lp-big">Start learning free →</Link>
       </section>
+      </main>
 
       <footer className="lp-foot">
         <span className="mono">Etudo</span> — learn it, practise it, build with it.

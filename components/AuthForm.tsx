@@ -55,7 +55,12 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <div className="auth-wrap">
+    // <main>, not a bare <div>. /login and /signup sit outside the app layout,
+    // so they inherited neither its landmark nor its skip link and reached a
+    // screen reader as an unstructured page. They need no skip link — the form
+    // is the first thing in the tab order already — but they do need somewhere
+    // for "jump to the content" to land.
+    <main className="auth-wrap" id="main">
       {/* noValidate: our own validate() owns the messaging (Hinglish, specific),
           so the browser's native English bubbles don't fire first. */}
       <form className="auth-card" onSubmit={submit} noValidate>
@@ -105,6 +110,6 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           {isSignup ? <>Already have an account? <Link href="/login">Sign in</Link></> : <>New here? <Link href="/signup">Create an account</Link></>}
         </div>
       </form>
-    </div>
+    </main>
   );
 }

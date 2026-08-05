@@ -39,6 +39,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="app">
+      {/* First thing in the tab order, and invisible until it has focus.
+          Without it a keyboard or screen-reader user tabs through the whole
+          sidebar — every subject, every link — before reaching the lesson they
+          opened, on every single page. */}
+      <a href="#main" className="skip-link">Skip to content</a>
       {/* Both only make sense for a member: activity feeds a focus session, and
           feedback is tied to an account we can reply to. */}
       {user && <ActivityPing />}
@@ -50,7 +55,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         user={user ? { name: user.name, role: user.role, xp: user.xp, avatarEmoji: user.avatarEmoji } : null}
         roadmapPct={roadmapPct}
       />
-      <main className="main">
+      <main className="main" id="main">
         <div className="wrap">
           <Topbar user={user ? { name: user.name, streak, isNew, xp: user.xp } : null} />
           {children}

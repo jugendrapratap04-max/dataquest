@@ -156,8 +156,18 @@ export async function buildSearchIndex(): Promise<Index> {
  * Body matches still appear — that is the whole reason for full text — but
  * underneath, where they belong.
  */
+/** Longer than any real search. A query is a word or a phrase; past this it is
+ *  either a paste accident or somebody probing.
+ *
+ *  It is a cap and not a rejection because the endpoint is deliberately public —
+ *  see the note in /api/search — and an unauthenticated caller could otherwise
+ *  hand us a megabyte to `.includes()` against the full text of every topic,
+ *  once per request, for free. Truncating keeps a fat-fingered paste working and
+ *  bounds the work per call at the same time. */
+const MAX_QUERY = 64;
+
 export async function search(q: string, limit = 8): Promise<SearchHit[]> {
-  const needle = q.trim().toLowerCase();
+  const needle = q.trim().toLowerCase().slice(0, MAX_QUERY);
   if (needle.length < 2) return [];
 
   const { rows } = await buildSearchIndex();

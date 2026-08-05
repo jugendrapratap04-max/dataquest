@@ -198,7 +198,9 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .main { min-width:0; }
 .wrap { max-width:1200px; margin:0 auto; padding:20px 30px 64px; }
 .topbar { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
-.greet h1 { font-size:21px; font-weight:750; } .greet p { margin:3px 0 0; color:var(--ink-soft); font-size:13px; }
+/* `.top-title` was an <h1> until it turned out every page with a title of its
+   own was shipping two of them. It is a div now and carries its own type. */
+.greet .top-title { font-size:21px; margin:0; font-weight:750; line-height:1.25; } .greet p { margin:3px 0 0; color:var(--ink-soft); font-size:13px; }
 .top-actions { margin-left:auto; display:flex; align-items:center; gap:10px; }
 .search { display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 12px; color:var(--ink-faint); font-size:13px; min-width:180px; }
 .search svg { width:16px; height:16px; flex:none; } .search kbd { margin-left:auto; font-family:var(--mono); font-size:10.5px; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
@@ -2538,3 +2540,13 @@ select.inp { cursor:pointer; }
 .bk-syntax dl > div { display:grid; grid-template-columns:minmax(70px,140px) 1fr; gap:10px; align-items:baseline; }
 .bk-syntax dt { margin:0; }
 .bk-syntax dd { margin:0; font-size:13.5px; color:var(--ink-soft); line-height:1.7; }
+
+/* --- Skip to content -----------------------------------------------------
+   Off-screen until focused, which is the whole convention: a sighted mouse
+   user never sees it, and a keyboard user gets it as the very first stop.
+   Positioned, not display:none — a hidden element cannot receive focus, so
+   hiding it the obvious way would remove the thing it exists to provide. */
+.skip-link { position:absolute; left:-9999px; top:0; z-index:1000;
+  background:var(--accent); color:#1a1205; font-size:13px; font-weight:600;
+  padding:10px 16px; border-radius:0 0 10px 0; text-decoration:none; }
+.skip-link:focus { left:0; outline:2px solid var(--ink); outline-offset:2px; }

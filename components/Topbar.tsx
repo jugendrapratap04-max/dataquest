@@ -37,6 +37,24 @@ function greetingNow(): string {
 // No "job-ready" anywhere in here. It reads as a promise about an outcome we do
 // not control — we teach the skill and show the evidence, and that is the claim
 // we can actually stand behind.
+/* Does the PAGE render its own <h1>, or is this bar's title the page heading?
+ *
+ * It has to be one or the other, and getting it wrong is invisible until
+ * somebody reads the page with a screen reader. This bar used to render an
+ * <h1> unconditionally, so a lesson shipped two — "Lessons" here and the
+ * subject's own title below it — and an outline with two beginnings answers
+ * nothing. Making it a <div> everywhere then swung the other way: /practice
+ * and /leaderboard have no heading of their own, so they went to zero, and a
+ * page with no h1 has no accessible name at all.
+ *
+ * Exactly three pages carry their own — verified by grep, not by memory. Add a
+ * route here when you add an <h1> to its page, and nowhere else. */
+function pageOwnsHeading(pathname: string): boolean {
+  if (pathname === "/roadmap") return true;
+  // Detail pages only. The index pages above them have no heading of their own.
+  return /^\/(learn|certificates)\/[^/]+/.test(pathname);
+}
+
 function pick(pathname: string): [string, string] {
   const key = Object.keys(titles).find((k) => pathname.startsWith(k));
   return key ? titles[key] : ["Etudo", "Learn it. Practise it. Build with it."];
@@ -251,11 +269,17 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
             "Welcome back," at them since it was opened to guests. Pages other
             than the dashboard carry no placeholders, so both branches leave
             their titles untouched. */}
-        <h1>
-          {user
+        {/* h1 when the page has no heading of its own, div when it does — see
+            pageOwnsHeading. Same text and same styling either way; only the
+            element changes, so nothing moves on screen. */}
+        {(() => {
+          const text = user
             ? title.replace("{greeting}", user.isNew ? "Welcome" : partOfDay ?? "Welcome back").replace("{name}", firstName)
-            : title.replace("{greeting}, {name}", "Dashboard")}
-        </h1>
+            : title.replace("{greeting}, {name}", "Dashboard");
+          return pageOwnsHeading(pathname)
+            ? <div className="top-title">{text}</div>
+            : <h1 className="top-title">{text}</h1>;
+        })()}
         <p>{sub}</p>
       </div>
       <div className="top-actions">
@@ -268,6 +292,11 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
               onChange={(e) => { setQ(e.target.value); setOpen(true); }}
               onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); if (e.key === "Enter" && results[0]) goTo(results[0]); }}
               placeholder="Search topics, lessons, problems…"
+              // A placeholder is not a label: it disappears the moment you type,
+              // and screen readers are not required to announce it. This input
+              // had nothing else, so it was reached as an unnamed text field.
+              aria-label="Search topics, lessons and problems"
+              type="search"
             />
           </div>
           {open && q.trim().length >= 2 && (
