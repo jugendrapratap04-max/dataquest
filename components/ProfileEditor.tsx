@@ -40,6 +40,16 @@ export function ProfileEditor({
   // address and not an optimistic version of it.
   const slug = username.trim().toLowerCase();
 
+  // Read from the browser rather than written into the source. Naming a domain
+  // here would put whatever it said in front of every student, on every
+  // deployment, whether or not the app was served from it.
+  //
+  // No state and no effect: the form is closed on first render, so the only
+  // renders that reach the preview happen after mount, on the client, where
+  // `window` exists. There is no server render of this text for hydration to
+  // disagree with.
+  const host = typeof window === "undefined" ? "" : window.location.host;
+
   async function save() {
     if (!role.trim()) { setNote("A title cannot be empty."); return; }
     setSaving(true);
@@ -143,7 +153,7 @@ export function ProfileEditor({
             autoComplete="off" spellCheck={false}
           />
           <div className="pf-count pf-url">
-            {slug ? `etudo.app/u/${slug}` : "Needed only if you want a shareable link."}
+            {slug ? `${host}/u/${slug}` : "Needed only if you want a shareable link."}
           </div>
         </div>
       </div>
