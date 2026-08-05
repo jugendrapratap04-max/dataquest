@@ -2255,8 +2255,12 @@ select.inp { cursor:pointer; }
 }
 
 /* --- profile header --- */
-.prof-head { display:flex; align-items:flex-start; gap:18px; margin-bottom:18px; }
-.prof-id { flex:1; min-width:0; }
+/* wrap, always. The editor is a third flex item in this row, and with nowrap
+   it took the whole width and squeezed .prof-id to ZERO — the name, role and
+   bio then wrapped one word per line and ran down the page behind the form.
+   flex-basis:100% on the form gives it its own row underneath instead. */
+.prof-head { display:flex; align-items:flex-start; gap:18px; margin-bottom:18px; flex-wrap:wrap; }
+.prof-id { flex:1 1 240px; min-width:0; }
 .prof-id h2 { font-size:22px; margin:0; line-height:1.2; }
 .prof-role { font-size:13px; color:var(--accent-2); margin-top:3px; }
 .prof-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
@@ -2267,7 +2271,7 @@ select.inp { cursor:pointer; }
 .prof-empty { font-size:12.5px; color:var(--ink-faint); line-height:1.6; margin:10px 0 0; }
 .prof-edit { flex:none; }
 @media (max-width: 640px) {
-  .prof-head { flex-wrap:wrap; gap:14px; }
+  .prof-head { gap:14px; }
   .prof-edit { width:100%; justify-content:center; }
 }
 
@@ -2316,7 +2320,7 @@ select.inp { cursor:pointer; }
 .tl-a { grid-area:ago; font-size:11px; font-family:var(--mono); color:var(--ink-faint); align-self:center; white-space:nowrap; }
 
 /* --- the editor --- */
-.prof-form { display:grid; gap:14px; margin-top:16px; padding-top:16px; border-top:1px solid var(--line); width:100%; }
+.prof-form { display:grid; gap:14px; margin-top:16px; padding-top:16px; border-top:1px solid var(--line); flex-basis:100%; width:100%; }
 .pf-row { display:flex; gap:12px; align-items:flex-start; }
 .pf-lbl { flex:none; width:104px; font-size:12px; color:var(--ink-faint); padding-top:9px; }
 .pf-emoji { display:flex; flex-wrap:wrap; gap:6px; flex:1; }
