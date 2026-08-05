@@ -286,3 +286,35 @@ export const treeTraversalProblems = [
     ["An empty node contributes 0 — that is the base case.", "A node's height is the taller of its two children, plus one.", "Sorted input builds a one-sided tree, so [1,2,3,4] has height 4."],
     ["tree", "recursion"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Balanced trees and array-stored trees.
+ * ------------------------------------------------------------------------- */
+export const balancedTreeProblems = [
+  PP("balanced-trees", "Medium", 433, "balance-factor", "How Lopsided Is It", "balance_factor",
+    "Insert every value of `values` into a binary search tree, then return the **balance factor of the root**: the height of its left subtree minus the height of its right.\n\n0 means even, positive means left-heavy, negative means right-heavy. An empty tree gives 0.",
+    [{ input: "values=[10,20,30,40,50]", output: "-4" }, { input: "values=[30,20,40]", output: "0" }],
+    "def balance_factor(values):\n    pass\n",
+    "def balance_factor(values):\n    class N:\n        def __init__(self, v):\n            self.value = v\n            self.left = None\n            self.right = None\n\n    def insert(root, v):\n        if root is None:\n            return N(v)\n        if v < root.value:\n            root.left = insert(root.left, v)\n        else:\n            root.right = insert(root.right, v)\n        return root\n\n    def height(n):\n        if n is None:\n            return 0\n        return max(height(n.left), height(n.right)) + 1\n\n    root = None\n    for v in values:\n        root = insert(root, v)\n    if root is None:\n        return 0\n    return height(root.left) - height(root.right)\n",
+    [{ args: [[10, 20, 30, 40, 50]], expected: -4 }, { args: [[30, 20, 40]], expected: 0 }, { args: [[]], expected: 0 }, { args: [[5]], expected: 0 }],
+    ["The height of None is 0 — that is the base case.", "Balance factor is left height MINUS right height, in that order.", "Sorted input sends everything right, so the factor goes negative."],
+    ["tree", "balance"]),
+
+  PP("balanced-trees", "Hard", 434, "rotate-left-root", "Rotate Without Losing Anything", "rotate_left_root",
+    "Build a right-leaning chain from `values` by linking each one as the right child of the last. Then perform **one left rotation at the root** and return the in-order walk.\n\nThe walk must be unchanged by the rotation — that is the whole guarantee. If a value goes missing, the rehoming line is the one you skipped.",
+    [{ input: "values=[10,20,30]", output: "[10, 20, 30]" }],
+    "def rotate_left_root(values):\n    pass\n",
+    "def rotate_left_root(values):\n    class N:\n        def __init__(self, v):\n            self.value = v\n            self.left = None\n            self.right = None\n\n    if not values:\n        return []\n\n    root = N(values[0])\n    node = root\n    for v in values[1:]:\n        node.right = N(v)\n        node = node.right\n\n    def ino(n, out):\n        if n is None:\n            return out\n        ino(n.left, out)\n        out.append(n.value)\n        ino(n.right, out)\n        return out\n\n    if root.right is None:\n        return ino(root, [])\n\n    pivot = root.right\n    root.right = pivot.left\n    pivot.left = root\n    return ino(pivot, [])\n",
+    [{ args: [[10, 20, 30]], expected: [10, 20, 30] }, { args: [[1, 2, 3, 4]], expected: [1, 2, 3, 4] }, { args: [[7]], expected: [7] }, { args: [[]], expected: [] }],
+    ["Rehome the pivot's left subtree onto the old root's right BEFORE overwriting pivot.left.", "The three lines are: save the pivot, rehome, then hang the old root off it.", "A single node has no right child — return it unrotated."],
+    ["tree", "rotation"]),
+
+  PP("balanced-trees", "Medium", 435, "array-tree-path", "Walk A Tree With Arithmetic", "array_tree_path",
+    "`tree` is a complete binary tree stored in a plain list: the children of index `i` sit at `2i+1` and `2i+2`.\n\nStarting at the root, follow `steps` — each one is `\"L\"` or `\"R\"` — and return the list of values visited, including the root. Stop early if a step would fall off the end of the list.",
+    [{ input: 'tree=[50,30,70,20,40,60,80], steps="LL"', output: "[50, 30, 20]" }],
+    "def array_tree_path(tree, steps):\n    pass\n",
+    "def array_tree_path(tree, steps):\n    if not tree:\n        return []\n    i = 0\n    out = [tree[0]]\n    for s in steps:\n        i = 2 * i + 1 if s == \"L\" else 2 * i + 2\n        if i >= len(tree):\n            break\n        out.append(tree[i])\n    return out\n",
+    [{ args: [[50, 30, 70, 20, 40, 60, 80], "LL"], expected: [50, 30, 20] }, { args: [[50, 30, 70, 20, 40, 60, 80], "RR"], expected: [50, 70, 80] }, { args: [[50, 30, 70], "LLL"], expected: [50, 30] }, { args: [[], "L"], expected: [] }],
+    ["Left is 2i+1, right is 2i+2. No nodes and no pointers — the arithmetic is the tree.", "Check the index against len(tree) before reading it.", "The root is always in the answer, even when steps is empty."],
+    ["tree", "array"]),
+];

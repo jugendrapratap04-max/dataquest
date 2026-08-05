@@ -1,7 +1,12 @@
 # Etudo 📊
 
-A full-stack **data science learning platform**. Read the topic, practise *that*
-topic in a real in-browser compiler, then build with it.
+A **multi-subject learning platform**. Read the topic, practise *that* topic in a
+real in-browser compiler, then build with it.
+
+Etudo is not a data science course and not a Python course — Python is simply the
+first subject finished, and 8085 assembly is the second one under way. The engine
+(lessons → visualisation → practice → quiz → progress) is subject-agnostic by
+design; see [`AGENTS.md`](AGENTS.md).
 
 Python and SQL run inside the browser — no paid API, no code-execution server,
 and no per-student cost.

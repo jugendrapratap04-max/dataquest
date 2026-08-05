@@ -181,8 +181,8 @@ export const SYLLABUS = [
     { t: "In-order traversal", covers: ["trees-graphs", "tree-traversals"] },
     { t: "Pre-order traversal", covers: ["tree-traversals"] },
     { t: "Post-order traversal", covers: ["tree-traversals"] },
-    { t: "Trees stored in an array", covers: [] },
-    { t: "Balanced trees / AVL", covers: [] },
+    { t: "Trees stored in an array", covers: ["balanced-trees"] },
+    { t: "Balanced trees / AVL", covers: ["balanced-trees"] },
   ]},
   { group: "DSA — graphs", topics: [
     { t: "Graphs", covers: ["trees-graphs"] },
@@ -214,9 +214,10 @@ export const SYLLABUS = [
     { t: "Keywords reference", covers: ["python-reference"] },
     { t: "Exceptions reference", covers: ["python-reference"] },
     { t: "Glossary", covers: [] },
-    // Also on W3Schools' module reference and deliberately not listed: the
-    // `requests` module, which needs the network and cannot run in Pyodide, and
-    // `cmath`, which is complex-number maths no data-analyst role asks for.
+    // Also on W3Schools' module reference: `requests`, which needs the network
+    // and cannot run in Pyodide — a runtime limit, not a judgement about who
+    // needs it. `cmath` is listed below and is a genuine gap.
+    { t: "cmath module", covers: [] },
   ]},
   { group: "Beyond W3Schools (our own edge)", topics: [
     { t: "Testing — unittest / pytest", covers: ["testing"] },
