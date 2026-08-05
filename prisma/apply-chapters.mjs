@@ -30,7 +30,7 @@ const PLANS = {
   // appended, and all eight ended up chapterless.
   //
   // So: after inserting or appending a lesson, re-check these boundaries and
-  // re-run `npm run db:chapters`. Boundaries below are correct for the 57-lesson
+  // re-run `npm run db:chapters`. Boundaries below are correct for the 58-lesson
   // track — verify with the order list before trusting them again.
   //
   // Re-running it is not optional and is easy to skip, because every other check
@@ -56,7 +56,7 @@ const PLANS = {
     // (app/sitemap.ts reads them from the database), so renaming the slug would
     // break /book/python/py-dsa, which has been live and indexed.
     { slug: "py-dsa", title: "Data structures & sorting", upto: 51, summary: "Complexity, stacks and queues, linked lists in all three shapes, hash tables and hash sets, trees from binary search trees to balanced ones, graphs, the Python reference, and every sort from bubble up to radix — including the two that never compare anything." },
-    { slug: "py-algorithms", title: "Graph algorithms & optimisation", upto: 57, summary: "Cycle detection, shortest paths with Dijkstra and Bellman-Ford, minimum spanning trees with Prim's and Kruskal's, and the three ways to choose well: memoisation, dynamic programming and greedy — each one shown failing before it is shown working." },
+    { slug: "py-algorithms", title: "Graph algorithms & optimisation", upto: 58, summary: "Cycle detection, shortest paths with Dijkstra and Bellman-Ford, minimum spanning trees with Prim's and Kruskal's, and the ways to choose well — memoisation, dynamic programming and greedy — each one shown failing before it is shown working. It ends on max flow, where a wrong choice is made reversible rather than avoided, and the travelling salesman, where no fast answer exists at all." },
   ],
   // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at

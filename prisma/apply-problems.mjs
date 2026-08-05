@@ -12,7 +12,7 @@ import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
 import { mpProblems } from "./mp-problems.mjs";
 import { topicProblems } from "./topic-problems.mjs";
-import { dsaProblems, treeTraversalProblems, balancedTreeProblems, countingRadixProblems, linkedListSetProblems, cycleProblems, dijkstraProblems, bellmanMstProblems, dpBasicsProblems, knapsackProblems, greedyProblems } from "./dsa-problems.mjs";
+import { dsaProblems, treeTraversalProblems, balancedTreeProblems, countingRadixProblems, linkedListSetProblems, cycleProblems, dijkstraProblems, bellmanMstProblems, dpBasicsProblems, knapsackProblems, greedyProblems, flowTspProblems } from "./dsa-problems.mjs";
 import { trackLessons, extraProblems } from "./seed.mjs";
 
 const prisma = new PrismaClient();
@@ -34,6 +34,7 @@ const SETS = [
   ["memoisation + tabulation", dpBasicsProblems],
   ["DP + knapsack", knapsackProblems],
   ["greedy algorithms", greedyProblems],
+  ["max flow + TSP", flowTspProblems],
 ];
 
 // Push the seed's problem definitions onto rows that already exist in the

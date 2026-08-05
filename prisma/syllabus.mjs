@@ -206,7 +206,7 @@ export const SYLLABUS = [
     { t: "Dijkstra's algorithm", covers: ["shortest-path-dijkstra"] },
     { t: "Bellman-Ford", covers: ["bellman-ford-mst"] },
     { t: "Minimum spanning tree — Prim's and Kruskal's", covers: ["bellman-ford-mst"] },
-    { t: "Maximum flow — Ford-Fulkerson / Edmonds-Karp", covers: [] },
+    { t: "Maximum flow — Ford-Fulkerson / Edmonds-Karp", covers: ["max-flow-tsp"] },
   ]},
   { group: "DSA — algorithm design", topics: [
     { t: "Memoization", covers: ["memoization-tabulation"] },
@@ -216,7 +216,7 @@ export const SYLLABUS = [
     { t: "0/1 knapsack", covers: ["dynamic-programming-knapsack"] },
     { t: "Euclidean algorithm", covers: ["greedy-algorithms"] },
     { t: "Huffman coding", covers: ["greedy-algorithms"] },
-    { t: "The travelling salesman", covers: [] },
+    { t: "The travelling salesman", covers: ["max-flow-tsp"] },
   ]},
   { group: "Reference (lookup pages)", topics: [
     { t: "Built-in functions reference", covers: ["python-reference"] },
@@ -254,6 +254,9 @@ export const SYLLABUS = [
     { t: "One loop direction turns 0/1 knapsack into unbounded, silently", covers: ["dynamic-programming-knapsack"] },
     { t: "The exchange argument — what a greedy rule has to prove", covers: ["greedy-algorithms"] },
     { t: "Why greedy change-making passes every test and is still wrong", covers: ["greedy-algorithms"] },
+    { t: "The residual edge — making a choice reversible instead of proving it right", covers: ["max-flow-tsp"] },
+    { t: "Max-flow min-cut — why running out of paths IS the proof", covers: ["max-flow-tsp"] },
+    { t: "What NP-hard means in practice: measure the heuristic, stop hunting the algorithm", covers: ["max-flow-tsp"] },
     { t: "Testing — unittest / pytest", covers: ["testing"] },
     { t: "Debugging and logging", covers: ["debugging-logging"] },
     { t: "Clean code, PEP 8, type hints", covers: ["clean-code"] },

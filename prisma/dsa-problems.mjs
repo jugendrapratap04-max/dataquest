@@ -608,3 +608,39 @@ export const greedyProblems = [
     ["A heap gives you the two smallest in O(log n) — `heapq.heapify` then two `heappop`s per round.", "Push the merged weight back on; it competes with the rest from then on.", "Stop when one item is left. The running total of the merges IS the encoded size — you never have to build the tree."],
     ["greedy", "huffman"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Max flow and the travelling salesman.
+ *
+ * `capacity` arrives as [from, to, amount] triples rather than a dict keyed on
+ * a pair, because a tuple key has no JSON form. The solution rebuilds the dict
+ * itself, which is also the shape the lesson uses.
+ * ------------------------------------------------------------------------- */
+export const flowTspProblems = [
+  PP("max-flow-tsp", "Hard", 460, "max-flow", "As Much As The Network Can Take", "max_flow",
+    "`capacity` is a list of `[from, to, amount]` triples, **directed**. Return the largest total that can flow from `source` to `sink` at once, with no edge exceeding its capacity.\n\nGreedy path-picking is not enough — on `s→a 3, s→b 3, a→b 1, a→t 3, b→t 3` an unlucky first path leaves it stuck at 5 when the answer is 6. Give every edge a **back edge** starting at 0, grow it whenever the forward one is spent, and let the path search use both.\n\nReturn 0 if the sink cannot be reached at all.",
+    [{ input: 'capacity=[["s","a",3],["s","b",3],["a","b",1],["a","t",3],["b","t",3]], source="s", sink="t"', output: "6" }, { input: 'capacity=[["s","a",1]], source="s", sink="t"', output: "0" }],
+    "def max_flow(capacity, source, sink):\n    pass\n",
+    "def max_flow(capacity, source, sink):\n    left = {}\n    for u, v, c in capacity:\n        left[(u, v)] = left.get((u, v), 0) + c\n    for u, v in list(left):\n        left.setdefault((v, u), 0)\n    nodes = sorted({n for edge in left for n in edge})\n    if source not in nodes or sink not in nodes:\n        return 0\n\n    def find(here, target, seen):\n        if here == target:\n            return [target]\n        seen.add(here)\n        for nxt in nodes:\n            if left.get((here, nxt), 0) > 0 and nxt not in seen:\n                rest = find(nxt, target, seen)\n                if rest:\n                    return [here] + rest\n        return []\n\n    total = 0\n    while True:\n        path = find(source, sink, set())\n        if not path:\n            return total\n        amount = min(left[(path[i], path[i + 1])] for i in range(len(path) - 1))\n        for i in range(len(path) - 1):\n            left[(path[i], path[i + 1])] -= amount\n            left[(path[i + 1], path[i])] += amount\n        total += amount\n",
+    [{ args: [[["s", "a", 3], ["s", "b", 3], ["a", "b", 1], ["a", "t", 3], ["b", "t", 3]], "s", "t"], expected: 6 }, { args: [[["s", "t", 5]], "s", "t"], expected: 5 }, { args: [[["s", "a", 2], ["a", "t", 1]], "s", "t"], expected: 1 }, { args: [[["s", "a", 1]], "s", "t"], expected: 0 }, { args: [[["s", "a", 1000], ["s", "b", 1000], ["a", "b", 1], ["a", "t", 1000], ["b", "t", 1000]], "s", "t"], expected: 2000 }],
+    ["Two lines make it work: `left.setdefault((v, u), 0)` for every edge, and `left[(v, u)] += amount` beside the subtraction.", "Use `left.get((here, nxt), 0)` when searching — a missing pair is an edge with no room, not a KeyError.", "Iterate `sorted(nodes)`, never a raw set: Python randomises string hashing, so a set would make the path order differ between runs."],
+    ["graph", "max-flow"]),
+
+  PP("max-flow-tsp", "Hard", 461, "best-tour", "The Shortest Round Trip", "best_tour",
+    "`km` is a square distance matrix — `km[i][j]` is the distance from city `i` to city `j`. Return the length of the **shortest tour** that starts at city 0, visits every other city exactly once, and returns to 0.\n\nTry every ordering. There is no better way known for the general case, which is the point: 5 cities is 24 tours and 20 cities is over 121 quadrillion.\n\nA matrix with fewer than 2 cities has a tour of length 0.",
+    [{ input: "km=[[0,2,9,10,1],[2,0,6,4,3],[9,6,0,8,5],[10,4,8,0,7],[1,3,5,7,0]]", output: "20" }, { input: "km=[[0,1],[1,0]]", output: "2" }],
+    "def best_tour(km):\n    pass\n",
+    "def best_tour(km):\n    from itertools import permutations\n    n = len(km)\n    if n < 2:\n        return 0\n    best = None\n    for order in permutations(range(1, n)):\n        route = (0,) + order + (0,)\n        total = sum(km[route[i]][route[i + 1]] for i in range(len(route) - 1))\n        if best is None or total < best:\n            best = total\n    return best\n",
+    [{ args: [[[0, 2, 9, 10, 1], [2, 0, 6, 4, 3], [9, 6, 0, 8, 5], [10, 4, 8, 0, 7], [1, 3, 5, 7, 0]]], expected: 20 }, { args: [[[0, 1], [1, 0]]], expected: 2 }, { args: [[[0]]], expected: 0 }, { args: [[[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]], expected: 80 }],
+    ["`permutations(range(1, n))` gives every ordering of the cities other than the start.", "Build the full route as `(0,) + order + (0,)` so the return leg is counted.", "Do not sort or pick greedily — nearest-neighbour gets 25 on the first example, and the answer is 20."],
+    ["graph", "tsp"]),
+
+  PP("max-flow-tsp", "Medium", 462, "nearest-neighbour-tour", "The Obvious Shortcut, Measured", "nearest_neighbour_tour",
+    "Same distance matrix. Build a tour the greedy way — start at city 0, repeatedly hop to the **nearest city not yet visited**, then return to 0 — and return its length.\n\nThis is a heuristic, not the answer. On the first example it returns 25 where the best tour is 20, because it spends its cheapest edges early and is left with an expensive way home. Solve `best_tour` too and compare: the gap is the thing worth knowing.\n\nWhen two cities are equally near, take the lower-numbered one. Fewer than 2 cities gives 0.",
+    [{ input: "km=[[0,2,9,10,1],[2,0,6,4,3],[9,6,0,8,5],[10,4,8,0,7],[1,3,5,7,0]]", output: "25" }, { input: "km=[[0,1],[1,0]]", output: "2" }],
+    "def nearest_neighbour_tour(km):\n    pass\n",
+    "def nearest_neighbour_tour(km):\n    n = len(km)\n    if n < 2:\n        return 0\n    here = 0\n    unvisited = set(range(1, n))\n    total = 0\n    while unvisited:\n        nxt = min(sorted(unvisited), key=lambda c: km[here][c])\n        total += km[here][nxt]\n        unvisited.remove(nxt)\n        here = nxt\n    return total + km[here][0]\n",
+    [{ args: [[[0, 2, 9, 10, 1], [2, 0, 6, 4, 3], [9, 6, 0, 8, 5], [10, 4, 8, 0, 7], [1, 3, 5, 7, 0]]], expected: 25 }, { args: [[[0, 1], [1, 0]]], expected: 2 }, { args: [[[0]]], expected: 0 }, { args: [[[0, 10, 15, 20], [10, 0, 35, 25], [15, 35, 0, 30], [20, 25, 30, 0]]], expected: 80 }],
+    ["`min(sorted(unvisited), key=lambda c: km[here][c])` picks the nearest and breaks ties by city number.", "Do not forget the leg home — that is where this heuristic usually loses.", "The last test is a matrix where greedy happens to be optimal. One agreeing input proves nothing about the method."],
+    ["graph", "tsp"]),
+];
