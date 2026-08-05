@@ -5,6 +5,19 @@
  * means nothing covers it yet — that is the point of the file. Run
  * `npm run syllabus` to see the scoreboard.
  *
+ * **W3Schools is the floor, not the target.** A `covers: []` filled in is a
+ * deficiency closed, not an achievement. The achievement is the last group,
+ * "Beyond W3Schools" — and anything we teach that they do not MUST be listed
+ * there, because a scoreboard that only counts their topics reports our best
+ * work as zero.
+ *
+ * The standing rule for every DSA lesson: teach where the algorithm BREAKS, not
+ * only how to run it. W3Schools shows the happy path. A lesson earns a line in
+ * the last group by showing the failure — plain BFS quietly returning the wrong
+ * path on a weighted graph, naive fib measured in call counts, greedy coin
+ * change on the one denomination set that defeats it, radix sort silently
+ * collapsing when its inner pass is not stable.
+ *
  * Sections that belong to other Etudo tracks (Matplotlib, MySQL, MongoDB,
  * Machine Learning, NumPy/Pandas) are deliberately not listed here — this file
  * is about the Python track only.
@@ -219,7 +232,13 @@ export const SYLLABUS = [
     // needs it. `cmath` is listed below and is a genuine gap.
     { t: "cmath module", covers: [] },
   ]},
+  // Where a lesson goes past the floor. Two kinds of entry live here: whole
+  // subjects W3Schools has no page for (testing, async, packaging), and the
+  // "where does this BREAK" half of a DSA lesson — the part that separates
+  // knowing an algorithm from being able to use one.
   { group: "Beyond W3Schools (our own edge)", topics: [
+    { t: "Why comparison sorts cannot beat O(n log n)", covers: ["counting-radix-sort"] },
+    { t: "Stability — the property radix sort silently dies without", covers: ["counting-radix-sort"] },
     { t: "Testing — unittest / pytest", covers: ["testing"] },
     { t: "Debugging and logging", covers: ["debugging-logging"] },
     { t: "Clean code, PEP 8, type hints", covers: ["clean-code"] },

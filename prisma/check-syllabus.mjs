@@ -115,7 +115,10 @@ for (const g of SYLLABUS) {
 
 const total = done + thin + missing + broken;
 console.log(`\n${"=".repeat(74)}`);
-console.log(`SYLLABUS COVERAGE (vs W3Schools core Python + DSA + Reference)`);
+// Not "vs W3Schools" any more. Their tutorial is the floor this is measured
+// against; the last group in syllabus.mjs is what we teach and they do not, and
+// it is counted here so that work shows up as coverage rather than as nothing.
+console.log(`SYLLABUS COVERAGE (W3Schools core Python + DSA + Reference, plus our own)`);
 console.log(`  ok  taught properly      ${String(done).padStart(3)} / ${total}`);
 console.log(`  ~   covered but thin     ${String(thin).padStart(3)} / ${total}`);
 console.log(`  --  nothing covers it    ${String(missing).padStart(3)} / ${total}`);
