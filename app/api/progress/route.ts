@@ -26,10 +26,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "lesson not found" }, { status: 404 });
   }
 
+  // completedAt is stamped the FIRST time a lesson becomes done and never moved
+  // afterwards — re-reading a finished lesson should not rewrite the day you
+  // finished it, which is what the activity timeline reads.
+  const existing = await prisma.lessonProgress.findUnique({
+    where: { userId_lessonId: { userId: user.id, lessonId } },
+    select: { completedAt: true },
+  });
+  const firstTimeDone = status === "done" && !existing?.completedAt;
+
   const record = await prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId: user.id, lessonId } },
-    update: { status },
-    create: { userId: user.id, lessonId, status },
+    update: { status, ...(firstTimeDone ? { completedAt: new Date() } : {}) },
+    create: { userId: user.id, lessonId, status, ...(status === "done" ? { completedAt: new Date() } : {}) },
   });
 
   return NextResponse.json({ ok: true, status: record.status });

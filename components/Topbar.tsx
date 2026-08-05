@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { MODE_KEY, THEME_KEY, themeNow, scheduleHint } from "@/lib/theme-schedule";
 import { isMuted as soundIsMuted, setMuted as soundSetMuted, play as playCue } from "@/lib/sound";
 
@@ -19,6 +19,20 @@ const titles: Record<string, [string, string]> = {
   "/certificates": ["Certificates", "Finish a track and earn its certificate."],
   "/resume": ["Resume + ATS", "Build your resume and check how it scores against ATS filters."],
 };
+
+// Module-level so their identity is stable across renders — useSyncExternalStore
+// re-subscribes if the subscribe function changes, and a fresh closure every
+// render would mean re-subscribing on every render.
+//
+// The greeting never changes after mount, so there is nothing to subscribe to.
+const neverChanges = () => () => {};
+const greetingOnServer = () => null;
+function greetingNow(): string {
+  const h = new Date().getHours();
+  // Before 5am counts as evening: someone practising at 2am is finishing a day,
+  // not starting one, and "Good morning" to them reads as a machine talking.
+  return h < 5 ? "Good evening" : h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+}
 
 // No "job-ready" anywhere in here. It reads as a promise about an outcome we do
 // not control — we teach the skill and show the evidence, and that is the claim
@@ -80,6 +94,18 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   // during render without hydrating to a different icon than was sent.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMuted(soundIsMuted()); }, []);
+
+  // "Good evening" has to come from the READER's clock, not the server's.
+  // Rendering it server-side would greet an Indian student with "Good morning"
+  // at three in the afternoon, because the server runs in UTC. So the server
+  // renders the timeless "Welcome back" and the browser replaces it.
+  //
+  // useSyncExternalStore rather than the setState-in-effect its two neighbours
+  // use, and the difference is real: the mute flag and the theme are values the
+  // reader CHANGES later, so they need state. This one is read once at mount and
+  // never again, which is precisely what this hook is for — a browser-only value
+  // with a server fallback — so it needs no lint suppression either.
+  const partOfDay = useSyncExternalStore(neverChanges, greetingNow, greetingOnServer);
 
   // Same external-store case as TodoList: the saved theme and the OS dark-mode
   // preference are both browser-only, so this cannot run before mount. It also
@@ -217,7 +243,19 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
   return (
     <header className="topbar">
       <div className="greet">
-        <h1>{title.replace("{greeting}", user?.isNew ? "Welcome" : "Welcome back").replace("{name}", firstName)}</h1>
+        {/* A first-time visitor gets "Welcome" whatever the hour — greeting
+            somebody good evening on an account they made ninety seconds ago
+            reads as a stranger who has mistaken you for a regular.
+            A signed-OUT visitor gets no greeting at all. There is no name to
+            put after the comma, and the dashboard has been rendering a dangling
+            "Welcome back," at them since it was opened to guests. Pages other
+            than the dashboard carry no placeholders, so both branches leave
+            their titles untouched. */}
+        <h1>
+          {user
+            ? title.replace("{greeting}", user.isNew ? "Welcome" : partOfDay ?? "Welcome back").replace("{name}", firstName)
+            : title.replace("{greeting}, {name}", "Dashboard")}
+        </h1>
         <p>{sub}</p>
       </div>
       <div className="top-actions">

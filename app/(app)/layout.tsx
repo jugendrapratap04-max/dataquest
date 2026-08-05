@@ -46,7 +46,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {/* Not gated on `user`: reading is free, and the reader who most needs the
           width is the one who has not signed up yet. */}
       <FocusButton />
-      <Sidebar user={user ? { name: user.name, role: user.role } : null} roadmapPct={roadmapPct} />
+      <Sidebar
+        user={user ? { name: user.name, role: user.role, xp: user.xp, avatarEmoji: user.avatarEmoji } : null}
+        roadmapPct={roadmapPct}
+      />
       <main className="main">
         <div className="wrap">
           <Topbar user={user ? { name: user.name, streak, isNew, xp: user.xp } : null} />

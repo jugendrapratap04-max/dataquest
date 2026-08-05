@@ -4,7 +4,10 @@ import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 import { GuestBanner } from "@/components/GuestBanner";
+import { Avatar } from "@/components/Avatar";
 import { subjectStyle } from "@/lib/subjects";
+import { levelFor, focusOf } from "@/lib/profile";
+import { getRank } from "@/lib/profile-server";
 
 // Subject tiles are coloured from lib/subjects.ts, the same hue as the lesson
 // header and the roadmap card, so a subject looks like itself everywhere. The
@@ -30,6 +33,12 @@ export default async function DashboardPage() {
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
   });
 
+  // Identity strip inputs. A guest has none of this and does not get the strip,
+  // so the rank query is skipped rather than run against "__guest__".
+  const lvl = user ? levelFor(user.xp) : null;
+  const focus = user ? focusOf(p) : null;
+  const rank = user ? await getRank(user.id) : null;
+
   const nextLesson = lessons.find((l) => !p.doneLessonIds.has(l.id)) ?? lessons[0];
   const theoryDone = nextLesson ? p.doneLessonIds.has(nextLesson.id) : false;
   const practiceDone =
@@ -42,6 +51,32 @@ export default async function DashboardPage() {
       {/* left */}
       <div className="col">
         {!user && <GuestBanner what="This is your dashboard, once you have one" />}
+
+        {/* Identity strip. The page was a wall of cards about a person who was
+            never on it — every number here existed already, and none of them
+            was attached to a face or a name. The Topbar greets you; this says
+            who is being greeted, and links to the profile that holds the rest. */}
+        {user && (
+          <Link href="/profile" className="card pad idstrip">
+            <Avatar name={user.name} emoji={user.avatarEmoji} size={52} />
+            <div className="ids-id">
+              <div className="ids-name">{user.name}</div>
+              <div className="ids-sub">
+                Level {lvl!.level}{focus ? ` · ${focus}` : ""}
+              </div>
+            </div>
+            <div className="ids-stats">
+              <span title={`${streak} day streak`}>🔥 {streak}</span>
+              <span title={`${user.xp.toLocaleString()} XP`}>⭐ {user.xp.toLocaleString()}</span>
+              {/* Rank is shown only once there are enough ranked students for a
+                  position to mean anything — see getRank. Nothing takes its
+                  place when it is absent; an empty slot is better than a
+                  flattering fraction of a three-person board. */}
+              {rank && <span title={`Ranked ${rank.rank} of ${rank.outOf}`}>🏆 #{rank.rank}</span>}
+            </div>
+            <span className="ids-go" aria-hidden="true">→</span>
+          </Link>
+        )}
 
         <section className="card resume">
           <div className="pad">

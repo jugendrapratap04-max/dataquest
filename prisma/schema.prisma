@@ -33,6 +33,16 @@ model User {
   onboardedAt  DateTime?
   welcomedAt   DateTime? // set the first time the welcome plays, so it plays once
 
+  // Profile — what a student writes about themselves. All optional: an account
+  // that never opens /profile is complete, it just has nothing written on it.
+  //
+  // No avatar URL. A photo upload means blob storage (a bill) and moderation;
+  // `avatarEmoji` is one emoji from a fixed set, and the colour behind it is
+  // derived from the name the way subject hues already are.
+  bio          String?
+  goal         String?   // "Current Goal" — what they are working towards
+  avatarEmoji  String?
+
   lessonProgress LessonProgress[]
   submissions    Submission[]
   attempts       ProblemAttempt[]
@@ -147,6 +157,11 @@ model LessonProgress {
   userId   String
   lessonId String
   status   String @default("in_progress") // in_progress | done
+  // Set the first time the status becomes "done", and never moved afterwards —
+  // re-reading a lesson should not rewrite when you finished it. NULL means the
+  // row predates this column; the activity timeline skips those rather than
+  // inventing a date for them.
+  completedAt DateTime?
   user     User   @relation(fields: [userId], references: [id])
   lesson   Lesson @relation(fields: [lessonId], references: [id])
 

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NavCollapse } from "@/components/LayoutControls";
+import { Avatar } from "@/components/Avatar";
+import { levelFor } from "@/lib/profile";
 
 const HomeIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H10v6H4a1 1 0 0 1-1-1z"/></svg>);
 const MapIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 5h12a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4z"/><path d="M4 5v14"/></svg>);
@@ -61,13 +63,18 @@ const groups = (roadmapPct: number): { label: string; items: Item[] }[] => [
 
 const LockIcon = () => (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>);
 
-export function Sidebar({ user, roadmapPct }: { user: { name: string; role: string } | null; roadmapPct: number }) {
+type SideUser = { name: string; role: string; xp: number; avatarEmoji: string | null };
+
+export function Sidebar({ user, roadmapPct }: { user: SideUser | null; roadmapPct: number }) {
   const pathname = usePathname();
   // Every nav href is now a real path (dashboard moved to /dashboard so "/" could
   // become the public landing page), so a plain prefix match is enough.
   const isActive = (href: string) => pathname.startsWith(href);
-  const initials = user ? user.name.split(" ").map((n) => n[0]).slice(0, 1).join("") : "";
   const nav = groups(roadmapPct);
+  // levelFor and Avatar come from lib/profile.ts, which is deliberately free of
+  // prisma so this client component can use them without pulling the database
+  // client into the browser bundle.
+  const lvl = user ? levelFor(user.xp) : null;
 
   // On desktop the sidebar is always shown (CSS ignores this state). On mobile it's
   // a drawer — closed by default. It closes on Escape, on a backdrop tap, and on
@@ -129,13 +136,22 @@ export function Sidebar({ user, roadmapPct }: { user: { name: string; role: stri
         </div>
         {user ? (
           <>
-            <div className="userbox">
-              <div className="av">{initials}</div>
-              <div>
+            {/* The userbox is a link now. It used to be the one piece of the app
+                that showed you your own name and then did nothing with it —
+                which is exactly where a person looks for themselves. */}
+            <Link href="/profile" className={`userbox${isActive("/profile") ? " active" : ""}`} onClick={() => setOpen(false)}>
+              <Avatar name={user.name} emoji={user.avatarEmoji} size={38} />
+              <div className="ub-id">
                 <div className="nm">{user.name}</div>
                 <div className="rl">{user.role}</div>
+                <div className="ub-lvl">
+                  <span>Level {lvl!.level}</span>
+                  <span className="ub-xp">{user.xp.toLocaleString()} XP</span>
+                </div>
+                <div className="ub-bar"><i style={{ width: `${lvl!.pct}%` }} /></div>
               </div>
-            </div>
+              <span className="ub-go" aria-hidden="true">→</span>
+            </Link>
             <button className="logout-btn" onClick={logout}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
               Logout
