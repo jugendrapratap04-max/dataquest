@@ -136,20 +136,74 @@ export const SYLLABUS = [
     { t: "RegEx", covers: ["regex"] },
     { t: "Random module", covers: ["numbers-math"] },
   ]},
-  { group: "DSA (interview-critical)", topics: [
+  /* DSA, widened to W3Schools' actual DSA tutorial.
+   *
+   * This group used to hold thirteen topics chosen as "interview-critical", and
+   * the scoreboard duly reported 134/134 — against a list we had written
+   * ourselves. Checked against the real thing, W3Schools teaches roughly 45.
+   * A reference syllabus that is smaller than what it claims to measure cannot
+   * find a gap; it can only confirm the gap it was built around.
+   *
+   * `covers` is strict here: a topic counts as taught when it has its own
+   * section, worked example or drill. A sentence mentioning it does not. So
+   * pre-order and post-order are marked uncovered even though the in-order
+   * section says how to get them, and AVL is uncovered even though the BST
+   * lesson says balancing exists — otherwise this list would hide exactly what
+   * it was widened to reveal.
+   */
+  { group: "DSA — foundations", topics: [
     { t: "Big-O / complexity", covers: ["big-o"] },
     { t: "Arrays and lists as data structures", covers: ["big-o", "lists-tuples"] },
     { t: "Stacks", covers: ["stacks-queues"] },
     { t: "Queues", covers: ["stacks-queues"] },
-    { t: "Linked lists", covers: ["linked-lists-hashing"] },
-    { t: "Hash tables", covers: ["linked-lists-hashing"] },
-    { t: "Trees", covers: ["trees-graphs"] },
-    { t: "Binary trees / binary search trees", covers: ["trees-graphs"] },
-    { t: "Graphs", covers: ["trees-graphs"] },
+  ]},
+  { group: "DSA — searching and sorting", topics: [
     { t: "Linear search", covers: ["searching-sorting"] },
     { t: "Binary search", covers: ["searching-sorting"] },
     { t: "Bubble / selection / insertion sort", covers: ["searching-sorting"] },
     { t: "Merge / quick sort", covers: ["searching-sorting"] },
+    { t: "Counting sort", covers: [] },
+    { t: "Radix sort", covers: [] },
+  ]},
+  { group: "DSA — linked structures and hashing", topics: [
+    { t: "Linked lists — nodes and traversal", covers: ["linked-lists-hashing"] },
+    { t: "Linked lists in memory — why no index", covers: ["linked-lists-hashing"] },
+    { t: "Linked list types — singly, doubly, circular", covers: [] },
+    { t: "Linked list operations — insert and delete at a position", covers: [] },
+    { t: "Hash tables and hash functions", covers: ["linked-lists-hashing"] },
+    { t: "Hash maps", covers: ["linked-lists-hashing"] },
+    { t: "Hash sets", covers: [] },
+  ]},
+  { group: "DSA — trees", topics: [
+    { t: "Trees", covers: ["trees-graphs"] },
+    { t: "Binary trees", covers: ["trees-graphs"] },
+    { t: "Binary search trees", covers: ["trees-graphs"] },
+    { t: "In-order traversal", covers: ["trees-graphs"] },
+    { t: "Pre-order traversal", covers: [] },
+    { t: "Post-order traversal", covers: [] },
+    { t: "Trees stored in an array", covers: [] },
+    { t: "Balanced trees / AVL", covers: [] },
+  ]},
+  { group: "DSA — graphs", topics: [
+    { t: "Graphs", covers: ["trees-graphs"] },
+    { t: "Graph representation — adjacency list", covers: ["trees-graphs"] },
+    { t: "Graph traversal — depth-first and breadth-first", covers: ["trees-graphs"] },
+    { t: "Cycle detection", covers: [] },
+    { t: "Shortest path", covers: [] },
+    { t: "Dijkstra's algorithm", covers: [] },
+    { t: "Bellman-Ford", covers: [] },
+    { t: "Minimum spanning tree — Prim's and Kruskal's", covers: [] },
+    { t: "Maximum flow — Ford-Fulkerson / Edmonds-Karp", covers: [] },
+  ]},
+  { group: "DSA — algorithm design", topics: [
+    { t: "Memoization", covers: [] },
+    { t: "Tabulation", covers: [] },
+    { t: "Dynamic programming", covers: [] },
+    { t: "Greedy algorithms", covers: [] },
+    { t: "0/1 knapsack", covers: [] },
+    { t: "Euclidean algorithm", covers: [] },
+    { t: "Huffman coding", covers: [] },
+    { t: "The travelling salesman", covers: [] },
   ]},
   { group: "Reference (lookup pages)", topics: [
     { t: "Built-in functions reference", covers: ["python-reference"] },
@@ -159,6 +213,10 @@ export const SYLLABUS = [
     { t: "File methods reference", covers: ["python-reference"] },
     { t: "Keywords reference", covers: ["python-reference"] },
     { t: "Exceptions reference", covers: ["python-reference"] },
+    { t: "Glossary", covers: [] },
+    // Also on W3Schools' module reference and deliberately not listed: the
+    // `requests` module, which needs the network and cannot run in Pyodide, and
+    // `cmath`, which is complex-number maths no data-analyst role asks for.
   ]},
   { group: "Beyond W3Schools (our own edge)", topics: [
     { t: "Testing — unittest / pytest", covers: ["testing"] },
