@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDuration } from "@/lib/duration";
 import Editor from "@monaco-editor/react";
 import Link from "next/link";
@@ -105,10 +105,39 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
     setTimeout(() => setNoPaste(false), 1900);
   }
 
+  // Always the CURRENT doRun, for the shortcuts registered at mount. No
+  // dependency array on purpose — see the same block in PracticeWorkbench.
+  const runRef = useRef<(submit: boolean) => void>(() => {});
+  useEffect(() => {
+    runRef.current = (submit: boolean) => { if (busy === null) void doRun(submit); };
+  });
+
+  const [isMac, setIsMac] = useState<boolean | null>(null);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setIsMac(/Mac|iPhone|iPad/i.test(navigator.userAgent)); }, []);
+  const mod = isMac === null ? null : isMac ? "⌘" : "Ctrl";
+
   function handleMount(editor: any, monaco: any) {
     // No copy-paste — the student has to type it, which is the point.
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, flashNoPaste);
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyV, flashNoPaste);
+
+    // Same two shortcuts as the Python workbench. Both compilers have to answer
+    // the same keys, or the muscle memory a student builds on one subject
+    // silently fails them on the next. `addAction` for the same reasons as
+    // there: it lands in the F1 palette, and it can be triggered by id in a test.
+    editor.addAction({
+      id: "etudo-run",
+      label: "Run query",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => runRef.current(false),
+    });
+    editor.addAction({
+      id: "etudo-submit",
+      label: "Submit query",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      run: () => runRef.current(true),
+    });
     const dom = editor.getDomNode?.();
     if (dom) {
       dom.addEventListener("paste", (e: ClipboardEvent) => { e.preventDefault(); e.stopPropagation(); flashNoPaste(); }, true);
@@ -225,10 +254,12 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
               <button className="btn btn-run" onClick={() => doRun(false)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 {busy === "run" ? "Running…" : "Run"}
+                {mod && busy === null && <kbd className="kb">{mod}↵</kbd>}
               </button>
               <button className="btn btn-submit" onClick={() => doRun(true)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5"/></svg>
                 {busy === "submit" ? "Checking…" : "Submit"}
+                {mod && busy === null && <kbd className="kb">{mod}⇧↵</kbd>}
               </button>
             </div>
           </div>

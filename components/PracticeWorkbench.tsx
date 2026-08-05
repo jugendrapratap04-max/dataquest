@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -97,10 +97,51 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
     setTimeout(() => setNoPaste(false), 1900);
   }
 
+  // Always the CURRENT doRun, for the keyboard shortcuts registered at mount.
+  // No dependency array on purpose: it has to be rewritten on every render, or
+  // the shortcut runs against whatever `code` existed when the editor loaded.
+  const runRef = useRef<(submit: boolean) => void>(() => {});
+  useEffect(() => {
+    runRef.current = (submit: boolean) => { if (busy === null) void doRun(submit); };
+  });
+
+  // ⌘ on a Mac, Ctrl everywhere else. Read after mount because `navigator` does
+  // not exist on the server, and rendering the wrong one then correcting it is a
+  // visible flicker on the busiest button in the app. null renders no hint.
+  const [isMac, setIsMac] = useState<boolean | null>(null);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setIsMac(/Mac|iPhone|iPad/i.test(navigator.userAgent)); }, []);
+  const mod = isMac === null ? null : isMac ? "⌘" : "Ctrl";
+
   function handleMount(editor: any, monaco: any) {
     // No copy-paste — the student has to type it, which is the point.
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, flashNoPaste);
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyV, flashNoPaste);
+
+    // Run and Submit without leaving the keyboard. Reaching for the mouse after
+    // every edit is dozens of interruptions in one sitting, and it is the single
+    // most common reason a code editor feels like a toy rather than a tool.
+    //
+    // Both go through a ref, not through `doRun` directly: this registers ONCE
+    // at mount, so a direct reference would capture the `code` and `busy` of
+    // that first render and keep running the starter template forever.
+    //
+    // `addAction` rather than `addCommand`, for two reasons: it also lists the
+    // shortcut in Monaco's own command palette (F1), so it is discoverable
+    // without reading the button; and it has an id, which means it can be
+    // triggered — and therefore tested — without synthesising a key press.
+    editor.addAction({
+      id: "etudo-run",
+      label: "Run code",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => runRef.current(false),
+    });
+    editor.addAction({
+      id: "etudo-submit",
+      label: "Submit solution",
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      run: () => runRef.current(true),
+    });
     const dom = editor.getDomNode?.();
     if (dom) {
       dom.addEventListener("paste", (e: ClipboardEvent) => { e.preventDefault(); e.stopPropagation(); flashNoPaste(); }, true);
@@ -237,10 +278,13 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
               <button className="btn btn-run" onClick={() => doRun(false)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 {busy === "run" ? "Running…" : "Run"}
+                {/* A shortcut nobody is told about is a shortcut nobody uses. */}
+                {mod && busy === null && <kbd className="kb">{mod}↵</kbd>}
               </button>
               <button className="btn btn-submit" onClick={() => doRun(true)} disabled={busy !== null}>
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M20 6 9 17l-5-5"/></svg>
                 {busy === "submit" ? "Checking…" : "Submit"}
+                {mod && busy === null && <kbd className="kb">{mod}⇧↵</kbd>}
               </button>
             </div>
           </div>
