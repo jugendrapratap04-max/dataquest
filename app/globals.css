@@ -192,6 +192,15 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .search { display:flex; align-items:center; gap:9px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 12px; color:var(--ink-faint); font-size:13px; min-width:180px; }
 .search svg { width:16px; height:16px; flex:none; } .search kbd { margin-left:auto; font-family:var(--mono); font-size:10.5px; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; }
 .search-wrap { position:relative; }
+/* On a phone this row is search + two auth buttons + two icon toggles inside
+   315px, which squeezes the input itself down to 78px — too narrow to read back
+   what you typed. Give search the whole line and let the rest wrap under it.
+   The signed-out view is the worst case and also the one that matters most:
+   guests browsing lessons are the try-before-signup path. */
+@media (max-width: 720px) {
+  .top-actions { flex-wrap:wrap; row-gap:8px; }
+  .search-wrap { flex:1 1 100%; }
+}
 .search input { border:0; background:none; outline:none; color:var(--ink); font-size:13px; width:100%; font-family:var(--sans); }
 .search input::placeholder { color:var(--ink-faint); }
 .search-drop { position:absolute; top:calc(100% + 6px); right:0; left:0; min-width:280px; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); z-index:40; max-height:340px; overflow-y:auto; }
@@ -822,6 +831,16 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lt-item.on .lt-n { background:var(--accent); color:#fff; }
 .lt-item.past .lt-n { background:color-mix(in srgb, var(--accent) 22%, transparent); color:var(--accent); }
 
+/* On a phone an 18-entry list is 736px of navigation above 49 words of content —
+   the topic you opened starts below the fold, which defeats the point of showing
+   one topic at a time. Cap it and let the list scroll inside itself. */
+@media (max-width: 720px) {
+  .lt { margin-bottom:16px; padding:11px 13px; }
+  .lt-list { max-height:152px; overflow-y:auto; overscroll-behavior:contain;
+             -webkit-overflow-scrolling:touch; padding-right:2px; }
+  .lt-item a { padding:7px 8px; }   /* a little taller: this is a touch target */
+}
+
 /* Previous / next, at the foot of the topic being read. */
 .tnav { display:flex; gap:12px; justify-content:space-between; margin:26px 0 4px; }
 .tnav-btn { display:flex; flex-direction:column; gap:2px; max-width:46%; padding:10px 14px; border-radius:10px;
@@ -830,6 +849,15 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .tnav-btn.next { text-align:right; margin-left:auto; }
 .tnav-dir { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--accent); }
 .tnav-label { font-size:13px; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Side by side, two buttons on a 375px screen are 92px and 145px stubs whose
+   labels are almost entirely ellipsis. Stacked and full width, they read — and
+   they become proper tap targets. Must come AFTER the rules above: same
+   specificity, so source order is what decides. */
+@media (max-width: 720px) {
+  .tnav { flex-direction:column; gap:8px; }
+  .tnav-btn { max-width:100%; }
+  .tnav-btn.next { text-align:left; margin-left:0; }
+}
 
 /* Editable lesson examples (components/LiveCode). The read-only state must look
    exactly like a normal `.code` block — the invitation is the button, not a
@@ -850,6 +878,14 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
            color:var(--code-fg, #E6E9EF); background:transparent; tab-size:4; }
 .code.live.editing { outline:1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
 .lc-hint { padding:7px 15px 11px; font-size:12px; color:var(--muted); }
+/* 25px-tall buttons are fine under a mouse and a poor target under a thumb.
+   The bar cannot take a full 44px without dominating the code block, but 36
+   is the difference between hitting Run and hitting Reset. */
+@media (max-width: 720px) {
+  .lc-try, .lc-run, .lc-reset { min-height:36px; padding-left:13px; padding-right:13px; font-size:12.5px; }
+  .code.live .bar { flex-wrap:wrap; row-gap:7px; padding-top:8px; padding-bottom:8px; }
+  .lc-area { font-size:13.5px; }   /* iOS zooms a focused field under ~16px less aggressively at this size */
+}
 .out.err { color:#FF8B8B; white-space:pre-wrap; font-family:var(--mono); font-size:12.5px; }
 
 /* The keyboard hint inside the Run / Submit buttons. Deliberately low-contrast:
