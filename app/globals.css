@@ -951,7 +951,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .def-en { font-size:15.5px; font-weight:600; color:var(--ink); line-height:1.55; }
 .def-hi { font-size:14px; color:var(--ink-soft); margin-top:9px; padding-top:9px; border-top:1px solid var(--line); line-height:1.65; }
 
-.analogy { border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--panel-2); padding:14px 16px; margin:18px 0; }
+.analogy { border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--panel-2); padding:14px 20px; margin:18px 0; }
 .an-row { display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:9px; }
 .an-a, .an-b { font-family:var(--mono); font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:7px; }
 .an-a { color:var(--indigo); background:var(--indigo-soft); }
@@ -972,7 +972,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .mk pre { font-family:var(--mono); font-size:12.5px; line-height:1.6; background:var(--panel-3); padding:8px 11px; border-radius:7px; color:var(--ink); margin:0; overflow-x:auto; white-space:pre; flex:1; min-width:0; }
 .mk-why { font-size:13px; color:var(--ink-soft); margin:7px 0; line-height:1.6; }
 
-.iv { padding:16px 18px; margin:20px 0; }
+.iv { padding:16px 20px; margin:20px 0; }
 .iv h3 { font-size:14px; margin:0 0 11px; }
 .iv-q { border-top:1px solid var(--line); }
 .iv-q:first-of-type { border-top:0; }
@@ -1036,7 +1036,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .page-intro { color:var(--ink-soft); font-size:13.5px; margin:0 0 22px; max-width:62ch; }
 
 /* ===== visualizations ===== */
-.viz { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px; margin:6px 0 22px; box-shadow:var(--shadow); }
+.viz { background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin:6px 0 22px; box-shadow:var(--shadow); }
 .viz-head { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
 .viz-title { font-size:14px; font-weight:700; }
 .viz-badge { font-family:var(--mono); font-size:9.5px; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--teal); background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); border-radius:20px; padding:2px 8px; }
@@ -1238,7 +1238,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .prose h2:first-of-type { margin-top:24px; }
 
 /* ---- Scaffolding ladder: worked example -> faded -> trace -> debug ---- */
-.worked { padding:16px 18px; margin:22px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
+.worked { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
 .worked h3, .faded h3, .trace h3, .debug h3 { font-size:14px; margin:0 0 6px; }
 .wk-goal { font-size:13px; color:var(--ink-soft); margin:0 0 14px; }
 .wk-steps { list-style:none; margin:0; padding:0; counter-reset:wk; }
@@ -1251,7 +1251,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .wk-full { margin-top:16px; padding-top:14px; border-top:1px dashed var(--line); }
 .wk-out { font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:7px; white-space:pre-wrap; }
 
-.faded, .trace { padding:16px 18px; margin:22px 0; border-color:color-mix(in srgb, var(--accent) 26%, var(--line)); }
+.faded, .trace { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--accent) 26%, var(--line)); }
 .fx-code { font-family:var(--mono); font-size:12.5px; line-height:2; background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:11px 13px; overflow-x:auto; margin:0; white-space:pre; }
 .fx-code.numbered { line-height:1.9; }
 .fx-ln { display:inline-block; width:22px; color:var(--ink-faint); user-select:none; }
@@ -1274,7 +1274,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .fx-notes li.no::before { content:"✗"; color:var(--bad); }
 .fx-notes code { font-family:var(--mono); font-size:.9em; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 5px; color:var(--accent-2); }
 
-.debug { padding:16px 18px; margin:22px 0; border-color:color-mix(in srgb, var(--bad) 26%, var(--line)); }
+.debug { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--bad) 26%, var(--line)); }
 .dbg-symptom { margin-top:10px; }
 .dbg-symptom > span { display:block; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--bad); margin-bottom:5px; }
 .dbg-symptom pre { font-family:var(--mono); font-size:12px; line-height:1.6; background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 28%,transparent); border-radius:9px; padding:9px 12px; overflow-x:auto; margin:0; white-space:pre-wrap; }
