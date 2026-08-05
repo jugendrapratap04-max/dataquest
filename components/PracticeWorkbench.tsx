@@ -32,11 +32,28 @@ export type ProblemData = {
 
 
 function mdLite(md: string) {
+  // Fenced blocks are pulled out FIRST. The inline-code rule below matches any
+  // pair of backticks, so a \`\`\` fence gets eaten as inline code — which leaves
+  // two stray backticks visible on the page and collapses the block onto a
+  // single line. That shipped on three problems before anyone looked at one.
+  const blocks: string[] = [];
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const pre = (i: string) => `<pre class="md-pre"><code>${esc(blocks[Number(i)])}</code></pre>`;
+
   return md
+    .replace(/\`\`\`[a-zA-Z]*\n([\s\S]*?)\`\`\`/g, (_m, body: string) => {
+      blocks.push(body.replace(/\n$/, ""));
+      return `\u0000FENCE${blocks.length - 1}\u0000`;
+    })
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/`([^`]+)`/g, '<code class="kbd">$1</code>')
-    .split(/\n\n+/).map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`).join("");
+    .replace(/\`([^\`]+)\`/g, '<code class="kbd">$1</code>')
+    .split(/\n\n+/).map((p) => `<p>${p.replace(/\n/g, "<br/>")}</p>`).join("")
+    // A <pre> nested in a <p> is invalid HTML, so unwrap the paragraph the
+    // placeholder ended up alone in before falling back to a bare swap.
+    .replace(/<p>\s*\u0000FENCE(\d+)\u0000\s*<\/p>/g, (_m, i: string) => pre(i))
+    .replace(/\u0000FENCE(\d+)\u0000/g, (_m, i: string) => pre(i));
 }
 
 // Pyodide hands Python's None back as `undefined`, and JSON.stringify(undefined)

@@ -701,6 +701,10 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .prose { line-height:1.65; } .prose h2 { font-size:19px; margin:30px 0 12px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--mono); font-size:13px; color:var(--accent-2); background:var(--accent-soft); width:26px; height:26px; border-radius:8px; display:grid; place-items:center; flex:none; }
 .prose p { margin:0 0 14px; } .prose p.soft { color:var(--ink-soft); }
 .prose code, .kbd { font-family:var(--mono); font-size:.9em; background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:1px 6px; color:var(--accent-2); }
+/* Fenced blocks inside a problem description (mdLite). The inner <code> has to
+   opt out of the inline pill above, or every block gets a border and a tint. */
+.md-pre { font-family:var(--mono); font-size:12.5px; line-height:1.7; background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:11px 13px; margin:0 0 14px; overflow-x:auto; white-space:pre; color:var(--ink); }
+.md-pre code { font-family:inherit; font-size:inherit; background:none; border:0; border-radius:0; padding:0; color:inherit; }
 .code { background:var(--code-bg); border-radius:12px; overflow:hidden; margin:0 0 16px; border:1px solid #23262F; }
 .code .bar { display:flex; align-items:center; gap:7px; padding:9px 13px; border-bottom:1px solid #23262F; } .code .bar .dot { width:11px; height:11px; border-radius:50%; } .code .bar .fn { font-family:var(--mono); font-size:11.5px; color:#8890A0; margin-left:6px; }
 .code pre { margin:0; padding:15px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.7; color:var(--code-ink); }
