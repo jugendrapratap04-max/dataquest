@@ -500,3 +500,39 @@ export const bellmanMstProblems = [
     ["Sort as `(w, u, v)` so the weight decides the order.", "Each node points at a parent; a group is named by whoever points at themselves. Join two groups by pointing one root at the other.", "Count the edges you take. Fewer than `len(nodes) - 1` means the graph was in more than one piece — return -1."],
     ["graph", "mst"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Memoisation and tabulation.
+ *
+ * `climb_ways` is the debug task's function done correctly — a fresh cache per
+ * top-level call. Left deliberately as the first problem, because a student who
+ * just watched it return the wrong answer has the reason to get it right.
+ * ------------------------------------------------------------------------- */
+export const dpBasicsProblems = [
+  PP("memoization-tabulation", "Medium", 451, "climb-ways", "Ways Up The Stairs", "climb_ways",
+    "There are `n` stairs and `steps` lists the step sizes allowed. Return how many different ways there are to reach the top. Order matters — 1 then 2 is a different climb from 2 then 1.\n\n`n = 0` has exactly one way: stand still. A step that overshoots contributes nothing.\n\nMemoise it. And be careful what the cache is keyed on — the answer depends on `steps` as well as on `n`.",
+    [{ input: "n=4, steps=[1,2]", output: "5" }, { input: "n=4, steps=[1,2,3]", output: "7" }],
+    "def climb_ways(n, steps):\n    pass\n",
+    "def climb_ways(n, steps):\n    seen = {}\n\n    def ways(k):\n        if k == 0:\n            return 1\n        if k < 0:\n            return 0\n        if k in seen:\n            return seen[k]\n        total = 0\n        for s in steps:\n            total += ways(k - s)\n        seen[k] = total\n        return total\n\n    return ways(n)\n",
+    [{ args: [4, [1, 2]], expected: 5 }, { args: [4, [1, 2, 3]], expected: 7 }, { args: [0, [1, 2]], expected: 1 }, { args: [1, [2]], expected: 0 }, { args: [10, [1, 2]], expected: 89 }, { args: [7, [1, 3, 5]], expected: 12 }],
+    ["Build the cache INSIDE the function. A `seen={}` default argument is created once and shared by every call the program ever makes.", "Base cases first: 0 stairs is one way (stand still), a negative overshoot is zero ways.", "If you cache across calls instead, the key must be `(n, tuple(steps))` — keying on n alone answers the previous question."],
+    ["dp", "memoisation"]),
+
+  PP("memoization-tabulation", "Medium", 452, "naive-call-count", "How Many Calls Would That Have Been", "naive_call_count",
+    "Return how many calls naive recursive Fibonacci would make to compute `fib(n)` — **without making them**. `fib(35)` is 29,860,703 calls, so actually running it to count is not an option past about 35.\n\nThe count has its own recurrence: computing `n` costs one call, plus whatever `n-1` cost, plus whatever `n-2` cost. `n = 0` and `n = 1` cost one call each.\n\nWhich means the answer is itself a tabulation — build it bottom-up.",
+    [{ input: "n=5", output: "15" }, { input: "n=35", output: "29860703" }],
+    "def naive_call_count(n):\n    pass\n",
+    "def naive_call_count(n):\n    if n < 2:\n        return 1\n    counts = [1, 1]\n    for i in range(2, n + 1):\n        counts.append(1 + counts[i - 1] + counts[i - 2])\n    return counts[n]\n",
+    [{ args: [0], expected: 1 }, { args: [1], expected: 1 }, { args: [2], expected: 3 }, { args: [5], expected: 15 }, { args: [10], expected: 177 }, { args: [25], expected: 242785 }, { args: [35], expected: 29860703 }],
+    ["`counts[i] = 1 + counts[i-1] + counts[i-2]` — the Fibonacci recurrence with a 1 added, which is why the cost grows like fib itself.", "Handle n = 0 and n = 1 before building the list, or the seed values are wrong.", "Do not solve this by actually recursing. That is the joke the problem is making."],
+    ["dp", "tabulation"]),
+
+  PP("memoization-tabulation", "Hard", 453, "min-path-sum", "Cheapest Way Down The Grid", "min_path_sum",
+    "`grid` is a list of rows of numbers. Starting at the top-left and moving only **right or down**, return the smallest possible total of the cells you land on, counting both the first and the last.\n\nTabulate it: each cell's best total is its own value plus the cheaper of the cell above and the cell to its left. Fill top-left to bottom-right so both of those are already known when you need them.\n\nAn empty grid totals 0.",
+    [{ input: "grid=[[1,3,1],[1,5,1],[4,2,1]]", output: "7" }, { input: "grid=[[1,2],[1,1]]", output: "3" }],
+    "def min_path_sum(grid):\n    pass\n",
+    "def min_path_sum(grid):\n    if not grid or not grid[0]:\n        return 0\n    rows, cols = len(grid), len(grid[0])\n    table = [[0] * cols for _ in range(rows)]\n    table[0][0] = grid[0][0]\n    for c in range(1, cols):\n        table[0][c] = table[0][c - 1] + grid[0][c]\n    for r in range(1, rows):\n        table[r][0] = table[r - 1][0] + grid[r][0]\n    for r in range(1, rows):\n        for c in range(1, cols):\n            table[r][c] = grid[r][c] + min(table[r - 1][c], table[r][c - 1])\n    return table[rows - 1][cols - 1]\n",
+    [{ args: [[[1, 3, 1], [1, 5, 1], [4, 2, 1]]], expected: 7 }, { args: [[[1, 2], [1, 1]]], expected: 3 }, { args: [[[5]]], expected: 5 }, { args: [[[1, 2, 3]]], expected: 6 }, { args: [[[1], [2], [3]]], expected: 6 }, { args: [[]], expected: 0 }],
+    ["The first row and first column have no choice — there is only one way to reach them, so fill those separately first.", "Every other cell: `grid[r][c] + min(above, left)`.", "Fill in increasing order of row and column. Reverse the direction and every cell reads slots that are still zero, with no error at all."],
+    ["dp", "tabulation"]),
+];
