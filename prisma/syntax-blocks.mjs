@@ -578,4 +578,206 @@ export const SYNTAX = {
     ],
     note: "Prefer <code>Path</code> over string joining. <code>folder + \"/\" + name</code> breaks on Windows and doubles the slash when the folder already ends with one.",
   },
+
+  /* ------------------------------------ 37-41: keeping it, proving it, shipping it -- */
+
+  "data-persistence": {
+    intro: "Three ways to make data outlive the program, each for a different job.",
+    form: "import csv, sqlite3\n\nwith open(path, newline=\"\") as f:\n    for row in csv.DictReader(f):\n        body\n\nconn = sqlite3.connect(path)\nconn.execute(query, params)\nconn.commit()",
+    parts: [
+      { bit: "import", says: "All three — <code>csv</code>, <code>pickle</code>, <code>sqlite3</code> — are standard library. No database server to install." },
+      { bit: "with", says: "Closes the file whatever happens, as always." },
+      { bit: "newline", says: "Set to empty for CSV, and only for CSV. Leave it out and Windows writes a blank line between every row." },
+      { bit: "as", says: "Names the open file for the block." },
+      { bit: "for", says: "Reads one row at a time rather than loading the whole file — which matters the moment the file is bigger than memory." },
+      { bit: "row", says: "One record. From <code>DictReader</code> it is a dictionary keyed by the header line." },
+      { bit: "in", says: "What is being walked follows." },
+      { bit: "csv.DictReader(f)", says: "Reads by column <b>name</b> instead of by position, so inserting a column upstream does not silently shift your data." },
+      { bit: "body", says: "What you do with each row." },
+      { bit: "sqlite3.connect(path)", says: "Opens the database, creating the file if it is not there. A whole SQL database in one file, no server." },
+      { bit: "conn.execute(query, params)", says: "Runs SQL. <code>params</code> is a tuple filling the <code>?</code> placeholders." },
+      { bit: "params", says: "Always pass values this way. Building the query by joining strings is how SQL injection happens." },
+      { bit: "conn.commit()", says: "Writes changes to disk. Forget it and the program ends with the database unchanged and no error to explain why." },
+    ],
+    note: "CSV for anything a human or a spreadsheet will open, SQLite when you need to query it, pickle only for Python talking to itself — a pickle file will run code when loaded, so never open one you did not write.",
+  },
+
+  testing: {
+    intro: "A test is an ordinary function that states what should be true and lets Python check it.",
+    form: "def test_name():\n    result = function(given_input)\n    assert result == expected\n\nwith pytest.raises(ErrorType):\n    failing_call()",
+    parts: [
+      { bit: "def", says: "A plain function. Nothing special about it except the name." },
+      { bit: "test_name", says: "Must start with <code>test_</code> — that prefix is how pytest finds it. Name it after the behaviour, not the function under test." },
+      { bit: "result", says: "What actually happened. Work it out first so the comparison line reads cleanly." },
+      { bit: "given_input", says: "The input for this case. One test, one case — a test asserting six things tells you nothing about which of them broke." },
+      { bit: "assert", says: "\"This must be true.\" If it is, nothing happens; if it is not, the test fails and pytest shows both sides." },
+      { bit: "expected", says: "What should have happened, written out by hand. Never computed by the same code you are testing." },
+      { bit: "with", says: "Opens a block where an error is the <b>expected</b> outcome." },
+      { bit: "pytest.raises(ErrorType)", says: "Passes only if the block raises that error. Testing that bad input is rejected is as important as testing that good input works." },
+    ],
+    note: "A test that never fails proves nothing. Break the code on purpose once and check the test goes red — otherwise you have only tested that it runs.",
+  },
+
+  "debugging-logging": {
+    intro: "<code>print</code> tells you something today. Logging tells you what happened at 3am on a machine you cannot reach.",
+    form: "import logging\n\nlogging.basicConfig(level=logging.INFO)\nlog = logging.getLogger(__name__)\n\nlog.info(message)\nlog.exception(message)\n\nbreakpoint()",
+    parts: [
+      { bit: "import", says: "Standard library. Nothing to install." },
+      { bit: "logging.basicConfig(level=logging.INFO)", says: "Set up once, at the program's entry point. Anything below the level is dropped." },
+      { bit: "level", says: "<code>DEBUG</code> → <code>INFO</code> → <code>WARNING</code> → <code>ERROR</code> → <code>CRITICAL</code>. Turning the dial changes how much you see without editing a single log line." },
+      { bit: "logging.getLogger(__name__)", says: "One logger per module. <code>__name__</code> is the module's own name, so every line records where it came from." },
+      { bit: "log.info(message)", says: "Normal progress. <code>.debug</code> for detail, <code>.warning</code> for suspicious, <code>.error</code> for broken." },
+      { bit: "log.exception(message)", says: "Only inside <code>except</code>. Logs your message <b>and</b> the full traceback — which is what you will actually want at 3am." },
+      { bit: "breakpoint()", says: "Stops the program and drops you into a debugger right there. <code>n</code> next line, <code>c</code> continue, and any variable name prints it." },
+    ],
+    note: "Never log passwords, tokens or card numbers. Logs get copied, emailed and shipped to third parties — treat everything you write as public.",
+  },
+
+  "clean-code": {
+    intro: "Three things that cost one line each and tell the next reader what the code cannot.",
+    // Prose inside a `form` is rare and has to avoid the reserved words, because
+    // the verifier reads the form as code and cannot tell a docstring sentence
+    // from a keyword. This one said "if it needs one" and tripped the check.
+    form: "def name(param: int, other: str = \"\") -> bool:\n    \"\"\"One line saying what it does.\n\n    Longer explanation goes here.\n    \"\"\"\n    return True",
+    parts: [
+      { bit: "def", says: "An ordinary definition — everything else here is annotation on top of it." },
+      { bit: "param: int", says: "A type hint. Python does not enforce it and will not stop you, but your editor will warn you and a reader stops having to guess." },
+      { bit: "other: str = \"\"", says: "Hint and default together, in that order. Spaces around the <code>=</code> once a hint is present; none without one — that is PEP 8." },
+      { bit: "->", says: "What the function hands back. <code>-&gt; None</code> is worth writing: it says the function works by side effect, on purpose." },
+      { bit: "bool", says: "The return type." },
+      { bit: "\"\"\"", says: "A docstring, and it must be the <b>first</b> statement in the function. A comment above the <code>def</code> looks the same and is invisible to <code>help()</code>." },
+      { bit: "return", says: "The value, matching the annotated type." },
+    ],
+    note: "Say <i>why</i>, not <i>what</i>. The code already says what it does; a comment repeating it just becomes a lie the first time somebody edits one and not the other.",
+  },
+
+  "project-git": {
+    intro: "The five commands that cover almost everything, in the order you meet them.",
+    form: "git init\ngit status\ngit add path\ngit commit -m \"message\"\ngit log --oneline\n\ngit switch -c branch-name\ngit push origin branch-name",
+    parts: [
+      { bit: "git init", says: "Turns this folder into a repository. Once, at the start. It creates a hidden <code>.git</code> folder — delete that and the history is gone." },
+      { bit: "git status", says: "What has changed and what is staged. Run it constantly; it is the cheapest way to never be surprised." },
+      { bit: "git add path", says: "Stages a change — \"include this in the next commit\". <code>.</code> means everything, which is convenient and how secrets get committed." },
+      { bit: "git commit -m \"message\"", says: "Saves the staged changes as one point in history. Only what was added is included." },
+      { bit: "message", says: "Say <b>why</b>, in the present tense. \"fix\" is worthless in six months; \"reject empty marks instead of storing 0\" is not." },
+      { bit: "git log --oneline", says: "The history, one commit per line. This is what your messages will actually be read as." },
+      { bit: "git switch -c branch-name", says: "Creates a branch and moves to it. Work on a branch, not on main — it is the whole reason you can experiment safely." },
+      { bit: "git push origin branch-name", says: "Sends your commits to the remote. Nothing leaves your machine until you do this." },
+    ],
+    note: "Add a <code>.gitignore</code> before your first commit. <code>.env</code>, <code>__pycache__/</code>, <code>venv/</code> — a key committed once stays in the history even after you delete the file.",
+  },
+
+  /* --------------------------------- 42-48: reading algorithms, not statements -- */
+
+  "big-o": {
+    intro: "Big-O is not measured, it is read off the shape of the loops.",
+    form: "for i in range(n):        # runs n times      -> O(n)\n    for j in range(n):    # n times, per i     -> O(n²)\n        work              # O(1) each\n\nwhile size > 1:           # halves each turn   -> O(log n)\n    size = size // 2",
+    parts: [
+      { bit: "for", says: "One loop over n items is O(n). Count the loops, not the lines inside them." },
+      { bit: "i", says: "The outer counter. Its own name means nothing to the complexity." },
+      { bit: "in", says: "What is being walked — its <b>size</b> is the n in the answer." },
+      { bit: "range(n)", says: "n turns. If the range were <code>range(10)</code> it would be a constant and would not appear in the answer at all." },
+      { bit: "j", says: "The inner counter. Nested means <b>multiplied</b>: n outer turns × n inner turns = n²." },
+      { bit: "work", says: "One step that does not depend on n — an assignment, a comparison, a list index. That is O(1)." },
+      { bit: "while", says: "A loop whose counter is halved rather than decremented finishes in about log₂n turns, not n." },
+      { bit: "size", says: "Halving is what makes it logarithmic. Binary search and balanced trees are both this shape." },
+    ],
+    note: "Drop constants and keep the biggest term: <code>3n² + 500n + 9</code> is O(n²). At n = 1,000,000 the n² is the only part that matters.",
+  },
+
+  "stacks-queues": {
+    intro: "Same data, opposite rule about which end you are allowed to touch.",
+    form: "stack = []\nstack.append(item)      # push, onto the end\nstack.pop()             # pop, off the end     -> LIFO\n\nfrom collections import deque\nqueue = deque()\nqueue.append(item)      # enqueue, at the back\nqueue.popleft()         # dequeue, from the front -> FIFO",
+    parts: [
+      { bit: "stack", says: "An ordinary list is already a stack — no class needed." },
+      { bit: "stack.append(item)", says: "Push. Adds to the end, which is the only end a stack uses." },
+      { bit: "stack.pop()", says: "Pop. Removes and returns the <b>last</b> item — last in, first out. Both operations are O(1)." },
+      { bit: "from", says: "A queue needs <code>deque</code>, and it is worth the import line." },
+      { bit: "import", says: "Standard library, nothing to install." },
+      { bit: "deque", says: "Double-ended queue: fast at both ends. A plain list is not — <code>list.pop(0)</code> shuffles every remaining item along, turning an O(1) job into O(n)." },
+      { bit: "queue.append(item)", says: "Enqueue, at the back." },
+      { bit: "queue.popleft()", says: "Dequeue, from the front — first in, first out, and O(1) because it is a deque." },
+    ],
+    note: "Undo, back buttons and call stacks are LIFO. Print jobs, task queues and BFS are FIFO. Choosing the wrong one gives an answer that looks plausible and is in the wrong order.",
+  },
+
+  "linked-lists-hashing": {
+    intro: "A list that stores where the next item is, and a table that computes where an item belongs.",
+    form: "class Node:\n    def __init__(self, value):\n        self.value = value\n        self.next = None\n\nslot = hash(key) % table_size",
+    parts: [
+      { bit: "class", says: "One node of the chain. Python has no built-in linked list, so you build it." },
+      { bit: "def", says: "The setup, storing the value and the link." },
+      { bit: "self.value", says: "What this node holds." },
+      { bit: "self.next", says: "The <b>next node</b>, not the next value. This reference is the entire structure — follow it and you have walked the list." },
+      { bit: "None", says: "Marks the end. Reaching it is how a walk knows to stop." },
+      { bit: "hash(key)", says: "Turns any hashable value into a number. The same key always gives the same number within one run." },
+      { bit: "%", says: "Folds that number into the table's range, so it names an actual slot." },
+      { bit: "table_size", says: "How many slots exist. Two keys landing in the same slot is a collision — normal, and handled by chaining a small list there." },
+    ],
+    note: "This is why dictionary keys must be immutable: the slot is computed from the value, so a key that changes after being stored is filed where nothing will ever look for it.",
+  },
+
+  "trees-graphs": {
+    intro: "A graph is a dictionary of neighbours, and breadth-first search is the loop that walks it.",
+    form: "graph = {node: [neighbour, neighbour]}\n\nqueue = deque([start])\nseen = {start}\nwhile queue:\n    current = queue.popleft()\n    for neighbour in graph[current]:\n        if neighbour not in seen:\n            seen.add(neighbour)\n            queue.append(neighbour)",
+    parts: [
+      { bit: "graph", says: "An adjacency list: each key is a node, each value the nodes it connects to. No class required." },
+      { bit: "queue", says: "What to visit next. A queue gives breadth-first — nearest first. Swap it for a stack and the same loop becomes depth-first." },
+      { bit: "start", says: "Where the walk begins. It goes into the queue and into <code>seen</code> at the same time." },
+      { bit: "seen", says: "Every node already queued. A set, because this is checked once per edge and a list would make the whole walk O(n²)." },
+      { bit: "while", says: "Keep going until nothing is left to visit. This ends on its own — every node enters the queue at most once." },
+      { bit: "current", says: "The node being visited this turn." },
+      { bit: "for", says: "Look at each neighbour of the current node." },
+      { bit: "neighbour", says: "One connected node." },
+      { bit: "in", says: "Walks the neighbour list, and — on the next line — tests membership of the set." },
+      { bit: "if", says: "The guard that makes this terminate." },
+      { bit: "not", says: "Only unseen nodes are queued. Drop this test and a graph with a cycle loops forever." },
+    ],
+    note: "Mark a node as seen when you <b>queue</b> it, not when you visit it. Marking on visit lets the same node be queued several times before its turn comes.",
+  },
+
+  "searching-sorting": {
+    intro: "Binary search is three variables and one rule: throw away half.",
+    form: "low, high = 0, len(items) - 1\nwhile low <= high:\n    mid = (low + high) // 2\n    if items[mid] == target:\n        return mid\n    if items[mid] < target:\n        low = mid + 1\n    else:\n        high = mid - 1\nreturn -1",
+    parts: [
+      { bit: "low", says: "First position still worth checking. Starts at 0." },
+      { bit: "high", says: "Last position still worth checking. <code>len(items) - 1</code>, not <code>len(items)</code> — that is off the end." },
+      { bit: "while", says: "Keep going while the window still holds something. <code>&lt;=</code>, not <code>&lt;</code>: with <code>&lt;</code> a one-item window is never examined." },
+      { bit: "mid", says: "The middle. <code>//</code> is integer division, because a position must be a whole number." },
+      { bit: "if", says: "Three outcomes: found it, went too low, went too high." },
+      { bit: "return", says: "Hands back the position on a hit, and <code>-1</code> when the window closes empty." },
+      { bit: "low = mid + 1", says: "Target is bigger, so discard <code>mid</code> and everything below it. The <code>+ 1</code> is what guarantees progress." },
+      { bit: "else", says: "Target is smaller, so discard <code>mid</code> and everything above." },
+      { bit: "high = mid - 1", says: "The mirror image. Miss either <code>± 1</code> and the window stops shrinking — an infinite loop, not a wrong answer." },
+    ],
+    note: "It only works on <b>sorted</b> data. Run it on an unsorted list and it returns confidently wrong answers rather than failing.",
+  },
+
+  "python-reference": {
+    intro: "Four built-ins that answer \"what is this and what can it do?\" without leaving the interpreter.",
+    form: "type(value)\nisinstance(value, Type)\ndir(object)\nhelp(object)",
+    parts: [
+      { bit: "type(value)", says: "What it actually is, as opposed to what you assumed. The first thing to run when a <code>TypeError</code> makes no sense." },
+      { bit: "isinstance(value, Type)", says: "\"Is it this type, or a subclass of it?\" Use it for checks — <code>type(x) == int</code> says no to a subclass that should have passed." },
+      { bit: "dir(object)", says: "Every name the object has. Skip the dunders and what remains is the list of things you can call on it." },
+      { bit: "help(object)", says: "The docstring, in the terminal. Works on modules, classes, functions and methods — this is what writing docstrings buys you." },
+    ],
+    note: "These work on anything, including modules you just installed. <code>dir</code> then <code>help</code> is usually faster than searching the web for it.",
+  },
+
+  "tree-traversals": {
+    intro: "One recursive shape. Moving a single line changes which order the tree comes out in.",
+    form: "def walk(node):\n    if node is None:\n        return\n    walk(node.left)     # move this line to change the order\n    visit(node)\n    walk(node.right)",
+    parts: [
+      { bit: "def", says: "The function calls itself on each side, so the same three lines handle a tree of any depth." },
+      { bit: "if", says: "The base case, and it must come first." },
+      { bit: "is", says: "Identity, and the right operator for <code>None</code> — <code>== None</code> works but is not how it is written." },
+      { bit: "None", says: "An empty branch. Reaching one means stop — that is what ends the recursion." },
+      { bit: "return", says: "Backs out of this branch with nothing. No value is needed; the work happens in <code>visit</code>." },
+      { bit: "walk(node.left)", says: "The whole left subtree, finished completely before this line returns." },
+      { bit: "visit(node)", says: "The <b>position of this line</b> is the entire difference. Before both calls → pre-order. Between them → in-order. After both → post-order." },
+      { bit: "walk(node.right)", says: "Then the whole right subtree." },
+    ],
+    note: "On a binary search tree, in-order comes out sorted. Pre-order is what you save to rebuild the tree later; post-order is for work that needs the children finished first.",
+  },
 };
