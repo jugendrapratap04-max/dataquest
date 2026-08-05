@@ -10,7 +10,10 @@ import { highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
 import { LessonQuiz } from "@/components/LessonQuiz";
 import { FadedExample, TraceCheck } from "@/components/LessonPractice";
-import { ReadingProgress, LessonToc } from "@/components/LessonProgress";
+// LessonToc is the scroll-spy contents for a single long page. With one topic
+// on screen there is nothing to spy on, so LessonTopics replaces it here.
+import { ReadingProgress } from "@/components/LessonProgress";
+import { LessonTopics, TopicNav } from "@/components/LessonTopics";
 import { lessonOutline } from "@/lib/lesson-outline";
 import { Fragment } from "react";
 import { RailControls } from "@/components/LayoutControls";
@@ -359,8 +362,14 @@ export async function generateMetadata({
   };
 }
 
-export default async function LessonPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function LessonPage({
+  params, searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ t?: string }>;
+}) {
   const { slug } = await params;
+  const { t: topicParam } = await searchParams;
   // Open to everyone — a visitor reads the whole lesson. Only the progress
   // (which lessons are ticked) and the "mark complete" action need an account.
   const user = await getCurrentUser();
@@ -388,6 +397,39 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
   // A short lesson does not need a table of contents.
   const { outline, anchors, total, readMinutes, workMinutes } = lessonOutline(rest);
   const showToc = outline.length >= 4;
+
+  /* ONE TOPIC AT A TIME.
+   *
+   * A lesson used to render as a single page — eight sections plus a trace,
+   * drills, mistakes, a debug task, a recap, an interview set and a quiz. That
+   * reads as a lecture, and a beginner scrolling past six things they have not
+   * learned yet to reach the one they came for does not feel like progress.
+   *
+   * The split needed no new data: `lessonOutline` has always divided a lesson
+   * into exactly these entries — one per <h2>, plus one per practice landmark —
+   * and `anchors` already marks the first block of each. Walking the blocks and
+   * counting those marks gives every block its topic. The content did not move;
+   * only what is on screen at once did.
+   *
+   * Which topic is open lives in the URL, so each one can be linked, shared and
+   * found by search instead of hiding inside an anchor on a page of twelve.
+   */
+  const partOf: number[] = [];
+  let seen = -1;
+  rest.forEach((_, i) => {
+    if (anchors.has(i)) seen++;
+    partOf[i] = Math.max(0, seen);
+  });
+
+  const asked = Number.parseInt(topicParam ?? "1", 10);
+  const topic = Number.isFinite(asked) ? Math.min(Math.max(asked, 1), outline.length) - 1 : 0;
+  const lastTopic = topic === outline.length - 1;
+
+  // A lesson too short to be worth splitting (`showToc` is false under four
+  // entries) keeps rendering whole. Filtering it anyway would show only its
+  // first topic with no navigation to reach the rest — which is what the stub
+  // lessons in the unwritten subjects would have done.
+  const visible = showToc ? rest.filter((_, i) => partOf[i] === topic) : rest;
   const concepts = (blocks.find((b) => b.t === "recap")?.items ?? []).length;
 
   // Send them to the first problem they have NOT solved, not to problem 1.
@@ -491,21 +533,26 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
           </div>
         ) : (
           <>
-        {objectives && <Block b={objectives} />}
-        {showToc && <LessonToc outline={outline} />}
+        {/* Objectives are the lesson's promise, not a topic — they belong on the
+            way in and nowhere else. */}
+        {objectives && topic === 0 && <Block b={objectives} />}
+        {showToc && <LessonTopics slug={slug} outline={outline} current={topic} />}
         <div className="prose">
-          {rest.map((b, i) => (
+          {visible.map((b, i) => (
             <Fragment key={i}>
-              {anchors.get(i) && <span id={anchors.get(i)} className="anchor" aria-hidden="true" />}
               <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} />
             </Fragment>
           ))}
         </div>
+        {showToc && <TopicNav slug={slug} outline={outline} current={topic} />}
 
         {/* Closing summary. Every number here is real — key ideas counted from
             the recap, minutes from the outline, progress from the database. No
             invented XP: finishing a lesson does not pay XP, solving problems
-            does, and saying otherwise would be a lie the dashboard exposes. */}
+            does, and saying otherwise would be a lie the dashboard exposes.
+            Only on the last topic: "you have finished" under topic 3 of 12 is
+            a lie the student can see. */}
+        {(!showToc || lastTopic) && (<>
         <div className="card lsum">
           <h3>What you just covered</h3>
           <div className="lsum-stats">
@@ -553,6 +600,7 @@ export default async function LessonPage({ params }: { params: Promise<{ slug: s
             )}
           </div>
         </div>
+        </>)}
           </>
         )}
 

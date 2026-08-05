@@ -802,6 +802,33 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .verdict { display:flex; align-items:center; gap:9px; font-weight:700; font-size:14px; margin-bottom:12px; } .verdict.ok { color:var(--good); } .verdict.no { color:var(--bad); } .verdict svg { width:18px; height:18px; }
 .tcase { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(255,255,255,.04); margin-bottom:7px; font-family:var(--mono); font-size:12px; color:#C6CDDA; } .tcase .st { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px; flex:none; } .tcase.ok .st { background:var(--good); color:#04240F; } .tcase.no .st { background:var(--bad); color:#fff; } .tcase .io b { color:#C6CDDA; } .tcase .ms { margin-left:auto; color:#6B7688; }
 .console-out { font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; word-break:break-word; } .console-out b { color:var(--code-str); }
+/* The topic list, and the lesson's only navigation (components/LessonTopics). */
+.lt { margin:0 0 22px; padding:13px 15px; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+.lt-head { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
+           display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.lt-count { margin-left:auto; letter-spacing:0; text-transform:none; font-weight:600; color:var(--accent); }
+.lt-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; }
+.lt-item a { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:7px;
+             text-decoration:none; color:var(--muted); font-size:13.5px; line-height:1.4; }
+.lt-item a:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); color:var(--fg); }
+.lt-n { flex:none; width:20px; height:20px; display:grid; place-items:center; border-radius:6px;
+        font-size:11px; font-weight:700; font-family:var(--mono);
+        background:color-mix(in srgb, var(--fg) 8%, transparent); }
+.lt-label { flex:1; }
+.lt-min { flex:none; font-size:11px; opacity:.6; font-variant-numeric:tabular-nums; }
+.lt-item.on a { background:color-mix(in srgb, var(--accent) 12%, transparent); color:var(--fg); font-weight:600; }
+.lt-item.on .lt-n { background:var(--accent); color:#fff; }
+.lt-item.past .lt-n { background:color-mix(in srgb, var(--accent) 22%, transparent); color:var(--accent); }
+
+/* Previous / next, at the foot of the topic being read. */
+.tnav { display:flex; gap:12px; justify-content:space-between; margin:26px 0 4px; }
+.tnav-btn { display:flex; flex-direction:column; gap:2px; max-width:46%; padding:10px 14px; border-radius:10px;
+            border:1px solid var(--line); text-decoration:none; background:var(--card); }
+.tnav-btn:hover { border-color:color-mix(in srgb, var(--accent) 45%, transparent); }
+.tnav-btn.next { text-align:right; margin-left:auto; }
+.tnav-dir { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--accent); }
+.tnav-label { font-size:13px; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
 /* Editable lesson examples (components/LiveCode). The read-only state must look
    exactly like a normal `.code` block — the invitation is the button, not a
    different-looking box, so nothing shouts until the student chooses to engage. */
