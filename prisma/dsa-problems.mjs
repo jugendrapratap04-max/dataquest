@@ -572,3 +572,39 @@ export const knapsackProblems = [
     ["Seed the table with an impossible value — `target + 1` works, since no valid answer can need more coins than that.", "Fill amounts from 1 upwards so `best[t - c]` is always already computed.", "An amount left at the impossible value was never reachable. Return -1, not the sentinel."],
     ["dp", "tabulation"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Greedy algorithms — the two that are proved, and the scheduling rule that is.
+ *
+ * There is deliberately no "greedy coin change" problem here. The lesson's whole
+ * point is that the rule is wrong, and the correct version is already the
+ * coin-change problem on the previous lesson.
+ * ------------------------------------------------------------------------- */
+export const greedyProblems = [
+  PP("greedy-algorithms", "Medium", 457, "gcd-of-list", "The Largest Divisor They All Share", "gcd_of_list",
+    "Return the greatest common divisor of every number in `nums`, using Euclid's algorithm.\n\nRun it pairwise: the gcd of a whole list is the gcd of the running answer with the next number. An empty list gives 0, and `gcd(0, n)` is `n` because everything divides 0.\n\nDo not factorise anything. `(a, b)` and `(b, a % b)` have exactly the same common divisors, so keep replacing until the remainder is 0.",
+    [{ input: "nums=[12,18,24]", output: "6" }, { input: "nums=[1071,462]", output: "21" }],
+    "def gcd_of_list(nums):\n    pass\n",
+    "def gcd_of_list(nums):\n    if not nums:\n        return 0\n    result = nums[0]\n    for n in nums[1:]:\n        a, b = result, n\n        while b:\n            a, b = b, a % b\n        result = a\n    return result\n",
+    [{ args: [[48, 18]], expected: 6 }, { args: [[1071, 462]], expected: 21 }, { args: [[12, 18, 24]], expected: 6 }, { args: [[7]], expected: 7 }, { args: [[0, 5]], expected: 5 }, { args: [[13, 17]], expected: 1 }, { args: [[]], expected: 0 }],
+    ["The whole of Euclid is `while b: a, b = b, a % b`, then return `a`.", "Fold across the list: start with the first number and combine it with each of the rest.", "No special cases are needed for 0 or for coprime pairs — the loop handles both. gcd(13, 17) is 1."],
+    ["greedy", "euclid"]),
+
+  PP("greedy-algorithms", "Hard", 458, "max-meetings", "Fit The Most Into One Room", "max_meetings",
+    "`meetings` is a list of `[start, finish]` pairs for one room. Nothing can be moved or shortened. Return the **largest number** of meetings that can be held.\n\nTwo meetings touching exactly at a boundary — one ending at 4, the next starting at 4 — do **not** clash.\n\nSort by the right thing. Earliest start loses to a single long early booking; shortest first loses to a brief meeting sitting across a boundary. Only one of the three obvious rules is provably optimal.",
+    [{ input: "meetings=[[1,4],[3,5],[0,6],[5,7],[8,9],[5,9]]", output: "3" }, { input: "meetings=[[0,10],[9,11],[10,20]]", output: "2" }],
+    "def max_meetings(meetings):\n    pass\n",
+    "def max_meetings(meetings):\n    count = 0\n    end = None\n    for s, f in sorted(meetings, key=lambda m: m[1]):\n        if end is None or s >= end:\n            count += 1\n            end = f\n    return count\n",
+    [{ args: [[[1, 4], [3, 5], [0, 6], [5, 7], [8, 9], [5, 9]]], expected: 3 }, { args: [[[0, 10], [9, 11], [10, 20]]], expected: 2 }, { args: [[]], expected: 0 }, { args: [[[1, 2]]], expected: 1 }, { args: [[[1, 3], [2, 4], [3, 5]]], expected: 2 }, { args: [[[1, 2], [2, 3], [3, 4]]], expected: 3 }],
+    ["Sort by FINISH time — `key=lambda m: m[1]`. That is the rule with an exchange proof behind it.", "Track only the finish time of the last meeting taken; anything starting at or after it fits.", "Use `s >= end`, not `s > end`. The last test is three meetings that touch at every boundary and all three fit."],
+    ["greedy", "scheduling"]),
+
+  PP("greedy-algorithms", "Medium", 459, "huffman-bits", "How Small Can It Get", "huffman_bits",
+    "`freqs` is how often each distinct symbol appears. Return the **total number of bits** an optimal prefix code needs for the whole text.\n\nHuffman's rule: repeatedly take the two smallest weights, merge them, and push the total back. Each merge pushes everything inside it one level deeper, so the merge costs its own combined weight — add those costs up and you have the answer.\n\nOne symbol needs no code at all, so the answer there is 0.",
+    [{ input: "freqs=[5,2,2,1,1]   (from 'abracadabra')", output: "23" }, { input: "freqs=[1,1,1,1]", output: "8" }],
+    "def huffman_bits(freqs):\n    pass\n",
+    "def huffman_bits(freqs):\n    import heapq\n    heap = list(freqs)\n    heapq.heapify(heap)\n    total = 0\n    while len(heap) > 1:\n        a = heapq.heappop(heap)\n        b = heapq.heappop(heap)\n        total += a + b\n        heapq.heappush(heap, a + b)\n    return total\n",
+    [{ args: [[5, 2, 2, 1, 1]], expected: 23 }, { args: [[1, 1]], expected: 2 }, { args: [[5]], expected: 0 }, { args: [[1, 1, 1, 1]], expected: 8 }, { args: [[10, 1, 1]], expected: 14 }],
+    ["A heap gives you the two smallest in O(log n) — `heapq.heapify` then two `heappop`s per round.", "Push the merged weight back on; it competes with the rest from then on.", "Stop when one item is left. The running total of the merges IS the encoded size — you never have to build the tree."],
+    ["greedy", "huffman"]),
+];
