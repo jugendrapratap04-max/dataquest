@@ -47,7 +47,7 @@ const PLANS = {
     { slug: "py-objects-and-flow", title: "Objects and control", upto: 32, summary: "Recursion, inheritance, encapsulation, dunder methods, class attributes and the MRO, generators, decorators and regex." },
     { slug: "py-standard-library", title: "The standard library", upto: 37, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
     { slug: "py-shipping-code", title: "Shipping code", upto: 41, summary: "Testing, debugging and logging, clean code, project structure and git." },
-    { slug: "py-dsa", title: "Data structures & algorithms", upto: 51, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, the Python reference, the three tree traversals, balanced trees, sorting without comparing, and the three linked-list shapes with hash sets." },
+    { slug: "py-dsa", title: "Data structures & algorithms", upto: 52, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, the Python reference, the three tree traversals, balanced trees, sorting without comparing, the three linked-list shapes with hash sets, and cycle detection." },
   ],
   // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at

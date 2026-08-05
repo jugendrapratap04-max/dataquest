@@ -386,3 +386,44 @@ export const linkedListSetProblems = [
     ["Check membership BEFORE adding, or every value looks like a repeat of itself.", "`n in seen` on a set is one hash and one lookup, however large the set gets.", "The answer is the first value whose second copy you reach — [1,2,1,2] gives 1, not 2."],
     ["set", "hashing"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Cycle detection.
+ *
+ * The list problems take a `nxt` array rather than real nodes — nxt[i] is the
+ * index of the next node and -1 is the end — because tests are JSON and a
+ * cyclic object graph has no JSON form. The arithmetic is identical, and it
+ * keeps the two-pointer logic exactly as it appears in the lesson.
+ *
+ * Note these are the first problems where a WRONG answer can hang rather than
+ * fail. That is the topic: the runner's watchdog stops it, and experiencing the
+ * hang is closer to the real lesson than a red X would be.
+ * ------------------------------------------------------------------------- */
+export const cycleProblems = [
+  PP("cycle-detection", "Medium", 442, "detect-cycle", "Is It Going Round", "has_cycle",
+    "`nxt` describes a linked list by position: `nxt[i]` is the index of the node after `i`, and `-1` means the end.\n\nReturn `True` if following the links from position 0 goes round forever, `False` if it reaches an end. An empty list has no cycle.\n\nUse two pointers — one stepping once, one stepping twice. Do not collect the positions you have seen; the point is to answer this in constant memory.",
+    [{ input: "nxt=[1,2,3,4,5,2]", output: "True" }, { input: "nxt=[1,2,3,4,5,-1]", output: "False" }],
+    "def has_cycle(nxt):\n    pass\n",
+    "def has_cycle(nxt):\n    if not nxt:\n        return False\n    slow = 0\n    fast = 0\n    while True:\n        if fast == -1 or nxt[fast] == -1:\n            return False\n        fast = nxt[nxt[fast]]\n        slow = nxt[slow]\n        if slow == fast:\n            return True\n",
+    [{ args: [[1, 2, 3, 4, 5, 2]], expected: true }, { args: [[1, 2, 3, 4, 5, -1]], expected: false }, { args: [[-1]], expected: false }, { args: [[0]], expected: true }, { args: [[1, -1]], expected: false }, { args: [[]], expected: false }],
+    ["Check BOTH `fast == -1` and `nxt[fast] == -1` before stepping — fast moves twice, so it can fall off the end from either position.", "`nxt[-1]` is a valid index in Python and reads the LAST element, so guarding in the wrong order gives a wrong answer with no error.", "A node pointing at itself, `[0]`, is the shortest cycle there is."],
+    ["cycle", "two-pointer"]),
+
+  PP("cycle-detection", "Hard", 443, "cycle-length", "How Long Is The Loop", "cycle_length",
+    "Same `nxt` array. Return how many nodes are **inside** the loop, or `0` if there is no loop.\n\nTwo phases: get the pointers to meet, then walk on from the meeting point counting steps until you arrive back at it. The meeting point is somewhere in the loop, which is all this phase needs — it does not have to be the entrance.",
+    [{ input: "nxt=[1,2,3,4,5,2]", output: "4" }, { input: "nxt=[1,2,3,4,5,-1]", output: "0" }],
+    "def cycle_length(nxt):\n    pass\n",
+    "def cycle_length(nxt):\n    if not nxt:\n        return 0\n    slow = 0\n    fast = 0\n    while True:\n        if fast == -1 or nxt[fast] == -1:\n            return 0\n        fast = nxt[nxt[fast]]\n        slow = nxt[slow]\n        if slow == fast:\n            break\n    n = 1\n    node = nxt[slow]\n    while node != slow:\n        n += 1\n        node = nxt[node]\n    return n\n",
+    [{ args: [[1, 2, 3, 4, 5, 2]], expected: 4 }, { args: [[1, 2, 3, 4, 5, -1]], expected: 0 }, { args: [[0]], expected: 1 }, { args: [[1, 0]], expected: 2 }, { args: [[-1]], expected: 0 }],
+    ["Phase 1 is exactly the previous problem — stop at the meeting point instead of returning True.", "Phase 2: start the count at 1 and step from `nxt[meet]` until you are back at `meet`.", "In [1,2,3,4,5,2] the loop is positions 2,3,4,5 — four nodes, even though the list has six."],
+    ["cycle", "two-pointer"]),
+
+  PP("cycle-detection", "Hard", 444, "graph-cycle", "On The Route Or Just Seen Before", "graph_has_cycle",
+    "`graph` maps each node to the list of nodes it points at. Return `True` if the graph contains a directed cycle.\n\nBeing reached twice is **not** a cycle — in `{\"A\": [\"B\",\"C\"], \"B\": [\"D\"], \"C\": [\"D\"], \"D\": []}` you arrive at D by two different routes and nothing points backwards. A cycle means arriving at a node that is on the route you are standing on right now.\n\nThe graph may be in several disconnected pieces, so every node needs a chance to be a starting point.",
+    [{ input: '{"A":["B","C"],"B":["D"],"C":["D"],"D":[]}', output: "False" }, { input: '{"A":["B"],"B":["C"],"C":["A"]}', output: "True" }],
+    "def graph_has_cycle(graph):\n    pass\n",
+    "def graph_has_cycle(graph):\n    visited = set()\n    path = set()\n\n    def walk(node):\n        visited.add(node)\n        path.add(node)\n        for nxt in graph[node]:\n            if nxt in path:\n                return True\n            if nxt not in visited and walk(nxt):\n                return True\n        path.remove(node)\n        return False\n\n    for node in sorted(graph):\n        if node not in visited and walk(node):\n            return True\n    return False\n",
+    [{ args: [{ A: ["B", "C"], B: ["D"], C: ["D"], D: [] }], expected: false }, { args: [{ A: ["B"], B: ["C"], C: ["A"] }], expected: true }, { args: [{ A: ["A"] }], expected: true }, { args: [{ A: [], B: [] }], expected: false }, { args: [{ A: ["B"], B: [], C: ["D"], D: ["C"] }], expected: true }],
+    ["Two sets, not one: `visited` stops you repeating work, `path` answers the question.", "`path.remove(node)` on the way out is the line that separates them. Without it every diamond reports a false cycle.", "Start a walk from every node that is still unvisited — the cycle may be in a piece you never reach from the first one."],
+    ["graph", "cycle"]),
+];
