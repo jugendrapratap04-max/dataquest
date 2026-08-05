@@ -427,3 +427,40 @@ export const cycleProblems = [
     ["Two sets, not one: `visited` stops you repeating work, `path` answers the question.", "`path.remove(node)` on the way out is the line that separates them. Without it every diamond reports a false cycle.", "Start a walk from every node that is still unvisited — the cycle may be in a piece you never reach from the first one."],
     ["graph", "cycle"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Shortest paths with Dijkstra.
+ *
+ * `graph` arrives as a dict of node -> [[neighbour, weight], ...]. Dicts and
+ * nested lists are fine as ARGUMENTS (it is returning a dict that breaks
+ * grading), and `for nxt, w in graph[node]` unpacks a two-element list exactly
+ * as it unpacks a tuple, so the lesson's code works here unchanged.
+ * ------------------------------------------------------------------------- */
+export const dijkstraProblems = [
+  PP("shortest-path-dijkstra", "Medium", 445, "cheapest-cost", "What Does The Cheapest Route Cost", "cheapest_cost",
+    "`graph` maps each node to a list of `[neighbour, weight]` pairs. All weights are positive.\n\nReturn the **total weight** of the cheapest route from `start` to `goal`, or `-1` if there is no route at all. The cost from a node to itself is 0.\n\nBFS will not do — it minimises hops, and the cheapest route here is often the one with more of them.",
+    [{ input: 'graph={"A":[["B",10],["C",1]],"B":[],"C":[["D",1]],"D":[["B",1]]}, start="A", goal="B"', output: "3" }, { input: 'start="B", goal="A"', output: "-1" }],
+    "def cheapest_cost(graph, start, goal):\n    pass\n",
+    "def cheapest_cost(graph, start, goal):\n    import heapq\n    best = {start: 0}\n    frontier = [(0, start)]\n    done = set()\n    while frontier:\n        cost, node = heapq.heappop(frontier)\n        if node in done:\n            continue\n        done.add(node)\n        for nxt, w in graph[node]:\n            step = cost + w\n            if step < best.get(nxt, float(\"inf\")):\n                best[nxt] = step\n                heapq.heappush(frontier, (step, nxt))\n    return best.get(goal, -1)\n",
+    [{ args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "B"], expected: 3 }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "D"], expected: 2 }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "B", "A"], expected: -1 }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "A"], expected: 0 }, { args: [{ A: [["B", 4], ["C", 2]], B: [["D", 1]], C: [["B", 1], ["D", 7]], D: [] }, "A", "D"], expected: 4 }],
+    ["Use `heapq` — push `(cost, node)` so the cheapest comes out first.", "`best.get(nxt, float(\"inf\"))` makes an unreached node infinitely expensive, so no special case is needed for the first visit.", "Unreachable is an answer. Return -1, never 0 — 0 would claim the two nodes are adjacent and free."],
+    ["graph", "dijkstra"]),
+
+  PP("shortest-path-dijkstra", "Hard", 446, "cheapest-route", "Which Way Did It Go", "cheapest_route",
+    "Same graph shape. Return the cheapest route from `start` to `goal` as a **list of nodes**, including both ends. Return `[]` if there is no route. A route from a node to itself is just `[node]`.\n\nRecord which node you arrived from each time a cost improves, then read the route back from the goal — and remember which direction that gives you.",
+    [{ input: 'graph={"A":[["B",10],["C",1]],"B":[],"C":[["D",1]],"D":[["B",1]]}, start="A", goal="B"', output: '["A", "C", "D", "B"]' }],
+    "def cheapest_route(graph, start, goal):\n    pass\n",
+    "def cheapest_route(graph, start, goal):\n    import heapq\n    best = {start: 0}\n    came_from = {}\n    frontier = [(0, start)]\n    done = set()\n    while frontier:\n        cost, node = heapq.heappop(frontier)\n        if node in done:\n            continue\n        done.add(node)\n        for nxt, w in graph[node]:\n            step = cost + w\n            if step < best.get(nxt, float(\"inf\")):\n                best[nxt] = step\n                came_from[nxt] = node\n                heapq.heappush(frontier, (step, nxt))\n    if goal not in best:\n        return []\n    path = [goal]\n    while path[-1] != start:\n        path.append(came_from[path[-1]])\n    path.reverse()\n    return path\n",
+    [{ args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "B"], expected: ["A", "C", "D", "B"] }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "D"], expected: ["A", "C", "D"] }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "B", "A"], expected: [] }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A", "A"], expected: ["A"] }, { args: [{ A: [["B", 4], ["C", 2]], B: [["D", 1]], C: [["B", 1], ["D", 7]], D: [] }, "A", "D"], expected: ["A", "C", "B", "D"] }],
+    ["`came_from[nxt] = node` goes right next to the line that improves the cost — it is overwritten every time a cheaper route is found.", "Following came_from from the goal walks you towards the start, so the list comes out backwards. Reverse it.", "Start to start is `[start]`, and the while loop handles that on its own if you seed the path with the goal."],
+    ["graph", "dijkstra"]),
+
+  PP("shortest-path-dijkstra", "Medium", 447, "all-costs", "Cost To Everywhere", "all_costs",
+    "Same graph shape. Return the cheapest cost from `start` to **every node it can reach**, as a list of `[node, cost]` pairs sorted by node name. `start` itself is included, at 0.\n\nUnreachable nodes are left out entirely — that is the honest answer, and it is why the result is a list rather than one entry per node in the graph.",
+    [{ input: 'graph={"A":[["B",10],["C",1]],"B":[],"C":[["D",1]],"D":[["B",1]]}, start="A"', output: '[["A", 0], ["B", 3], ["C", 1], ["D", 2]]' }, { input: 'start="B"', output: '[["B", 0]]' }],
+    "def all_costs(graph, start):\n    pass\n",
+    "def all_costs(graph, start):\n    import heapq\n    best = {start: 0}\n    frontier = [(0, start)]\n    done = set()\n    while frontier:\n        cost, node = heapq.heappop(frontier)\n        if node in done:\n            continue\n        done.add(node)\n        for nxt, w in graph[node]:\n            step = cost + w\n            if step < best.get(nxt, float(\"inf\")):\n                best[nxt] = step\n                heapq.heappush(frontier, (step, nxt))\n    return sorted([node, cost] for node, cost in best.items())\n",
+    [{ args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "A"], expected: [["A", 0], ["B", 3], ["C", 1], ["D", 2]] }, { args: [{ A: [["B", 10], ["C", 1]], B: [], C: [["D", 1]], D: [["B", 1]] }, "B"], expected: [["B", 0]] }, { args: [{ A: [["B", 1]], B: [] }, "A"], expected: [["A", 0], ["B", 1]] }, { args: [{ A: [["B", 4], ["C", 2]], B: [["D", 1]], C: [["B", 1], ["D", 7]], D: [] }, "A"], expected: [["A", 0], ["B", 3], ["C", 2], ["D", 4]] }],
+    ["One run of Dijkstra already computes all of these — the goal was never needed.", "Return pairs as two-element LISTS, and sort them. A dict would arrive in JS as a Map and grade as empty.", "Only nodes that were actually reached belong in the answer."],
+    ["graph", "dijkstra"]),
+];
