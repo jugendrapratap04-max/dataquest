@@ -318,3 +318,35 @@ export const balancedTreeProblems = [
     ["Left is 2i+1, right is 2i+2. No nodes and no pointers — the arithmetic is the tree.", "Check the index against len(tree) before reading it.", "The root is always in the answer, even when steps is empty."],
     ["tree", "array"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Counting sort and radix sort — the two sorts that never compare anything.
+ * ------------------------------------------------------------------------- */
+export const countingRadixProblems = [
+  PP("counting-radix-sort", "Medium", 436, "counting-sort-tally", "Sort By Tally", "counting_sort",
+    "Sort a list of **non-negative integers** without comparing any two of them.\n\nTally how many times each value appears — using the value itself as an index — then read the tally back out in order. An empty list returns `[]`.",
+    [{ input: "nums=[4,2,2,8,3,3,1]", output: "[1, 2, 2, 3, 3, 4, 8]" }, { input: "nums=[]", output: "[]" }],
+    "def counting_sort(nums):\n    pass\n",
+    "def counting_sort(nums):\n    if not nums:\n        return []\n    counts = [0] * (max(nums) + 1)\n    for n in nums:\n        counts[n] += 1\n    out = []\n    for value, times in enumerate(counts):\n        out.extend([value] * times)\n    return out\n",
+    [{ args: [[4, 2, 2, 8, 3, 3, 1]], expected: [1, 2, 2, 3, 3, 4, 8] }, { args: [[]], expected: [] }, { args: [[0, 0]], expected: [0, 0] }, { args: [[7]], expected: [7] }, { args: [[3, 1, 2]], expected: [1, 2, 3] }],
+    ["The tally needs `max(nums) + 1` slots — the largest value has to be a valid index.", "`counts[n] += 1` files each value under itself. There is no comparison anywhere in this.", "`enumerate(counts)` hands you (value, times); extend the output by `[value] * times`."],
+    ["sorting", "counting"]),
+
+  PP("counting-radix-sort", "Medium", 437, "digit-pass", "One Digit, Order Kept", "digit_pass",
+    "One **stable** counting pass by a single digit.\n\n`place` is 1 for the ones digit, 10 for the tens, 100 for the hundreds. Return `nums` reordered by the digit at that place — and values whose digit is equal **must stay in the order they arrived**.\n\nThat stability is the entire point: it is what lets radix sort stack these passes without each one destroying the last.\n\nThe digit of `n` at `place` is `(n // place) % 10`.",
+    [{ input: "nums=[170,45,75,90,802,24,2,66], place=1", output: "[170, 90, 802, 2, 24, 45, 75, 66]" }, { input: "nums=[21,12], place=10", output: "[12, 21]" }],
+    "def digit_pass(nums, place):\n    pass\n",
+    "def digit_pass(nums, place):\n    counts = [0] * 10\n    for n in nums:\n        counts[(n // place) % 10] += 1\n    for d in range(1, 10):\n        counts[d] += counts[d - 1]\n    out = [0] * len(nums)\n    for n in reversed(nums):\n        d = (n // place) % 10\n        counts[d] -= 1\n        out[counts[d]] = n\n    return out\n",
+    [{ args: [[170, 45, 75, 90, 802, 24, 2, 66], 1], expected: [170, 90, 802, 2, 24, 45, 75, 66] }, { args: [[170, 90, 802, 2, 24, 45, 75, 66], 10], expected: [802, 2, 24, 45, 66, 170, 75, 90] }, { args: [[], 1], expected: [] }, { args: [[5], 1], expected: [5] }, { args: [[21, 12], 10], expected: [12, 21] }],
+    ["Tally the ten digits, then turn the tally into a running total: `counts[d] += counts[d - 1]`.", "After the running total, `counts[d]` is where digit d's block ENDS, not how many there are.", "Place walking BACKWARDS through the input, decrementing before each write — that is the one thing keeping equal digits in order."],
+    ["sorting", "radix"]),
+
+  PP("counting-radix-sort", "Hard", 438, "radix-sort-digits", "Sort Without Comparing", "radix_sort",
+    "Sort non-negative integers with one **stable** pass per digit: ones, then tens, then hundreds, and so on until the digits run out.\n\nNo two values are ever compared. Keep going while `max(nums) // place > 0`, multiplying `place` by 10 each round.",
+    [{ input: "nums=[170,45,75,90,802,24,2,66]", output: "[2, 24, 45, 66, 75, 90, 170, 802]" }, { input: "nums=[9,10,1]", output: "[1, 9, 10]" }],
+    "def radix_sort(nums):\n    pass\n",
+    "def radix_sort(nums):\n    if not nums:\n        return []\n    out = list(nums)\n    place = 1\n    while max(out) // place > 0:\n        counts = [0] * 10\n        for n in out:\n            counts[(n // place) % 10] += 1\n        for d in range(1, 10):\n            counts[d] += counts[d - 1]\n        nxt = [0] * len(out)\n        for n in reversed(out):\n            d = (n // place) % 10\n            counts[d] -= 1\n            nxt[counts[d]] = n\n        out = nxt\n        place *= 10\n    return out\n",
+    [{ args: [[170, 45, 75, 90, 802, 24, 2, 66]], expected: [2, 24, 45, 66, 75, 90, 170, 802] }, { args: [[]], expected: [] }, { args: [[0]], expected: [0] }, { args: [[5, 3, 5]], expected: [3, 5, 5] }, { args: [[9, 10, 1]], expected: [1, 9, 10] }],
+    ["Each round is a stable counting sort on the digit `(n // place) % 10`.", "`place` starts at 1 and multiplies by 10; stop when `max(...) // place` reaches 0. A list of just [0] does no passes at all.", "If the inner pass is unstable the result comes out wrong with nothing raised — place backwards, from a running total."],
+    ["sorting", "radix"]),
+];

@@ -162,8 +162,8 @@ export const SYLLABUS = [
     { t: "Binary search", covers: ["searching-sorting"] },
     { t: "Bubble / selection / insertion sort", covers: ["searching-sorting"] },
     { t: "Merge / quick sort", covers: ["searching-sorting"] },
-    { t: "Counting sort", covers: [] },
-    { t: "Radix sort", covers: [] },
+    { t: "Counting sort", covers: ["counting-radix-sort"] },
+    { t: "Radix sort", covers: ["counting-radix-sort"] },
   ]},
   { group: "DSA — linked structures and hashing", topics: [
     { t: "Linked lists — nodes and traversal", covers: ["linked-lists-hashing"] },

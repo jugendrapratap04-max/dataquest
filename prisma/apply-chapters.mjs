@@ -30,8 +30,16 @@ const PLANS = {
   // appended, and all eight ended up chapterless.
   //
   // So: after inserting or appending a lesson, re-check these boundaries and
-  // re-run `npm run db:chapters`. Boundaries below are correct for the 47-lesson
+  // re-run `npm run db:chapters`. Boundaries below are correct for the 50-lesson
   // track — verify with the order list before trusting them again.
+  //
+  // Re-running it is not optional and is easy to skip, because every other check
+  // passes without it: `db:lessons` creates the lesson, `db:check` and
+  // `syllabus` both read it happily, and the only symptom is that it is absent
+  // from /book. Lessons 48, 49 and 50 shipped chapterless for exactly that
+  // reason — two of them were live and invisible for a full release before this
+  // was noticed. `db:chapters` belongs in the per-lesson recipe, not in a
+  // once-in-a-while cleanup.
   python: [
     { slug: "py-foundations", title: "Foundations", upto: 8, summary: "Running code, variables, operators, conditionals, loops and the core collections." },
     { slug: "py-working-with-data", title: "Working with data", upto: 18, summary: "Functions, strings, comprehensions, objects, errors, files, modules and booleans." },
@@ -39,7 +47,7 @@ const PLANS = {
     { slug: "py-objects-and-flow", title: "Objects and control", upto: 32, summary: "Recursion, inheritance, encapsulation, dunder methods, class attributes and the MRO, generators, decorators and regex." },
     { slug: "py-standard-library", title: "The standard library", upto: 37, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
     { slug: "py-shipping-code", title: "Shipping code", upto: 41, summary: "Testing, debugging and logging, clean code, project structure and git." },
-    { slug: "py-dsa", title: "Data structures & algorithms", upto: 47, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, and the Python reference." },
+    { slug: "py-dsa", title: "Data structures & algorithms", upto: 50, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, the Python reference, the three tree traversals, balanced trees, and sorting without comparing." },
   ],
   // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at
