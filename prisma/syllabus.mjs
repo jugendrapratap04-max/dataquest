@@ -226,11 +226,17 @@ export const SYLLABUS = [
     { t: "File methods reference", covers: ["python-reference"] },
     { t: "Keywords reference", covers: ["python-reference"] },
     { t: "Exceptions reference", covers: ["python-reference"] },
-    { t: "Glossary", covers: [] },
+    { t: "Glossary", covers: ["python-reference"] },
     // Also on W3Schools' module reference: `requests`, which needs the network
     // and cannot run in Pyodide — a runtime limit, not a judgement about who
-    // needs it. `cmath` is listed below and is a genuine gap.
-    { t: "cmath module", covers: [] },
+    // needs it. That is now the ONLY thing on their reference we do not cover.
+    //
+    // `cmath` lives in numbers-math rather than in a lesson of its own: it is
+    // the math module for the plane instead of the line, so it belongs beside
+    // math, and a whole lesson on complex numbers would be out of proportion to
+    // how often a learner meets one. Same reasoning puts the glossary in
+    // python-reference — the vocabulary IS reference material.
+    { t: "cmath module", covers: ["numbers-math"] },
   ]},
   // Where a lesson goes past the floor. Two kinds of entry live here: whole
   // subjects W3Schools has no page for (testing, async, packaging), and the
