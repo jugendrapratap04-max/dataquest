@@ -13,7 +13,7 @@
  * Usage: npm run test:errors
  */
 import { execFileSync } from "node:child_process";
-import { explainError, RULE_COUNT } from "../lib/error-help.ts";
+import { explainError, RULE_COUNT, RULE_ID_LIST } from "../lib/error-help.ts";
 
 /** Mirror of errLast() in lib/pyodide-runner.ts: the last non-empty line. */
 const lastLine = (s) => {
@@ -75,9 +75,19 @@ for (const [label, code, expectedLesson] of CASES) {
   console.log(`  ok   ${label.padEnd(24)} → ${help.title}`);
 }
 
+// Rule ids are written to ErrorEvent.rule and counted across months, so a
+// duplicate silently merges two different mistakes into one statistic and a
+// missing one writes an empty string. Neither shows up as a failure anywhere
+// else — the explanation still renders correctly — so it is checked here.
+const dupes = RULE_ID_LIST.filter((id, i) => RULE_ID_LIST.indexOf(id) !== i);
+if (dupes.length) fails.push(`duplicate rule ids: ${[...new Set(dupes)].join(", ")}`);
+const blank = RULE_ID_LIST.filter((id) => !id || !/^[a-z0-9-]+$/.test(id));
+if (blank.length) fails.push(`rule ids must be lowercase kebab-case: ${blank.join(", ")}`);
+
 console.log("");
 for (const f of fails) console.log(` FAIL  ${f}`);
 console.log(`\n${pass}/${CASES.length} real Python errors explained (${RULE_COUNT} rules).`);
+console.log(`${RULE_ID_LIST.length} rule ids, all unique.`);
 
 // An unmatched error is not a crash — explainError returns null and the student
 // still sees the raw message. But a case listed here is one we claimed to

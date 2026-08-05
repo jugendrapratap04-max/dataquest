@@ -25,13 +25,13 @@ model User {
   createdAt    DateTime @default(now())
 
   // Onboarding. All optional — a student who skips still gets an account.
-  gender       String?  // "male" | "female" | "unspecified"
-  institution  String?  // class or college, free text
-  interestsCsv String   @default("")
-  language     String   @default("en") // stated preference; no content varies by it yet
-  sessionVersion Int     @default(0) // bumped on logout, invalidating every issued cookie
-  onboardedAt  DateTime?
-  welcomedAt   DateTime? // set the first time the welcome plays, so it plays once
+  gender         String? // "male" | "female" | "unspecified"
+  institution    String? // class or college, free text
+  interestsCsv   String    @default("")
+  language       String    @default("en") // stated preference; no content varies by it yet
+  sessionVersion Int       @default(0) // bumped on logout, invalidating every issued cookie
+  onboardedAt    DateTime?
+  welcomedAt     DateTime? // set the first time the welcome plays, so it plays once
 
   // Profile — what a student writes about themselves. All optional: an account
   // that never opens /profile is complete, it just has nothing written on it.
@@ -39,13 +39,15 @@ model User {
   // No avatar URL. A photo upload means blob storage (a bill) and moderation;
   // `avatarEmoji` is one emoji from a fixed set, and the colour behind it is
   // derived from the name the way subject hues already are.
-  bio          String?
-  goal         String?   // "Current Goal" — what they are working towards
-  avatarEmoji  String?
+  bio         String?
+  goal        String? // "Current Goal" — what they are working towards
+  avatarEmoji String?
 
   lessonProgress LessonProgress[]
   submissions    Submission[]
   attempts       ProblemAttempt[]
+  quizAnswers    QuizAnswer[]
+  errorEvents    ErrorEvent[]
   challenges     Challenge[]
   challengeRuns  ChallengeAttempt[]
   notes          Note[]
@@ -53,7 +55,7 @@ model User {
   notebook       NotebookEntry[]
   roomMembers    RoomMember[]
   roomMessages   RoomMessage[]
-  hostedRooms    Room[]           @relation("RoomHost")
+  hostedRooms    Room[]             @relation("RoomHost")
   feedback       Feedback[]
 }
 
@@ -119,8 +121,9 @@ model Lesson {
   chapterId String?
   chapter   Chapter? @relation(fields: [chapterId], references: [id])
 
-  problems Problem[]
-  progress LessonProgress[]
+  problems    Problem[]
+  progress    LessonProgress[]
+  quizAnswers QuizAnswer[]
 
   @@index([chapterId, order])
 }
@@ -150,20 +153,21 @@ model Problem {
 
   submissions Submission[]
   attempts    ProblemAttempt[]
+  errorEvents ErrorEvent[]
 }
 
 model LessonProgress {
-  id       String @id @default(cuid())
-  userId   String
-  lessonId String
-  status   String @default("in_progress") // in_progress | done
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  status      String    @default("in_progress") // in_progress | done
   // Set the first time the status becomes "done", and never moved afterwards —
   // re-reading a lesson should not rewrite when you finished it. NULL means the
   // row predates this column; the activity timeline skips those rather than
   // inventing a date for them.
   completedAt DateTime?
-  user     User   @relation(fields: [userId], references: [id])
-  lesson   Lesson @relation(fields: [lessonId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+  lesson      Lesson    @relation(fields: [lessonId], references: [id])
 
   @@unique([userId, lessonId])
 }
@@ -219,6 +223,76 @@ model ProblemAttempt {
   @@index([userId, updatedAt])
 }
 
+// One answer to one end-of-lesson quiz question.
+//
+// These used to exist only in React state. A student answered eleven questions,
+// saw which ones they got wrong, closed the tab, and every bit of it was gone —
+// the single clearest signal the platform produces about whether a topic landed,
+// thrown away eleven times per lesson. A practice problem tells you pass or fail;
+// a quiz tells you *which* misunderstanding, because the wrong option they picked
+// is itself the diagnosis.
+//
+// A log, not one row per (student, question), for the same reason Submission is
+// a log: "got it wrong in March, right in May" is the thing worth knowing, and
+// an upsert would erase exactly that. Volume is small — eleven questions per
+// lesson, each locked after one pick.
+//
+// `question` is a snapshot for the reason Challenge.questions is one: lessons get
+// edited constantly, so question 4 today is not question 4 next month. Without
+// the text, a row would decay into an index into an array that has since moved.
+//
+// `correct` is derived on the server from the lesson's own content — never taken
+// from the request body. Nothing is paid for a right answer, so there is no
+// incentive to lie, but a client-supplied verdict would still quietly corrupt the
+// one record we have of what this student actually understands.
+model QuizAnswer {
+  id        String   @id @default(cuid())
+  userId    String
+  lessonId  String
+  qIndex    Int
+  question  String   @default("")
+  chosen    Int
+  correct   Boolean
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+
+  // Serves "how did this student do on this lesson", the per-topic weakness
+  // rollup, and the recent-activity scan respectively.
+  @@index([userId, lessonId])
+  @@index([userId, correct])
+  @@index([userId, createdAt])
+}
+
+// One time a student hit an error we could explain.
+//
+// lib/error-help.ts already classifies a raw traceback into one of its rules —
+// that work happened in the browser, was shown to the student, and was then
+// dropped on the floor. This keeps the classification.
+//
+// Deliberately stores the rule id and not the traceback. A traceback carries the
+// student's own variable names and values, is unbounded in length, and is
+// writable by anyone logged in; the rule id is a short value from a fixed set,
+// checked against that set before it is written. Everything a "you keep hitting
+// indentation errors" feature needs is in the id, and none of what it does not
+// need is kept.
+model ErrorEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  rule       String
+  dialect    String   @default("python")
+  // Where it happened. Both optional: a runnable example inside a lesson has no
+  // problem, and the practice workbench has no lesson.
+  problemId  String?
+  lessonSlug String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  problem    Problem? @relation(fields: [problemId], references: [id])
+
+  @@index([userId, rule])
+  @@index([userId, createdAt])
+}
+
 // A challenge: a fixed set of quiz questions, taken by two or more people and
 // compared.
 //
@@ -235,13 +309,13 @@ model ProblemAttempt {
 // changed underneath it would no longer be the same test for both players.
 // Fairness here means the bytes are frozen at creation.
 model Challenge {
-  id        String   @id @default(cuid())
-  code      String   @unique
+  id        String             @id @default(cuid())
+  code      String             @unique
   creatorId String
   title     String
   questions String
-  createdAt DateTime @default(now())
-  creator   User     @relation(fields: [creatorId], references: [id])
+  createdAt DateTime           @default(now())
+  creator   User               @relation(fields: [creatorId], references: [id])
   attempts  ChallengeAttempt[]
 
   @@index([creatorId, createdAt])
@@ -251,14 +325,14 @@ model Challenge {
 // second player retries until they win, and the comparison means nothing.
 // Practising the questions again is what the lessons are for.
 model ChallengeAttempt {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   challengeId String
   userId      String
   correct     Int
   total       Int
   seconds     Int
   answersJson String
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
   challenge   Challenge @relation(fields: [challengeId], references: [id])
   user        User      @relation(fields: [userId], references: [id])
 

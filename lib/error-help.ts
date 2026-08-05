@@ -31,7 +31,16 @@ export type ErrorHelp = {
   lessonLabel?: string;
 };
 
+/** An explanation plus which rule produced it. `rule` is what gets recorded —
+ *  see the ErrorEvent model in prisma/schema.prisma for why the id and not the
+ *  traceback. */
+export type MatchedHelp = ErrorHelp & { rule: string };
+
 type Rule = {
+  /** Stable, recorded in ErrorEvent.rule and counted across months. Renaming one
+   *  splits a student's history in two, so treat these as permanent: add new
+   *  ids freely, never repurpose an existing one. */
+  id: string;
   test: RegExp;
   build: (m: RegExpMatchArray) => ErrorHelp;
 };
@@ -42,6 +51,7 @@ const q = (s: string | undefined) => (s ?? "").trim();
 const RULES: Rule[] = [
   // ---------------------------------------------------------------- names ---
   {
+    id: "name-not-defined",
     test: /NameError: name ['"]([^'"]+)['"] is not defined/,
     build: (m) => ({
       title: `Python has never seen the name “${q(m[1])}”`,
@@ -52,6 +62,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "unbound-local",
     test: /UnboundLocalError/,
     build: () => ({
       title: "You changed a name inside a function that was created outside it",
@@ -64,6 +75,7 @@ const RULES: Rule[] = [
 
   // ------------------------------------------------------------- the None ---
   {
+    id: "none-not-usable",
     test: /TypeError: 'NoneType' object is not (subscriptable|iterable|callable)/,
     build: () => ({
       title: "You are using the result of something that did not return a result",
@@ -74,6 +86,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "none-attribute",
     test: /AttributeError: 'NoneType' object has no attribute/,
     build: () => ({
       title: "The thing you are calling a method on is None",
@@ -86,6 +99,7 @@ const RULES: Rule[] = [
 
   // ---------------------------------------------------------- indentation ---
   {
+    id: "indent-expected-block",
     test: /IndentationError: expected an indented block/,
     build: () => ({
       title: "A block was opened and left empty",
@@ -96,6 +110,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "indent-mismatch",
     test: /IndentationError|TabError/,
     build: () => ({
       title: "The indentation does not line up",
@@ -108,6 +123,7 @@ const RULES: Rule[] = [
 
   // --------------------------------------------------------------- syntax ---
   {
+    id: "syntax-missing-colon",
     test: /SyntaxError: expected ':'/,
     build: () => ({
       title: "A colon is missing",
@@ -118,6 +134,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "syntax-invalid",
     test: /SyntaxError: invalid syntax/,
     build: () => ({
       title: "Python could not read that line",
@@ -128,6 +145,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "syntax-unterminated-string",
     test: /SyntaxError: (unterminated string literal|EOL while scanning string literal)/,
     build: () => ({
       title: "A quote was opened and never closed",
@@ -140,6 +158,7 @@ const RULES: Rule[] = [
 
   // ---------------------------------------------------------------- types ---
   {
+    id: "str-plus-number",
     test: /TypeError: (unsupported operand type\(s\) for \+|can only concatenate str)/,
     build: () => ({
       title: "You are adding text to a number",
@@ -150,6 +169,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "int-parse-failed",
     test: /ValueError: invalid literal for int\(\) with base 10: (.*)/,
     build: (m) => ({
       title: `That text (${q(m[1])}) is not a whole number`,
@@ -160,6 +180,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "loop-over-number",
     test: /TypeError: '(int|float|bool)' object is not iterable/,
     build: () => ({
       title: "You tried to loop over a single number",
@@ -170,6 +191,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "string-indices-int",
     test: /TypeError: string indices must be integers/,
     build: () => ({
       title: "You indexed a string as if it were a dictionary",
@@ -180,6 +202,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "unhashable-key",
     test: /TypeError: unhashable type: '(list|dict|set)'/,
     build: (m) => ({
       title: `A ${q(m[1])} cannot be used as a dictionary key`,
@@ -192,6 +215,7 @@ const RULES: Rule[] = [
 
   // ----------------------------------------------------------- attributes ---
   {
+    id: "immutable-mutate",
     test: /AttributeError: '(tuple|str|int|float)' object has no attribute '(append|add|sort|update)'/,
     build: (m) => ({
       title: `A ${q(m[1])} cannot be changed after it is made`,
@@ -202,6 +226,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "attribute-missing",
     test: /AttributeError: '?([A-Za-z_][\w.]*)'? object has no attribute '([^']+)'/,
     build: (m) => ({
       title: `${q(m[1])} objects have nothing called “${q(m[2])}”`,
@@ -214,6 +239,7 @@ const RULES: Rule[] = [
 
   // ----------------------------------------------------------- containers ---
   {
+    id: "index-out-of-range",
     test: /IndexError: (list|string|tuple) index out of range/,
     build: (m) => ({
       title: `There is no item at that position`,
@@ -224,6 +250,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "key-missing",
     test: /KeyError: (.*)/,
     build: (m) => ({
       title: `The dictionary has no key ${q(m[1])}`,
@@ -236,6 +263,7 @@ const RULES: Rule[] = [
 
   // ------------------------------------------------------------- function ---
   {
+    id: "args-too-many",
     test: /TypeError: (\w+)\(\) takes (\d+) positional arguments? but (\d+) (?:was|were) given/,
     build: (m) => ({
       title: `${q(m[1])}() was given ${q(m[3])} values but expects ${q(m[2])}`,
@@ -246,6 +274,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "args-missing",
     test: /TypeError: (\w+)\(\) missing (\d+) required positional argument/,
     build: (m) => ({
       title: `${q(m[1])}() was not given everything it needs`,
@@ -256,6 +285,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "recursion-no-base-case",
     test: /RecursionError/,
     build: () => ({
       title: "A function kept calling itself and never stopped",
@@ -268,6 +298,7 @@ const RULES: Rule[] = [
 
   // --------------------------------------------------------------- others ---
   {
+    id: "divide-by-zero",
     test: /ZeroDivisionError/,
     build: () => ({
       title: "Something was divided by zero",
@@ -278,6 +309,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "module-not-found",
     test: /ModuleNotFoundError: No module named '([^']+)'/,
     build: (m) => ({
       title: `There is no module called “${q(m[1])}” here`,
@@ -288,6 +320,7 @@ const RULES: Rule[] = [
     }),
   },
   {
+    id: "unpack-mismatch",
     test: /ValueError: not enough values to unpack|ValueError: too many values to unpack/,
     build: () => ({
       title: "The number of names does not match the number of values",
@@ -306,6 +339,7 @@ const RULES: Rule[] = [
  * map. The ones here are the ones a learner actually hits. */
 const SQL_RULES: Rule[] = [
   {
+    id: "sql-no-such-column",
     test: /no such column: (.+)/i,
     build: (m) => ({
       title: `There is no column called “${q(m[1])}”`,
@@ -316,6 +350,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-no-such-table",
     test: /no such table: (.+)/i,
     build: (m) => ({
       title: `There is no table called “${q(m[1])}”`,
@@ -326,6 +361,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-ambiguous-column",
     test: /ambiguous column name: (.+)/i,
     build: (m) => ({
       title: `“${q(m[1])}” exists in more than one joined table`,
@@ -336,6 +372,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-aggregate-in-where",
     test: /misuse of aggregate/i,
     build: () => ({
       title: "An aggregate cannot go in WHERE",
@@ -346,6 +383,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-no-such-function",
     test: /no such function: (.+)/i,
     build: (m) => ({
       title: `SQLite has no function called “${q(m[1])}”`,
@@ -356,6 +394,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-syntax-near",
     test: /near ["“']?([^"“']*)["”']?: syntax error/i,
     build: (m) => ({
       title: `SQLite stopped reading at “${q(m[1])}”`,
@@ -366,6 +405,7 @@ const SQL_RULES: Rule[] = [
     }),
   },
   {
+    id: "sql-incomplete-input",
     test: /incomplete input/i,
     build: () => ({
       title: "The statement is not finished",
@@ -381,24 +421,34 @@ const SQL_RULES: Rule[] = [
  * Explain a raw Python error. Returns null when we have nothing useful to add —
  * showing a vague guess would be worse than showing the real message alone.
  */
-export function explainError(raw: string | undefined): ErrorHelp | null {
+export function explainError(raw: string | undefined): MatchedHelp | null {
   if (!raw) return null;
   for (const rule of RULES) {
     const m = raw.match(rule.test);
-    if (m) return rule.build(m);
+    if (m) return { ...rule.build(m), rule: rule.id };
   }
   return null;
 }
 
 /** Same contract, for the SQL workbench. */
-export function explainSqlError(raw: string | undefined): ErrorHelp | null {
+export function explainSqlError(raw: string | undefined): MatchedHelp | null {
   if (!raw) return null;
   for (const rule of SQL_RULES) {
     const m = raw.match(rule.test);
-    if (m) return rule.build(m);
+    if (m) return { ...rule.build(m), rule: rule.id };
   }
   return null;
 }
 
-/** Exposed for the test in scripts/test-error-help.mjs. */
+/** Every id that may legally be written to ErrorEvent.rule.
+ *
+ *  /api/error-event checks against this rather than storing whatever arrives:
+ *  the route is reachable by any logged-in student, and an unchecked string
+ *  column would let one of them fill the table with junk that then has to be
+ *  told apart from real signal forever. */
+const ALL_RULES: readonly Rule[] = [...RULES, ...SQL_RULES];
+export const RULE_IDS: ReadonlySet<string> = new Set(ALL_RULES.map((r) => r.id));
+
+/** Exposed for the tests in scripts/test-error-help.mjs and test-sql-help.mjs. */
 export const RULE_COUNT = RULES.length;
+export const RULE_ID_LIST: readonly string[] = ALL_RULES.map((r) => r.id);
