@@ -32,8 +32,8 @@ import { play as playCue } from "@/lib/sound";
  * nothing at all.
  */
 export function LiveCode({
-  file, code, output, runnable,
-}: { file: string; code: string; output?: string; runnable: boolean }) {
+  file, code, output, runnable, lessonSlug,
+}: { file: string; code: string; output?: string; runnable: boolean; lessonSlug?: string }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(code);
   const [busy, setBusy] = useState(false);
@@ -139,7 +139,7 @@ export function LiveCode({
       {result?.error && (
         <>
           <div className="out err">{result.error}</div>
-          <ErrorHelp error={result.error} />
+          <ErrorHelp error={result.error} lessonSlug={lessonSlug} />
         </>
       )}
 

@@ -342,7 +342,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your code has an error</div>
                     <div className="console-out">{result.error}</div>
-                    <ErrorHelp error={result.error} />
+                    <ErrorHelp error={result.error} problemId={p.id} />
                   </>
                 ) : (
                   <>
@@ -362,7 +362,7 @@ export function PracticeWorkbench({ p }: { p: ProblemData }) {
                         raised. Explain the first one — several cases usually
                         fail for the same single reason, so repeating it per
                         case would bury the tests under identical panels. */}
-                    <ErrorHelp error={result.cases.find((c) => c.error)?.error} />
+                    <ErrorHelp error={result.cases.find((c) => c.error)?.error} problemId={p.id} />
                   </>
                 )
               )}

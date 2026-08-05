@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { play as playCue } from "@/lib/sound";
 
 type Level = "easy" | "medium" | "hard";
@@ -62,15 +62,41 @@ function Question({
   );
 }
 
-export function LessonQuiz({ items }: { items: Q[] }) {
+export function LessonQuiz({ items, lessonId }: { items: Q[]; lessonId?: string }) {
   const [ans, setAns] = useState<(number | null)[]>(() => items.map(() => null));
+  // Which questions have already been handled. A ref and not `ans`, because the
+  // two guards below have to hold on the *same tick*: a fast double-click fires
+  // twice before React re-renders, so both calls would read `ans[qi] === null`,
+  // play the cue twice and file two rows for one answer.
+  const doneRef = useRef<Set<number>>(new Set());
+
+  // Which answer was given is the clearest signal in the app about whether a
+  // topic landed — the wrong option a student picks *is* the diagnosis, in a way
+  // a failed practice problem never is. It used to live in the state above and
+  // nowhere else, so it died with the tab.
+  //
+  // Fire-and-forget on purpose. Nothing on screen waits for this, an offline
+  // student still gets their quiz, and a failed write costs one data point —
+  // which is not worth an error message that interrupts a lesson. Only the
+  // question number and the pick are sent; the server reads the lesson's own
+  // content to decide whether it was right.
+  const record = (qi: number, oi: number) => {
+    if (!lessonId) return;
+    void fetch("/api/quiz", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lessonId, qIndex: qi, chosen: oi }),
+    }).catch(() => {});
+  };
 
   const choose = (qi: number, oi: number) => {
-    if (ans[qi] !== null) return;              // already answered; stay silent
+    if (doneRef.current.has(qi)) return;       // already answered; stay silent
+    doneRef.current.add(qi);
     // Deliberately OUTSIDE the state updater: React may call an updater twice
     // in StrictMode, which would play the cue twice.
     playCue(oi === items[qi].correct ? "correct" : "wrong");
     setAns((a) => (a[qi] !== null ? a : a.map((v, i) => (i === qi ? oi : v))));
+    record(qi, oi);
   };
 
   const answered = ans.filter((a) => a !== null).length;

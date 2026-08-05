@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { explainError, explainSqlError } from "@/lib/error-help";
 
 /**
@@ -25,8 +28,49 @@ function withCode(text: string) {
   );
 }
 
-export function ErrorHelp({ error, dialect = "python" }: { error?: string; dialect?: "python" | "sql" }) {
+export function ErrorHelp({
+  error, dialect = "python", problemId, lessonSlug,
+}: {
+  error?: string;
+  dialect?: "python" | "sql";
+  /** Where this happened. Both optional — a runnable example inside a lesson has
+   *  no problem, and the practice workbench has no lesson. */
+  problemId?: string;
+  lessonSlug?: string;
+}) {
   const help = dialect === "sql" ? explainSqlError(error) : explainError(error);
+  const rule = help?.rule;
+
+  /* Which mistakes a student actually keeps making is the other half of what
+   * this file already computes, and until now it was computed and dropped.
+   *
+   * The guard is what makes this safe to put in a render path: this component
+   * re-renders on every keystroke in the editor above it, and an unguarded write
+   * would file a row per character typed. `error` is in the dependency list, so
+   * React skips the effect entirely while the message is unchanged; the ref
+   * catches StrictMode's deliberate double-invoke, which shares the instance.
+   *
+   * A consequence worth stating: running the same broken code twice in a row
+   * records one event, not two. That is the behaviour we want — the question is
+   * "which mistakes does this student keep hitting", not "how many times did
+   * they press Run before reading the message". */
+  const lastRef = useRef("");
+  useEffect(() => {
+    if (!rule || !error) return;
+    const key = `${dialect}|${rule}|${error}`;
+    if (lastRef.current === key) return;
+    lastRef.current = key;
+    void fetch("/api/error-event", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rule, dialect, problemId, lessonSlug }),
+    }).catch(() => {});
+    // Nothing on screen waits for this and a failed write costs one data point,
+    // which is not worth an error message on top of the error they already have.
+  }, [rule, error, dialect, problemId, lessonSlug]);
+
+  // After the hook, never before it — an early return above a useEffect changes
+  // the hook order between renders, which React rejects outright.
   if (!help) return null;
 
   return (

@@ -31,7 +31,13 @@ import { LiveCode } from "@/components/LiveCode";
  * Python at all. */
 const LIVE_TRACKS = new Set(["python", "statistics", "pandas"]);
 
-function Block({ b, pyLive = false }: { b: any; pyLive?: boolean }) {
+// `lessonId` and `lessonSlug` are threaded through so two block types can say
+// where they are: the quiz files each answer against its lesson, and a runnable
+// example records which lesson an explained error came from. Both optional, so
+// the /book renderer — no student, no quiz — keeps calling this unchanged.
+function Block({
+  b, pyLive = false, lessonId, lessonSlug,
+}: { b: any; pyLive?: boolean; lessonId?: string; lessonSlug?: string }) {
   switch (b.t) {
     case "objectives":
       return (
@@ -134,7 +140,7 @@ function Block({ b, pyLive = false }: { b: any; pyLive?: boolean }) {
     case "code":
       // Every code block is verified runnable by `npm run verify:lesson`, so on
       // a Python subject it can simply be handed over as an editable example.
-      if (pyLive) return <LiveCode file={b.file} code={b.code} output={b.output} runnable />;
+      if (pyLive) return <LiveCode file={b.file} code={b.code} output={b.output} runnable lessonSlug={lessonSlug} />;
       return (
         <div className="code">
           <div className="bar">
@@ -311,7 +317,7 @@ function Block({ b, pyLive = false }: { b: any; pyLive?: boolean }) {
     case "viz":
       return <VizBlock name={b.name} />;
     case "quiz":
-      return <LessonQuiz items={b.items} />;
+      return <LessonQuiz items={b.items} lessonId={lessonId} />;
     case "recap":
       return (
         <div className="card recap">
@@ -540,7 +546,7 @@ export default async function LessonPage({
         <div className="prose">
           {visible.map((b, i) => (
             <Fragment key={i}>
-              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} />
+              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} lessonId={lesson.id} lessonSlug={slug} />
             </Fragment>
           ))}
         </div>

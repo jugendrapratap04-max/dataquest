@@ -310,7 +310,7 @@ export function SqlWorkbench({ p }: { p: SqlProblemData }) {
                   <>
                     <div className="verdict no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg> Your query has an error</div>
                     <div className="console-out">{result.error}</div>
-                    <ErrorHelp error={result.error} dialect="sql" />
+                    <ErrorHelp error={result.error} dialect="sql" problemId={p.id} />
                   </>
                 ) : (
                   <>
