@@ -11,6 +11,7 @@
 import { PrismaClient } from "@prisma/client";
 import { SYLLABUS } from "./syllabus.mjs";
 import { ML_SYLLABUS } from "./ml-syllabus.mjs";
+import { DL_SYLLABUS } from "./dl-syllabus.mjs";
 
 // One reference syllabus per subject. A subject with no entry here is still
 // measured by the platform table below — it just has no topic-by-topic map yet.
@@ -23,6 +24,7 @@ import { ML_SYLLABUS } from "./ml-syllabus.mjs";
 const SYLLABI = [
   { subject: "python", label: "W3Schools core Python + DSA + Reference, plus our own", groups: SYLLABUS },
   { subject: "ml", label: "W3Schools Machine Learning, plus our own", groups: ML_SYLLABUS },
+  { subject: "dl", label: "no W3Schools section exists - the floor here is any textbook chapter one", groups: DL_SYLLABUS },
 ];
 
 const prisma = new PrismaClient();
