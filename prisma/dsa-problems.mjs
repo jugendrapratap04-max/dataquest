@@ -536,3 +536,39 @@ export const dpBasicsProblems = [
     ["The first row and first column have no choice — there is only one way to reach them, so fill those separately first.", "Every other cell: `grid[r][c] + min(above, left)`.", "Fill in increasing order of row and column. Reverse the direction and every cell reads slots that are still zero, with no error at all."],
     ["dp", "tabulation"]),
 ];
+
+/* ---------------------------------------------------------------------------
+ * Dynamic programming and the knapsack family.
+ *
+ * The first two problems are the SAME algorithm with the capacity loop running
+ * in opposite directions, and they are deliberately adjacent — writing both is
+ * the fastest way to stop confusing them.
+ * ------------------------------------------------------------------------- */
+export const knapsackProblems = [
+  PP("dynamic-programming-knapsack", "Hard", 454, "knapsack-01", "Fill The Bag Once", "knapsack",
+    "`items` is a list of `[weight, value]` pairs and `capacity` is what the bag holds. Return the greatest total value that fits.\n\n**Each item may be taken at most once.** Weights and the capacity are whole numbers.\n\nValue-per-kilo will not do: with a bag of 10 and items `[[6,30],[5,20],[5,20]]` the best ratio is the 6kg item, and taking it strands 4 kilos. The answer is 40, not 30.",
+    [{ input: "capacity=10, items=[[6,30],[5,20],[5,20]]", output: "40" }, { input: "capacity=9, items=[[3,20],[4,25]]", output: "45" }],
+    "def knapsack(capacity, items):\n    pass\n",
+    "def knapsack(capacity, items):\n    best = [0] * (capacity + 1)\n    for w, v in items:\n        for c in range(capacity, w - 1, -1):\n            if best[c - w] + v > best[c]:\n                best[c] = best[c - w] + v\n    return best[capacity]\n",
+    [{ args: [10, [[6, 30], [5, 20], [5, 20]]], expected: 40 }, { args: [9, [[3, 20], [4, 25]]], expected: 45 }, { args: [0, [[1, 1]]], expected: 0 }, { args: [5, []], expected: 0 }, { args: [3, [[5, 100]]], expected: 0 }, { args: [7, [[3, 4], [4, 5]]], expected: 9 }],
+    ["One row of `capacity + 1` slots is enough — each row of the full table only ever reads the one above it.", "Sweep the capacity BACKWARDS: `range(capacity, w - 1, -1)`. Forwards lets `best[c - w]` already contain this item, so it gets taken again.", "An item weighing exactly the remaining capacity fits — the test is `w <= c`, not `w < c`."],
+    ["dp", "knapsack"]),
+
+  PP("dynamic-programming-knapsack", "Medium", 455, "knapsack-unbounded", "Take It As Often As You Like", "unbounded_knapsack",
+    "Same arguments, one rule changed: **each item may be taken any number of times**.\n\nWith a bag of 9 and items `[[3,20],[4,25]]` the answer is 60 — three copies of the first item — where the 0/1 answer was 45.\n\nThe code is the previous problem's with one loop running the other way. Work out which way, and why that is the whole difference.",
+    [{ input: "capacity=9, items=[[3,20],[4,25]]", output: "60" }, { input: "capacity=7, items=[[3,4]]", output: "8" }],
+    "def unbounded_knapsack(capacity, items):\n    pass\n",
+    "def unbounded_knapsack(capacity, items):\n    best = [0] * (capacity + 1)\n    for w, v in items:\n        for c in range(w, capacity + 1):\n            if best[c - w] + v > best[c]:\n                best[c] = best[c - w] + v\n    return best[capacity]\n",
+    [{ args: [9, [[3, 20], [4, 25]]], expected: 60 }, { args: [10, [[6, 30], [5, 20], [5, 20]]], expected: 40 }, { args: [0, [[1, 1]]], expected: 0 }, { args: [7, [[3, 4]]], expected: 8 }, { args: [5, []], expected: 0 }],
+    ["Sweep the capacity FORWARDS this time: `range(w, capacity + 1)`.", "Going forwards, `best[c - w]` was already updated in this pass and may include the current item — which is exactly what \"take it again\" means.", "Note the second test: on that set the two answers agree at 40. Two algorithms matching on one input proves nothing."],
+    ["dp", "knapsack"]),
+
+  PP("dynamic-programming-knapsack", "Hard", 456, "coin-change-min", "Fewest Coins", "coin_change_min",
+    "Given a `target` amount and a list of `coins` (unlimited supply of each), return the **fewest coins** that add up to exactly `target`. Return `-1` if it cannot be made at all. A target of 0 needs 0 coins.\n\nTabulate it: the best way to make `t` is one coin plus the best way to make `t` minus that coin, taking the smallest over every coin that fits.\n\nWorth trying by hand first: `target=30, coins=[25,10,1]`. Taking the largest coin that fits, repeatedly, gives 25 then five 1s — six coins. The real answer is three.",
+    [{ input: "target=11, coins=[1,2,5]", output: "3" }, { input: "target=3, coins=[2]", output: "-1" }],
+    "def coin_change_min(target, coins):\n    pass\n",
+    "def coin_change_min(target, coins):\n    unreachable = target + 1\n    best = [0] + [unreachable] * target\n    for t in range(1, target + 1):\n        for c in coins:\n            if c <= t and best[t - c] + 1 < best[t]:\n                best[t] = best[t - c] + 1\n    return -1 if best[target] == unreachable else best[target]\n",
+    [{ args: [11, [1, 2, 5]], expected: 3 }, { args: [3, [2]], expected: -1 }, { args: [0, [1]], expected: 0 }, { args: [6, [1, 3, 4]], expected: 2 }, { args: [30, [25, 10, 1]], expected: 3 }, { args: [7, [2, 4]], expected: -1 }],
+    ["Seed the table with an impossible value — `target + 1` works, since no valid answer can need more coins than that.", "Fill amounts from 1 upwards so `best[t - c]` is always already computed.", "An amount left at the impossible value was never reachable. Return -1, not the sentinel."],
+    ["dp", "tabulation"]),
+];
