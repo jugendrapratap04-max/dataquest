@@ -40,6 +40,52 @@ const MP = (lessonSlug, difficulty, order, slug, title, desc, examples, starter,
 const HALT = "\n        HLT\n";
 
 const mpProblems = [
+  /* ============== 0. Switches, and How They Become Numbers ==============
+   * The very first lesson of the course, and it comes BEFORE memory addressing
+   * — the only instructions it has taught are MVI, MOV and adding one. So these
+   * three take no input from memory and have a single test each, which is the
+   * same shape as mp-load-and-copy below. What they actually examine is whether
+   * the student can write a number in hex correctly: the leading-zero rule, that
+   * ten is 0AH and not 10H, and that a byte wraps at 255.
+   *
+   * The wrap problem checks A, B and Z but deliberately NOT CY, because `INR A`
+   * leaves carry alone while `ADI 01H` sets it. Both are correct answers to the
+   * question asked, and a grader that failed one of them would be teaching a
+   * rule the lesson never stated.
+   * ==================================================================== */
+  MP("mp-switches-and-numbers", "Easy", 281, "mp-write-in-hex", "Write Them In Hex",
+    "Three ordinary decimal numbers. Put **255** into A, **sixteen** into B, and **ten** into C. End with `HLT`.\n\nThe whole exercise is writing them down correctly. Sixteen is `10H` — the digits 1 and 0 do not mean ten here. And a hex value has to start with a digit, so 255 is written `0FFH`, not `FFH`.",
+    [{ input: "(nothing in memory)", output: "A=FF B=10 C=0A" }],
+    "        ; 255 into A, sixteen into B, ten into C\n" + HALT,
+    "        MVI A, 0FFH\n        MVI B, 10H\n        MVI C, 0AH\n        HLT\n",
+    [{ memory: {}, check: ["A", "B", "C"] }],
+    ["`MVI A, 0FFH` — the leading 0 is required because FFH starts with a letter.",
+      "Sixteen is one full group of sixteen and nothing left over, so it is written 10H.",
+      "Ten is smaller than sixteen, so it is still a single hex digit: 0AH."],
+    ["8085", "hex"]),
+
+  MP("mp-switches-and-numbers", "Easy", 282, "mp-byte-runs-out", "The Byte That Runs Out",
+    "Put **255** into A — every switch on. Copy it into B so it is still readable afterwards. Then **add one to A**.\n\nEight switches cannot hold 256. Work out what A contains afterwards before you run it, and watch the zero flag.",
+    [{ input: "(nothing in memory)", output: "A=00 B=FF Z=1" }],
+    "        ; 255 into A, a copy into B, then add one to A\n" + HALT,
+    "        MVI A, 0FFH\n        MOV B, A\n        INR A\n        HLT\n",
+    [{ memory: {}, check: ["A", "B", "Z"] }],
+    ["Copy BEFORE you add, or the original is gone.",
+      "`INR A` adds one. `ADI 01H` also works — both are accepted.",
+      "Every switch was on; adding one turns them all off. The zero flag is how the machine says so."],
+    ["8085", "binary"]),
+
+  MP("mp-switches-and-numbers", "Medium", 283, "mp-read-the-switches", "Read The Switches",
+    "Three rows of eight switches. Read each as a number and load it into a register.\n\n```\n1111 0000  ->  A\n0000 1111  ->  B\n0100 0010  ->  C\n```\n\nDo not convert to decimal first. Each group of **four** switches is exactly one hex digit — read the left four, then the right four, and you have written the byte.",
+    [{ input: "(nothing in memory)", output: "A=F0 B=0F C=42" }],
+    "        ; 1111 0000 into A, 0000 1111 into B, 0100 0010 into C\n" + HALT,
+    "        MVI A, 0F0H\n        MVI B, 0FH\n        MVI C, 42H\n        HLT\n",
+    [{ memory: {}, check: ["A", "B", "C"] }],
+    ["Four switches make one hex digit: 1111 is F, 0000 is 0, 0100 is 4, 0010 is 2.",
+      "So 1111 0000 is F then 0, written 0F0H — with the leading zero, because it starts with a letter.",
+      "The third one is the letter B in a text file. 42H is 66 in decimal, and that is not a coincidence worth memorising — just notice that a byte is only ever a number."],
+    ["8085", "binary", "hex"]),
+
   /* ============== 1. What a Microprocessor Really Is ============== */
   MP("mp-what-is-a-microprocessor", "Easy", 301, "mp-load-and-copy", "Load It, Then Copy It",
     "The two instructions every 8085 program starts with. `MVI` puts a value **into** a register; `MOV` **copies** one register to another.\n\nWrite a program that puts `25H` into the accumulator, then copies it into **B** and into **C**. End with `HLT`.\n\nRemember that `MOV` copies rather than moves — A still holds 25H at the end.",
