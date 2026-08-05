@@ -30,7 +30,7 @@ const PLANS = {
   // appended, and all eight ended up chapterless.
   //
   // So: after inserting or appending a lesson, re-check these boundaries and
-  // re-run `npm run db:chapters`. Boundaries below are correct for the 50-lesson
+  // re-run `npm run db:chapters`. Boundaries below are correct for the 57-lesson
   // track — verify with the order list before trusting them again.
   //
   // Re-running it is not optional and is easy to skip, because every other check
@@ -47,7 +47,16 @@ const PLANS = {
     { slug: "py-objects-and-flow", title: "Objects and control", upto: 32, summary: "Recursion, inheritance, encapsulation, dunder methods, class attributes and the MRO, generators, decorators and regex." },
     { slug: "py-standard-library", title: "The standard library", upto: 37, summary: "Concurrency, async, collections, itertools, functools, system modules and persistence." },
     { slug: "py-shipping-code", title: "Shipping code", upto: 41, summary: "Testing, debugging and logging, clean code, project structure and git." },
-    { slug: "py-dsa", title: "Data structures & algorithms", upto: 57, summary: "Big-O, stacks and queues, linked lists and hash tables, trees and graphs, searching and sorting, the Python reference, the three tree traversals, balanced trees, sorting without comparing, the three linked-list shapes with hash sets, cycle detection, shortest paths, minimum spanning trees, memoisation, dynamic programming, and greedy algorithms." },
+    // Split at 51/52 when the DSA block reached 16 lessons. The boundary is not
+    // arbitrary: everything up to 51 is "here is a structure, and the operations
+    // that live on it" (the sorts included — they run on a plain list), and
+    // everything from 52 is a named algorithm that has to CHOOSE correctly.
+    //
+    // `py-dsa` keeps its slug deliberately. Chapter URLs are in the sitemap
+    // (app/sitemap.ts reads them from the database), so renaming the slug would
+    // break /book/python/py-dsa, which has been live and indexed.
+    { slug: "py-dsa", title: "Data structures & sorting", upto: 51, summary: "Complexity, stacks and queues, linked lists in all three shapes, hash tables and hash sets, trees from binary search trees to balanced ones, graphs, the Python reference, and every sort from bubble up to radix — including the two that never compare anything." },
+    { slug: "py-algorithms", title: "Graph algorithms & optimisation", upto: 57, summary: "Cycle detection, shortest paths with Dijkstra and Bellman-Ford, minimum spanning trees with Prim's and Kruskal's, and the three ways to choose well: memoisation, dynamic programming and greedy — each one shown failing before it is shown working." },
   ],
   // The full plan is docs/MICROPROCESSOR-SYLLABUS.md — 42 lessons, decided in one
   // go so nothing has to be guessed lesson by lesson. `upto` values point at
