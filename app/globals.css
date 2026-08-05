@@ -355,7 +355,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    min-content width, so one long code line would push the sidebar off-screen
    and give the whole page a horizontal scrollbar. */
 .learn-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:28px; align-items:start; } @media (max-width:1000px){ .learn-layout{ grid-template-columns:minmax(0,1fr);} .learn-side{ display:none;} }
-.crumb { font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-bottom:14px; } .crumb b { color:var(--accent-2); }
+.crumb { font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-bottom:16px; } .crumb b { color:var(--accent-2); }
 /* The breadcrumb is the way back out of a detail page, so its segments have to
    look and behave like links — on mobile the sidebar is behind a hamburger and
    this is the only exit on screen. Tap target kept >=44px tall on touch. */
@@ -707,7 +707,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .st-flag.no { color:var(--ink-faint); background:var(--panel-2); border:1px solid var(--line); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
-.obj { padding:18px 20px; margin-bottom:28px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
+.obj { padding:18px 20px; margin-bottom:24px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
 .obj ul { margin:0; padding:0; list-style:none; display:grid; gap:9px; } .obj li { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; } .obj li svg { width:17px; height:17px; color:var(--teal); flex:none; margin-top:2px; }
 .prose { line-height:1.65; } .prose h2 { font-size:19px; margin:30px 0 12px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--mono); font-size:13px; color:var(--accent-2); background:var(--accent-soft); width:26px; height:26px; border-radius:8px; display:grid; place-items:center; flex:none; }
 .prose p { margin:0 0 14px; } .prose p.soft { color:var(--ink-soft); }
@@ -716,17 +716,17 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    opt out of the inline pill above, or every block gets a border and a tint. */
 .md-pre { font-family:var(--mono); font-size:12.5px; line-height:1.7; background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:11px 13px; margin:0 0 14px; overflow-x:auto; white-space:pre; color:var(--ink); }
 .md-pre code { font-family:inherit; font-size:inherit; background:none; border:0; border-radius:0; padding:0; color:inherit; }
-.code { background:var(--code-bg); border-radius:12px; overflow:hidden; margin:0 0 16px; border:1px solid #23262F; }
+.code { background:var(--code-bg); border-radius:12px; overflow:hidden; margin:0 0 20px; border:1px solid #23262F; }
 .code .bar { display:flex; align-items:center; gap:7px; padding:9px 13px; border-bottom:1px solid #23262F; } .code .bar .dot { width:11px; height:11px; border-radius:50%; } .code .bar .fn { font-family:var(--mono); font-size:11.5px; color:#8890A0; margin-left:6px; }
 .code pre { margin:0; padding:15px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.7; color:var(--code-ink); }
 .code .out { border-top:1px dashed #2A2E38; padding:11px 16px; font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; } .code .out b { color:var(--code-str); }
 .c-com{color:var(--code-com);} .c-str{color:var(--code-str);} .c-kw{color:var(--code-kw);} .c-num{color:var(--code-num);} .c-fn{color:var(--code-fn);}
-.note { display:flex; gap:12px; padding:14px 16px; border-radius:12px; margin:0 0 16px; font-size:13.5px; } .note .i { font-size:18px; flex:none; }
+.note { display:flex; gap:12px; padding:14px 20px; border-radius:12px; margin:0 0 20px; font-size:13.5px; } .note .i { font-size:18px; flex:none; }
 .note.tip { background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); } .note.warn { background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 30%,transparent); } .note.key { background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
 .dtypes { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:4px 0 18px; } @media (max-width:560px){ .dtypes{ grid-template-columns:1fr;} }
 .dt { border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--panel); } .dt .dtag { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--indigo); background:var(--indigo-soft); border-radius:6px; padding:2px 8px; } .dt h4 { font-size:14px; margin:10px 0 4px; } .dt p { font-size:12.5px; color:var(--ink-soft); margin:0; } .dt .ex { font-family:var(--mono); font-size:12px; color:var(--teal); margin-top:8px; }
 .recap { padding:20px; margin:30px 0; } .recap h3 { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
-.cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:8px 0 26px; background:var(--feat-teal-bg); }
+.cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:24px 0; background:var(--feat-teal-bg); }
 .cta .pad { padding:24px; } .cta .eyebrow { color:var(--teal); } .cta h3 { font-size:20px; color:var(--feat-ink); margin:8px 0 6px; } .cta p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; }
 /* Challenges — the async half of the battle arena. Built on the existing card,
    btn and note primitives; the only new shapes are the option buttons, the
@@ -793,7 +793,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .guest-banner p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; max-width:62ch; }
 .gb-cta { display:flex; gap:10px; flex-wrap:wrap; }
 
-.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:12px; padding:13px 16px; background:var(--panel); cursor:pointer; } .lnav a.next { text-align:right; } .lnav .dir { font-family:var(--mono); font-size:11px; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { opacity:.5; pointer-events:none; }
+.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:12px; padding:13px 20px; background:var(--panel); cursor:pointer; } .lnav a.next { text-align:right; } .lnav .dir { font-family:var(--mono); font-size:11px; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { opacity:.5; pointer-events:none; }
 .learn-side { position:sticky; top:20px; display:flex; flex-direction:column; gap:18px; }
 .llist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; } .llist li { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:8px; font-size:13px; cursor:pointer; }
 .llist li .lic { width:19px; height:19px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:10px; font-family:var(--mono); border:1.5px solid var(--line); color:var(--ink-faint); }
@@ -829,7 +829,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .tcase { display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; background:rgba(255,255,255,.04); margin-bottom:7px; font-family:var(--mono); font-size:12px; color:#C6CDDA; } .tcase .st { width:18px; height:18px; border-radius:50%; display:grid; place-items:center; font-size:11px; flex:none; } .tcase.ok .st { background:var(--good); color:#04240F; } .tcase.no .st { background:var(--bad); color:#fff; } .tcase .io b { color:#C6CDDA; } .tcase .ms { margin-left:auto; color:#6B7688; }
 .console-out { font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; word-break:break-word; } .console-out b { color:var(--code-str); }
 /* The topic list, and the lesson's only navigation (components/LessonTopics). */
-.lt { margin:0 0 22px; padding:13px 15px; border:1px solid var(--line); border-radius:12px; background:var(--card); }
+.lt { margin:0 0 24px; padding:13px 20px; border:1px solid var(--line); border-radius:12px; background:var(--card); }
 .lt-head { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
            display:flex; align-items:center; gap:8px; margin-bottom:9px; }
 .lt-count { margin-left:auto; letter-spacing:0; text-transform:none; font-weight:600; color:var(--accent); }
@@ -850,15 +850,17 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    the topic you opened starts below the fold, which defeats the point of showing
    one topic at a time. Cap it and let the list scroll inside itself. */
 @media (max-width: 720px) {
-  .lt { margin-bottom:16px; padding:11px 13px; }
+  /* Padding stays 20 so the topic list keeps the same left edge as the title
+     and every card below it. Only the vertical margin tightens on a phone. */
+  .lt { margin-bottom:16px; padding:11px 20px; }
   .lt-list { max-height:152px; overflow-y:auto; overscroll-behavior:contain;
              -webkit-overflow-scrolling:touch; padding-right:2px; }
   .lt-item a { padding:7px 8px; }   /* a little taller: this is a touch target */
 }
 
 /* Previous / next, at the foot of the topic being read. */
-.tnav { display:flex; gap:12px; justify-content:space-between; margin:26px 0 4px; }
-.tnav-btn { display:flex; flex-direction:column; gap:2px; max-width:46%; padding:10px 14px; border-radius:10px;
+.tnav { display:flex; gap:12px; justify-content:space-between; margin:24px 0; }
+.tnav-btn { display:flex; flex-direction:column; gap:2px; max-width:46%; padding:10px 20px; border-radius:10px;
             border:1px solid var(--line); text-decoration:none; background:var(--card); }
 .tnav-btn:hover { border-color:color-mix(in srgb, var(--accent) 45%, transparent); }
 .tnav-btn.next { text-align:right; margin-left:auto; }
@@ -929,19 +931,19 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 /* --- Lesson teaching blocks: hook → think → def → analogy → mistakes → interview --- */
 
 /* Curiosity opener. Deliberately loud — it's the first thing on the page. */
-.hook { border-left:3px solid var(--accent); background:linear-gradient(90deg, var(--accent-soft), transparent 70%); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:16px 18px; margin:22px 0; }
+.hook { border-left:3px solid var(--accent); background:linear-gradient(90deg, var(--accent-soft), transparent 70%); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:16px 18px; margin:20px 0; }
 .hook-q { font-size:17px; font-weight:700; color:var(--ink); line-height:1.5; }
 .hook-why { font-size:13.5px; color:var(--ink-soft); margin:8px 0 0; }
 
 /* Hidden answer = the student has to guess first. That's the whole point. */
-.think { border:1px dashed var(--line); border-radius:var(--radius-sm); background:var(--panel-2); margin:18px 0; }
-.think > summary { cursor:pointer; padding:13px 16px; font-weight:600; font-size:14px; list-style:none; }
+.think { border:1px dashed var(--line); border-radius:var(--radius-sm); background:var(--panel-2); margin:20px 0; }
+.think > summary { cursor:pointer; padding:13px 20px; font-weight:600; font-size:14px; list-style:none; }
 .think > summary::-webkit-details-marker { display:none; }
-.think > summary::before { content:"▸ "; color:var(--accent); font-weight:700; }
+.think > summary::before { content:"▸ "; color:var(--accent); font-weight:700; margin-left:-16px; }
 .think[open] > summary::before { content:"▾ "; }
 .think-hint { font-weight:400; font-size:12.5px; color:var(--ink-faint); }
 .think[open] .think-hint { display:none; }
-.think-a { padding:0 16px 15px 32px; font-size:14px; color:var(--ink-soft); line-height:1.65; border-top:1px dashed var(--line); margin-top:2px; padding-top:13px; }
+.think-a { padding:0 20px 15px 20px; font-size:14px; color:var(--ink-soft); line-height:1.65; border-top:1px dashed var(--line); margin-top:2px; padding-top:13px; }
 
 /* The definition block — professional English first, Hinglish gloss under it. */
 .def { border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:0 var(--radius-sm) var(--radius-sm) 0; background:var(--panel-2); padding:15px 18px; margin:20px 0; }
@@ -957,7 +959,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .an-arrow { color:var(--ink-faint); font-weight:700; }
 .analogy p { font-size:13.5px; color:var(--ink-soft); margin:0; line-height:1.65; }
 
-.mistakes { padding:16px 18px; margin:20px 0; border-color:color-mix(in srgb, var(--bad) 28%, var(--line)); }
+.mistakes { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--bad) 28%, var(--line)); }
 .mistakes h3 { font-size:14px; margin:0 0 12px; }
 .mk { border-top:1px solid var(--line); padding:12px 0; }
 .mk:first-of-type { border-top:0; padding-top:0; }
@@ -1171,7 +1173,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lp-foot { max-width:1120px; margin:0 auto; padding:56px 24px 40px; text-align:center; font-size:12.5px; color:var(--ink-faint); }
 
 /* ---- Lesson quiz ---- */
-.quiz { padding:20px; margin:26px 0; }
+.quiz { padding:20px; margin:24px 0; }
 .quiz-head { display:flex; align-items:center; gap:8px; font-size:15px; }
 .quiz-head .quiz-count { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--ink-faint); background:var(--panel-2); border-radius:20px; padding:2px 9px; }
 .quiz-sub { font-size:12.5px; color:var(--ink-soft); margin:6px 0 16px; }
@@ -1223,7 +1225,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .toc li.landmark.on .toc-t { color:var(--ink); }
 
 /* ---- End-of-lesson summary ---- */
-.lsum { padding:16px 18px; margin:26px 0 0; }
+.lsum { padding:16px 20px; margin:24px 0 0; }
 .lsum h3 { font-size:14px; margin:0 0 12px; }
 .lsum-stats { display:flex; gap:10px; flex-wrap:wrap; }
 .lsum-stats > div { flex:1 1 92px; text-align:center; padding:11px 8px; border-radius:10px; background:var(--panel-2); border:1px solid var(--line); }
@@ -1233,7 +1235,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 
 /* Breathing room between major concepts — the page was one long wall of text. */
 .prose h2 { margin-top:44px; padding-top:26px; border-top:1px solid var(--line); }
-.prose h2:first-of-type { margin-top:26px; }
+.prose h2:first-of-type { margin-top:24px; }
 
 /* ---- Scaffolding ladder: worked example -> faded -> trace -> debug ---- */
 .worked { padding:16px 18px; margin:22px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
@@ -1279,7 +1281,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .debug .dr { border-top:1px solid var(--line); margin-top:12px; }
 
 /* ---- Lesson drills (one per operation, self-checked) ---- */
-.drills { padding:16px 18px; margin:22px 0; }
+.drills { padding:16px 20px; margin:20px 0; }
 .drills h3 { font-size:14px; margin:0 0 6px; }
 .dr-intro { font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
 .dr { border-top:1px solid var(--line); }
@@ -2035,12 +2037,19 @@ select.inp { cursor:pointer; }
   background:var(--sub-bg); color:var(--sub-fg);
   font-size:10.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase;
 }
-.lesson-head.subject-tint { border-left:3px solid var(--sub-fg); padding-left:15px; }
+/* 18px, not 15: this rule sits behind a 3px accent border exactly like .hook
+   and .def, and those use 18 — so the lesson title landed 3px left of every
+   card's text. Far enough to see, close enough to read as a mistake. */
+.lesson-head.subject-tint { border-left:3px solid var(--sub-fg); padding-left:18px; }
 /* Where you are in this subject. Uses progress that already existed — the header
    used to say "Lesson 6" with nothing to measure it against. */
 .subject-bar { height:4px; max-width:320px; margin-top:11px; border-radius:20px; background:var(--sub-bg); overflow:hidden; }
 .subject-bar span { display:block; height:100%; border-radius:20px; background:var(--sub-fg); transition:width .4s ease; }
-@media (max-width:640px){ .lesson-head.subject-tint { padding-left:12px; } .subject-bar { max-width:100%; } }
+/* No padding override for the title here any more. It used to drop to 12px
+   below 640px while every card on the same screen kept landing at 21, so the
+   lesson title sat 6px left of its own content on every phone — the desktop
+   misalignment, moved to a breakpoint where nobody was measuring. */
+@media (max-width:640px){ .subject-bar { max-width:100%; } }
 
 /* ---- Locked topic ---------------------------------------------------------
    Shown in place of a topic's content when the one before it is unfinished

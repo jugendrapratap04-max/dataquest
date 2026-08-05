@@ -604,13 +604,18 @@ export default async function LessonPage({
           </>
         )}
 
+        {/* These four carried the whole of `.lnav a` again as inline styles —
+            flex, border, radius, padding, background — which beat the stylesheet
+            every time. The CSS rule was dead: editing it changed nothing, and
+            these buttons sat 4px left of every other block for that reason
+            alone. The classes already say all of this. */}
         <nav className="lnav">
           {prev
-            ? <Link className="lnav-prev" href={`/learn/${prev.slug}`} style={{ flex: 1, border: "1px solid var(--line)", borderRadius: 12, padding: "13px 16px", background: "var(--panel)" }}><div className="dir">← Previous</div><div className="ttl">{prev.title}</div></Link>
-            : <a className="dis" style={{ flex: 1, border: "1px solid var(--line)", borderRadius: 12, padding: "13px 16px", background: "var(--panel)" }}><div className="dir">← Previous</div><div className="ttl">Lesson start</div></a>}
+            ? <Link className="lnav-prev" href={`/learn/${prev.slug}`}><div className="dir">← Previous</div><div className="ttl">{prev.title}</div></Link>
+            : <a className="dis"><div className="dir">← Previous</div><div className="ttl">Lesson start</div></a>}
           {next
-            ? <Link className="next" href={`/learn/${next.slug}`} style={{ flex: 1, textAlign: "right", border: "1px solid var(--line)", borderRadius: 12, padding: "13px 16px", background: "var(--panel)" }}><div className="dir">Next →</div><div className="ttl">{next.title}</div></Link>
-            : <a className="dis next" style={{ flex: 1, textAlign: "right", border: "1px solid var(--line)", borderRadius: 12, padding: "13px 16px", background: "var(--panel)" }}><div className="dir">Next →</div><div className="ttl">Module end</div></a>}
+            ? <Link className="next" href={`/learn/${next.slug}`}><div className="dir">Next →</div><div className="ttl">{next.title}</div></Link>
+            : <a className="dis next"><div className="dir">Next →</div><div className="ttl">Module end</div></a>}
         </nav>
       </article>
 
