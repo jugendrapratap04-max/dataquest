@@ -202,6 +202,8 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .si-tag { font-family:var(--mono); font-size:9px; font-weight:700; padding:2px 6px; border-radius:5px; flex:none; text-transform:uppercase; }
 .si-tag.lesson { background:var(--accent-soft); color:var(--accent-2); }
 .si-tag.problem { background:var(--teal-soft); color:var(--teal); }
+/* A topic is a piece of a lesson, so it reads as a quieter version of one. */
+.si-tag.topic { background:color-mix(in srgb, var(--accent) 10%, transparent); color:var(--accent); }
 .si-title { font-size:13px; font-weight:550; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .si-sub { font-size:11px; color:var(--ink-faint); font-family:var(--mono); flex:none; }
 .streak-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 13px; border-radius:10px; background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 32%,transparent); }

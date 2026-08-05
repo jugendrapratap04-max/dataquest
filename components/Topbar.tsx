@@ -42,7 +42,13 @@ const THEMES: Theme[] = [
   { id: "sunset", name: "Sunset", sub: "Warm & cozy", xp: 0, sw: "linear-gradient(135deg,#1B1012 52%,#FF9E5A 52%)" }, // re-lock: 1500
 ];
 
-type Item = { title: string; slug: string; sub: string; kind: "lesson" | "problem" };
+type Item = {
+  title: string; slug: string; sub: string;
+  kind: "lesson" | "topic" | "problem";
+  /** Topics only: which ?t= opens it, and identifiers from its code. */
+  t?: number;
+  k?: string;
+};
 
 export function Topbar({ user }: { user: { name: string; streak: number; xp: number; isNew?: boolean } | null }) {
   const pathname = usePathname();
@@ -135,7 +141,19 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     (async () => {
       try {
         const d = await fetch("/api/search").then((r) => r.json());
+        // Topics arrive grouped by lesson and one-letter keyed, to keep the
+        // payload down — see lib/search-index.ts. Flatten once, here.
+        type Group = { s: string; b: string; t: [string, string?][] };
+        const topics: Item[] = (d.topicGroups ?? []).flatMap((g: Group) =>
+          g.t.map(([title, k], i) => ({
+            title, slug: g.s, sub: g.b, k, t: i + 1, kind: "topic" as const,
+          })),
+        );
+        // Topics first: they are the most specific answer to a query. A student
+        // searching "frozenset" wants the topic that teaches it, not the lesson
+        // it happens to sit in.
         setIndex([
+          ...topics,
           ...d.lessons.map((l: Item) => ({ ...l, kind: "lesson" as const })),
           ...d.problems.map((p: Item) => ({ ...p, kind: "problem" as const })),
         ]);
@@ -175,13 +193,36 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     setTimeout(() => setToast(null), 2600);
   };
 
-  const results = q.trim() && index
-    ? index.filter((it) => it.title.toLowerCase().includes(q.toLowerCase()) || it.sub.toLowerCase().includes(q.toLowerCase())).slice(0, 8)
-    : [];
+  /* Title, then the lesson it belongs to, then the identifiers taken from its
+   * code — that last one is why "frozenset", "deque" and "popleft" now find
+   * anything at all. A title-only match made most of the course invisible.
+   *
+   * A hit on the title outranks a hit on a keyword, so typing "set" gives the
+   * topics actually about sets before every topic that merely mentions one. */
+  const results = (() => {
+    if (!q.trim() || !index) return [];
+    const needle = q.trim().toLowerCase();
+    const scored = index
+      .map((it) => {
+        const title = it.title.toLowerCase();
+        if (title.startsWith(needle)) return { it, rank: 0 };
+        if (title.includes(needle)) return { it, rank: 1 };
+        if (it.sub.toLowerCase().includes(needle)) return { it, rank: 2 };
+        if (it.k?.includes(needle)) return { it, rank: 3 };
+        return null;
+      })
+      .filter(Boolean) as { it: Item; rank: number }[];
+    return scored.sort((a, b) => a.rank - b.rank).slice(0, 8).map((s) => s.it);
+  })();
+
+  const hrefFor = (it: Item) =>
+    it.kind === "problem" ? `/practice/${it.slug}`
+      : it.kind === "topic" && it.t && it.t > 1 ? `/learn/${it.slug}?t=${it.t}`
+        : `/learn/${it.slug}`;
 
   const goTo = (it: Item) => {
     setOpen(false); setQ("");
-    router.push(it.kind === "lesson" ? `/learn/${it.slug}` : `/practice/${it.slug}`);
+    router.push(hrefFor(it));
   };
 
   const firstName = user ? user.name.split(" ")[0] : "";
@@ -202,7 +243,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
               onFocus={() => setOpen(true)}
               onChange={(e) => { setQ(e.target.value); setOpen(true); }}
               onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); if (e.key === "Enter" && results[0]) goTo(results[0]); }}
-              placeholder="Search lessons, problems…"
+              placeholder="Search topics, lessons, problems…"
             />
           </div>
           {open && q.trim() && (
@@ -211,7 +252,7 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
                 <div className="search-empty">Nothing found</div>
               ) : results.map((it, i) => (
                 <button key={i} className="search-item" onClick={() => goTo(it)}>
-                  <span className={`si-tag ${it.kind}`}>{it.kind === "lesson" ? "Lesson" : "Practice"}</span>
+                  <span className={`si-tag ${it.kind}`}>{it.kind === "lesson" ? "Lesson" : it.kind === "topic" ? "Topic" : "Practice"}</span>
                   <span className="si-title">{it.title}</span>
                   <span className="si-sub">{it.sub}</span>
                 </button>
