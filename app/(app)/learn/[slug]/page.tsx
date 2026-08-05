@@ -38,8 +38,17 @@ import { LiveCode } from "@/components/LiveCode";
  * wait. A few ML blocks fit hundreds of models (200 bagged trees, a 20-repeat
  * tuning sweep) and take seconds even after Pyodide is warm, which is a real
  * cost and still a far better deal than a beginner having to believe the
- * printed output of an algorithm this lesson exists to make them distrust. */
-const LIVE_TRACKS = new Set(["python", "statistics", "pandas", "ml"]);
+ * printed output of an algorithm this lesson exists to make them distrust.
+ *
+ * `dl` for the same reasons, and one more specific to it. Its whole argument is
+ * made of results the reader is meant to disbelieve until they see them — that
+ * scrambling every pixel costs 0.004, that one word changes 0.5 into 1.0, that
+ * "not good food" scores exactly what "good food" scores. Printed, those are
+ * claims to take on trust. Runnable, they are experiments, and the reader can
+ * change the word and watch the number move. Two of its blocks train networks
+ * and take a while; the first-run notice in LiveCode covers the download, and
+ * the rest is the cost of the thing being real. */
+const LIVE_TRACKS = new Set(["python", "statistics", "pandas", "ml", "dl"]);
 
 // `lessonId` and `lessonSlug` are threaded through so two block types can say
 // where they are: the quiz files each answer against its lesson, and a runnable
