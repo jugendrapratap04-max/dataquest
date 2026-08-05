@@ -21,15 +21,24 @@ export function ProfileEditor({
   initial,
 }: {
   name: string;
-  initial: { role: string; goal: string | null; bio: string | null; avatarEmoji: string | null };
+  initial: {
+    role: string; goal: string | null; bio: string | null; avatarEmoji: string | null;
+    username: string | null; publicProfile: boolean;
+  };
 }) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState(initial.role);
   const [goal, setGoal] = useState(initial.goal ?? "");
   const [bio, setBio] = useState(initial.bio ?? "");
   const [emoji, setEmoji] = useState<string | null>(initial.avatarEmoji);
+  const [username, setUsername] = useState(initial.username ?? "");
+  const [isPublic, setIsPublic] = useState(initial.publicProfile);
   const [saving, setSaving] = useState(false);
   const [note, setNote] = useState<string | null>(null);
+
+  // Typed as it will be stored, so the preview under the field is the real
+  // address and not an optimistic version of it.
+  const slug = username.trim().toLowerCase();
 
   async function save() {
     if (!role.trim()) { setNote("A title cannot be empty."); return; }
@@ -38,7 +47,10 @@ export function ProfileEditor({
     const r = await fetch("/api/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: role.trim(), goal, bio, avatarEmoji: emoji }),
+      body: JSON.stringify({
+        role: role.trim(), goal, bio, avatarEmoji: emoji,
+        username: slug, publicProfile: isPublic,
+      }),
     }).then((x) => x.json()).catch(() => null);
     setSaving(false);
 
@@ -116,6 +128,46 @@ export function ProfileEditor({
           />
           <div className="pf-count">{bio.length}/{MAX_BIO}</div>
         </div>
+      </div>
+
+      {/* ---------------------------------------------------------- sharing -- */}
+      <div className="pf-sep">Sharing</div>
+
+      <div className="pf-row">
+        <label className="pf-lbl" htmlFor="pf-user">Username</label>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <input
+            id="pf-user" className="pf-in" value={username} maxLength={20}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="jugendra"
+            autoComplete="off" spellCheck={false}
+          />
+          <div className="pf-count pf-url">
+            {slug ? `etudo.app/u/${slug}` : "Needed only if you want a shareable link."}
+          </div>
+        </div>
+      </div>
+
+      {/* Off unless the student turns it on, and it says in plain words what
+          turning it on means. A switch labelled only "public" leaves people
+          guessing what becomes visible — so the sentence lists it. */}
+      <div className="pf-row">
+        <div className="pf-lbl">Public page</div>
+        <label className="pf-toggle">
+          <input
+            type="checkbox" checked={isPublic}
+            disabled={!slug}
+            onChange={(e) => setIsPublic(e.target.checked)}
+          />
+          <span className="pf-sw" aria-hidden />
+          <span className="pf-toggle-t">
+            {isPublic
+              ? "Anyone with the link can see your name, badges, solved counts and activity. Your email is never shown."
+              : slug
+                ? "Off — only you can see this page."
+                : "Pick a username first."}
+          </span>
+        </label>
       </div>
 
       {note && <p className="pf-note">{note}</p>}

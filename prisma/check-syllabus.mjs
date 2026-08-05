@@ -10,6 +10,20 @@
  */
 import { PrismaClient } from "@prisma/client";
 import { SYLLABUS } from "./syllabus.mjs";
+import { ML_SYLLABUS } from "./ml-syllabus.mjs";
+
+// One reference syllabus per subject. A subject with no entry here is still
+// measured by the platform table below — it just has no topic-by-topic map yet.
+//
+// This registry exists because the ML track was finished (6/6 at the FULL
+// standard) while the only thing the scoreboard could say about it was "6". The
+// whole point of the last group in each syllabus is that work beyond W3Schools
+// shows up as coverage rather than as nothing, and that guarantee was worth
+// exactly one subject until this became a list.
+const SYLLABI = [
+  { subject: "python", label: "W3Schools core Python + DSA + Reference, plus our own", groups: SYLLABUS },
+  { subject: "ml", label: "W3Schools Machine Learning, plus our own", groups: ML_SYLLABUS },
+];
 
 const prisma = new PrismaClient();
 const FULL = process.argv.includes("--full");
@@ -90,39 +104,45 @@ const measured = subjects.map((s) => ({
   lessons: s.lessons.map((l) => ({ ...l, m: measure(l), subject: s.slug })),
 }));
 
-const pythonSubject = measured.find((s) => s.slug === "python");
-if (!pythonSubject) { console.error("no python subject"); process.exit(1); }
-const lessons = pythonSubject.lessons;
-const bySlug = Object.fromEntries(lessons.map((l) => [l.slug, l]));
+// Measure one subject against its own reference syllabus. `covers` can only
+// name lessons inside that subject — a topic another track owns belongs in that
+// track's syllabus, not borrowed into this one.
+function coverage({ subject, label, groups }) {
+  const s = measured.find((x) => x.slug === subject);
+  if (!s) { console.error(`no ${subject} subject`); process.exit(1); }
+  const bySlug = Object.fromEntries(s.lessons.map((l) => [l.slug, l]));
 
-let done = 0, thin = 0, missing = 0, broken = 0;
-const gaps = [];
-
-for (const g of SYLLABUS) {
-  const rows = [];
-  for (const topic of g.topics) {
-    const hits = topic.covers.map((s) => bySlug[s]).filter(Boolean);
-    const badRef = topic.covers.filter((s) => !bySlug[s]);
-    let mark, note;
-    if (badRef.length) { mark = "  !!  "; note = `syllabus points at a lesson that does not exist: ${badRef.join(", ")}`; broken++; }
-    else if (!hits.length) { mark = "  --  "; note = "nothing covers this"; missing++; gaps.push(`${g.group} → ${topic.t}`); }
-    else if (hits.some((h) => h.m.solid)) { mark = "  ok  "; note = hits.map((h) => h.slug).join(", "); done++; }
-    else { mark = "  ~   "; const h = hits[0]; note = `${h.slug} is thin (${h.m.words}w, ${h.m.viz} viz, ${h.m.teaching}/5 teaching blocks)`; thin++; gaps.push(`${g.group} → ${topic.t}  [thin: ${h.slug}]`); }
-    if (FULL || mark !== "  ok  ") rows.push(`${mark} ${topic.t.padEnd(46)} ${note}`);
+  let done = 0, thin = 0, missing = 0, broken = 0;
+  for (const g of groups) {
+    const rows = [];
+    for (const topic of g.topics) {
+      const hits = topic.covers.map((x) => bySlug[x]).filter(Boolean);
+      const badRef = topic.covers.filter((x) => !bySlug[x]);
+      let mark, note;
+      if (badRef.length) { mark = "  !!  "; note = `syllabus points at a lesson that does not exist: ${badRef.join(", ")}`; broken++; }
+      else if (!hits.length) { mark = "  --  "; note = "nothing covers this"; missing++; }
+      else if (hits.some((h) => h.m.solid)) { mark = "  ok  "; note = hits.map((h) => h.slug).join(", "); done++; }
+      else { mark = "  ~   "; const h = hits[0]; note = `${h.slug} is thin (${h.m.words}w, ${h.m.viz} viz, ${h.m.teaching}/5 teaching blocks)`; thin++; }
+      if (FULL || mark !== "  ok  ") rows.push(`${mark} ${topic.t.padEnd(52)} ${note}`);
+    }
+    if (rows.length) { console.log(`\n### ${subject} — ${g.group}`); rows.forEach((r) => console.log(r)); }
   }
-  if (rows.length) { console.log(`\n### ${g.group}`); rows.forEach((r) => console.log(r)); }
+
+  const total = done + thin + missing + broken;
+  console.log(`\n${"=".repeat(74)}`);
+  // Not "vs W3Schools". Their tutorial is the floor this is measured against;
+  // the last group in each syllabus is what we teach and they do not, and it is
+  // counted here so that work shows up as coverage rather than as nothing.
+  console.log(`SYLLABUS COVERAGE — ${subject} (${label})`);
+  console.log(`  ok  taught properly      ${String(done).padStart(3)} / ${total}`);
+  console.log(`  ~   covered but thin     ${String(thin).padStart(3)} / ${total}`);
+  console.log(`  --  nothing covers it    ${String(missing).padStart(3)} / ${total}`);
+  if (broken) console.log(`  !!  broken mapping      ${String(broken).padStart(3)} / ${total}   <- fix prisma/${subject === "python" ? "syllabus" : subject + "-syllabus"}.mjs`);
+  return broken;
 }
 
-const total = done + thin + missing + broken;
-console.log(`\n${"=".repeat(74)}`);
-// Not "vs W3Schools" any more. Their tutorial is the floor this is measured
-// against; the last group in syllabus.mjs is what we teach and they do not, and
-// it is counted here so that work shows up as coverage rather than as nothing.
-console.log(`SYLLABUS COVERAGE (W3Schools core Python + DSA + Reference, plus our own)`);
-console.log(`  ok  taught properly      ${String(done).padStart(3)} / ${total}`);
-console.log(`  ~   covered but thin     ${String(thin).padStart(3)} / ${total}`);
-console.log(`  --  nothing covers it    ${String(missing).padStart(3)} / ${total}`);
-if (broken) console.log(`  !!  broken mapping      ${String(broken).padStart(3)} / ${total}   <- fix prisma/syllabus.mjs`);
+let broken = 0;
+for (const s of SYLLABI) broken += coverage(s);
 console.log(`\n  a lesson counts as taught at >=${MIN_WORDS} words, >=1 visualisation and >=4/5 teaching blocks`);
 
 // ---------------------------------------------------------------------------

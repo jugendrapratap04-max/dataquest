@@ -19,8 +19,9 @@
  * collapsing when its inner pass is not stable.
  *
  * Sections that belong to other Etudo tracks (Matplotlib, MySQL, MongoDB,
- * Machine Learning, NumPy/Pandas) are deliberately not listed here — this file
- * is about the Python track only.
+ * NumPy/Pandas) are deliberately not listed here — this file is about the
+ * Python track only. Machine Learning has its own now: ml-syllabus.mjs, built
+ * to the same rules and registered alongside this one in check-syllabus.mjs.
  */
 
 export const SYLLABUS = [

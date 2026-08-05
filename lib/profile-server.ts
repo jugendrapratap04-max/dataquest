@@ -50,14 +50,25 @@ async function getRankImpl(userId: string): Promise<{ rank: number; outOf: numbe
  *
  *  LessonProgress rows written before `completedAt` existed have NULL there and
  *  are skipped rather than dated — see the migration note. A short honest
- *  timeline beats a full one with invented dates on it. */
+ *  timeline beats a full one with invented dates on it.
+ *
+ *  ONE ENTRY PER PROBLEM. This read every passing submission, so a student who
+ *  reopened one problem across a fortnight — which is exactly what practising
+ *  looks like — got a profile whose entire recent history was "Add Two Numbers"
+ *  five times over. Solving something you have already solved is not news; the
+ *  first time you solved it is. `distinct` on problemId with the oldest row
+ *  first is that first solve.
+ *
+ *  Unbounded on purpose: it returns one row per problem the student has ever
+ *  solved, which is capped by the size of the catalogue, and the merge below
+ *  needs them all before it can know which twelve are the most recent. */
 export const getTimeline = cache(getTimelineImpl);
 async function getTimelineImpl(userId: string, limit = 12): Promise<TimelineEntry[]> {
   const [subs, lessons] = await Promise.all([
     prisma.submission.findMany({
       where: { userId, passed: true },
-      orderBy: { createdAt: "desc" },
-      take: limit,
+      orderBy: [{ problemId: "asc" }, { createdAt: "asc" }],
+      distinct: ["problemId"],
       select: { createdAt: true, problem: { select: { title: true, slug: true, difficulty: true } } },
     }),
     prisma.lessonProgress.findMany({

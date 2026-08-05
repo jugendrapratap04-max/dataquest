@@ -43,6 +43,20 @@ model User {
   goal        String? // "Current Goal" — what they are working towards
   avatarEmoji String?
 
+  // A shareable profile, off until the student turns it on.
+  //
+  // The point of a profile page is that you can send someone the link — that is
+  // the whole difference between a profile and a dashboard. But this is a
+  // learning platform whose students include school and college kids, so nobody
+  // becomes findable as a side effect of signing up: `publicProfile` defaults to
+  // false and only the student themselves can change it.
+  //
+  // `username` is nullable because most accounts will never claim one. It is the
+  // only user-chosen value in the schema that appears in a URL, which is why the
+  // API checks it against a shape and a reserved list rather than just a length.
+  username      String? @unique
+  publicProfile Boolean @default(false)
+
   lessonProgress LessonProgress[]
   submissions    Submission[]
   attempts       ProblemAttempt[]

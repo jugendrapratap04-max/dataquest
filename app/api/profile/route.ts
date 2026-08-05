@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { AVATAR_EMOJI } from "@/lib/profile";
+import { AVATAR_EMOJI, checkUsername } from "@/lib/profile";
 
 // The parts of a profile a student writes themselves.
 //
@@ -36,7 +36,7 @@ export async function PATCH(req: Request) {
   if (!user) return NextResponse.json({ error: "Login required" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const data: Record<string, string | null> = {};
+  const data: Record<string, string | null | boolean> = {};
 
   // Role keeps its original contract: sent but empty is an error, not a clear.
   // `role` is NOT NULL in the schema, so there is no null to fall back to.
@@ -62,14 +62,51 @@ export async function PATCH(req: Request) {
         : null; // anything unrecognised clears it, back to initials
   }
 
+  // Username. Sent empty is a clear, which also turns the public page off —
+  // leaving a profile public with no address to reach it at is a state with no
+  // meaning, and one the student did not ask for.
+  if (body.username !== undefined) {
+    const raw = typeof body.username === "string" ? body.username.trim() : "";
+    if (!raw) {
+      data.username = null;
+      data.publicProfile = false;
+    } else {
+      const check = checkUsername(raw);
+      if (!check.ok) return NextResponse.json({ error: check.error }, { status: 400 });
+      data.username = check.value;
+    }
+  }
+
+  // The public switch. A profile cannot be turned public without an address, so
+  // this is refused rather than silently ignored — a switch that flips back on
+  // its own is worse than one that explains itself.
+  if (body.publicProfile !== undefined) {
+    const wants = body.publicProfile === true;
+    const willHave = data.username !== undefined ? data.username : user.username;
+    if (wants && !willHave) {
+      return NextResponse.json({ error: "Pick a username before making your profile public." }, { status: 400 });
+    }
+    data.publicProfile = wants;
+  }
+
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
-  const saved = await prisma.user.update({
-    where: { id: user.id },
-    data,
-    select: { role: true, bio: true, goal: true, avatarEmoji: true },
-  });
-  return NextResponse.json({ ok: true, ...saved });
+  // A username is unique, so two students can race for the same one. Postgres
+  // decides that, not a findFirst above — which would leave a window between the
+  // check and the write however small it looks.
+  try {
+    const saved = await prisma.user.update({
+      where: { id: user.id },
+      data,
+      select: { role: true, bio: true, goal: true, avatarEmoji: true, username: true, publicProfile: true },
+    });
+    return NextResponse.json({ ok: true, ...saved });
+  } catch (e: unknown) {
+    if ((e as { code?: string })?.code === "P2002") {
+      return NextResponse.json({ error: "That username is taken." }, { status: 409 });
+    }
+    throw e;
+  }
 }
