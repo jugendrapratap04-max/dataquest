@@ -89,6 +89,10 @@ const PLANS = {
     { slug: "html-lists", title: "Lists", upto: 18, summary: "Ordered, unordered and description lists — and why a list announces its count before its contents." },
     { slug: "html-tables", title: "Tables", upto: 20, summary: "Rows, headers and scope for real tabular data, plus spanning cells and the decade tables were misused for layout." },
     { slug: "html-forms", title: "Forms", upto: 23, summary: "Where the web stops being read-only: names, labels, input types, and validation that is a courtesy rather than a defence." },
+    // ⚠️ LAST ENTRY: bump this `upto` with every lesson appended to the track.
+    // Anything past the final boundary gets no chapter at all, which drops it
+    // out of /book AND now out of the course navigation's grouping.
+    { slug: "html-semantic", title: "Semantic HTML", upto: 25, summary: "The argument the whole course has been making, given its name and its page-level elements: landmarks a reader can jump between, and the test that separates an article from a section from a plain div." },
   ],
 };
 

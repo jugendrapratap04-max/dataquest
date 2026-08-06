@@ -1572,7 +1572,7 @@ export const htmlLessons = [
       { t: "code", file: "nav.html", code: "<ul>\n  <li><a href=\"index.html\">Home</a></li>\n  <li><a href=\"about.html\">About</a></li>\n  <li><a href=\"contact.html\">Contact</a></li>\n</ul>", output: "Three bulleted links — which CSS turns into a horizontal menu without changing any of this." },
       { t: "psoft", html: "The anchor goes <b>inside</b> the <code>&lt;li&gt;</code>: the item is the thing in the menu, and the link is what that item does. Wrapping the other way round — a list item inside a link — is invalid and says something nobody means." },
 
-      { t: "note", variant: "key", html: "Module 12 adds <code>&lt;nav&gt;</code> around this to say <i>which</i> list is the navigation. The list stays exactly as it is — the two elements answer different questions, and both are worth having." },
+      { t: "note", variant: "key", html: "Module 9 adds <code>&lt;nav&gt;</code> around this to say <i>which</i> list is the navigation. The list stays exactly as it is — the two elements answer different questions, and both are worth having." },
 
       { t: "h2", n: "3", text: "The three, side by side" },
       { t: "note", variant: "tip", html: "<b><code>ul</code></b> — the order does not matter. Shopping list, feature list, menu.<br><b><code>ol</code></b> — the order is information. Steps, rankings, anything referred to by number.<br><b><code>dl</code></b> — name and value pairs. Glossary, spec sheet, FAQ, metadata.<br><br>If you cannot say which of the three it is, it is probably not a list — it is prose." },
@@ -1756,7 +1756,7 @@ export const htmlLessons = [
       { t: "note", variant: "warn", html: "<b>The rule is about intent, not the element.</b> Data with rows and columns → a table, with headers and a caption, and anyone who tells you otherwise has learned half of this history. Positioning things on a page → CSS, always. The question to ask is: <i>would this still make sense as a grid if I read it aloud?</i>" },
 
       { t: "h2", n: "2", text: "What a layout table becomes" },
-      { t: "p", html: "The replacement is almost never another single element. A page laid out as a table is really a heading, some paragraphs, an image and a menu — each of which has an element that says what it is. Module 12's semantic elements finish the job; the elements you already have get most of the way." },
+      { t: "p", html: "The replacement is almost never another single element. A page laid out as a table is really a heading, some paragraphs, an image and a menu — each of which has an element that says what it is. Module 9's semantic elements finish the job; the elements you already have get most of the way." },
 
       { t: "code", file: "was-a-table.html", code: "<!-- what a 2003 page looked like -->\n<table>\n  <tr>\n    <td><h2>About us</h2></td>\n    <td><img src=\"/img-lab/logo.svg\" alt=\"Home\"></td>\n  </tr>\n</table>\n\n<!-- what it is -->\n<h2>About us</h2>\n<img src=\"/img-lab/logo.svg\" alt=\"Home\">", output: "Both draw roughly the same thing; only the second says what any of it is." },
 
@@ -2084,6 +2084,193 @@ export const htmlLessons = [
         { level: "easy", q: "What does the required attribute do?", a: "It stops the browser submitting the form while that field is empty, and points the visitor at it with a message in their own language. It costs nothing and is purely a convenience — it does not guarantee the server receives a value, because the check runs in software the visitor controls." },
         { level: "medium", q: "Why is a placeholder not an acceptable replacement for a label?", a: "It disappears as soon as the visitor types, so anyone interrupted loses the field's name; it is grey by default and usually fails contrast; screen reader support for it is inconsistent, so the field may be announced with no name at all; and it gives no second click target, which matters for anyone with limited dexterity. A placeholder should show an example of the expected format while the label carries the name." },
         { level: "hard", q: "If HTML validation can be bypassed, why bother writing it?", a: "Because it solves a different problem from security. It gives immediate, local feedback with no round trip and no script — the visitor learns the postcode is malformed before waiting for a server to say so — and the messages arrive translated. It is a user-experience feature that happens to look like a security feature, which is exactly why the distinction has to be stated: it must be paired with server-side validation, never trusted in place of it." },
+      ] },
+    ],
+  },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 9 — SEMANTIC HTML
+   *
+   * The module the whole course has been promising. Every earlier lesson made
+   * the same argument in miniature — h1 is not "big text", strong is not bold,
+   * a list announces its count, a table needs headers — and this is where that
+   * argument gets its name and its page-level elements.
+   *
+   * TWO REFERENCES ELSEWHERE POINT HERE, and both said "Module 12" until this
+   * module was written (the lists lesson promising <nav>, the tables lesson
+   * promising the replacement for layout tables). Both corrected. If this
+   * module ever moves, grep the file for its number before doing anything else.
+   *
+   * Parser parity checked in linkedom and DOMParser before the problems were
+   * written: 12 of 12 identical across header/nav/main/article/section/aside/
+   * footer including nesting, and — the one that matters for problem 633 — a
+   * SECOND <main> survives parsing in both, so "there should be one" is a
+   * gradeable exercise rather than a repaired-away one.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-semantic",
+    order: 24,
+    title: "Semantic HTML: Naming the Parts of a Page",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Say what \"semantic\" means, in one sentence, without using the word",
+        "Lay a page out with <code>header</code>, <code>nav</code>, <code>main</code>, <code>aside</code> and <code>footer</code>",
+        "Explain what a landmark is and who uses one",
+        "Know when a <code>&lt;div&gt;</code> is still the right answer",
+      ] },
+
+      { t: "hook",
+        q: "A screen reader user presses one key and gets a menu: banner, navigation, main, complementary, footer — and jumps straight past your header and menu into the article. On a page built from <code>&lt;div&gt;</code>s, what does that menu say?",
+        why: "Nothing. It is empty. They then have to tab through every logo, every menu item and every advert to reach the first sentence — on every page, every time. The elements in this lesson are what fill that menu, and they cost you nothing but choosing a different tag name." },
+
+      { t: "def",
+        term: "Semantic element",
+        en: "An element chosen for what the content <b>is</b>, rather than for how it should look." },
+
+      { t: "def",
+        term: "Landmark",
+        en: "A region of the page that assistive technology can list and jump between — produced automatically by <code>header</code>, <code>nav</code>, <code>main</code>, <code>aside</code> and <code>footer</code>." },
+
+      { t: "analogy",
+        concept: "semantic elements",
+        real: "rooms in a house versus one open hall",
+        html: "\"Go to the kitchen\" works because rooms have names. In an open hall you can only say \"about six metres past the sofa\" — accurate, useless to anyone who cannot see the sofa. <code>&lt;div&gt;</code> builds the hall; <code>&lt;main&gt;</code> and <code>&lt;nav&gt;</code> build rooms, and everything that cannot see the page navigates by room name." },
+
+      { t: "syntax",
+        intro: "The shape of nearly every page on the web, in seven elements.",
+        form: "<body>\n  <header>\n    <h1>The Practice Site</h1>\n    <nav>\n      <ul><li><a href=\"/\">Home</a></li></ul>\n    </nav>\n  </header>\n\n  <main>\n    <h2>Today's article</h2>\n    <p>The thing the visitor came for.</p>\n  </main>\n\n  <aside>\n    <h2>Related</h2>\n  </aside>\n\n  <footer>\n    <p>&copy; 2026</p>\n  </footer>\n</body>",
+        parts: [
+          { bit: "<header>", says: "Introductory content for whatever contains it. At the top of <code>&lt;body&gt;</code> it is the site's banner; inside an <code>&lt;article&gt;</code> it is that article's own header, and there may be many on a page for that reason." },
+          { bit: "<nav>", says: "A block of <b>major</b> navigation. Not every group of links — the site menu, a table of contents, the pagination. Marking every link cluster as <code>nav</code> refills the landmark menu with noise." },
+          { bit: "<main>", says: "The page's own content — what is left when you remove the parts repeated on every page. <b>Exactly one per page</b>, and it is the landmark \"skip to content\" actually jumps to." },
+          { bit: "<aside>", says: "Related but not essential: a sidebar, a pull quote, further reading. Announced as \"complementary\", which is a good test — if removing it would damage the page, it is not an aside." },
+          { bit: "<footer>", says: "Closing content for its container: copyright and small print at page level, a byline inside an article." },
+        ],
+        note: "None of these do anything visual. <code>&lt;main&gt;</code> and <code>&lt;div&gt;</code> render identically, and that is the point — the difference is entirely in what the page <i>says about itself</i>, which is what everything other than a pair of eyes has to work from.",
+      },
+
+      { t: "code", file: "page.html", code: "<body>\n  <header>\n    <h1>Mochi's Kitchen</h1>\n    <nav>\n      <ul>\n        <li><a href=\"index.html\">Home</a></li>\n        <li><a href=\"recipes.html\">Recipes</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <main>\n    <h2>Poha Chivda</h2>\n    <p>Twenty minutes, one pan.</p>\n  </main>\n\n  <footer>\n    <p>Written by Ravi</p>\n  </footer>\n</body>", output: "A heading, a menu, the recipe, and a byline — laid out top to bottom, exactly as divs would be." },
+      { t: "psoft", html: "Press <b>Try it yourself</b> and change every one of those tags to <code>&lt;div&gt;</code>. <b>Nothing on screen moves.</b> That is the entire lesson: the version you just broke looks identical and has stopped telling anyone what any of it is." },
+
+      { t: "h2", n: "1", text: "Why this is not decoration" },
+      { t: "p", html: "Four groups read your markup and none of them are looking at it. <b>Screen readers</b> build the landmark menu from the hook. <b>Search engines</b> weigh content inside <code>&lt;main&gt;</code> above a footer repeated on 400 pages. <b>Reader modes</b> — Safari's, Firefox's, every read-it-later app — guess which part is the article, and semantic markup is what they guess from. <b>Your own CSS</b> gets to say <code>main p</code> instead of <code>.content-wrapper .inner p</code>." },
+
+      { t: "note", variant: "key", html: "<b>\"Skip to content\" is the oldest accessibility feature on the web, and <code>&lt;main&gt;</code> is what makes it work without one.</b> A keyboard user landing on a page has to tab past every header link before reaching the article — forty times, if your menu has forty items and they visit forty pages. The landmark turns that into one key." },
+
+      { t: "h2", n: "2", text: "One main, many headers" },
+      { t: "p", html: "<code>&lt;main&gt;</code> is the exception: exactly one per page, because \"the main content\" is a claim that cannot be true twice. <code>&lt;header&gt;</code> and <code>&lt;footer&gt;</code> are the opposite — they belong to whatever contains them, so a page with six articles legitimately has seven headers." },
+
+      { t: "debug",
+        intro: "This page has a landmark problem that renders perfectly. Find it before opening the fix.",
+        code: "<body>\n  <main>\n    <header>\n      <h1>Mochi's Kitchen</h1>\n      <nav><ul><li><a href=\"/\">Home</a></li></ul></nav>\n    </header>\n  </main>\n\n  <main>\n    <h2>Poha Chivda</h2>\n    <p>Twenty minutes, one pan.</p>\n  </main>\n</body>",
+        symptom: "The page looks right. \"Skip to main content\" lands on the site's logo and menu instead of the recipe, and a landmark list shows two identical \"main\" entries.",
+        q: "Both <code>&lt;main&gt;</code> elements are correctly opened and closed. So what did the page claim?",
+        fix: "<body>\n  <header>\n    <h1>Mochi's Kitchen</h1>\n    <nav><ul><li><a href=\"/\">Home</a></li></ul></nav>\n  </header>\n\n  <main>\n    <h2>Poha Chivda</h2>\n    <p>Twenty minutes, one pan.</p>\n  </main>\n</body>",
+        why: "That it has two main contents, which cannot be true — so anything jumping to \"the main content\" takes the first, and the first is the banner. The banner is not main content at all: it is the part repeated on every page, which is the definition of what <code>&lt;main&gt;</code> excludes. The fix is not to rename the second one; it is to notice the header was never inside main to begin with. <b>The parser keeps both</b>, which is why this ships — nothing repairs it and nothing on screen changes." },
+
+      { t: "h2", n: "3", text: "When a div is still right" },
+      { t: "p", html: "<code>&lt;div&gt;</code> is not deprecated and not a mistake. It means \"a box with no meaning of its own\", and sometimes that is exactly true — a wrapper that exists only so CSS has something to grid, a row, a card shell." },
+      { t: "note", variant: "tip", html: "<b>The test: could you describe this box to someone over the phone without mentioning how it looks?</b> \"The site menu\" — that is <code>nav</code>. \"The article\" — <code>main</code> or <code>article</code>. \"The thing that holds the three columns\" — that is a <code>div</code>, and reaching for a semantic element there is the opposite mistake, just as wrong and much less common." },
+
+      { t: "mistakes", items: [
+        { bad: "<div class=\"header\">…</div>", why: "The class name tells a human reading the source and nothing else. Assistive tech, search engines and reader modes never see class names.", fix: "<header>…</header>" },
+        { bad: "Two <main> elements on one page", why: "Only one thing can be the main content. Anything jumping to it takes the first, which is usually the wrong one — and the parser keeps both, so nothing warns you.", fix: "One <main>; the other was probably a <section> or the header." },
+        { bad: "<nav> around every group of links", why: "Marking a three-link footer cluster as major navigation fills the landmark menu with entries nobody wants to jump to.", fix: "<nav> for the site menu and the table of contents; plain lists elsewhere." },
+        { bad: "<aside> for the article's own conclusion", why: "aside is announced as complementary — content that could be removed. A conclusion cannot.", fix: "Keep it inside <main>; use <aside> for the sidebar beside it." },
+      ] },
+
+      { t: "recap", items: [
+        "Semantic means the element says what the content <b>is</b>, not how it looks",
+        "<code>header</code> · <code>nav</code> · <code>main</code> · <code>aside</code> · <code>footer</code> create <b>landmarks</b> that can be jumped between",
+        "Exactly one <code>&lt;main&gt;</code> per page; <code>header</code> and <code>footer</code> may repeat",
+        "Screen readers, search engines, reader modes and your own CSS all read them",
+        "None of them change the rendering — that is the point, not a shortcoming",
+        "<code>&lt;div&gt;</code> is right when the box genuinely has no meaning",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is semantic HTML?", a: "Choosing elements for what the content is rather than for how it should look — header, nav, main, article and so on instead of a div with a class name. The rendering is usually identical; what changes is that assistive technology, search engines and reader modes can now tell the parts of the page apart, because a class name means nothing to any of them." },
+        { level: "medium", q: "Why should there be only one main element per page?", a: "Because it identifies the page's primary content, and a page cannot have two primary contents. Assistive tech and skip links jump to the first one, so a second makes that jump unpredictable — and since nothing repairs or warns about it, the page looks perfectly correct while the skip link lands in the banner." },
+        { level: "hard", q: "If semantic elements do not change the rendering, what is the business case for them?", a: "Three things that are all measurable. Search: content inside main is weighted differently from a footer that repeats across every page, and reader modes and rich results depend on being able to identify the article. Accessibility: landmarks are what let a keyboard or screen reader user skip a forty-item menu on every page, which in many countries is also a legal requirement. Maintenance: main p is a selector that survives a redesign, and .wrapper-inner-2 p is not." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-article-section",
+    order: 25,
+    title: "Article, Section, or Just a Div",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Choose between <code>article</code>, <code>section</code> and <code>div</code> with a test you can apply",
+        "Give every <code>&lt;section&gt;</code> the heading it requires",
+        "Know why heading levels still decide the outline",
+        "Assemble a whole page from everything this course has covered",
+      ] },
+
+      { t: "hook",
+        q: "Three elements, identical rendering, and the most-argued question in HTML: is this an <code>article</code>, a <code>section</code>, or a <code>div</code>? Two of them have a real test. What is it?",
+        why: "<b>Article: would it still make sense somewhere else?</b> A blog post in a feed reader, a product card in search results — yes, article. <b>Section: is it a named part of something bigger?</b> Chapter three of a guide only makes sense inside the guide — section. Neither — <code>div</code>." },
+
+      { t: "def",
+        term: "article",
+        en: "A self-contained piece of content that would still make sense if it were taken out and published somewhere else." },
+
+      { t: "def",
+        term: "section",
+        en: "A thematic part of a larger whole, with a heading that names it." },
+
+      { t: "syntax",
+        intro: "The three, and what each claims about the box.",
+        form: "<article>          stands alone anywhere\n  <h2>Poha Chivda</h2>\n  <section>        a named part of THIS article\n    <h3>Ingredients</h3>\n  </section>\n</article>\n\n<div>              a box with no meaning: CSS needs a handle</div>",
+        parts: [
+          { bit: "<article>", says: "Self-contained. A blog post, a product card, a comment, a news item. If it appeared alone in a feed reader it would still make sense." },
+          { bit: "<section>", says: "A named part of something. It <b>needs a heading</b> — a section nobody can name is not a section, it is a <code>div</code>." },
+          { bit: "<h3>", says: "That heading. Section and heading arrive together, which is the fastest way to tell whether you actually wanted a section." },
+          { bit: "<div>", says: "No claim at all. A layout wrapper, a grid row, a styling hook. Still correct, still common, and not a failure." },
+        ],
+        note: "They nest both ways round and both are right. An <code>&lt;article&gt;</code> divided into <code>&lt;section&gt;</code>s is one long post with parts; a <code>&lt;section&gt;</code> holding several <code>&lt;article&gt;</code>s is \"Latest posts\" holding posts.",
+      },
+
+      { t: "code", file: "post.html", code: "<main>\n  <article>\n    <header>\n      <h2>Poha Chivda</h2>\n      <p>By Ravi, <time datetime=\"2026-08-06\">6 August</time></p>\n    </header>\n\n    <section>\n      <h3>Ingredients</h3>\n      <ul><li>Poha</li><li>Peanuts</li></ul>\n    </section>\n\n    <section>\n      <h3>Method</h3>\n      <ol><li>Heat the oil</li><li>Fry the peanuts</li></ol>\n    </section>\n\n    <footer>\n      <p>Filed under snacks</p>\n    </footer>\n  </article>\n</main>", output: "One recipe with a byline, two named parts, and a footer — all inside the page's main content." },
+      { t: "psoft", html: "Everything in that snippet came from an earlier module: the heading levels, the <code>&lt;time datetime&gt;</code>, the two list types, the header and footer belonging to their container. The only new elements are <code>article</code> and <code>section</code> — this module is mostly the point at which the rest clicks together." },
+
+      { t: "h2", n: "1", text: "A section without a heading is a div" },
+      { t: "p", html: "This is the single most reliable rule in the module, and it settles most arguments before they start. If you cannot write the heading, the box is not a thematic part of anything — it is a wrapper, and a wrapper is a <code>&lt;div&gt;</code>." },
+      { t: "p", html: "The reason is what a section claims. It says \"the document has a part here\", and a part with no name cannot appear in any outline, be announced, or be linked to. It is a promise the markup never keeps." },
+
+      { t: "note", variant: "warn", html: "<b>The outline algorithm never happened.</b> HTML5 was specified so that each <code>&lt;section&gt;</code> would restart heading levels — an <code>&lt;h1&gt;</code> inside a section would automatically become a sub-heading. It sounded excellent and <b>no browser or screen reader ever implemented it</b>; the spec removed it. So <code>&lt;h1&gt;</code> inside a <code>&lt;section&gt;</code> is still an <code>&lt;h1&gt;</code>, and the rules from Module 3 stand unchanged: one <code>h1</code>, do not skip levels. Advice telling you otherwise is real, was once correct, and is now wrong." },
+
+      { t: "h2", n: "2", text: "Article or section: worked examples" },
+      { t: "note", variant: "tip", html: "<b>A blog post on a listing page</b> → <code>article</code>. It makes sense on its own.<br><b>Each comment under it</b> → <code>article</code>. Same test — a comment is self-contained.<br><b>\"Ingredients\" inside a recipe</b> → <code>section</code>. Meaningless without the recipe.<br><b>\"Latest posts\" wrapping five posts</b> → <code>section</code> holding five <code>article</code>s.<br><b>The three-column grid wrapper</b> → <code>div</code>. It exists for CSS.<br><b>A product card in a shop</b> → <code>article</code>. It appears in search results alone.<br><br>Still unsure? Choose <code>div</code>. A wrong <code>div</code> claims nothing; a wrong <code>article</code> tells every machine that a fragment is a complete work." },
+
+      { t: "h2", n: "3", text: "The whole page, assembled" },
+      { t: "code", file: "index.html", code: "<body>\n  <header>\n    <h1>Mochi's Kitchen</h1>\n    <nav>\n      <ul>\n        <li><a href=\"index.html\">Home</a></li>\n        <li><a href=\"about.html\">About</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <main>\n    <section>\n      <h2>Latest recipes</h2>\n\n      <article>\n        <h3>Poha Chivda</h3>\n        <p>Twenty minutes, one pan.</p>\n      </article>\n\n      <article>\n        <h3>Masala Peanuts</h3>\n        <p>Ten minutes, no oven.</p>\n      </article>\n    </section>\n  </main>\n\n  <aside>\n    <h2>About the cook</h2>\n    <p>Ravi has been cooking since 2019.</p>\n  </aside>\n\n  <footer>\n    <p>&copy; 2026 Mochi's Kitchen</p>\n  </footer>\n</body>", output: "A complete page: banner and menu, two recipes in a named group, a sidebar, and a footer." },
+      { t: "psoft", html: "Read only the headings — <i>Mochi's Kitchen, Latest recipes, Poha Chivda, Masala Peanuts, About the cook</i> — and you have the page. That is the outline from Module 3, still built entirely from <code>h1</code> to <code>h6</code>, with the landmarks sitting alongside it rather than replacing it." },
+
+      { t: "mistakes", items: [
+        { bad: "<section class=\"wrapper\">…</section>", why: "No heading and no name — it is a layout box wearing a semantic element.", fix: "<div class=\"wrapper\">…</div>" },
+        { bad: "<article> for \"Ingredients\" inside a recipe", why: "It is not self-contained: alone in a feed it would be a list of items for nothing.", fix: "<section><h3>Ingredients</h3>…</section>" },
+        { bad: "<section><h1>Method</h1></section> — expecting it to become an h3", why: "The outline algorithm was specified, never implemented anywhere, and removed. That h1 is a page-level heading.", fix: "<section><h3>Method</h3></section>" },
+        { bad: "Wrapping every div on the page in <section> to be \"more semantic\"", why: "Sections you cannot name are noise in the outline, and noise is worse than silence.", fix: "Use <div> unless you can write the heading." },
+      ] },
+
+      { t: "recap", items: [
+        "<b>article</b> = would still make sense somewhere else, on its own",
+        "<b>section</b> = a named part of something bigger, and it <b>needs its heading</b>",
+        "<b>div</b> = no meaning, only a handle for CSS — still correct, still common",
+        "If you cannot write the heading, it is a <code>div</code>",
+        "The outline algorithm never shipped: <code>h1</code>–<code>h6</code> still decide the outline",
+        "Unsure? <code>div</code> — a wrong <code>div</code> claims nothing",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between article and section?", a: "An article is self-contained — it would still make sense republished elsewhere, like a blog post, a comment or a product card. A section is a named thematic part of something bigger, like \"Ingredients\" inside a recipe, and it needs a heading. They nest either way round: an article split into sections, or a section holding several articles." },
+        { level: "medium", q: "Does putting an h1 inside a section make it behave like a lower-level heading?", a: "No. HTML5 specified an outline algorithm that would have done exactly that, but no browser or assistive technology ever implemented it and it was removed from the spec. Heading levels are still absolute, so the old rules hold: one h1 per page and no skipped levels. It is worth knowing because plenty of still-published advice says the opposite and was written while the algorithm was expected to arrive." },
+        { level: "hard", q: "How do you decide between section and div when both would render identically?", a: "Try to write the section's heading. If there is a name for what the box contains — a thematic part of the document — it is a section and that heading belongs in the markup. If the box exists only so CSS has something to position, it has no name and it is a div. Reaching for section everywhere is a common overcorrection: an unnamed section adds an empty entry to the document's structure, which is worse than a div that claimed nothing at all." },
       ] },
     ],
   },

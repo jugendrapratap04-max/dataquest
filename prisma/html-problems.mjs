@@ -166,6 +166,29 @@ export const htmlProblems = [
     ],
     "html,text,semantics"),
 
+  /* Added later than the rest of Module 3: this lesson was the only one in the
+   * course sitting on a single problem, which is below the bar `npm run
+   * syllabus` enforces (two, for FULL standard). Caught by counting problems
+   * per lesson rather than by reading. */
+  P("html-headings-paragraphs", 636, "html-spacing-not-breaks", "Spacing Is Not a Line Break", "Medium",
+    "This page has the two commonest heading-and-paragraph mistakes at once:\n\n- **two `h1` elements** — two answers to \"what is this page about\", which is none. `Study Notes` is the page; `Biology` is a section under it\n- **empty `<br>` tags used to push things apart**. Paragraphs already carry their own spacing, and each of those breaks tells everything reading the page that there is a meaningful line break there\n\nFix both: one `h1`, `Biology` becomes an `h2`, and every `<br>` goes. The two body lines stay as paragraphs, and no words change.",
+    "<h1>Study Notes</h1>\n<br><br>\n<h1>Biology</h1>\n<p>Every cell has a membrane.</p>\n<br><br>\n<p>Mitochondria release energy.</p>\n",
+    "<h1>Study Notes</h1>\n<h2>Biology</h2>\n<p>Every cell has a membrane.</p>\n<p>Mitochondria release energy.</p>\n",
+    [
+      { find: "h1", count: 1, says: "exactly one <h1> — the page has one subject" },
+      { find: "h1", text: true, contains: "Study Notes", says: "and it is \"Study Notes\"" },
+      { find: "h2", count: 1, says: "\"Biology\" is now an <h2> section under it" },
+      { find: "h2", text: true, contains: "Biology", says: "with its wording unchanged" },
+      { find: "br", count: 0, says: "no <br> left — paragraphs bring their own spacing" },
+      { find: "p", count: 2, says: "the two body lines are still paragraphs" },
+    ],
+    [
+      "One `h1` per page. Biology sits under Study Notes, so it is one level down.",
+      "`<br>` is for a break that belongs to the text — an address, a verse — never for a gap.",
+      "Deleting the breaks changes nothing visible, because `<p>` already has space above and below it.",
+    ],
+    "html,text,semantics"),
+
   /* ------------------------------------------ html-text-meaning ---- */
   P("html-text-meaning", 608, "html-emphasis", "Mean What You Mark", "Medium",
     "This safety notice is styled by hand and says nothing to anything that is not a pair of eyes.\n\nRewrite it so the markup carries the meaning:\n\n- `Do not` is genuinely important — use the element that says so\n- `Cell Structure` here is a **term being introduced**, not something important — use the element for that\n- the deadline `2026-09-01` should be machine-readable, shown as `1 September`\n\nKeep all the visible words the same.",
@@ -653,4 +676,90 @@ export const htmlProblems = [
       "`<legend>` must be the first thing inside `<fieldset>`, before the radios.",
     ],
     "html,forms,accessibility"),
+
+  /* ---------------------------------------------- html-semantic ----
+   *
+   * Parity checked in linkedom and DOMParser before writing: 12 of 12 identical
+   * across header/nav/main/article/section/aside/footer and their nesting. The
+   * one that decides whether 633 is possible at all: a SECOND <main> survives
+   * parsing in both engines (neither repairs or drops it), so "there should be
+   * exactly one" is a real assertion rather than one the parser has already
+   * satisfied. */
+  P("html-semantic", 632, "html-landmarks", "Give the Page Its Landmarks", "Easy",
+    "This page is built entirely from `div`s with class names. It renders correctly and tells nothing that is not a pair of eyes what any part of it is — a screen reader's landmark menu is empty.\n\nReplace each `div` with the element that says what it holds:\n\n- `class=\"header\"` → the site banner\n- `class=\"nav\"` → the major navigation\n- `class=\"main\"` → the page's own content\n- `class=\"footer\"` → the closing content\n\nDrop the class attributes as you go — the element names carry the meaning now. Change nothing else; the page should look exactly the same afterwards, and that is the point.",
+    "<div class=\"header\">\n  <h1>Mochi's Kitchen</h1>\n  <div class=\"nav\">\n    <ul>\n      <li><a href=\"index.html\">Home</a></li>\n      <li><a href=\"about.html\">About</a></li>\n    </ul>\n  </div>\n</div>\n\n<div class=\"main\">\n  <h2>Poha Chivda</h2>\n  <p>Twenty minutes, one pan.</p>\n</div>\n\n<div class=\"footer\">\n  <p>Written by Ravi</p>\n</div>\n",
+    "<header>\n  <h1>Mochi's Kitchen</h1>\n  <nav>\n    <ul>\n      <li><a href=\"index.html\">Home</a></li>\n      <li><a href=\"about.html\">About</a></li>\n    </ul>\n  </nav>\n</header>\n\n<main>\n  <h2>Poha Chivda</h2>\n  <p>Twenty minutes, one pan.</p>\n</main>\n\n<footer>\n  <p>Written by Ravi</p>\n</footer>\n",
+    [
+      { find: "header", count: 1, says: "a <header> for the site banner" },
+      { find: "header nav", exists: true, says: "the <nav> is inside the header, where the menu was" },
+      { find: "nav ul li a", atLeast: 2, says: "the menu links are still a list inside the nav" },
+      { find: "main", count: 1, says: "exactly one <main> for the page's own content" },
+      { find: "main h2", text: true, contains: "Poha Chivda", says: "the recipe heading is inside <main>" },
+      { find: "footer", count: 1, says: "a <footer> for the closing content" },
+      { find: "div", count: 0, says: "no meaningless <div> left — every box now says what it is" },
+    ],
+    [
+      "Each `div` becomes the element that names what it holds: header, nav, main, footer.",
+      "The nav stays inside the header, and the list stays inside the nav.",
+      "Remove the class attributes — the element name is the meaning now.",
+    ],
+    "html,semantic,accessibility"),
+
+  P("html-semantic", 633, "html-two-mains", "Skip to the Wrong Content", "Medium",
+    "This page renders perfectly and its \"skip to main content\" link lands on the **logo and menu** instead of the recipe. A landmark list shows **two identical \"main\" entries**.\n\nThe banner was wrapped in a `main` of its own — but the banner is the part repeated on every page, which is exactly what `main` is supposed to exclude.\n\nFix it so the page has **one** `main`, holding only the recipe, and the banner sits in a `header` instead. Do not delete any content and do not touch the words.",
+    "<main>\n  <header>\n    <h1>Mochi's Kitchen</h1>\n    <nav><ul><li><a href=\"index.html\">Home</a></li></ul></nav>\n  </header>\n</main>\n\n<main>\n  <h2>Poha Chivda</h2>\n  <p>Twenty minutes, one pan.</p>\n</main>\n",
+    "<header>\n  <h1>Mochi's Kitchen</h1>\n  <nav><ul><li><a href=\"index.html\">Home</a></li></ul></nav>\n</header>\n\n<main>\n  <h2>Poha Chivda</h2>\n  <p>Twenty minutes, one pan.</p>\n</main>\n",
+    [
+      { find: "main", count: 1, says: "exactly one <main> on the page" },
+      { find: "main h2", text: true, contains: "Poha Chivda", says: "the one <main> holds the recipe" },
+      { find: "main h1", count: 0, says: "the site title is no longer inside <main>" },
+      { find: "main nav", count: 0, says: "and neither is the menu" },
+      { find: "header h1", text: true, contains: "Mochi's Kitchen", says: "the site title sits in a <header>" },
+      { find: "header nav ul li a", exists: true, says: "the menu is still in the header, unchanged" },
+    ],
+    [
+      "Only one thing can be the main content — and the banner appears on every page.",
+      "Delete the outer `<main>` tags around the header; keep everything inside them.",
+      "The recipe's `<main>` stays exactly as it is.",
+    ],
+    "html,semantic,debugging"),
+
+  /* --------------------------------------- html-article-section ---- */
+  P("html-article-section", 634, "html-articles-in-section", "Posts in a Named Group", "Easy",
+    "A listing page: two recipes under the heading `Latest recipes`.\n\nEach recipe is **self-contained** — it would still make sense on its own in a feed reader — so each one is an `article`. The group around them has a name, so it is a `section` carrying that heading.\n\nInside `main`, build:\n\n- one `section` whose first thing is an `h2` reading `Latest recipes`\n- inside it, **two** `article` elements, each with an `h3` for its title (`Poha Chivda` and `Masala Peanuts`) and a `p` of description\n\nThe words are already written below — they just need the right boxes.",
+    "<main>\n  <!-- a section headed \"Latest recipes\", holding two articles -->\n\n  <!-- Poha Chivda — Twenty minutes, one pan. -->\n  <!-- Masala Peanuts — Ten minutes, no oven. -->\n</main>\n",
+    "<main>\n  <section>\n    <h2>Latest recipes</h2>\n\n    <article>\n      <h3>Poha Chivda</h3>\n      <p>Twenty minutes, one pan.</p>\n    </article>\n\n    <article>\n      <h3>Masala Peanuts</h3>\n      <p>Ten minutes, no oven.</p>\n    </article>\n  </section>\n</main>\n",
+    [
+      { find: "main section", count: 1, says: "one <section> inside <main>" },
+      { find: "section h2", text: true, contains: "Latest recipes", says: "the section is headed \"Latest recipes\"" },
+      { find: "section article", count: 2, says: "two <article> elements inside it — one per recipe" },
+      { find: "article h3", count: 2, says: "each article has its own <h3> title" },
+      { find: "article h3", text: true, contains: "Masala Peanuts", says: "one of them is \"Masala Peanuts\"" },
+      { find: "article p", count: 2, says: "each article has a paragraph of description" },
+    ],
+    [
+      "A recipe would make sense on its own, so each is an `article`.",
+      "The group has a name, so it is a `section` — and a section needs its heading.",
+      "Heading levels do not restart inside a section: h2 for the group, h3 for each post.",
+    ],
+    "html,semantic"),
+
+  P("html-article-section", 635, "html-section-or-div", "One Is Not a Section", "Medium",
+    "Two problems here, and they pull in opposite directions.\n\n- the `div` around the recipe's method is a genuine **named part** of the recipe — it should be a `section`, and it needs an `h3` heading reading `Method`\n- the `div` with `class=\"layout\"` is a **layout wrapper**. Somebody made it a `section` to be \"more semantic\", and a section nobody can name is noise in the outline. Turn it back into a `div`\n\nThe rule that settles both: **if you cannot write the heading, it is a `div`.**\n\nKeep the article, its `h2` and all the words exactly as they are.",
+    "<article>\n  <h2>Poha Chivda</h2>\n\n  <section class=\"layout\">\n    <div>\n      <p>Heat the oil, fry the peanuts, fold in the poha.</p>\n    </div>\n  </section>\n</article>\n",
+    "<article>\n  <h2>Poha Chivda</h2>\n\n  <div class=\"layout\">\n    <section>\n      <h3>Method</h3>\n      <p>Heat the oil, fry the peanuts, fold in the poha.</p>\n    </section>\n  </div>\n</article>\n",
+    [
+      { find: "article > h2", text: true, contains: "Poha Chivda", says: "the article keeps its <h2> title" },
+      { find: "div.layout", count: 1, says: "the layout wrapper is a <div> again" },
+      { find: "section.layout", count: 0, says: "and is no longer claiming to be a section" },
+      { find: "section", count: 1, says: "exactly one <section> — the method, which has a name" },
+      { find: "section h3", text: true, contains: "Method", says: "that section carries an <h3> heading reading \"Method\"" },
+      { find: "section p", text: true, contains: "fry the peanuts", says: "the method text is inside it, unchanged" },
+    ],
+    [
+      "A section needs a heading. The method has one you can write: `Method`.",
+      "A box that exists only for CSS has no name — that is a `div`.",
+      "Keep the class on the wrapper; only the element name changes.",
+    ],
+    "html,semantic,structure"),
 ];
