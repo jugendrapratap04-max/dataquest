@@ -145,4 +145,61 @@ export const htmlProblems = [
       "Alt text should describe what the image shows, not say the word \"image\".",
     ],
     "html,attributes,debugging"),
+
+  /* ------------------------------------ html-headings-paragraphs ---- */
+  P("html-headings-paragraphs", 607, "html-outline", "Give It an Outline", "Easy",
+    "Turn this flat page into a structured one.\n\n`Study Notes` is the page title. `Biology` and `Chemistry` are its two sections, and `Cell Structure` is a subsection under Biology.\n\nUse the right heading level for each — and do not skip a level on the way down. Leave the two body lines as paragraphs.",
+    "<p>Study Notes</p>\n<p>Biology</p>\n<p>Cell Structure</p>\n<p>Every cell has a membrane.</p>\n<p>Chemistry</p>\n<p>Atoms bond to form molecules.</p>\n",
+    "<h1>Study Notes</h1>\n<h2>Biology</h2>\n<h3>Cell Structure</h3>\n<p>Every cell has a membrane.</p>\n<h2>Chemistry</h2>\n<p>Atoms bond to form molecules.</p>\n",
+    [
+      { find: "h1", count: 1, says: "exactly one <h1> for the page title" },
+      { find: "h1", text: true, contains: "Study Notes", says: "the <h1> is \"Study Notes\"" },
+      { find: "h2", count: 2, says: "two <h2> sections" },
+      { find: "h3", count: 1, says: "one <h3> subsection under Biology" },
+      { find: "h3", text: true, contains: "Cell Structure", says: "the <h3> is \"Cell Structure\"" },
+      { find: "p", count: 2, says: "only the two body lines remain as <p>" },
+    ],
+    [
+      "One h1 per page — it answers \"what is this page about\".",
+      "Biology and Chemistry sit at the same level, so they take the same tag.",
+      "Cell Structure is inside Biology, so it goes one level deeper — h3, not h4.",
+    ],
+    "html,text,semantics"),
+
+  /* ------------------------------------------ html-text-meaning ---- */
+  P("html-text-meaning", 608, "html-emphasis", "Mean What You Mark", "Medium",
+    "This safety notice is styled by hand and says nothing to anything that is not a pair of eyes.\n\nRewrite it so the markup carries the meaning:\n\n- `Do not` is genuinely important — use the element that says so\n- `Cell Structure` here is a **term being introduced**, not something important — use the element for that\n- the deadline `2026-09-01` should be machine-readable, shown as `1 September`\n\nKeep all the visible words the same.",
+    "<p><span style=\"font-weight:bold\">Do not</span> submit after\n<span style=\"font-style:italic\">Cell Structure</span> closes on 1 September.</p>\n",
+    "<p><strong>Do not</strong> submit after\n<i>Cell Structure</i> closes on <time datetime=\"2026-09-01\">1 September</time>.</p>\n",
+    [
+      { find: "strong", text: true, contains: "Do not", says: "\"Do not\" is marked with <strong>" },
+      { find: "i", text: true, contains: "Cell Structure", says: "\"Cell Structure\" is marked with <i> as a term" },
+      { find: "time", attr: "datetime", equals: "2026-09-01", says: "<time> carries datetime=\"2026-09-01\"" },
+      { find: "time", text: true, contains: "1 September", says: "the visible date still reads \"1 September\"" },
+      { find: "span[style]", count: 0, says: "no hand-styled <span> left" },
+    ],
+    [
+      "`strong` means important. `b` only means bold.",
+      "A term being introduced is `i`, not `em` — `em` is stress you would hear.",
+      "`<time datetime=\"2026-09-01\">1 September</time>` — machine form in the attribute, human form in the text.",
+    ],
+    "html,text,semantics"),
+
+  P("html-text-meaning", 609, "html-code-block", "Show Some Code", "Medium",
+    "Write a short page documenting a shortcut:\n\n- an `h2` reading `Saving your work`\n- a paragraph telling the reader to press **Ctrl** and **S** — each key marked as a keyboard key, separately\n- a code block showing these two lines exactly, with the indentation preserved:\n\n```\nfunction save() {\n  return true;\n}\n```\n\nRemember which pair of elements a code block needs.",
+    "<h2>Saving your work</h2>\n\n<!-- a paragraph with two <kbd> keys, then a code block -->\n",
+    "<h2>Saving your work</h2>\n<p>Press <kbd>Ctrl</kbd> + <kbd>S</kbd> to save.</p>\n<pre><code>function save() {\n  return true;\n}</code></pre>\n",
+    [
+      { find: "h2", text: true, contains: "Saving your work", says: "an <h2> reading \"Saving your work\"" },
+      { find: "kbd", count: 2, says: "two <kbd> elements — one per key" },
+      { find: "pre code", exists: true, says: "a <code> inside a <pre> for the code block" },
+      { find: "pre code", text: true, contains: "function save()", says: "the code block contains the function" },
+      { find: "pre code", text: true, contains: "return true", says: "the second line is there too" },
+    ],
+    [
+      "Mark each key on its own: `<kbd>Ctrl</kbd> + <kbd>S</kbd>`.",
+      "A code block needs both: `pre` keeps the shape, `code` says what it is.",
+      "Do not indent the lines inside `pre` to match your HTML — that indentation would show on screen.",
+    ],
+    "html,text,code"),
 ];

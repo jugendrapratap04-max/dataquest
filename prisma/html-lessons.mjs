@@ -474,6 +474,149 @@ export const htmlLessons = [
   },
 
   /* ---------------------------------------------------------------------------
+   * MODULE 1 — ENVIRONMENT SETUP
+   *
+   * Short on purpose. Nobody learns anything from a tour of a settings screen,
+   * and a student who cannot see their own page change is going to give up long
+   * before any lesson about elements helps them.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-setup",
+    order: 6,
+    title: "Your Setup: Editor, Live Server, First File",
+    minutes: 12,
+    content: [
+      { t: "objectives", items: [
+        "Have VS Code installed with the two extensions worth having",
+        "See your page reload by itself the moment you save",
+        "Organise a project so it still makes sense at twenty files",
+        "Know why a file must be called <code>index.html</code>",
+      ] },
+
+      { t: "hook",
+        q: "You can write HTML in Notepad and open it in any browser. So why does anyone install anything?",
+        why: "Because of the loop. Edit, save, switch window, press F5, look. Do that four hundred times in an afternoon and the pressing is most of the afternoon. Everything below exists to shorten that loop." },
+
+      { t: "h2", n: "1", text: "The editor" },
+      { t: "p", html: "Install <b>VS Code</b> — it is free, it is what most of the industry uses, and every tutorial you find assumes it. Then two extensions, and only two:" },
+
+      { t: "note", variant: "tip", html: "<b>Live Server</b> (Ritwick Dey) — right-click your file, \"Open with Live Server\", and the browser reloads itself every time you save. This is the one that matters.<br><br><b>Prettier</b> — formats your file on save, so indentation stops being something you maintain by hand. In HTML, indentation is how you spot a tag that never closed." },
+
+      { t: "p", html: "Resist the rest for now. An editor loaded with twenty extensions you do not understand is slower and no better, and the ones that auto-write HTML for you will happily teach you nothing." },
+
+      { t: "note", variant: "key", html: "Live Server also changes something real, not just convenience. Opening a file directly gives you <code>file:///</code>; Live Server gives you <code>http://127.0.0.1:5500</code> — an actual server on your own machine. Some things simply do not work over <code>file:///</code>, and later modules depend on the difference." },
+
+      { t: "h2", n: "2", text: "Where files go" },
+      { t: "syntax",
+        intro: "This shape works from your first page to a real site. Start here even for one file.",
+        form: "my-site/\n  index.html      <- the home page, this exact name\n  about.html\n  css/\n    style.css\n  images/\n    logo.png\n  js/\n    main.js",
+        parts: [
+          { bit: "my-site", says: "The project folder. Everything lives inside it, so the whole site can be moved or uploaded as one thing." },
+          { bit: "index.html", says: "The name servers look for when nobody asks for a file. <code>example.com</code> serves <code>index.html</code> without it ever appearing in the address." },
+          { bit: "about.html", says: "Other pages sit beside it. Lowercase, no spaces — a space becomes <code>%20</code> in every link to it." },
+          { bit: "css", says: "Stylesheets, in their own folder. One file is fine; the folder is for when it is not one file." },
+          { bit: "images", says: "Pictures. Keeping them apart is what stops the project folder becoming forty items you have to read past." },
+          { bit: "js", says: "Scripts, for later. Empty for now and worth creating anyway." },
+        ],
+        note: "Lowercase names, hyphens instead of spaces, no capitals. Windows treats <code>About.html</code> and <code>about.html</code> as the same file and most servers do not — which is a link that works on your machine and 404s for everyone else.",
+      },
+
+      { t: "h2", n: "3", text: "The loop" },
+      { t: "p", html: "Create the folder, create <code>index.html</code>, type <code>!</code> and press Tab — VS Code writes the whole skeleton from Module 2 for you. Then right-click the file and choose Open with Live Server." },
+      { t: "p", html: "Now put the browser on one half of the screen and the editor on the other, and change a heading. It updates as you save, with nothing to press. That is the loop, and it is the single biggest thing separating an hour that teaches you something from an hour that exhausts you." },
+
+      { t: "mistakes", items: [
+        { bad: "my site/About Page.html", why: "Spaces become %20 in every URL, and capitals break on servers that are case-sensitive even though they work on Windows.", fix: "my-site/about-page.html" },
+        { bad: "home.html", why: "A server looking for a default page looks for index.html. Calling it anything else means the address only works with the filename in it.", fix: "index.html" },
+        { bad: "index.html.txt", why: "Windows hides known extensions, so a file saved from Notepad is often really a .txt. The browser then shows your markup as text.", fix: "Turn on file extensions in Explorer, and save from VS Code." },
+      ] },
+
+      { t: "recap", items: [
+        "VS Code, plus <b>Live Server</b> and <b>Prettier</b> — nothing else yet",
+        "Live Server reloads on save and serves over <code>http://</code>, not <code>file:///</code>",
+        "The home page must be called <code>index.html</code>",
+        "Lowercase, hyphens, no spaces — every time",
+        "<code>!</code> then Tab writes the skeleton",
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-devtools",
+    order: 7,
+    title: "DevTools: Seeing What the Browser Sees",
+    minutes: 13,
+    content: [
+      { t: "objectives", items: [
+        "Open DevTools and read the Elements panel",
+        "Understand why what you see there is not your file",
+        "Use the Network panel to tell a broken page from a broken request",
+        "Read the Console instead of guessing",
+      ] },
+
+      { t: "hook",
+        q: "Your page looks wrong. You have read your file four times and it looks right. What now?",
+        why: "Stop reading the file. The file is what you wrote; DevTools shows what the browser actually built out of it — and when those differ, the difference is the bug." },
+
+      { t: "def",
+        term: "DevTools",
+        en: "A set of panels built into every browser that show what the page became: its structure, its styles, its requests and its errors. F12, or right-click and Inspect." },
+
+      { t: "analogy",
+        concept: "Elements panel vs your file",
+        real: "an X-ray, not the photograph",
+        html: "A photograph shows what you presented. An X-ray shows what is actually inside — including the bones you did not know were broken. Your HTML file is the photograph; the Elements panel is the X-ray of what the browser built after repairing your mistakes." },
+
+      { t: "h2", n: "1", text: "Elements: the repaired page" },
+      { t: "p", html: "Right-click anything on any page and choose <b>Inspect</b>. The Elements panel opens with that exact element highlighted, inside the whole tree." },
+      { t: "p", html: "The crucial thing: this is <b>not your file</b>. It is the DOM — the tree the browser built, after it silently repaired everything you got wrong. A tag you never closed shows up closed here. A <code>&lt;p&gt;</code> you nested inside another <code>&lt;p&gt;</code> shows up moved." },
+
+      { t: "note", variant: "key", html: "<b>That difference is the most useful debugging signal you have.</b> When the Elements tree does not match the file you wrote, the browser is telling you exactly which mistake it had to fix — and the shape it chose is why your page looks wrong." },
+
+      { t: "p", html: "You can edit in there — double-click any text or attribute and change it. Nothing is saved; refresh and it is gone. That is what makes it worth doing: it is a free place to try something before touching the file." },
+
+      { t: "h2", n: "2", text: "Network: did it even arrive?" },
+      { t: "p", html: "Open the <b>Network</b> panel and reload. Every request the page made is listed with its status code — the same codes from Module 0." },
+
+      { t: "note", variant: "tip", html: "<b>Image not showing?</b> Network will show a 404 against it, and the path in that row is exactly what the browser asked for. Nine times out of ten it is a folder name or a capital letter.<br><br><b>Style change not applying?</b> If the CSS file is not in the list at all, the <code>&lt;link&gt;</code> never worked — which is a different problem from a rule that is being overridden." },
+
+      { t: "p", html: "There is a <b>Disable cache</b> tickbox there. Turn it on while you work: it removes the entire class of bug where your change is correct and you are looking at yesterday's file." },
+
+      { t: "h2", n: "3", text: "Console: read it" },
+      { t: "p", html: "The <b>Console</b> is where the browser reports what went wrong. It is genuinely worth reading rather than clearing — a red line naming a file and a line number is a better answer than anything you would have guessed." },
+
+      { t: "debug",
+        intro: "A student says \"my image is broken and the path is definitely right\". This is the markup. Decide what to check before opening the fix.",
+        code: "<img src=\"Images/logo.png\" alt=\"Logo\">",
+        symptom: "Broken-image icon on the page. Network panel shows 404 for /Images/logo.png. The folder on disk is called images.",
+        q: "It works when they open the file directly on Windows and breaks once it is on a server. Why?",
+        fix: "<img src=\"images/logo.png\" alt=\"Logo\">",
+        why: "Windows treats <code>Images</code> and <code>images</code> as the same folder, so it worked locally. Almost every real server is case-sensitive and looks for a folder that does not exist. This is the single commonest \"but it works on my machine\" bug in web development, and the Network panel names it in one line: the 404 shows the exact path that was requested, capital and all." },
+
+      { t: "mistakes", items: [
+        { bad: "Reading your HTML file again for the fifth time", why: "The file is what you wrote. The bug is usually in what the browser built from it.", fix: "Open Elements and compare the tree against what you expected." },
+        { bad: "Clearing the console because it looks messy", why: "The red lines name the file and the line. That is the answer you were about to spend twenty minutes looking for.", fix: "Read it first." },
+        { bad: "\"The image path is right\" — without checking Network", why: "The Network row shows the exact path requested. Guessing cannot compete with that.", fix: "Open Network, find the 404, read the path." },
+      ] },
+
+      { t: "recap", items: [
+        "F12 or right-click → Inspect",
+        "<b>Elements</b> shows the DOM — the repaired page, not your file",
+        "Where the tree differs from your file, that gap <b>is</b> the bug",
+        "Edits there are temporary, which makes them safe to experiment with",
+        "<b>Network</b> answers \"did it arrive?\" — and tick Disable cache",
+        "<b>Console</b> names the file and the line. Read it",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between your HTML file and what the Elements panel shows?", a: "The file is the source you wrote. Elements shows the DOM — what the browser built after parsing it, including every repair it made to invalid markup and anything added since by script. They are often not the same, and the difference is usually the bug." },
+        { level: "medium", q: "A page works locally and 404s on images once deployed. Where do you look first?", a: "The Network panel, at the failing request's path. It is nearly always a capital letter or a folder name: Windows is case-insensitive and most servers are not, so a path that worked on the machine it was written on cannot be found anywhere else." },
+      ] },
+    ],
+  },
+
+  /* ---------------------------------------------------------------------------
    * MODULE 2 — HTML BASICS
    *
    * Where the first line of markup is written, and where graded practice starts.
@@ -481,7 +624,7 @@ export const htmlLessons = [
 
   {
     slug: "html-what-it-is",
-    order: 6,
+    order: 8,
     title: "What HTML Actually Is",
     minutes: 14,
     content: [
@@ -559,7 +702,7 @@ export const htmlLessons = [
 
   {
     slug: "html-document-structure",
-    order: 7,
+    order: 9,
     title: "The Shape of Every Page",
     minutes: 15,
     content: [
@@ -638,7 +781,7 @@ export const htmlLessons = [
 
   {
     slug: "html-elements-attributes",
-    order: 8,
+    order: 10,
     title: "Elements, Attributes and Nesting",
     minutes: 16,
     content: [
@@ -712,6 +855,181 @@ export const htmlLessons = [
       { t: "interview", items: [
         { level: "easy", q: "What is the difference between a tag and an element?", a: "The tag is the marker — <code>&lt;p&gt;</code>. The element is the whole thing: opening tag, content and closing tag. People use them interchangeably in conversation and the distinction matters when reading a spec." },
         { level: "medium", q: "Why do empty elements have no closing tag?", a: "Because a closing tag exists to mark where content ends, and these elements have no content. An image is not a wrapper around something — the element itself is the whole thing." },
+      ] },
+    ],
+  },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 3 — TEXT & CONTENT
+   *
+   * Fourteen elements, and the through-line is the same argument the whole
+   * course makes: every one of them exists because it means something, and
+   * choosing by appearance is what produces a page that works for sighted mouse
+   * users and nobody else.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-headings-paragraphs",
+    order: 11,
+    title: "Headings and Paragraphs: the Shape of a Document",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Use the six heading levels to describe structure rather than size",
+        "Explain why skipping from h1 to h3 is a real problem",
+        "Know when a line break is right and when it is a mistake",
+        "Say what <code>&lt;hr&gt;</code> means now, which is not what it used to",
+      ] },
+
+      { t: "hook",
+        q: "A screen reader user presses one key and hears a list of every heading on the page, then jumps to the one they want. What happens to that list if you chose your headings by how big they looked?",
+        why: "It becomes nonsense. Their table of contents is built entirely from your heading levels — so choosing <code>h3</code> because <code>h2</code> looked too big rearranges a menu you never see." },
+
+      { t: "def",
+        term: "Heading level",
+        en: "A number from 1 to 6 saying how deeply nested a section is. h1 is the page, h2 its main sections, h3 subsections of those." },
+
+      { t: "analogy",
+        concept: "heading levels",
+        real: "the contents page of a book",
+        html: "Chapter, section, sub-section. You would not label a sub-section \"Chapter\" because the font looked nicer — the number is a claim about where it sits, and everything that generates a contents page believes it." },
+
+      { t: "syntax",
+        intro: "Six levels, one paragraph element, and two markers.",
+        form: "<h1>Page title</h1>\n<h2>A section</h2>\n<h3>Part of that section</h3>\n\n<p>A paragraph of text.</p>\n\nline one<br>line two\n<hr>",
+        parts: [
+          { bit: "<h1>", says: "The page's subject. One per page — it is the answer to \"what is this page\", and two answers is none." },
+          { bit: "<h2>", says: "Main sections. As many as the page has." },
+          { bit: "<h3>", says: "Subsections of an h2. Never used to jump a level because the size suits you." },
+          { bit: "<p>", says: "One paragraph. Browsers put space above and below it — that space is the paragraph break, so blank lines in your file do nothing." },
+          { bit: "<br>", says: "A line break <b>inside</b> a block of text, where the break is part of the content: an address, a verse. Empty element, no closing tag." },
+          { bit: "<hr>", says: "A thematic break — a change of subject, not a decorative line. It draws a rule because that is the convention, and it means the shift." },
+        ],
+        note: "Six levels exist and pages needing more than three are rare. If you are reaching for <code>h5</code>, the structure underneath it is probably the real problem.",
+      },
+
+      { t: "code", file: "structure.html", code: "<h1>Chocolate Cake</h1>\n\n<h2>Ingredients</h2>\n<p>Flour, sugar, cocoa, eggs.</p>\n\n<h2>Method</h2>\n<h3>Preparing the tin</h3>\n<p>Grease it and line the base.</p>\n<h3>Baking</h3>\n<p>Forty minutes at 180C.</p>", output: "A title, two sections, and two subsections under the second one." },
+      { t: "psoft", html: "Read only the headings and you have the recipe's outline. That is exactly what a screen reader offers its user, and what a search engine reads to work out what the page covers." },
+
+      { t: "h2", n: "1", text: "Why skipping a level matters" },
+      { t: "p", html: "Going <code>h1</code> → <code>h3</code> claims there is an <code>h2</code> section that this belongs to, and there is not. To anything reading the outline, a level has gone missing — the page describes a structure it does not have." },
+      { t: "p", html: "The fix is never to change the level. It is to notice that you only wanted smaller text, and that CSS does that in one line without lying about the structure." },
+
+      { t: "note", variant: "warn", html: "<b><code>&lt;br&gt;</code> is not how you make space.</b> Three of them to push something down is the commonest beginner habit, and it tells everything that reads the page that there are three meaningful line breaks there. Spacing is CSS's job; <code>&lt;br&gt;</code> is for breaks that are part of the text itself." },
+
+      { t: "mistakes", items: [
+        { bad: "<h1>Recipes</h1>\n<h3>Ingredients</h3>", why: "Skips h2, so the outline claims a section that does not exist.", fix: "<h1>Recipes</h1>\n<h2>Ingredients</h2>" },
+        { bad: "<p>Line one</p>\n<br><br>\n<p>Line two</p>", why: "Empty breaks used as spacing. Paragraphs already have space around them, and this adds meaningless breaks to the outline.", fix: "<p>Line one</p>\n<p>Line two</p>" },
+        { bad: "<h1>Home</h1>\n<h1>About us</h1>", why: "Two answers to \"what is this page about\".", fix: "<h1>Home</h1>\n<h2>About us</h2>" },
+      ] },
+
+      { t: "recap", items: [
+        "Heading levels describe <b>structure</b>, never size",
+        "One <code>h1</code> per page; do not skip levels going down",
+        "Screen readers and search engines build the page outline from them",
+        "<code>&lt;p&gt;</code> already carries its own spacing",
+        "<code>&lt;br&gt;</code> is for breaks that belong to the text, not for gaps",
+        "<code>&lt;hr&gt;</code> means a change of subject, not a decorative line",
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-text-meaning",
+    order: 12,
+    title: "Marking Up Meaning in Text",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Choose between <code>strong</code> and <code>b</code> for the right reason",
+        "Quote something so a machine can tell it is a quote",
+        "Show code, keystrokes and output with the element each one has",
+        "Use <code>abbr</code>, <code>time</code> and <code>address</code> where they belong",
+      ] },
+
+      { t: "hook",
+        q: "<code>&lt;b&gt;</code> and <code>&lt;strong&gt;</code> both render bold. Both are valid HTML5. So why does the spec keep both?",
+        why: "Because they are answers to different questions. One says \"draw this differently\"; the other says \"this matters\". A screen reader changes its emphasis for one of them and not the other." },
+
+      { t: "def",
+        term: "Semantic element",
+        en: "An element chosen for what the content means rather than for how it looks." },
+
+      { t: "h2", n: "1", text: "Emphasis, and its lookalikes" },
+      { t: "syntax",
+        intro: "Four elements, two appearances, four different meanings.",
+        form: "<strong>important</strong>     <b>stands out</b>\n<em>stressed</em>            <i>a term, a name, a foreign word</i>",
+        parts: [
+          { bit: "<strong>", says: "This matters — a warning, a deadline, the word that changes the sentence. Screen readers can announce it differently." },
+          { bit: "<b>", says: "Draw attention without claiming importance: a product name in a review, a keyword in a summary. The spec's own description is \"stylistically offset\"." },
+          { bit: "<em>", says: "Stress emphasis — the word you would lean on when reading aloud. \"I never said she took it\" means six different things depending which word is em." },
+          { bit: "<i>", says: "A different voice: a technical term on first use, a ship's name, a phrase in another language. Italic by convention, not by instruction." },
+        ],
+        note: "In doubt, ask whether a person reading aloud would change their voice. Yes means <code>strong</code> or <code>em</code>; no means <code>b</code> or <code>i</code> — or, more often, that CSS was what you wanted.",
+      },
+
+      { t: "h2", n: "2", text: "Quoting" },
+      { t: "syntax",
+        intro: "A long quote, a short one, and the source of either.",
+        form: "<blockquote cite=\"https://example.com/paper\">\n  <p>A quoted passage.</p>\n  <footer>— <cite>The Paper</cite></footer>\n</blockquote>\n\nShe called it <q>a vague but exciting proposal</q>.",
+        parts: [
+          { bit: "<blockquote", says: "A quoted block. Indented by default, and the indent is a consequence of the meaning rather than the reason to use it." },
+          { bit: "cite", says: "A URL for where it came from. Machine-readable; browsers do not display it, which is why people forget it exists." },
+          { bit: "<cite>", says: "The <b>title of a work</b> — a book, a paper, a film. Not the person: the spec is specific, and \"— <cite>Tim Berners-Lee</cite>\" is the common misuse." },
+          { bit: "<q>", says: "A short inline quote. The browser adds the quotation marks itself, and adds the right ones for the page's language — which is why you do not type them." },
+        ],
+        note: "Use <code>&lt;blockquote&gt;</code> because something is quoted, never because you want an indent. CSS indents anything, and a fake quote confuses everything that collects citations.",
+      },
+
+      { t: "h2", n: "3", text: "Code, keys and output" },
+      { t: "syntax",
+        intro: "Four elements that all end up in a monospace font and mean four different things.",
+        form: "<code>const x = 5</code>\n<pre><code>line one\n  indented line</code></pre>\n<kbd>Ctrl</kbd> + <kbd>S</kbd>\n<samp>File missing</samp>\n<var>n</var>",
+        parts: [
+          { bit: "<code>", says: "A fragment of code, inline. Monospace by default and that is the least interesting thing about it." },
+          { bit: "<pre>", says: "Preserves whitespace and line breaks exactly. Everywhere else HTML collapses runs of spaces into one — <code>pre</code> is the exception." },
+          { bit: "<pre><code>", says: "The pair used together for a code block: <code>pre</code> keeps the shape, <code>code</code> says what it is. Neither alone is right." },
+          { bit: "<kbd>", says: "Keys the user should press. Wrap each key separately so a stylesheet can draw each as a key." },
+          { bit: "<samp>", says: "Output <b>from</b> a program — an error message, a printed result. The mirror of <code>kbd</code>." },
+          { bit: "<var>", says: "A variable or placeholder, in prose or in maths." },
+        ],
+        note: "Inside <code>&lt;pre&gt;</code> your indentation is content. Indenting it to match the surrounding HTML puts that indentation on screen, which is why code blocks so often appear pushed to the right.",
+      },
+
+      { t: "h2", n: "4", text: "Three worth knowing" },
+      { t: "syntax",
+        intro: "Small elements that answer a question the plain text cannot.",
+        form: "<abbr title=\"HyperText Markup Language\">HTML</abbr>\n<time datetime=\"2026-08-06\">6 August</time>\n<address>\n  Contact: <a href=\"mailto:hi@example.com\">hi@example.com</a>\n</address>",
+        parts: [
+          { bit: "<abbr", says: "An abbreviation, with the expansion in <code>title</code>. Hovering shows it; more usefully, the expansion is available to anything that needs it." },
+          { bit: "<time", says: "A date or time a machine can read." },
+          { bit: "datetime", says: "The machine-readable form, <code>YYYY-MM-DD</code>. It exists because \"6 August\", \"Aug 6\" and \"06/08\" are the same day and no parser should have to guess — and \"06/08\" means two different days on two continents." },
+          { bit: "<address>", says: "Contact details for the page's author or owner — not any postal address that happens to appear in the text. That is the usual misreading of the name." },
+        ],
+        note: "<code>&lt;time&gt;</code> is what lets a search result show a date beside your article, and a calendar offer to add your event. The visible text stays whatever you want it to be.",
+      },
+
+      { t: "mistakes", items: [
+        { bad: "<blockquote>Some indented text</blockquote>", why: "Used for the indent rather than because anything is quoted. CSS indents; this claims a quotation.", fix: "<p class=\"indented\">Some indented text</p>" },
+        { bad: "<cite>Tim Berners-Lee</cite>", why: "cite is for the title of a work, not the person who made it.", fix: "<cite>Weaving the Web</cite>" },
+        { bad: "<q>\"a direct quote\"</q>", why: "The browser adds quotation marks itself, so this shows two sets.", fix: "<q>a direct quote</q>" },
+        { bad: "<pre>\n    <code>x = 5</code>\n  </pre>", why: "Inside pre, your indentation is content — this puts four spaces on screen.", fix: "<pre><code>x = 5</code></pre>" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>strong</code>/<code>em</code> carry meaning; <code>b</code>/<code>i</code> only change appearance",
+        "Ask whether a reader would change their voice — that is the test",
+        "<code>blockquote</code> for quotations, not for indents; <code>cite</code> is the <b>work</b>",
+        "<code>q</code> supplies its own quotation marks",
+        "<code>pre</code> preserves whitespace; <code>pre</code> + <code>code</code> for blocks",
+        "<code>kbd</code> is input, <code>samp</code> is output",
+        "<code>time datetime=\"\"</code> is what makes a date machine-readable",
+        "<code>address</code> is contact details for the page's owner",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between b and strong?", a: "strong means the content is important — a screen reader may announce it differently, and it survives into anything that reads the page's meaning. b only says \"offset this visually\" with no claim about importance. Both usually render bold, which is why the choice gets made carelessly." },
+        { level: "medium", q: "Why does time have a datetime attribute when the text already shows the date?", a: "Because the visible text is for people and is ambiguous — 06/08 is two different days depending on the country, and \"last Tuesday\" is not a date at all. datetime is an unambiguous machine format, which is what lets a search result show the date and a calendar offer to add the event." },
       ] },
     ],
   },
