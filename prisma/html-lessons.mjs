@@ -2127,11 +2127,11 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Semantic element",
-        en: "An element chosen for what the content <b>is</b>, rather than for how it should look." },
+        en: "An element chosen for what the content is, rather than for how it should look." },
 
       { t: "def",
         term: "Landmark",
-        en: "A region of the page that assistive technology can list and jump between — produced automatically by <code>header</code>, <code>nav</code>, <code>main</code>, <code>aside</code> and <code>footer</code>." },
+        en: "A region of the page that assistive technology can list and jump between — produced automatically by header, nav, main, aside and footer." },
 
       { t: "analogy",
         concept: "semantic elements",
@@ -2314,7 +2314,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Metadata",
-        en: "Information <b>about</b> the page rather than in it — read by browsers, search engines and share previews, and never drawn on screen." },
+        en: "Information about the page rather than in it — read by browsers, search engines and share previews, and never drawn on screen." },
 
       { t: "analogy",
         concept: "the head",
@@ -2402,7 +2402,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Open Graph",
-        en: "A small set of <code>&lt;meta&gt;</code> tags, originally from Facebook and now read by nearly everything, that describe how a page should appear when it is shared." },
+        en: "A small set of meta tags, originally from Facebook and now read by nearly everything, that describe how a page should appear when it is shared." },
 
       { t: "analogy",
         concept: "Open Graph tags",
@@ -2524,7 +2524,7 @@ export const htmlLessons = [
       { t: "h2", n: "1", text: "The five that matter" },
       { t: "note", variant: "key", html: "<b><code>&amp;lt;</code></b> → <b>&lt;</b> — starts a tag, so it must be escaped in text.<br><b><code>&amp;gt;</code></b> → <b>&gt;</b> — ends one. Less dangerous alone, escaped for symmetry and safety.<br><b><code>&amp;amp;</code></b> → <b>&amp;</b> — starts an entity, so it must escape itself.<br><b><code>&amp;quot;</code></b> → <b>\"</b> — needed <i>inside</i> a double-quoted attribute value.<br><b><code>&amp;apos;</code></b> → <b>'</b> — the same, inside a single-quoted one.<br><br>In ordinary text you only really need the first three. In attribute values you need whichever quote you used to open the value." },
 
-      { t: "code", file: "escaped.html", code: "<p>Use the &lt;p&gt; element for text.</p>\n<p>Tom &amp; Jerry</p>\n<p>5 &lt; 10 and 10 &gt; 5</p>\n<a href=\"/x\" title=\"She said &quot;hello&quot;\">link</a>", output: "Use the <p> element for text. / Tom & Jerry / 5 < 10 and 10 > 5 / a link whose tooltip contains real quotation marks." },
+      { t: "code", file: "escaped.html", code: "<p>Use the &lt;p&gt; element for text.</p>\n<p>Tom &amp; Jerry</p>\n<p>5 &lt; 10 and 10 &gt; 5</p>\n<a href=\"/x\" title=\"She said &quot;hello&quot;\">link</a>", output: "Four lines showing the characters themselves: a paragraph tag, an ampersand, a less-than and a greater-than sign, and a link whose tooltip contains real quotation marks." },
       { t: "psoft", html: "Press <b>Try it yourself</b> and change the first line's <code>&amp;lt;p&amp;gt;</code> back to a plain <code>&lt;p&gt;</code>. The sentence breaks apart in the preview exactly as the hook described — which is the fastest way to believe any of this." },
 
       { t: "h2", n: "2", text: "Showing code on a page" },
@@ -2949,7 +2949,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "JSON-LD",
-        en: "The format that description is written in — a block of JSON inside a <code>&lt;script&gt;</code> tag, kept separate from the visible markup." },
+        en: "The format that description is written in — a block of JSON inside a script tag, kept separate from the visible markup." },
 
       { t: "syntax",
         intro: "One script tag, four lines that always look like this, and then the facts.",
@@ -3042,7 +3042,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Media element",
-        en: "<code>&lt;video&gt;</code> or <code>&lt;audio&gt;</code> — a built-in player the browser supplies, controlled entirely by attributes." },
+        en: "The video or audio element — a built-in player the browser supplies, controlled entirely by attributes." },
 
       { t: "syntax",
         intro: "Both elements take the same attributes. This is nearly all of them.",
