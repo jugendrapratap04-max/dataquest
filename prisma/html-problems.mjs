@@ -276,4 +276,78 @@ export const htmlProblems = [
       "A mail link is a scheme, like https: `<a href=\"mailto:hi@example.com\">hi@example.com</a>`.",
     ],
     "html,links,accessibility"),
+
+  /* ------------------------------------------------ html-images ---- */
+  P("html-images", 614, "html-first-image", "A Real Picture, Rendered", "Easy",
+    "The practice area ships its own image folder at `/img-lab/` — so this time the picture will genuinely appear in the preview.\n\nAdd two images under the heading:\n\n- the cat, from `/img-lab/cat.svg`, with alt text that mentions the **cat** and describes what you see\n- below it, the decorative divider from `/img-lab/divider.svg` — decoration a screen reader should skip, so give it the alt value the lesson taught for exactly that\n\nWatch the preview as you type the paths: the moment each one is right, the picture appears.",
+    "<h2>Meet Mochi</h2>\n<p>The office cat reviews every page before it ships.</p>\n\n<!-- the cat, then the divider -->\n",
+    "<h2>Meet Mochi</h2>\n<p>The office cat reviews every page before it ships.</p>\n\n<img src=\"/img-lab/cat.svg\" alt=\"A grey cat curled up asleep\">\n<img src=\"/img-lab/divider.svg\" alt=\"\">\n",
+    [
+      { find: "img[src=\"/img-lab/cat.svg\"]", exists: true, says: "the cat image, src exactly /img-lab/cat.svg" },
+      { find: "img[src=\"/img-lab/cat.svg\"]", attr: "alt", contains: "cat", says: "the cat's alt text describes it — it mentions the cat" },
+      { find: "img[src=\"/img-lab/divider.svg\"]", exists: true, says: "the divider image, from /img-lab/divider.svg" },
+      { find: "img[src=\"/img-lab/divider.svg\"][alt=\"\"]", exists: true, says: "the divider's alt is present and empty — decoration, deliberately skipped" },
+      { find: "h2", text: true, contains: "Meet Mochi", says: "the heading is unchanged" },
+    ],
+    [
+      "An image is `<img src=\"...\" alt=\"...\">` — empty element, no closing tag.",
+      "The paths start with `/` — the root-relative form from the links lesson.",
+      "Decorative images get `alt=\"\"` — the attribute present, the value empty. That is different from leaving alt off.",
+    ],
+    "html,images,accessibility"),
+
+  P("html-images", 615, "html-fix-the-image", "Broken on Every Machine but Yours", "Medium",
+    "This page has two image problems, and the preview shows you both:\n\n- the cat is a **broken icon** — its path was written with capital letters, and this server (like almost every real one) is case-sensitive. The file is `/img-lab/cat.svg`, all lowercase. It also has **no alt at all**, so while it is broken, a visitor is told nothing\n- the divider has alt text that a screen reader would read out — `\"decorative divider graphic\"` — which is noise. It is pure decoration; give it the empty alt that says so\n\nFix both. The moment the cat's path is right, it appears.",
+    "<h2>My Cat</h2>\n<img src=\"/img-lab/CAT.svg\">\n<p>She sleeps eighteen hours a day.</p>\n<img src=\"/img-lab/divider.svg\" alt=\"decorative divider graphic\">\n",
+    "<h2>My Cat</h2>\n<img src=\"/img-lab/cat.svg\" alt=\"A grey cat curled up asleep\">\n<p>She sleeps eighteen hours a day.</p>\n<img src=\"/img-lab/divider.svg\" alt=\"\">\n",
+    [
+      { find: "img[src=\"/img-lab/cat.svg\"]", exists: true, says: "the cat's src is exactly /img-lab/cat.svg — lowercase, as the file is named" },
+      { find: "img[src=\"/img-lab/cat.svg\"]", attr: "alt", contains: "cat", says: "the cat now has alt text describing it" },
+      { find: "img[src=\"/img-lab/divider.svg\"][alt=\"\"]", exists: true, says: "the divider's alt is empty — decoration, skipped aloud" },
+      { find: "img", count: 2, says: "still exactly two images" },
+      { find: "p", text: true, contains: "eighteen hours", says: "the paragraph is unchanged" },
+    ],
+    [
+      "Case matters on servers: `CAT.svg` and `cat.svg` are different files everywhere except Windows.",
+      "A missing alt is worse than an empty one — screen readers may read the filename aloud. Describe the cat.",
+      "Decoration gets `alt=\"\"` — present, empty, deliberate.",
+    ],
+    "html,images,debugging"),
+
+  /* ----------------------------------------- html-image-figures ---- */
+  P("html-image-figures", 616, "html-figure", "A Figure With Its Caption", "Easy",
+    "The sunset photo at `/img-lab/photo.png` needs a caption that stays attached to it.\n\nBuild a **figure**:\n\n- the image inside it, with alt text that mentions the **sun** or the **sea** — what the picture shows\n- a **figcaption** reading `Sunset from the harbour wall` — why it is here\n\nRemember these are two different jobs: the alt describes, the caption comments. Do not write the same words in both.",
+    "<h2>From the Photo Diary</h2>\n\n<!-- a figure: the photo, then its caption -->\n",
+    "<h2>From the Photo Diary</h2>\n\n<figure>\n  <img src=\"/img-lab/photo.png\" alt=\"The sun low over a dark sea\">\n  <figcaption>Sunset from the harbour wall</figcaption>\n</figure>\n",
+    [
+      { find: "figure img", exists: true, says: "an image inside a <figure>" },
+      { find: "figure img", attr: "src", equals: "/img-lab/photo.png", says: "the image is the sunset photo from /img-lab/" },
+      { find: "figure img", attr: "alt", notEmpty: true, says: "the image has alt text of its own" },
+      { find: "figure figcaption", text: true, contains: "harbour wall", says: "the caption reads \"Sunset from the harbour wall\", inside the figure" },
+    ],
+    [
+      "The wrapper is `<figure> ... </figure>`; both the image and the caption live inside it.",
+      "The caption element is `<figcaption>`, not a paragraph.",
+      "Alt says what the picture shows; the caption says why it is on the page.",
+    ],
+    "html,images,semantics"),
+
+  P("html-image-figures", 617, "html-image-manners", "Stop the Page Jumping", "Medium",
+    "This article loads, then lurches — neither image declares its size, so the text moves twice as they arrive. And both images load immediately, though the sunset sits several screens down.\n\nFix three things:\n\n- the banner is `640 × 160` — declare its `width` and `height`\n- the photo is `320 × 200` — declare its too\n- the photo is far below the first screen, so give it `loading=\"lazy\"` — and leave the banner alone: it is the first thing a visitor sees, and the hero image must never wait\n\nThe numbers are the files' real pixels — that is always where they come from.",
+    "<img src=\"/img-lab/banner.svg\" alt=\"The Practice Site banner\">\n<p>Imagine several screens of article here.</p>\n<img src=\"/img-lab/photo.png\" alt=\"Sunset over a dark sea\">\n",
+    "<img src=\"/img-lab/banner.svg\" alt=\"The Practice Site banner\" width=\"640\" height=\"160\">\n<p>Imagine several screens of article here.</p>\n<img src=\"/img-lab/photo.png\" alt=\"Sunset over a dark sea\" width=\"320\" height=\"200\" loading=\"lazy\">\n",
+    [
+      { find: "img[src=\"/img-lab/banner.svg\"]", attr: "width", equals: "640", says: "the banner declares width=\"640\"" },
+      { find: "img[src=\"/img-lab/banner.svg\"]", attr: "height", equals: "160", says: "the banner declares height=\"160\"" },
+      { find: "img[src=\"/img-lab/photo.png\"]", attr: "width", equals: "320", says: "the photo declares width=\"320\"" },
+      { find: "img[src=\"/img-lab/photo.png\"]", attr: "height", equals: "200", says: "the photo declares height=\"200\"" },
+      { find: "img[src=\"/img-lab/photo.png\"]", attr: "loading", equals: "lazy", says: "the photo, far below the fold, is lazy" },
+      { find: "img[src=\"/img-lab/banner.svg\"][loading=\"lazy\"]", count: 0, says: "the banner — the hero — is NOT lazy" },
+    ],
+    [
+      "Bare numbers, no units: `width=\"640\" height=\"160\"`.",
+      "The values are the file's true pixels — wrong numbers reserve the wrong shape and the page jumps anyway.",
+      "`loading=\"lazy\"` goes on the below-the-fold photo only. The banner loads normally.",
+    ],
+    "html,images,performance"),
 ];

@@ -1231,4 +1231,190 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 5 — IMAGES
+   *
+   * Two lessons. The first is the element, the paths (already learned — they
+   * are the link rules) and alt text, which gets the most room because it is
+   * the part beginners get wrong invisibly. The second is behaviour: reserving
+   * space so the page does not jump, captions, and lazy loading.
+   *
+   * THE PRACTICE AREA SHIPS ITS OWN IMAGES — public/img-lab/ — so every
+   * exercise renders a real picture inside the workbench preview. A student
+   * never needs to find an image file, and a broken path shows an actual
+   * broken-image icon they then fix and SEE fixed. The files are addressed
+   * root-relatively (/img-lab/cat.svg), which is honest: it is the exact
+   * root-relative form lesson 13 taught. banner.svg is 640x160 and photo.png
+   * is 320x200 ON PURPOSE — the width/height exercise quotes those numbers.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-images",
+    order: 15,
+    title: "Images: src, alt and the Audience That Never Sees Them",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Put an image on a page and know exactly where the browser looks for it",
+        "Write alt text that does its job — and know the one case where empty is correct",
+        "Pick a file format by what the image <b>is</b>, not by habit",
+        "Debug a missing image in one look instead of twenty guesses",
+      ] },
+
+      { t: "hook",
+        q: "A visitor on hotel wifi, a screen reader user, and a search engine crawler all reach your page today. Not one of them sees your photo. What does each get instead?",
+        why: "Whatever you wrote in <code>alt</code> — and if you wrote nothing, they get nothing: a silent gap, an unlabelled \"image\", an unindexed file. Every image has this second audience, and the whole craft of this lesson is writing for it." },
+
+      { t: "def",
+        term: "alt text",
+        en: "The words that stand in for an image when the image cannot be seen: read aloud by screen readers, shown in place of a failed file, and read by search engines." },
+
+      { t: "analogy",
+        concept: "alt text",
+        real: "describing a photo to someone over the phone",
+        html: "You would never say \"it's an image\" — they know that. You would say what is <i>in</i> it: \"the three of us outside the old house, mid-laugh\". That sentence is exactly what good alt text is, and the phone test — would this description work aloud? — catches almost every bad one." },
+
+      { t: "syntax",
+        intro: "One empty element, two attributes that are never optional.",
+        form: "<img src=\"/img-lab/cat.svg\" alt=\"A grey cat curled up asleep\">",
+        parts: [
+          { bit: "<img", says: "An empty element, from Module 2 — the image <b>is</b> the content, so there is no closing tag and never a <code>&lt;/img&gt;</code>." },
+          { bit: "src", says: "Where the file lives. Every path rule from the links lesson applies unchanged: relative, <code>../</code>, root-relative, absolute." },
+          { bit: "/img-lab/cat.svg", says: "A root-relative path — lesson 13's <code>/</code> form. This one is real: the practice area ships a small folder of images at <code>/img-lab/</code>, so your exercises render actual pictures." },
+          { bit: "alt", says: "The stand-in words. Not optional decoration — it is the image's content for everyone who cannot see the pixels." },
+        ],
+        note: "<code>&lt;img&gt;</code> is inline, like <code>&lt;a&gt;</code> — it sits in the flow of text where you put it. Wrapping one in an anchor makes a clickable image; the two elements compose exactly as you would hope.",
+      },
+
+      { t: "code", file: "cat-page.html", code: "<h2>Meet Mochi</h2>\n<p>The office cat reviews every page before it ships.</p>\n<img src=\"/img-lab/cat.svg\" alt=\"A grey cat curled up asleep, striped tail wrapped around\">", output: "A heading, a line of text, and the cat — actually drawn on the page." },
+      { t: "psoft", html: "Try this exact markup in any practice problem of this module — the picture renders in the preview, because <code>/img-lab/</code> genuinely exists here. Then break the path on purpose and watch what appears instead: the broken-image icon <b>and your alt text</b>. That fallback is the first of alt's three jobs, demonstrated in ten seconds." },
+
+      { t: "h2", n: "1", text: "Writing alt that does the job" },
+      { t: "p", html: "Describe what the image <b>shows</b>, or what it <b>does</b> if it is functional — a logo that links home is \"Home\", not \"company logo in blue gradient\". Never start with \"image of\" or \"picture of\": the screen reader already announces it as an image, so those words are pure noise played twice." },
+      { t: "p", html: "Length follows the phone test: as many words as you would actually say, usually a short phrase, occasionally a sentence. If the image is a chart whose content <i>matters</i>, the description belongs in the page text where everyone gets it — alt then summarises." },
+
+      { t: "note", variant: "key", html: "<b>The one case where empty is correct: <code>alt=\"\"</code> on decoration.</b> A flourish, a divider, a background texture — describing it aloud would be noise, so the empty value says \"skip this, it carries no content\". <b>Empty and missing are opposites here.</b> Missing <code>alt</code> gives the screen reader nothing to go on, so many fall back to reading the <b>filename</b> — \"IMG underscore 4 0 3 2 dot J P G\" — which is the worst outcome available. Decorative image → <code>alt=\"\"</code>, present and empty. Content image → real words. Missing → never." },
+
+      { t: "h2", n: "2", text: "Formats: match the file to the picture" },
+      { t: "note", variant: "tip", html: "<b>JPG</b> — photographs. Millions of colours, small files, no transparency.<br><b>PNG</b> — screenshots, diagrams, anything needing transparency. Crisp edges stay crisp.<br><b>SVG</b> — logos, icons, illustrations. It is markup, not pixels, so it scales to any size without blurring — the lab's cat is one.<br><b>WebP</b> — a modern format that does both jobs smaller; support is now universal.<br><b>GIF</b> — the legacy one. For animation, video formats beat it; for stills, everything beats it." },
+      { t: "p", html: "The choice is content-driven: a photograph saved as PNG is enormous; a logo saved as JPG grows fuzz around every edge. When in doubt — photo means JPG (or WebP), art and UI mean PNG or SVG." },
+
+      { t: "h2", n: "3", text: "When the image does not appear" },
+      { t: "p", html: "Module 1's DevTools lesson already handed you the tool: open <b>Network</b>, find the red 404, and read the path in that row — it is exactly what the browser asked for. The usual culprits are the usual suspects: a capital letter that Windows forgave, a space that became <code>%20</code>, a file that sits one folder above where the path points." },
+
+      { t: "debug",
+        intro: "A student's photo shows on their machine and is broken for everyone else. The file on disk is photo.png, inside the images folder. Decide what is wrong before opening the fix.",
+        code: "<img src=\"Images/Photo.PNG\" alt=\"Sunset over the sea\">",
+        symptom: "Fine locally. On the deployed site: broken-image icon, and Network shows 404 for /Images/Photo.PNG.",
+        q: "The file exists and the spelling looks right. What is the server seeing that Windows never did?",
+        fix: "<img src=\"images/photo.png\" alt=\"Sunset over the sea\">",
+        why: "Case. Windows treats <code>Images/Photo.PNG</code> and <code>images/photo.png</code> as the same file, so the page worked on the machine it was written on. The server treats them as three separate differences — folder, name, extension — and finds nothing. The Network row said all of this in one line; the fix is making the markup match the disk exactly, lowercase throughout, which is why Module 1 told you to name files that way in the first place." },
+
+      { t: "drills", intro: "Write these out — attribute order never matters, but every quote and slash does.", items: [
+        { task: "The lab's cat, with proper alt text.", code: "<img src=\"/img-lab/cat.svg\" alt=\"A grey cat curled up asleep\">" },
+        { task: "A decorative divider that screen readers should skip.", code: "<img src=\"/img-lab/divider.svg\" alt=\"\">" },
+        { task: "A photo that lives in an images folder next to this page.", code: "<img src=\"images/photo.jpg\" alt=\"Sunset over the harbour\">" },
+        { task: "The lab's logo, linked to the home page.", code: "<a href=\"index.html\"><img src=\"/img-lab/logo.svg\" alt=\"Home\"></a>" },
+      ] },
+
+      { t: "mistakes", items: [
+        { bad: "<img src=\"cat.jpg\" alt=\"image of a cat\">", why: "The screen reader announces \"image\" already — the phrase plays twice. Say what is in it.", fix: "<img src=\"cat.jpg\" alt=\"A grey cat asleep on the windowsill\">" },
+        { bad: "<img src=\"divider.svg\">", why: "Missing alt is not \"no description\" — many screen readers read the filename aloud instead, which is worse than silence.", fix: "<img src=\"divider.svg\" alt=\"\">" },
+        { bad: "<img src=\"logo.svg\" alt=\"\"> — as the site's only home link", why: "Empty alt on a functional image makes the link unusable: there is nothing to announce, so the control vanishes for keyboard and screen reader users.", fix: "<img src=\"logo.svg\" alt=\"Home\">" },
+        { bad: "<img src=\"My Photo.JPG\" alt=\"...\">", why: "The space becomes %20 in every URL and the capitals 404 on case-sensitive servers — the two filename rules from Module 1, both broken at once.", fix: "<img src=\"my-photo.jpg\" alt=\"...\">" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>&lt;img&gt;</code> is empty: <code>src</code> says where, <code>alt</code> says what",
+        "Paths follow the link rules exactly — nothing new to learn",
+        "Alt describes content or function; never \"image of\"",
+        "Decorative → <code>alt=\"\"</code>, present and empty. Missing → filename read aloud",
+        "JPG photos · PNG crisp/transparent · SVG scales forever · WebP both, smaller",
+        "Broken image? Network panel first — the 404 row shows the exact path asked for",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is alt text for?", a: "Three audiences that never see the pixels: screen readers speak it, browsers show it when the file fails to load, and search engines index by it. It is the image's content in words, not a caption and not a tooltip." },
+        { level: "medium", q: "What is the difference between alt=\"\" and leaving alt off entirely?", a: "Opposites. alt=\"\" is a deliberate statement that the image is decorative, so assistive tech skips it silently. A missing alt gives the screen reader nothing to go on, and many fall back to announcing the filename — noise at best, confusion at worst. Every img gets an alt attribute; only decorative ones get an empty value." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-image-figures",
+    order: 16,
+    title: "Images That Behave: Size, Captions and Lazy Loading",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Stop a page jumping mid-read by reserving the image's space",
+        "Caption an image with the element built for captions",
+        "Delay offscreen images with one attribute — and know the one image that must not wait",
+        "Keep alt and caption doing their separate jobs",
+      ] },
+
+      { t: "hook",
+        q: "You are reading an article on your phone. The paragraph slides down mid-sentence, your thumb taps the wrong link. Module 0's final lesson named this jumping as a rendering step gone wrong. What did the developer leave out?",
+        why: "Two attributes. The browser laid the text out, an image arrived late with dimensions nobody had declared, and everything below it moved to make room. <code>width</code> and <code>height</code> would have held the space from the first moment." },
+
+      { t: "def",
+        term: "figure",
+        en: "A self-contained piece of content — an image, a chart, a code listing — that the surrounding text refers to, optionally with a caption that belongs to it." },
+
+      { t: "analogy",
+        concept: "width and height on an image",
+        real: "a reserved seat",
+        html: "The guest has not arrived, but the seat is held — nobody shuffles when they walk in. Declaring the dimensions reserves the image's seat in the layout, so its arrival changes nothing. Without the reservation, every latecomer reshuffles the whole room." },
+
+      { t: "syntax",
+        intro: "The two attributes that hold space, and the one that delays loading.",
+        form: "<img src=\"/img-lab/photo.png\" alt=\"Sunset over the sea\"\n     width=\"320\" height=\"200\" loading=\"lazy\">",
+        parts: [
+          { bit: "width=\"320\"", says: "The image's real pixel width, as a bare number — no units. CSS can still display it at any size; what these declare is the <b>shape</b> of the space to reserve." },
+          { bit: "height=\"200\"", says: "The real height. Together they give the browser the aspect ratio before a single byte of the file arrives — which is what kills the jump." },
+          { bit: "loading=\"lazy\"", says: "Do not fetch this until the reader scrolls near it. Free bandwidth on every image below the first screen — and wrong on any image <b>in</b> the first screen, which would then wait to appear." },
+        ],
+        note: "Use the file's true dimensions. Declare a 320x200 image as 320x320 and the browser reserves the wrong shape — the space is held, the picture arrives, and it is stretched or the layout shifts anyway. The lab's files state their sizes: <code>banner.svg</code> is 640x160, <code>photo.png</code> is 320x200.",
+      },
+
+      { t: "syntax",
+        intro: "A captioned figure: the image and its caption, tied together so everything knows they belong to each other.",
+        form: "<figure>\n  <img src=\"/img-lab/photo.png\" alt=\"The sun low over a dark sea\"\n       width=\"320\" height=\"200\">\n  <figcaption>Sunset from the harbour wall, minutes before the storm.</figcaption>\n</figure>",
+        parts: [
+          { bit: "<figure>", says: "The wrapper that says \"this is one self-contained thing\". Move it, and the caption moves with it — they cannot drift apart." },
+          { bit: "<figcaption>", says: "The visible caption, first or last child of the figure. One per figure." },
+        ],
+        note: "A <code>&lt;p&gt;</code> under an image <i>looks</i> identical — and nothing knows the two are related. The figure exists for the relationship: screen readers announce the caption as the image's caption, and anything extracting content keeps them together.",
+      },
+
+      { t: "h2", n: "1", text: "Alt and caption are different jobs" },
+      { t: "p", html: "The caption is visible commentary — <i>why this image is here</i>: \"Sunset from the harbour wall, minutes before the storm.\" The alt describes <i>what the image shows</i> for someone who cannot see it: \"The sun low over a dark sea.\" A screen reader reads both, in turn — write them identically and the listener hears the same sentence twice." },
+
+      { t: "h2", n: "2", text: "Lazy loading, and the image that must not wait" },
+      { t: "p", html: "A long article might carry twenty images; a visitor who reads the first paragraph and leaves has paid for all twenty. <code>loading=\"lazy\"</code> defers each one until the reader approaches it — one attribute, no script, and the saving is real on exactly the pages that have many images." },
+      { t: "note", variant: "warn", html: "<b>Never lazy-load the first screen.</b> The banner at the top of the page is the first thing a visitor looks at; marking it <code>lazy</code> tells the browser it can wait, and the largest thing on screen arrives last. Everything <b>below</b> the first screen: lazy. The hero image: never." },
+
+      { t: "mistakes", items: [
+        { bad: "<figcaption>The harbour</figcaption>\n<figure>\n  <img src=\"photo.png\" alt=\"...\">\n</figure>", why: "The caption is outside the figure, so it is a stray element related to nothing. It belongs inside — first or last child.", fix: "<figure>\n  <img src=\"photo.png\" alt=\"...\">\n  <figcaption>The harbour</figcaption>\n</figure>" },
+        { bad: "width=\"320\" height=\"320\" — on a 320x200 photo", why: "The reserved space has the wrong shape, so the layout shifts anyway when the real ratio arrives — the exact bug the attributes exist to prevent.", fix: "width=\"320\" height=\"200\" — the file's true ratio" },
+        { bad: "<img src=\"banner.svg\" loading=\"lazy\"> — at the very top of the page", why: "The first thing the visitor should see is the one image told it may wait.", fix: "Lazy below the first screen; the hero loads normally." },
+        { bad: "alt=\"Sunset from the harbour wall\" + <figcaption>Sunset from the harbour wall</figcaption>", why: "A screen reader reads the same words twice in a row. Alt describes the picture; the caption says why it is here.", fix: "alt=\"The sun low over a dark sea\" + a caption that comments" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>width</code>/<code>height</code> = the file's real pixels, no units — they reserve the shape",
+        "Reserved shape = no layout jump when the image arrives",
+        "<code>&lt;figure&gt;</code> ties image and <code>&lt;figcaption&gt;</code> into one unit",
+        "Alt describes the image; the caption comments on it — never the same words",
+        "<code>loading=\"lazy\"</code> on everything below the first screen",
+        "The hero image is the one image that must never be lazy",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "Why give an image width and height attributes when CSS controls its displayed size anyway?", a: "The attributes tell the browser the aspect ratio before the file arrives, so the layout reserves correctly-shaped space and nothing below the image moves when it loads. CSS then scales it freely. Without them the browser learns the size only when the bytes arrive, lays the page out again, and the visible content jumps — measured as Cumulative Layout Shift." },
+        { level: "medium", q: "When is figure the right element rather than a bare img?", a: "When the image has a caption, or the text refers to it as a unit — \"see the chart below\". figure binds the image and figcaption into one self-contained thing that can move together, and assistive tech announces the caption as belonging to the image. A bare img with a paragraph under it looks the same and relates the two by nothing but proximity." },
+      ] },
+    ],
+  },
 ];

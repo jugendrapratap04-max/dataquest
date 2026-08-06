@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 24" width="480" height="24" role="presentation">
+  <!-- Purely decorative flourish — the lab's example of an image whose correct
+       alt text is alt="" (empty, but present). -->
+  <path d="M10 12 h180" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/>
+  <path d="M290 12 h180" stroke="#c9b98a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="240" cy="12" r="6" fill="none" stroke="#c9b98a" stroke-width="2"/>
+  <circle cx="218" cy="12" r="3" fill="#c9b98a"/>
+  <circle cx="262" cy="12" r="3" fill="#c9b98a"/>
+</svg>
