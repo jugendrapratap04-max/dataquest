@@ -1656,4 +1656,295 @@ export const SYNTAX = {
     ],
     note: "Every comparison you run against the validation folds fits your choices to them a little more. That is why the held-out set is spent once, at the end, and why a big gap between it and the search's best score is a warning.",
   },
+
+  /* ------------------------------------------------------------ deploy 4 -- */
+
+  "deploy-git": {
+    intro: "Five commands cover almost everything, in the order you meet them.",
+    form: "git init\ngit status\ngit add .\ngit commit -m \"message\"\ngit push origin main\n\ngit switch -c branch-name\ngit pull",
+    parts: [
+      { bit: "git init", says: "Turns this folder into a repository. Once, at the start — it creates a hidden <code>.git</code> folder, and deleting that deletes the history." },
+      { bit: "git status", says: "What changed, what is staged. Run it constantly; it is the cheapest way never to be surprised by a commit." },
+      { bit: "git add .", says: "Stages everything changed. Convenient, and exactly how credentials get committed — check <code>git status</code> first." },
+      { bit: "git commit -m \"message\"", says: "Saves the staged changes as one point in history. Only what was staged goes in." },
+      { bit: "git push origin main", says: "Sends your commits to GitHub. Nothing leaves your machine until you do this." },
+      { bit: "git switch -c branch-name", says: "Creates a branch and moves onto it. Working on a branch is what makes experimenting safe." },
+      { bit: "git pull", says: "Brings down what others pushed. Do it before you start, not after you have conflicting work." },
+    ],
+    note: "Write <code>.gitignore</code> before the first commit: <code>.env</code>, <code>__pycache__/</code>, <code>venv/</code>, data files. A key committed once stays in the history even after you delete the file.",
+  },
+
+  /* ====================================================== MICROPROCESSOR ==== */
+
+  "mp-switches-and-numbers": {
+    intro: "A wire is on or off. Eight of them side by side is every number a chip can hold.",
+    form: "bit    ->  0 / 1         (one wire)\nnibble ->  4 bits         (one hex digit)\nbyte   ->  8 bits         (0 to 255)\n\n1011 0110  =  B6H  =  182",
+    parts: [
+      { bit: "bit", says: "One wire, one switch. Off is 0, on is 1. Everything else here is a way of grouping these." },
+      { bit: "nibble", says: "Four bits. It matters because four bits is exactly one hexadecimal digit — which is the whole reason hex is used." },
+      { bit: "byte", says: "Eight bits, so 2⁸ = 256 different patterns: 0 to 255 counting normally." },
+      { bit: "1011 0110", says: "The eight wires. Split into two nibbles because each half converts to one hex digit on its own." },
+      { bit: "B6H", says: "The same byte in hex. 1011 is B, 0110 is 6. The trailing H says hexadecimal — an 8085 program marks it this way." },
+      { bit: "182", says: "The same byte in decimal. Three notations, one pattern of switches — the chip only ever has the switches." },
+    ],
+    note: "Convert by nibble, never by dividing the whole byte. 1011 0110 is B then 6, and you are done — the arithmetic route is slower and gets errors.",
+  },
+
+  "mp-memory-street": {
+    intro: "Memory is a street of numbered boxes. Every box holds one byte and has one address.",
+    form: "address     content\n2000H   ->  3EH\n2001H   ->  05H\n2002H   ->  32H\n\n16 address lines  ->  2^16 = 65536 boxes  ->  0000H to FFFFH",
+    parts: [
+      { bit: "address", says: "The box number. Nothing to do with what is inside it — a house number tells you nothing about the house." },
+      { bit: "content", says: "The one byte stored there. Whether it is data or an instruction depends entirely on how the chip reaches it." },
+      { bit: "2000H", says: "Written in hex because the address is really 16 wires, and four hex digits map onto them exactly." },
+      { bit: "16 address lines", says: "The 8085's address bus. Each line is on or off, so the count of reachable boxes is 2 to the power of the line count." },
+      { bit: "65536", says: "64K of memory. Add one address line and it doubles — that is why address bus width is quoted as a headline number." },
+      { bit: "FFFFH", says: "The highest address, with all sixteen lines on. 0000H to FFFFH is the whole range the chip can name." },
+    ],
+    note: "The same byte is data or instruction depending only on whether the chip fetched it as one. A program that jumps into the middle of its own data executes it, and that is exactly what a crash usually is.",
+  },
+
+  "mp-what-is-a-program": {
+    intro: "A program is bytes in consecutive boxes. The chip reads one, does it, and moves on.",
+    form: "2000H  3E 05      MVI A, 05H     ; put 05 into A\n2002H  C6 03      ADI 03H        ; add 03 to A\n2004H  32 50 20   STA 2050H      ; store A at 2050H\n2007H  76         HLT            ; stop",
+    parts: [
+      { bit: "2000H", says: "Where this instruction sits. The next address is this one plus the instruction's length — which is why the column jumps by 2, 2 and 3." },
+      { bit: "3E 05", says: "The machine code: what is actually in memory. 3E is the opcode, 05 is its data byte." },
+      { bit: "MVI A, 05H", says: "The mnemonic — the same bytes written for humans. The chip never sees this; an assembler turns it into 3E 05." },
+      { bit: ";", says: "Starts a comment. Everything after it on the line is ignored." },
+      { bit: "STA 2050H", says: "Three bytes: opcode plus a 16-bit address, stored low byte first. That is why the listing shows 32 50 20 for address 2050H." },
+      { bit: "HLT", says: "Stops the processor. Without it the chip carries on reading whatever bytes follow and executes them as instructions." },
+    ],
+    note: "Instruction length is 1, 2 or 3 bytes and you can read it off the operand: no operand is 1, an 8-bit value is 2, a 16-bit address is 3.",
+  },
+
+  "mp-carry-and-flags": {
+    intro: "Eight bits run out at 255. What happens next is the whole reason flags exist.",
+    form: "  1111 1111   (255)\n+ 0000 0001   (  1)\n-----------\n1 0000 0000   -> A = 00H, CY = 1\n\nCY  ->  the ninth bit — nowhere to put it",
+    parts: [
+      { bit: "1111 1111", says: "255 — every bit on, the largest a byte holds." },
+      { bit: "0000 0001", says: "Adding one more." },
+      { bit: "A", says: "The accumulator keeps the low eight bits: 0000 0000. On its own that says the answer is zero, which is wrong." },
+      { bit: "CY", says: "The carry flag: the bit that did not fit. It is the only record that the answer was 256 and not 0." },
+      { bit: "1", says: "Carry set. Check it after any addition that might overflow, because the accumulator alone cannot tell you." },
+    ],
+    note: "The chip does not warn you. It rolls over silently and sets a flag, and reading that flag is your job — this is the same wrap-around that makes an odometer go back to zero.",
+  },
+
+  "mp-what-is-a-microprocessor": {
+    intro: "Fetch, decode, execute, repeat. Every processor ever built runs this loop.",
+    form: "FETCH    ->  read the byte at PC, PC = PC + 1\nDECODE   ->  work out what that opcode means\nEXECUTE  ->  do it, update flags\nrepeat",
+    parts: [
+      { bit: "FETCH", says: "Put the program counter on the address bus and read the byte back. The chip has no idea yet what it is." },
+      { bit: "PC", says: "The program counter: the address of the next instruction. Incrementing it is what makes a program run forwards." },
+      { bit: "DECODE", says: "The instruction decoder turns the opcode into control signals. This is the only step that knows 3E means MVI A." },
+      { bit: "EXECUTE", says: "The ALU or the registers actually do the work — and may fetch more bytes if the instruction is 2 or 3 long." },
+      { bit: "repeat", says: "Forever, at the clock rate, until HLT or a reset. Nothing else is going on inside the chip." },
+    ],
+    note: "A jump instruction is nothing more special than writing a new value into PC. That single trick is loops, branches, functions and every control structure above them.",
+  },
+
+  "mp-evolution": {
+    intro: "Four numbers describe any processor, and comparing generations is comparing these.",
+    form: "data bus    ->  bits moved at once   (8085: 8)\naddress bus ->  memory reachable     (8085: 16 -> 64K)\nclock       ->  operations per second (8085: 3 MHz)\nregisters   ->  scratch space on chip (8085: 8-bit)",
+    parts: [
+      { bit: "data bus", says: "How many bits move in one go. Doubling it halves the transfers for the same data — the 8086's jump from 8 to 16 is exactly this." },
+      { bit: "address bus", says: "How much memory can be named. 16 lines is 64K; the 8086's 20 lines is 1MB, and that is the same arithmetic as before." },
+      { bit: "clock", says: "How many cycles per second. Faster is not proportionally faster overall — an instruction still takes several cycles." },
+      { bit: "registers", says: "Working space inside the chip, which is far quicker to reach than memory. Wider and more of them means fewer trips out to RAM." },
+    ],
+    note: "The bus widths matter more than the clock. A faster chip that still moves 8 bits at a time and reaches 64K is doing the same work at the same shape, only sooner.",
+  },
+
+  "mp-inside-the-chip": {
+    intro: "Three blocks, and every instruction is a conversation between them.",
+    form: "ALU       ->  arithmetic, logic, sets the flags\nREGISTERS ->  A, B, C, D, E, H, L, PC, SP\nCONTROL   ->  decodes the opcode, raises the signals",
+    parts: [
+      { bit: "ALU", says: "The arithmetic and logic unit. It adds, subtracts, ANDs, ORs, rotates — and it is the only part that writes the flags." },
+      { bit: "REGISTERS", says: "The chip's own scratch space. Reaching one takes no bus cycle at all, which is why good 8085 code keeps working values here." },
+      { bit: "A", says: "The accumulator. One side of nearly every ALU operation is always A, and the answer always lands back in it." },
+      { bit: "PC", says: "Program counter — the address of the next instruction." },
+      { bit: "SP", says: "Stack pointer — the address of the top of the stack." },
+      { bit: "CONTROL", says: "The timing and control unit. It reads the decoded opcode and raises the right signals in the right order — RD, WR, ALE and the rest." },
+    ],
+    note: "Nothing here is mysterious once you see the flow: control decides what happens, registers hold the operands, the ALU does the work and reports on it through the flags.",
+  },
+
+  "mp-three-buses": {
+    intro: "Three groups of wires connect the chip to everything else, and each carries one kind of thing.",
+    form: "ADDRESS  ->  16 lines, one way  (chip -> memory)\nDATA     ->   8 lines, two ways  (chip <-> memory)\nCONTROL  ->  RD, WR, ALE, IO/M   (what to do; when to do it)",
+    parts: [
+      { bit: "ADDRESS", says: "Which box. Sixteen lines, and the chip only ever drives them — memory never puts an address on this bus." },
+      { bit: "DATA", says: "The byte itself. Eight lines, and both directions: out on a write, in on a read." },
+      { bit: "two ways", says: "Which is why the control bus exists — the wires cannot say by themselves whether this is a read or a write." },
+      { bit: "CONTROL", says: "The signals that give the other two meaning at a moment in time." },
+      { bit: "RD", says: "Read: memory, put your byte on the data bus." },
+      { bit: "WR", says: "Write: memory, take the byte that is on the data bus." },
+      { bit: "ALE", says: "Address latch enable. The 8085's low address lines double as the data bus, so ALE is the pulse that says \"what is on these wires right now is an address\" — see the next lesson." },
+      { bit: "IO/M", says: "Whether this cycle is talking to memory or to an I/O device. Same buses, two different worlds." },
+    ],
+    note: "The address bus is one-way and the data bus is two-way. Nearly every timing question comes down to knowing which bus is carrying what at that instant.",
+  },
+
+  "mp-register-set": {
+    intro: "Six general registers that also work in pairs, plus two that hold addresses.",
+    form: "A                 ->  accumulator, 8-bit\nB C   D E   H L   ->  general, 8-bit; pairs: BC DE HL\nHL                ->  the pair that holds a memory address, M\nSP                ->  stack pointer, 16-bit\nPC                ->  program counter, 16-bit",
+    parts: [
+      { bit: "A", says: "The accumulator. Not a general register — arithmetic, logic and every I/O instruction go through it specifically." },
+      { bit: "B C", says: "Two 8-bit registers that join into the 16-bit pair BC. B is the high byte, C the low." },
+      { bit: "pairs", says: "Pairing is what lets 8-bit registers hold a 16-bit address, which is the only way an 8-bit chip can point at 64K of memory." },
+      { bit: "HL", says: "The pointer pair. It is special because of M." },
+      { bit: "M", says: "Not a register: it means \"the memory byte at the address in HL\". <code>MOV A, M</code> is a memory read written to look like a register move." },
+      { bit: "SP", says: "Points at the top of the stack. PUSH lowers it, POP raises it — the 8085 stack grows downwards." },
+      { bit: "PC", says: "The address of the next instruction to fetch." },
+    ],
+    note: "M looks like a seventh register and is a memory access. That one disguise is where most confusion about 8085 instruction timing starts — anything touching M costs an extra machine cycle.",
+  },
+
+  "mp-flag-register": {
+    intro: "One byte, five meaningful bits, each answering a yes/no question about the last ALU result.",
+    form: "bit   7   6   5   4   3   2   1   0\n      S   Z   -   AC  -   P   -   CY",
+    parts: [
+      { bit: "S", says: "Sign: a copy of bit 7 of the result. 1 means negative when the byte is being read as a signed number." },
+      { bit: "Z", says: "Zero: set when the result was exactly 00H. The flag almost every conditional jump is really testing." },
+      { bit: "AC", says: "Auxiliary carry: a carry out of bit 3 into bit 4. Only DAA uses it, and that is its entire purpose." },
+      { bit: "P", says: "Parity: set when the number of 1 bits is even. Rarely useful now; it was a cheap error check." },
+      { bit: "CY", says: "Carry: the ninth bit that did not fit, or the borrow from a subtraction." },
+      { bit: "-", says: "Unused bits. They are not zero and not reliable — never test them." },
+    ],
+    note: "Not every instruction writes the flags. Data-transfer instructions like MOV and MVI leave them completely untouched, so a jump can safely test a comparison made several instructions earlier.",
+  },
+
+  "mp-pins-and-signals": {
+    intro: "The 8085 has 40 pins, and its most-asked exam question comes from a shortage of them.",
+    form: "AD0-AD7  ->  address low byte AND data, on the same eight pins\nA8-A15   ->  address high byte\nALE      ->  pulse: AD0-AD7 currently carries an ADDRESS\nRD WR    ->  direction of this cycle\nIO/M     ->  memory / I/O",
+    parts: [
+      { bit: "AD0-AD7", says: "Multiplexed: the same eight pins carry the low address byte, then the data byte. Eight pins doing two jobs is how the chip fitted into 40." },
+      { bit: "A8-A15", says: "The high address byte, on its own pins and stable for the whole cycle." },
+      { bit: "ALE", says: "High only during the first clock state, while the address is on AD0-AD7. An external latch (the 74LS373) grabs it on the falling edge and holds it for the rest of the cycle." },
+      { bit: "RD", says: "Active low: the chip is reading this cycle." },
+      { bit: "WR", says: "Active low: the chip is writing." },
+      { bit: "IO/M", says: "High for I/O, low for memory. Combined with RD and WR it names all four possible cycles." },
+    ],
+    note: "Demultiplexing is not optional. Without the latch, the low address byte is gone by the time memory is ready to answer — which is why every 8085 circuit diagram has that chip in it.",
+  },
+
+  "mp-memory-decoding": {
+    intro: "Several chips share one bus. The decoder decides which one is allowed to answer.",
+    form: "A15 A14 A13 | A12 ... A0\n 0   0   0  | ................  ->  chip 0 : 0000H - 1FFFH\n 0   0   1  | ................  ->  chip 1 : 2000H - 3FFFH\n\nhigh lines -> decoder -> CS\nlow lines  -> the chip's own address pins",
+    parts: [
+      { bit: "A15 A14 A13", says: "The high lines. They choose the chip and are never wired to it — they go to the decoder instead." },
+      { bit: "A12 ... A0", says: "The low lines, wired straight to the memory chip. Thirteen lines is 2¹³ = 8K, which is that chip's size." },
+      { bit: "decoder", says: "A 3-to-8 decoder (74LS138) turns three high lines into eight chip-select lines, exactly one of which is active." },
+      { bit: "CS", says: "Chip select. A memory chip ignores the bus entirely unless its CS is active — which is what stops two chips answering at once." },
+      { bit: "chip 0", says: "Its range starts where its high lines are all 0 and runs for as many addresses as its low lines can name." },
+    ],
+    note: "Leave a high address line out of the decoding and the same chip answers at several addresses — foldback. The memory appears to be larger than it is, and every copy is the same bytes.",
+  },
+
+  "mp-timing-diagrams": {
+    intro: "One instruction is several machine cycles; one machine cycle is several T-states.",
+    form: "instruction  ->  machine cycles  ->  T-states\n\nMVI A, 05H   ->  2 cycles        ->  7 T\n  opcode fetch  ->  4 T\n  memory read   ->  3 T\n\ntime = T-states x clock period",
+    parts: [
+      { bit: "instruction", says: "What you wrote. Its cost is the sum of its machine cycles, not a single number you memorise." },
+      { bit: "machine cycles", says: "One bus operation each: one fetch, one read, one write. Count the memory accesses an instruction needs and you have counted its cycles." },
+      { bit: "T-states", says: "Clock periods. The smallest unit of time the chip has — everything is measured in these." },
+      { bit: "opcode fetch", says: "Always first, always 4 T-states. The extra state over a plain read is the chip decoding what it just fetched." },
+      { bit: "memory read", says: "3 T-states. MVI needs one because its data byte sits in the next memory box." },
+      { bit: "7 T", says: "4 + 3. The published figure for MVI, and now a number you can derive rather than look up." },
+      { bit: "clock period", says: "1 / frequency. At 3 MHz one T-state is about 333 ns, so this instruction takes roughly 2.3 µs." },
+    ],
+    note: "Every instruction begins with a 4 T-state opcode fetch. Anything longer than 4 T is telling you the instruction went back to memory — and how many times.",
+  },
+
+  "mp-instruction-set": {
+    intro: "Seventy-four instructions in five families. Knowing which family an instruction is in tells you most of what it does.",
+    form: "DATA TRANSFER  ->  MOV MVI LXI LDA STA   ; move bytes, no flags\nARITHMETIC     ->  ADD ADI SUB INR DCR   ; ALU, sets flags\nLOGICAL        ->  ANA ORA XRA CMP RLC   ; ALU, sets flags\nBRANCHING      ->  JMP JZ CALL RET       ; changes PC\nCONTROL        ->  HLT NOP EI DI         ; the machine itself",
+    parts: [
+      { bit: "DATA TRANSFER", says: "Copies bytes between registers, memory and I/O. Copies — the source is unchanged. These leave the flags alone entirely." },
+      { bit: "ARITHMETIC", says: "Add, subtract, increment, decrement. Goes through the ALU, so it writes the flags." },
+      { bit: "LOGICAL", says: "AND, OR, XOR, compare, rotate. Also the ALU, also writes flags — and CMP is a subtraction whose answer is thrown away." },
+      { bit: "BRANCHING", says: "Anything that writes PC: jumps, calls, returns. The conditional ones read the flags the previous two families wrote." },
+      { bit: "CONTROL", says: "Halt, no-operation, interrupt enable and disable. They act on the processor rather than on data." },
+      { bit: "INR", says: "Increment is the exception worth remembering: it sets every flag <b>except</b> carry, so a loop counter does not disturb an arithmetic carry you are still using." },
+    ],
+    note: "The split that matters is which families touch the flags. Data transfer never does, which is why you can move a result somewhere and still branch on the comparison that produced it.",
+  },
+
+  "mp-addressing-modes": {
+    intro: "Five ways of saying where the operand is — and the mnemonic tells you which.",
+    form: "MOV  B, C     ->  register     : operand sits inside a register\nMVI  A, 05H   ->  immediate    : operand sits inside the instruction\nLDA  2050H    ->  direct       : instruction holds the address\nMOV  A, M     ->  indirect     : HL holds the address\nHLT           ->  implicit     : operand implied by the opcode",
+    parts: [
+      { bit: "register", says: "Both operands are registers. Fastest — no memory access at all, so it is a single machine cycle." },
+      { bit: "immediate", says: "The value is the next byte of the program itself. The <b>I</b> in MVI, ADI, LXI means exactly this." },
+      { bit: "direct", says: "The address is written into the instruction, so it is fixed at assembly time. Three bytes long: opcode plus two address bytes." },
+      { bit: "indirect", says: "The address is in HL, so it can change while the program runs — which is what makes walking through an array possible." },
+      { bit: "M", says: "The marker for indirect. Any instruction mentioning M reaches memory through HL." },
+      { bit: "implicit", says: "The instruction names no operand because there is only one thing it could act on." },
+    ],
+    note: "Immediate and direct look alike and are opposites: <code>MVI A, 50H</code> loads the number 50H, <code>LDA 0050H</code> loads whatever byte lives at address 0050H.",
+  },
+
+  "mp-data-transfer": {
+    intro: "Moving bytes about. None of these touch the flags, which is what makes them safe to use mid-calculation.",
+    form: "MOV  rd, rs   ->  register to register\nMOV  r,  M    ->  memory (via HL) to register\nMVI  r,  data ->  8-bit constant into a register\nLXI  rp, addr ->  16-bit constant into a pair\nLDA  addr     ->  memory to A\nSTA  addr     ->  A to memory\nXCHG          ->  swap HL, DE",
+    parts: [
+      { bit: "MOV", says: "Copy between registers. The destination is written first, the source second — <code>MOV B, C</code> puts C into B." },
+      { bit: "rd", says: "Destination register." },
+      { bit: "rs", says: "Source register, left unchanged. It is a copy, not a move, whatever the mnemonic says." },
+      { bit: "M", says: "Memory through HL. Using it costs an extra machine cycle over a register-to-register move." },
+      { bit: "MVI", says: "Move immediate: an 8-bit constant written into the instruction." },
+      { bit: "LXI", says: "Load extended immediate: a 16-bit constant into a register pair. This is how HL gets set up before any indirect access." },
+      { bit: "LDA", says: "Load A directly from a named address." },
+      { bit: "STA", says: "Store A at a named address. LDA and STA are always about A specifically." },
+      { bit: "XCHG", says: "Swaps HL and DE in one instruction. Cheaper than four MOVs, and the usual way to juggle two pointers." },
+    ],
+    note: "Set HL with LXI before any instruction that mentions M. Forgetting is the commonest 8085 bug: the code reads or writes whatever address HL happened to hold.",
+  },
+
+  "mp-arithmetic": {
+    intro: "The ALU family. Every one of these writes the flags, and that is usually the point.",
+    form: "ADD  r        ->  A = A + r\nADI  data     ->  A = A + data\nADC  r        ->  A = A + r + CY      ; multi-byte adds\nSUB  r        ->  A = A − r\nINR  r        ->  r = r + 1           ; all flags EXCEPT CY\nDCR  r        ->  r = r − 1\nDAA           ->  fix A back to BCD",
+    parts: [
+      { bit: "ADD", says: "One side is always A and the answer always lands in A. That is not a convention — the ALU is wired that way." },
+      { bit: "ADI", says: "The immediate form: add a constant carried in the instruction." },
+      { bit: "ADC", says: "Add with carry. Chaining it is how an 8-bit chip adds 16-bit numbers: add the low bytes, then ADC the high ones." },
+      { bit: "SUB", says: "Subtract. Internally it adds the two's complement, which is why a borrow shows up as the carry flag." },
+      { bit: "INR", says: "Increment by one, on any register — not only A. It writes every flag <b>except</b> carry, deliberately." },
+      { bit: "CY", says: "Carry stays untouched by INR and DCR so a loop counter can tick without disturbing a multi-byte addition in progress." },
+      { bit: "DCR", says: "Decrement. Pair it with JNZ and you have the standard 8085 counting loop." },
+      { bit: "DAA", says: "Decimal adjust: corrects A after adding two BCD numbers. The only instruction that reads the auxiliary carry flag." },
+    ],
+    note: "16-bit addition is ADD then ADC, low bytes first. Doing it the other way round loses the carry, because the carry from the low half has not happened yet.",
+  },
+
+  "mp-logical": {
+    intro: "Bit-level operations, and a comparison that works by subtracting and throwing the answer away.",
+    form: "ANA  r    ->  A = A AND r     ; masking: keep chosen bits\nORA  r    ->  A = A OR  r     ; setting: force bits on\nXRA  r    ->  A = A XOR r     ; toggling; XRA A clears A\nCMP  r    ->  A − r, result discarded, flags kept\nRLC       ->  rotate A left; bit 7 -> bit 0, also CY\nRAL       ->  rotate A left THROUGH carry",
+    parts: [
+      { bit: "ANA", says: "AND. A 0 in the mask forces that bit to 0 and a 1 leaves it alone — the standard way to isolate part of a byte." },
+      { bit: "ORA", says: "OR. A 1 in the mask forces that bit on. <code>ORA A</code> changes nothing and updates the flags, which is the cheapest way to test A." },
+      { bit: "XRA", says: "XOR. <code>XRA A</code> clears A to zero and clears carry, in one byte — faster than MVI A, 00H." },
+      { bit: "CMP", says: "Compare: subtracts, sets the flags, and discards the result. A is unchanged, which is what makes it a test rather than an operation." },
+      { bit: "flags kept", says: "After CMP: Z set means equal, CY set means A was smaller. Those two flags are what the conditional jumps read." },
+      { bit: "RLC", says: "Rotate left circular: bit 7 wraps round to bit 0 and is also copied into carry. A rotates, carry only observes." },
+      { bit: "RAL", says: "Rotate left through carry: carry becomes part of the ring, so it is a 9-bit rotation. This is the one for shifting multi-byte values." },
+    ],
+    note: "CMP then a conditional jump is how every comparison in 8085 is written. There is no \"if\" — there is a subtraction you throw away and a flag you branch on.",
+  },
+
+  "mp-branching-stack": {
+    intro: "Writing PC is a jump. Saving PC first and restoring it later is a subroutine.",
+    form: "JMP  addr   ->  PC = addr\nJZ   addr   ->  jump when Z = 1     ; JNZ JC JNC ...\n\nCALL addr   ->  push PC, then PC = addr\nRET         ->  pop  PC\n\nPUSH rp     ->  SP = SP − 2, store pair\nPOP  rp     ->  load pair, SP = SP + 2",
+    parts: [
+      { bit: "JMP", says: "Unconditional: writes the address into PC and the next fetch happens there. Nothing else about it is special." },
+      { bit: "JZ", says: "Conditional: taken only when the zero flag is set. There is one of these per flag condition, and each reads a flag some earlier instruction wrote." },
+      { bit: "CALL", says: "Pushes the return address — the instruction <b>after</b> the CALL — onto the stack, then jumps. That saved address is the whole difference from JMP." },
+      { bit: "RET", says: "Pops that address back into PC. Which is why every CALL needs exactly one RET on every path out of the subroutine." },
+      { bit: "PUSH", says: "Stores a register pair on the stack, two bytes at a time. SP goes <b>down</b> — the 8085 stack grows towards lower addresses." },
+      { bit: "POP", says: "The reverse, and it must be in the opposite order. Push BC then DE, pop DE then BC." },
+      { bit: "SP", says: "Points at the top of the stack. Set it with LXI SP before the first PUSH or CALL, or bytes land somewhere unintended." },
+    ],
+    note: "Push and pop in reverse order, and balance them inside a subroutine. One unmatched PUSH and RET pops your data into PC — the program jumps into nowhere, which is exactly how a stack corruption crash looks.",
+  },
 };
