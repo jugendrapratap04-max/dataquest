@@ -16,7 +16,7 @@ import { ReadingProgress } from "@/components/LessonProgress";
 import { LessonTopics, TopicNav } from "@/components/LessonTopics";
 import { lessonOutline } from "@/lib/lesson-outline";
 import { Fragment } from "react";
-import { RailControls } from "@/components/LayoutControls";
+import { CourseNav } from "@/components/CourseNav";
 import { VizBlock } from "@/components/viz/VizBlock";
 import { LiveCode } from "@/components/LiveCode";
 import { LiveHtml } from "@/components/LiveHtml";
@@ -450,6 +450,18 @@ export default async function LessonPage({
     where: { trackId: lesson.trackId },
     orderBy: { order: "asc" },
   });
+  /* Chapter titles for the course nav's group headings.
+   *
+   * One extra query rather than an `include` on the 23-row sibling list, which
+   * would carry the same handful of chapter rows over and over. A track with no
+   * chapter plan yet returns an empty map, and CourseNav then renders the flat
+   * list it renders today — no special case needed at the call site. */
+  const chapterRows = await prisma.chapter.findMany({
+    where: { trackId: lesson.trackId },
+    orderBy: { order: "asc" },
+    select: { id: true, title: true },
+  });
+  const chapterOf = new Map(chapterRows.map((c) => [c.id, c.title]));
   const doneRows = user
     ? await prisma.lessonProgress.findMany({ where: { userId: user.id, status: "done" } })
     : [];
@@ -529,6 +541,21 @@ export default async function LessonPage({
   return (
     <div className="learn-layout">
       <ReadingProgress />
+      {/* The contents come FIRST in the source as well as on screen: on a phone
+          this renders as a closed disclosure above the lesson, which is the
+          whole fix — the old rail landed after the entire lesson. */}
+      <CourseNav
+        courseTitle={lesson.track.title.split(" — ")[0]}
+        courseHref="/learn"
+        currentId={lesson.id}
+        doneIds={[...doneIds]}
+        doneCount={doneIds.size}
+        lessons={siblings.map((s) => ({
+          id: s.id, slug: s.slug, title: s.title, order: s.order,
+          chapterTitle: chapterOf.get(s.chapterId ?? "") ?? null,
+          chapterOrder: null,
+        }))}
+      />
       <article>
         {/* Clickable, because this breadcrumb was plain text and a lesson had no
             way out at all — and on mobile the sidebar is behind a hamburger, so
@@ -684,29 +711,6 @@ export default async function LessonPage({
             : <a className="dis next"><div className="dir">Next →</div><div className="ttl">Module end</div></a>}
         </nav>
       </article>
-
-      <aside className="learn-side">
-        <RailControls />
-        <div className="card pad">
-          <h3 className="side-card">{lesson.track.title.split(" — ")[0]} — {doneIds.size} / {siblings.length}</h3>
-          <div className="pbar"><i style={{ width: `${Math.round((doneIds.size / siblings.length) * 100)}%` }} /></div>
-        </div>
-        <div className="card pad">
-          <h3 className="side-card" style={{ marginBottom: 14 }}>Lessons in this module</h3>
-          <ul className="llist">
-            {siblings.map((s) => {
-              const cls = s.id === lesson.id ? "cur" : doneIds.has(s.id) ? "done" : "lock";
-              return (
-                <li key={s.id} className={cls}>
-                  <Link href={`/learn/${s.slug}`} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
-                    <span className="lic">{doneIds.has(s.id) ? "✓" : s.order}</span> {s.title}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </aside>
     </div>
   );
 }

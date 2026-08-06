@@ -74,6 +74,22 @@ const PLANS = {
     { slug: "mp-microcontrollers", title: "Microcontrollers", upto: 41, summary: "Where a microcontroller belongs instead of a microprocessor, and the 8051." },
     { slug: "mp-exam-prep", title: "Exam and interview preparation", upto: 42, summary: "The question patterns that repeat every year, each worked end to end, plus a one-page revision per chapter." },
   ],
+
+  // The HTML course was written in modules from the start; this makes those
+  // modules real rather than a comment in the content file. They are what the
+  // course navigation groups by, so a student can see "I am in Links, there are
+  // two lessons in it" instead of reading a flat list of 23 titles.
+  html: [
+    { slug: "html-web-foundations", title: "How the web works", upto: 5, summary: "No markup at all yet, and that is the point: where a page goes, who asks for it, who answers, and what happens between pressing Enter and seeing the screen." },
+    { slug: "html-setup", title: "Setting up", upto: 7, summary: "An editor, a live-reloading server, and the browser tools that show you what your file became." },
+    { slug: "html-basics", title: "The basics", upto: 10, summary: "What HTML actually is, the skeleton every page starts from, and elements, attributes and nesting." },
+    { slug: "html-text", title: "Text and content", upto: 12, summary: "Headings that describe structure rather than size, and the elements that mark what text means." },
+    { slug: "html-links", title: "Links", upto: 14, summary: "The element the web is named after: absolute and relative addresses, fragments, new tabs, and the words inside the anchor." },
+    { slug: "html-images", title: "Images", upto: 16, summary: "src and alt for the audience that never sees them, then size, captions and lazy loading." },
+    { slug: "html-lists", title: "Lists", upto: 18, summary: "Ordered, unordered and description lists — and why a list announces its count before its contents." },
+    { slug: "html-tables", title: "Tables", upto: 20, summary: "Rows, headers and scope for real tabular data, plus spanning cells and the decade tables were misused for layout." },
+    { slug: "html-forms", title: "Forms", upto: 23, summary: "Where the web stops being read-only: names, labels, input types, and validation that is a courtesy rather than a defence." },
+  ],
 };
 
 const titleOf = (t) => t.title.split(" — ").pop() ?? t.title;

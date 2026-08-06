@@ -363,7 +363,16 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 /* minmax(0,1fr), not 1fr: a grid track's automatic minimum is its content's
    min-content width, so one long code line would push the sidebar off-screen
    and give the whole page a horizontal scrollbar. */
-.learn-layout { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:28px; align-items:start; } @media (max-width:1000px){ .learn-layout{ grid-template-columns:minmax(0,1fr);} .learn-side{ display:none;} }
+/* Course nav LEFT, lesson right — the W3Schools shape, and for its reason: the
+   eye starts on the left, so the contents are the first thing on the page.
+   ⚠️ The old rule tried to hide `.learn-side` below 1000px and FAILED: this
+   selector sits at line ~366 and `.learn-side { … display:flex }` sits at ~816,
+   same specificity and later in the file, so the later one won. The rail was
+   never hidden on a phone — it stacked after the whole lesson, which measured
+   at y=2339 of a 3310px page. Anything hiding a panel by width now lives WITH
+   that panel's own rules, never in a separate early block. */
+.learn-layout { display:grid; grid-template-columns:264px minmax(0,1fr); gap:28px; align-items:start; }
+@media (max-width:1000px){ .learn-layout{ grid-template-columns:minmax(0,1fr); gap:0; } }
 .crumb { font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-bottom:16px; } .crumb b { color:var(--accent-2); }
 /* The breadcrumb is the way back out of a detail page, so its segments have to
    look and behave like links — on mobile the sidebar is behind a hamburger and
@@ -813,10 +822,70 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    A dashed border and a recessed background say inactive and leave the words
    legible. */
 .lnav a.dis .ttl { color:var(--ink-faint); font-weight:500; }
-.learn-side { position:sticky; top:20px; display:flex; flex-direction:column; gap:18px; }
-.llist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; } .llist li { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:8px; font-size:13px; cursor:pointer; }
-.llist li .lic { width:19px; height:19px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:10px; font-family:var(--mono); border:1.5px solid var(--line); color:var(--ink-faint); }
-.llist li.done .lic { background:var(--good); border-color:var(--good); color:#fff; } .llist li.cur { background:var(--accent-soft); font-weight:650; } .llist li.cur .lic { background:var(--accent); border-color:var(--accent); color:#21160A; } .llist li.lock { color:var(--ink-faint); }
+
+/* ---- CourseNav: the course's contents beside the lesson -------------------
+   See the note at the top of components/CourseNav.tsx for the measurements
+   this layout came out of. Two rules matter more than the rest: it has its OWN
+   scrollbar (so an 18-lesson course does not push the page down), and it is
+   present at every width (below 1000px it becomes a closed disclosure ABOVE the
+   lesson rather than a panel dumped after it). */
+.cnav { position:sticky; top:20px; max-height:calc(100vh - 40px); display:flex; flex-direction:column;
+        border:1px solid var(--line); border-radius:12px; background:var(--card); overflow:hidden; }
+.cnav-head { display:flex; align-items:baseline; gap:8px; padding:13px 15px 9px; }
+.cnav-course { font-size:13px; font-weight:700; color:var(--fg); text-decoration:none; letter-spacing:.01em; }
+.cnav-course:hover { color:var(--accent); }
+.cnav-count { margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.cnav-bar { height:3px; margin:0 15px 8px; border-radius:2px; background:var(--line); overflow:hidden; }
+.cnav-bar i { display:block; height:100%; background:var(--accent); }
+
+/* ⚠️ `min-height:0` on BOTH of these, and the nav is broken without them.
+   A flex item defaults to `min-height:auto`, so the wrapper refused to shrink
+   below its content: the scroller was rendered at its full 1370px, `.cnav`
+   clipped it at 593px with overflow:hidden, and `overflow-y:auto` never had
+   anything to scroll. Measured before the fix: the last lesson sat 817px past
+   the nav's bottom edge with `scrollHeight === clientHeight`, so the entire
+   Forms module was invisible AND unreachable. */
+.cnav-open { display:flex; flex-direction:column; min-height:0; }
+.cnav-scroll { flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; padding:4px 8px 12px; }
+.cnav-group + .cnav-group { margin-top:10px; }
+/* The module heading. Sticky inside the scroller, so while you are reading
+   lesson 17 the strip still says which module you are in — the one thing a flat
+   list of 18 titles can never tell you. */
+.cnav-gtitle { position:sticky; top:0; z-index:1; padding:7px 7px 5px; background:var(--card);
+               font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--muted); }
+.cnav-scroll ul { list-style:none; margin:0; padding:0; }
+.cnav-scroll li a { display:flex; align-items:flex-start; gap:9px; padding:6px 8px; border-radius:7px;
+                    font-size:12.75px; line-height:1.4; color:var(--ink-soft); text-decoration:none; }
+.cnav-scroll li a:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); color:var(--fg); }
+.cnav-n { flex:none; width:19px; height:19px; margin-top:1px; display:grid; place-items:center; border-radius:6px;
+          font-family:var(--mono); font-size:10px; border:1px solid var(--line); color:var(--ink-faint); }
+.cnav-t { flex:1; }
+/* Reading is free on this platform, so nothing here is greyed out as "locked" —
+   the old rail gave every unfinished lesson `.lock` and a faint colour, which
+   told a signed-out reader the whole course was shut. Only DONE and CURRENT
+   are marked; everything else is simply available. */
+.cnav-scroll li.done a { color:var(--muted); }
+.cnav-scroll li.done .cnav-n { border-color:var(--good); color:var(--good); }
+.cnav-scroll li.on a { background:var(--accent-soft); color:var(--fg); font-weight:650; }
+.cnav-scroll li.on .cnav-n { background:var(--accent); border-color:var(--accent); color:#21160A; }
+
+/* Desktop shows the list open; the phone disclosure is inert. Swapped below. */
+.cnav-fold { display:none; }
+@media (max-width:1000px){
+  .cnav { position:static; max-height:none; margin:0 0 18px; }
+  .cnav-open { display:none; }
+  .cnav-fold { display:block; }
+  .cnav-fold summary { padding:11px 15px; font-size:13px; font-weight:650; cursor:pointer;
+                       border-top:1px solid var(--line); color:var(--fg); }
+  .cnav-fold[open] summary { border-bottom:1px solid var(--line); }
+  .cnav-fold .cnav-scroll { max-height:50vh; flex:none; }
+  .cnav-scroll li a { padding:9px 8px; font-size:13.5px; }  /* thumb-sized */
+}
+/* The collapse toggle already existed for the old right rail and keeps working;
+   the rules that hide it live with the other panel-collapse rules further down
+   this file, not here — one place per behaviour. What DOES belong here is the
+   restore tab moving to the left edge, because the panel it restores did. */
+.rail-tab { right:auto; left:0; border-radius:0 9px 9px 0; border-right:1px solid var(--line); border-left:0; }
 /* `.side-card`, not `.side-card h4`.
    The class sits ON the heading, so the descendant form matched nothing and
    both sidebar labels have been rendering at default browser heading size this
@@ -2237,15 +2306,15 @@ select.inp { cursor:pointer; }
   /* The chevron flips to point outwards, and stays reachable when collapsed. */
   html[data-nav="mini"] .nav-collapse { margin: 0; }
 
-  /* -- right module panel ------------------------------------------------ */
-  html[data-rail="off"] .learn-side { display: none; }
+  /* -- course contents panel (was the right module rail) ------------------ */
+  html[data-rail="off"] .cnav { display: none; }
   html[data-rail="off"] .learn-layout { grid-template-columns: minmax(0, 1fr); }
 
   /* -- focus reading ----------------------------------------------------- */
   html[data-focus="1"] .app { grid-template-columns: minmax(0, 1fr); }
   html[data-focus="1"] .side,
   html[data-focus="1"] .side-backdrop,
-  html[data-focus="1"] .learn-side,
+  html[data-focus="1"] .cnav,
   html[data-focus="1"] .rail-tab { display: none; }
   html[data-focus="1"] .learn-layout { grid-template-columns: minmax(0, 1fr); }
   html[data-focus="1"] .wrap { max-width: none; padding-left: 44px; padding-right: 44px; }

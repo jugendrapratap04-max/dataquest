@@ -78,9 +78,15 @@ export function NavCollapse() {
 
 /* ----------------------------------------- right rail, collapsed to a tab --- */
 
-/** The chevron that lives at the top of the module rail, plus the tab that
- *  brings it back. The tab is fixed, so it works from anywhere down the page —
- *  a reader who wants the rail back is rarely at the top. */
+/** The chevron that folds the course contents away, plus the tab that brings
+ *  them back. The tab is fixed, so it works from anywhere down the page — a
+ *  reader who wants the contents back is rarely at the top.
+ *
+ *  ⚠️ BOTH ARROWS POINT THE OTHER WAY NOW. This panel used to be the module
+ *  rail on the RIGHT; it is the course contents on the LEFT since the
+ *  navigation rebuild, so collapsing moves it left and restoring pulls it
+ *  right. An arrow pointing at the wrong edge is a small thing that makes a
+ *  control read as broken. */
 export function RailControls() {
   const off = usePref("rail");
   const focus = usePref("focus");
@@ -88,16 +94,16 @@ export function RailControls() {
   return (
     <>
       {!off && (
-        <button className="rail-collapse" onClick={() => set("rail", true)} title="Hide this panel">
+        <button className="rail-collapse" onClick={() => set("rail", true)} title="Hide the contents">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m9 6 6 6-6 6" />
+            <path d="m15 6-6 6 6 6" />
           </svg>
         </button>
       )}
       {off && !focus && (
-        <button className="rail-tab" onClick={() => set("rail", false)} title="Show the module panel">
+        <button className="rail-tab" onClick={() => set("rail", false)} title="Show the course contents">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="m15 6-6 6 6 6" />
+            <path d="m9 6 6 6-6 6" />
           </svg>
         </button>
       )}
