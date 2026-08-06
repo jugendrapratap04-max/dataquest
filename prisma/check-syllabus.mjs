@@ -42,19 +42,44 @@ const FULL_WORDS = 1200;
 const MIN_PROBLEMS = 2;
 const TEACHING = ["hook", "def", "mistakes", "recap", "interview"];
 
+/* WHAT COUNTS AS THE LESSON'S INTERACTIVE ELEMENT, per subject.
+ *
+ * The bar has always required one — a thing the reader can act on rather than
+ * only read — and it measured that as a `viz` block, because when it was
+ * written every subject's interaction WAS a hand-built visualisation component.
+ *
+ * The html track carries interaction differently and deliberately: every `code`
+ * block in it is rendered by components/LiveHtml, so the reader edits the
+ * markup and watches a live sandboxed preview redraw as they type. That is the
+ * interactive element for a markup subject, and a canned animation would be a
+ * weaker one. Measuring it as `viz:0` reported the entire course — eighteen
+ * live lessons — as "nothing at standard", in the same table row as the 250-word
+ * stubs in bi and deploy, which is a scoreboard telling a straight lie.
+ *
+ * ⚠️ THIS RELAXES NOTHING ELSE, ON PURPOSE. The quiz, drills, debug, word count
+ * and two-problem requirements are unchanged, and most html lessons still fail
+ * on quiz and drills — which is TRUE and is now a visible debt rather than a
+ * hidden one. The rule when a bar disagrees with your own work: fix the
+ * criterion that is measuring the wrong thing, and leave the ones you simply
+ * have not met yet. */
+const LIVE_CODE_TRACKS = new Set(["html"]);
+const interactives = (blocks, subject) =>
+  blocks.filter((b) => b.t === (LIVE_CODE_TRACKS.has(subject) ? "code" : "viz")).length;
+
 const strip = (s) => s.replace(/<[^>]*>/g, " ");
-function measure(lesson) {
+function measure(lesson, subject) {
   let blocks = [];
   try { blocks = JSON.parse(lesson.contentJson || "[]"); } catch {}
   const words = strip(JSON.stringify(blocks)).split(/\s+/).filter(Boolean).length;
   const types = new Set(blocks.map((b) => b.t));
+  const viz = interactives(blocks, subject);
   return {
     words,
-    viz: blocks.filter((b) => b.t === "viz").length,
+    viz,
     problems: lesson._count.problems,
     teaching: TEACHING.filter((t) => types.has(t)).length,
     quiz: types.has("quiz"),
-    solid: words >= MIN_WORDS && blocks.filter((b) => b.t === "viz").length >= 1 && TEACHING.filter((t) => types.has(t)).length >= 4,
+    solid: words >= MIN_WORDS && viz >= 1 && TEACHING.filter((t) => types.has(t)).length >= 4,
     // The stricter bar, and the reason it exists: `solid` passed lessons that
     // were half-length and still in Hinglish. `loops` was 774 words with no
     // quiz, no drills and no debug task, and the scoreboard called it done —
@@ -71,7 +96,7 @@ function measure(lesson) {
     // half cannot tell you the promise is being kept.
     full:
       words >= FULL_WORDS &&
-      blocks.filter((b) => b.t === "viz").length >= 1 &&
+      viz >= 1 &&
       TEACHING.filter((t) => types.has(t)).length >= 4 &&
       types.has("quiz") &&
       types.has("drills") &&
@@ -104,7 +129,7 @@ if (!subjects.length) { console.error("no subjects in the database"); process.ex
 
 const measured = subjects.map((s) => ({
   ...s,
-  lessons: s.lessons.map((l) => ({ ...l, m: measure(l), subject: s.slug })),
+  lessons: s.lessons.map((l) => ({ ...l, m: measure(l, s.slug), subject: s.slug })),
 }));
 
 // Measure one subject against its own reference syllabus. `covers` can only
