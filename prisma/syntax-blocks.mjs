@@ -962,4 +962,698 @@ export const SYNTAX = {
     ],
     note: "Max flow is exact and fast because it can undo. TSP has no known way to do that, so real solvers return a good tour with a bound on how far off it might be — and that is the honest answer, not a failure.",
   },
+
+  /* ============================================================ PANDAS ==== */
+
+  "numpy-arrays": {
+    intro: "An array is not a list. One operation applies to every element at once, without a loop.",
+    form: "import numpy as np\n\narr = np.array([1, 2, 3])\narr * 2\narr[arr > 1]\narr.mean()",
+    parts: [
+      { bit: "import", says: "NumPy is not in the standard library — it comes with the practice environment here, and with pip anywhere else." },
+      { bit: "as", says: "<code>np</code> is the universal alias. Every example you will ever read uses it, so follow it." },
+      { bit: "np.array([1, 2, 3])", says: "Builds the array from a list. Every element must be the same type — mix text and numbers and NumPy quietly turns them all into text." },
+      { bit: "arr * 2", says: "Vectorisation: the operation applies element by element, with no loop written and none run. This is the whole reason NumPy exists." },
+      { bit: "arr[arr > 1]", says: "Boolean masking. The inside produces an array of True/False, and the outside keeps only the True positions." },
+      { bit: "arr.mean()", says: "Aggregations run over the whole array in one call — <code>.sum()</code>, <code>.std()</code>, <code>.max()</code> and the rest." },
+    ],
+    note: "A NumPy loop written by hand is usually 10–100× slower than the vectorised form. If you are writing <code>for</code> over an array, there is nearly always a way not to.",
+  },
+
+  "series-dataframe": {
+    intro: "Two shapes hold nearly everything in pandas: one labelled column, and a table of them.",
+    form: "import pandas as pd\n\ns = pd.Series(values, index=labels)\ndf = pd.DataFrame({\"column\": values})\n\ndf.head()\ndf.info()\ndf.shape",
+    parts: [
+      { bit: "import", says: "pandas is built on NumPy, so importing it brings the array machinery with it." },
+      { bit: "as", says: "<code>pd</code>, always. Same convention as <code>np</code>." },
+      { bit: "pd.Series(values, index=labels)", says: "One column with a label on every row. The index is not a row number — it is a name, and it survives filtering and sorting." },
+      { bit: "index", says: "The row labels. Left out, you get 0, 1, 2 — which looks like positions and is still an index." },
+      { bit: "pd.DataFrame({\"column\": values})", says: "A table. From a dict, each key becomes a column name and each value that column's data." },
+      { bit: "df.head()", says: "The first five rows. The first thing to run on any new data, before any assumption about it." },
+      { bit: "df.info()", says: "Column names, types and how many non-null values each holds — where missing data announces itself." },
+      { bit: "df.shape", says: "(rows, columns). No brackets: it is an attribute, not a method." },
+    ],
+    note: "A DataFrame column is a Series, and a Series has an index. Almost every confusing pandas error traces back to two objects whose indexes do not line up.",
+  },
+
+  "select-filter": {
+    intro: "Four ways in, and choosing the wrong one is where most pandas confusion starts.",
+    form: "df[\"column\"]\ndf[[\"col_a\", \"col_b\"]]\ndf.loc[row_label, column_label]\ndf.iloc[row_position, column_position]\ndf[df[\"column\"] > value]\ndf[(condition_a) & (condition_b)]",
+    parts: [
+      { bit: "df[\"column\"]", says: "One column, as a Series. Single brackets, single column." },
+      { bit: "df[[\"col_a\", \"col_b\"]]", says: "Several columns, as a DataFrame. The inner brackets are a list — that is why there are two." },
+      { bit: "df.loc[row_label, column_label]", says: "By <b>label</b>. The end of a <code>.loc</code> slice is <b>included</b>, unlike everywhere else in Python." },
+      { bit: "df.iloc[row_position, column_position]", says: "By <b>position</b>, 0-based, end excluded — the ordinary Python rule. The <code>i</code> is for integer." },
+      { bit: "df[df[\"column\"] > value]", says: "Boolean filtering. The inside makes a True/False Series; the outside keeps the True rows." },
+      { bit: "&", says: "AND for two conditions. Not the word <code>and</code> — that compares whole Series and raises." },
+      { bit: "(condition_a)", says: "Brackets around each condition are required. <code>&</code> binds tighter than <code>&gt;</code>, so without them the comparison happens in the wrong order." },
+    ],
+    note: "<code>.loc</code> includes its end, <code>.iloc</code> does not. Mixing them up silently returns a row too many or too few.",
+  },
+
+  "missing-data": {
+    intro: "Missing values are not zeros. Deciding what they mean is your job; pandas only gives you the tools.",
+    form: "df.isna().sum()\ndf.dropna(subset=[\"column\"])\ndf.fillna(value)\ndf[\"column\"].fillna(df[\"column\"].median())",
+    parts: [
+      { bit: "df.isna()", says: "True wherever a value is missing, same shape as the table." },
+      { bit: "df.isna().sum()", says: "Counts them per column, because summing True/False counts the Trues. The first line to run on new data." },
+      { bit: "df.dropna(subset=[\"column\"])", says: "Removes rows missing that column. Without <code>subset</code> it drops a row missing <b>anything</b>, which on wide data can take most of the table." },
+      { bit: "df.fillna(value)", says: "Replaces them. Hands back a new frame — the original is untouched unless you assign the result." },
+      { bit: "df[\"column\"].median()", says: "Filling with the median rather than the mean, because one extreme value drags a mean and leaves a median alone." },
+    ],
+    note: "Filling changes what the data says. A missing salary filled with the median becomes a real-looking salary nobody earns — record that you filled it, or you will forget.",
+  },
+
+  groupby: {
+    intro: "Split the rows into groups, compute something per group, put the answers back together.",
+    form: "df.groupby(\"column\")[\"value\"].mean()\ndf.groupby([\"col_a\", \"col_b\"]).agg({\"value\": [\"mean\", \"count\"]})\ndf.groupby(\"column\").size()",
+    parts: [
+      { bit: "df.groupby(\"column\")", says: "Splits by the distinct values in that column. On its own it computes nothing — it describes the split and waits." },
+      { bit: "[\"value\"]", says: "Which column to aggregate. Leave it out and every numeric column is aggregated, which is usually more than you wanted." },
+      { bit: ".mean()", says: "The aggregation. One number per group; the group values become the index of the result." },
+      { bit: "[\"col_a\", \"col_b\"]", says: "Grouping by two columns gives one group per combination, and a two-level index on the result." },
+      { bit: ".agg({\"value\": [\"mean\", \"count\"]})", says: "Several aggregations at once, per column. Almost always pair a mean with a count — a mean over three rows is not a fact." },
+      { bit: ".size()", says: "How many rows per group, missing values included. <code>.count()</code> is the same but skips them, which is a different question." },
+    ],
+    note: "The grouped column becomes the index, not a column. <code>.reset_index()</code> turns it back into one when you need to keep working.",
+  },
+
+  "sorting-unique": {
+    intro: "The cleaning steps that come between reading a file and trusting it.",
+    form: "df.sort_values(\"column\", ascending=False)\ndf[\"column\"].unique()\ndf[\"column\"].value_counts()\ndf.drop_duplicates(subset=[\"column\"])\ndf.rename(columns={\"old\": \"new\"})",
+    parts: [
+      { bit: "df.sort_values(\"column\", ascending=False)", says: "Sorts by a column. Hands back a new frame — a very common mistake is sorting and then using the original." },
+      { bit: "ascending", says: "<code>False</code> for largest first. A list of booleans when sorting by several columns." },
+      { bit: "df[\"column\"].unique()", says: "The distinct values, in the order first seen. The fastest way to find that \"Delhi\", \"delhi\" and \"Delhi \" are three cities." },
+      { bit: "df[\"column\"].value_counts()", says: "The distinct values <b>and</b> how often each appears, biggest first. Usually the more useful of the two." },
+      { bit: "df.drop_duplicates(subset=[\"column\"])", says: "Keeps the first row per value of that column. Without <code>subset</code>, a row counts as duplicate only when <b>every</b> column matches." },
+      { bit: "df.rename(columns={\"old\": \"new\"})", says: "Renames by mapping. Anything not in the dict is left alone." },
+    ],
+    note: "Nearly every one of these returns a new frame instead of changing yours. If nothing seems to happen, you probably forgot to assign the result.",
+  },
+
+  /* =============================================================== SQL ==== */
+
+  "sql-intro": {
+    intro: "Every query is the same skeleton. You start with two clauses and add the rest as you need them.",
+    form: "SELECT column_a, column_b\nFROM table_name;",
+    parts: [
+      { bit: "SELECT", says: "Which columns you want back. <code>*</code> means every one — fine while exploring, and worth replacing with real names once you know what you need." },
+      { bit: "column_a", says: "Column names, comma-separated. A missing comma is the commonest reason a query will not parse." },
+      { bit: "FROM", says: "Which table they come from. SELECT names the columns; FROM is what decides they exist." },
+      { bit: "table_name", says: "The table. Names here are exactly as the schema panel shows them — plural and singular are easy to mix up." },
+      { bit: ";", says: "Ends the statement. One query does not need it; several in a row do." },
+    ],
+    note: "SQL says <b>what</b> you want, not how to get it. There is no loop to write — the database decides how to find the rows.",
+  },
+
+  "sql-where": {
+    intro: "WHERE throws rows away before anything else looks at them.",
+    form: "SELECT columns\nFROM table_name\nWHERE condition\n  AND other_condition\n  OR third_condition;",
+    parts: [
+      { bit: "WHERE", says: "Tested once per row, and only the rows that pass continue. It comes after FROM and before everything else." },
+      { bit: "condition", says: "A comparison: <code>=</code> (not <code>==</code>), <code>&lt;&gt;</code> for not-equal, <code>BETWEEN</code>, <code>LIKE</code> for patterns, <code>IS NULL</code> for missing." },
+      { bit: "AND", says: "Both must hold." },
+      { bit: "OR", says: "Either will do. Mixing AND and OR without brackets is the classic silent bug — AND binds tighter, so the query means something you did not write." },
+    ],
+    note: "Text goes in single quotes: <code>'Delhi'</code>. Double quotes mean a column name, which is why a missing quote reports \"no such column\" rather than a syntax error.",
+  },
+
+  "sql-order": {
+    intro: "Three clauses that shape what comes back rather than which rows do.",
+    form: "SELECT DISTINCT column\nFROM table_name\nORDER BY column DESC\nLIMIT 10;",
+    parts: [
+      { bit: "DISTINCT", says: "Drops duplicate rows from the result. It applies to the whole selected row, not to one column." },
+      { bit: "ORDER BY", says: "Sorts the result. Without it, row order is whatever the database found convenient — never assume it." },
+      { bit: "DESC", says: "Largest first. <code>ASC</code> is the default and rarely written." },
+      { bit: "LIMIT", says: "How many rows to return. Put it on every exploratory query — a SELECT on a million-row table with no limit is a slow way to learn that." },
+    ],
+    note: "LIMIT without ORDER BY gives you ten rows, not the top ten. Which ten is undefined and can change between runs.",
+  },
+
+  "sql-groupby": {
+    intro: "Collapse many rows into one per group — and the clause order that makes it work.",
+    form: "SELECT column, COUNT(*), AVG(value)\nFROM table_name\nWHERE row_condition\nGROUP BY column\nHAVING group_condition\nORDER BY COUNT(*) DESC;",
+    parts: [
+      { bit: "COUNT(*)", says: "Rows per group. <code>COUNT(column)</code> is different — it skips NULLs, which is sometimes what you want and never by accident." },
+      { bit: "AVG(value)", says: "An aggregate: one number per group. <code>SUM</code>, <code>MIN</code>, <code>MAX</code> behave the same way." },
+      { bit: "GROUP BY", says: "Which column defines a group. Every non-aggregated column in SELECT must appear here." },
+      { bit: "WHERE", says: "Filters <b>rows</b>, before grouping. An aggregate cannot go here — at this point the groups do not exist yet." },
+      { bit: "HAVING", says: "Filters <b>groups</b>, after aggregating. This is where a condition on COUNT or AVG belongs." },
+      { bit: "ORDER BY", says: "Sorts the grouped result, and may sort by an aggregate." },
+    ],
+    note: "Written order is SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY → LIMIT. <b>Run</b> order is FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT — which is why WHERE cannot see an alias SELECT has not created yet.",
+  },
+
+  "sql-joins": {
+    intro: "One table rarely holds everything. A join lines two of them up on a shared value.",
+    form: "SELECT a.column, b.column\nFROM table_a AS a\nJOIN table_b AS b\n  ON a.key = b.key;",
+    parts: [
+      { bit: "AS", says: "Gives the table a short alias. With two tables in play, prefixing columns stops \"ambiguous column name\" — and makes the query readable." },
+      { bit: "a.column", says: "Which table each column comes from. Required whenever the name exists in both." },
+      { bit: "JOIN", says: "Inner join: keeps only rows with a match on <b>both</b> sides. Rows with no partner disappear silently, which is the commonest way a join loses data." },
+      { bit: "ON", says: "The condition that pairs the rows — normally a key on one side equalling a key on the other." },
+      { bit: "a.key = b.key", says: "The link. Forget ON entirely and you get every row paired with every row: 1,000 × 1,000 = a million." },
+    ],
+    note: "<code>LEFT JOIN</code> keeps every row of the left table and fills the right with NULL where there is no match. Use it when \"no match\" is itself an answer worth seeing.",
+  },
+
+  "sql-advanced": {
+    intro: "A query inside a query, and a way to rank rows without collapsing them.",
+    form: "SELECT column,\n       ROW_NUMBER() OVER (PARTITION BY group_column ORDER BY sort_column) AS position\nFROM table_name\nWHERE column IN (SELECT column FROM other_table);",
+    parts: [
+      { bit: "ROW_NUMBER()", says: "A window function: numbers the rows. <code>RANK</code> and <code>DENSE_RANK</code> handle ties differently." },
+      { bit: "OVER", says: "What makes it a window function. GROUP BY collapses rows into one; OVER computes per row and <b>keeps every row</b>." },
+      { bit: "PARTITION BY", says: "Restarts the numbering per group — the window equivalent of GROUP BY." },
+      { bit: "ORDER BY", says: "Inside the OVER brackets it decides what \"first\" means for the numbering, which is a different job from sorting the output." },
+      { bit: "AS", says: "Names the computed column, so the result is readable." },
+      { bit: "IN", says: "Membership against a list — or, here, against whatever the inner query returns." },
+      { bit: "(SELECT column FROM other_table)", says: "A subquery. It runs first, and its result becomes the list the outer WHERE tests against." },
+    ],
+    note: "\"Top 3 per group\" needs a window function, not GROUP BY. GROUP BY gives you one row per group; you wanted three, with their detail intact.",
+  },
+
+  /* ======================================================== STATISTICS ==== */
+
+  "descriptive-stats": {
+    intro: "Three numbers that summarise a column, and they disagree on purpose.",
+    form: "import numpy as np\nfrom scipy import stats\n\nnp.mean(data)      # the average\nnp.median(data)    # the middle value\nstats.mode(data)   # the commonest value",
+    parts: [
+      { bit: "import", says: "NumPy carries the everyday statistics; SciPy carries the rest." },
+      { bit: "as", says: "<code>np</code> by convention, everywhere." },
+      { bit: "from", says: "<code>stats</code> is a submodule, so it is taken out by name." },
+      { bit: "np.mean(data)", says: "Add up, divide by the count. Moves when one extreme value does — which is exactly why it is not always the right summary." },
+      { bit: "np.median(data)", says: "Sort, take the middle. One billionaire in a room of ten does not move it." },
+      { bit: "stats.mode(data)", says: "The value appearing most often. The only one of the three that works on text." },
+    ],
+    note: "Report the mean and the median together. When they are far apart, that gap <b>is</b> the finding — the data is skewed, and one number was about to hide it.",
+  },
+
+  spread: {
+    intro: "The average alone says nothing about how tightly the values sit around it.",
+    form: "import numpy as np\n\nnp.var(data, ddof=1)\nnp.std(data, ddof=1)\nnp.max(data) - np.min(data)",
+    parts: [
+      { bit: "import", says: "NumPy again." },
+      { bit: "as", says: "<code>np</code>." },
+      { bit: "np.var(data, ddof=1)", says: "Variance: the average squared distance from the mean. Squared, so its units are not the data's units — which is why it is rarely reported directly." },
+      { bit: "ddof", says: "Delta degrees of freedom. <code>1</code> for a <b>sample</b>, <code>0</code> for a whole population. NumPy defaults to 0 and most real data is a sample, so this is the argument people forget." },
+      { bit: "np.std(data, ddof=1)", says: "Standard deviation: the square root of the variance, back in the data's own units. This is the one to report." },
+      { bit: "np.max(data) - np.min(data)", says: "The range. Simple, and decided entirely by the two most extreme values — so it tells you about the tails and nothing about the middle." },
+    ],
+    note: "Two datasets can share a mean and be nothing alike. Spread is what tells them apart, and quoting a mean without it is half a sentence.",
+  },
+
+  "probability-basics": {
+    intro: "Three rules, and almost every probability question is one of them in disguise.",
+    form: "P(A)      = favourable / total\n\nP(A ∩ B)  = P(A) × P(B|A)\nP(A ∪ B)  = P(A) + P(B) − P(A ∩ B)\nP(A′)     = 1 − P(A)",
+    parts: [
+      { bit: "P(A)", says: "The probability of A: how many outcomes count as A, out of all equally likely outcomes. Always between 0 and 1." },
+      { bit: "favourable", says: "Outcomes that count as A." },
+      { bit: "total", says: "All possible outcomes. Getting this wrong is the usual mistake — count the whole sample space, not the interesting part of it." },
+      { bit: "∩", says: "Both happen. Multiply — but by <code>P(B|A)</code>, not <code>P(B)</code>, unless the two are independent." },
+      { bit: "P(B|A)", says: "The probability of B <b>given</b> A already happened. When knowing A changes nothing, this equals P(B) and the events are independent." },
+      { bit: "∪", says: "Either happens. Add both, then subtract the overlap — otherwise the cases where both happen get counted twice." },
+      { bit: "P(A′)", says: "The complement — \"A does not happen\". Often far easier than the direct count: \"at least one\" is nearly always solved as \"1 minus none\"." },
+    ],
+    note: "If your answer is below 0 or above 1, you have not made a rounding error — you have counted something twice or used the wrong total.",
+  },
+
+  "normal-distribution": {
+    intro: "A z-score turns any value into \"how many standard deviations from average\", so unlike things become comparable.",
+    form: "z = (value − mean) / std\n\nfrom scipy import stats\nstats.norm.cdf(z)\nstats.norm.ppf(probability)",
+    parts: [
+      { bit: "z", says: "The z-score. 0 is exactly average, +2 is two standard deviations above, −1.5 is one and a half below." },
+      { bit: "value", says: "The raw observation." },
+      { bit: "mean", says: "The centre it is measured from." },
+      { bit: "std", says: "The unit it is measured in. Dividing by it is what removes the original units and makes two different scales comparable." },
+      { bit: "from", says: "<code>stats</code> out of SciPy." },
+      { bit: "import", says: "Loads it." },
+      { bit: "stats.norm.cdf(z)", says: "The proportion of the distribution <b>below</b> that z. cdf(0) is 0.5 — half the data sits below average." },
+      { bit: "stats.norm.ppf(probability)", says: "The inverse: give it a proportion, get the z that cuts there. ppf(0.95) ≈ 1.645, which is where confidence intervals come from." },
+    ],
+    note: "68 / 95 / 99.7 within one, two and three standard deviations — but only for data that is actually bell-shaped. Plot it before you trust the rule.",
+  },
+
+  "percentiles-iqr": {
+    intro: "Cut the sorted data into quarters, and the middle half tells you what \"normal\" looks like.",
+    form: "q1  = np.percentile(data, 25)\nq3  = np.percentile(data, 75)\niqr = q3 − q1\n\nlower = q1 − 1.5 × iqr\nupper = q3 + 1.5 × iqr",
+    parts: [
+      { bit: "np.percentile(data, 25)", says: "The value below which 25% of the data sits. The 50th percentile is the median." },
+      { bit: "q1", says: "First quartile — the bottom quarter ends here." },
+      { bit: "q3", says: "Third quartile — three quarters of the data sits below it." },
+      { bit: "iqr", says: "Interquartile range: the span of the middle 50%. Immune to extremes, because it never looks at the tails." },
+      { bit: "lower", says: "Anything below this counts as an outlier by the usual convention." },
+      { bit: "upper", says: "And anything above it. This pair is exactly what a box plot's whiskers draw." },
+      { bit: "1.5", says: "A convention, not a law. Widen it to 3 when you only want the extreme outliers." },
+    ],
+    note: "\"Outlier\" means unusual, not wrong. Look at each one before deleting it — the interesting rows in real data are often the ones this rule flags.",
+  },
+
+  correlation: {
+    intro: "One number for how tightly two columns move together.",
+    form: "np.corrcoef(x, y)[0, 1]\ndf.corr()\nstats.pearsonr(x, y)",
+    parts: [
+      { bit: "np.corrcoef(x, y)", says: "Returns a 2×2 matrix, not a number — every variable against every variable, itself included." },
+      { bit: "[0, 1]", says: "Pulls the one cell you wanted: x against y. The diagonal is always 1, because everything correlates perfectly with itself." },
+      { bit: "df.corr()", says: "Every numeric column against every other, in one table. The fastest first look at a new dataset." },
+      { bit: "stats.pearsonr(x, y)", says: "The correlation <b>and</b> a p-value — how likely a correlation this strong is from chance alone on this much data." },
+    ],
+    note: "+1 and −1 are equally strong, in opposite directions; 0 means no <b>straight-line</b> relationship, which is not the same as no relationship. And correlation is not cause — the third thing driving both is usually the real story.",
+  },
+
+  bayes: {
+    intro: "New evidence should update a belief, not replace it. This is the arithmetic for that.",
+    form: "P(A|B) = P(B|A) × P(A) / P(B)",
+    parts: [
+      { bit: "P(A|B)", says: "The posterior — what you believe about A <b>after</b> seeing B. The thing you actually want." },
+      { bit: "P(B|A)", says: "The likelihood — how often the evidence shows up when A is true. This is what a test's accuracy usually reports." },
+      { bit: "P(A)", says: "The prior — how common A is <b>before</b> any evidence. Skipping this is the mistake the whole lesson exists for." },
+      { bit: "P(B)", says: "How often the evidence appears at all, over every cause of it. It normalises the result so probabilities still sum to 1." },
+    ],
+    note: "A 99%-accurate test for a disease that 1 person in 10,000 has still gives mostly false positives. The prior is doing the work, and it is the term people leave out.",
+  },
+
+  distributions: {
+    intro: "A distribution is a shape data tends to take. Naming the right one lets you answer questions without collecting more.",
+    form: "from scipy import stats\n\nstats.norm(loc=mean, scale=std)\nstats.binom(n=trials, p=chance)\nstats.poisson(mu=rate)\n\ndist.pmf(k)   dist.pdf(x)   dist.cdf(x)   dist.rvs(size=n)",
+    parts: [
+      { bit: "from", says: "Every distribution lives in <code>scipy.stats</code> and shares the same interface." },
+      { bit: "import", says: "Loads it." },
+      { bit: "stats.norm(loc=mean, scale=std)", says: "The bell curve. <code>loc</code> is the centre, <code>scale</code> the standard deviation — the names are the same for every distribution." },
+      { bit: "stats.binom(n=trials, p=chance)", says: "Counts of successes in a fixed number of independent yes/no trials." },
+      { bit: "stats.poisson(mu=rate)", says: "Counts of events in a fixed window when they arrive independently — calls per hour, defects per batch." },
+      { bit: "dist.pmf(k)", says: "Probability of exactly k, for <b>discrete</b> distributions." },
+      { bit: "dist.pdf(x)", says: "Density at x, for <b>continuous</b> ones. Not a probability — the probability of exactly one real number is zero." },
+      { bit: "dist.cdf(x)", says: "Probability of x <b>or less</b>. This is the one that answers most real questions." },
+      { bit: "dist.rvs(size=n)", says: "Draws n random values from it — how you simulate when the maths gets awkward." },
+    ],
+    note: "Discrete counts things, continuous measures them. Reaching for <code>pdf</code> on a binomial or <code>pmf</code> on a normal is the commonest slip here.",
+  },
+
+  "sampling-clt": {
+    intro: "You measure a sample and want to talk about the population. This is what makes that legal.",
+    form: "sample = np.random.choice(population, size=n)\n\nmeans = [np.mean(np.random.choice(population, size=n)) for _ in range(1000)]\n\nstandard_error = np.std(population) / np.sqrt(n)",
+    parts: [
+      { bit: "np.random.choice(population, size=n)", says: "One sample of n. Every draw gives a different one — that variation is the whole subject." },
+      { bit: "means", says: "The sampling distribution: what the sample mean does when you take the sample again and again." },
+      { bit: "for", says: "One repetition per turn. A thousand is plenty to see the shape." },
+      { bit: "_", says: "The counter is never used — only how many times matters." },
+      { bit: "in", says: "Walks the repetitions." },
+      { bit: "range(1000)", says: "How many samples to simulate." },
+      { bit: "standard_error", says: "How much the sample mean itself varies. Not the spread of the data — the spread of the <b>estimate</b>." },
+      { bit: "np.sqrt(n)", says: "Dividing by the square root of n is why precision is expensive: four times the data buys twice the accuracy, not four times." },
+    ],
+    note: "The central limit theorem says those sample means go bell-shaped even when the data is not — which is why the normal distribution turns up in tests on data that looks nothing like it.",
+  },
+
+  "hypothesis-testing": {
+    intro: "A test answers one narrow question: could this difference plausibly be chance?",
+    form: "from scipy import stats\n\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\n\nif p_value < alpha:\n    reject_the_null",
+    parts: [
+      { bit: "from", says: "SciPy carries the standard tests." },
+      { bit: "import", says: "Loads them." },
+      { bit: "stats.ttest_ind(group_a, group_b)", says: "Independent two-sample t-test: are these two groups' means further apart than chance explains? <code>ttest_rel</code> is the paired version, for before-and-after on the same subjects." },
+      { bit: "t_stat", says: "The size of the difference, in units of its own uncertainty." },
+      { bit: "p_value", says: "The probability of seeing a difference this big <b>if the null were true</b>. It is not the probability the null is true — that is the misreading everything else here rests on." },
+      { bit: "if", says: "The decision rule, and it must be fixed <b>before</b> looking at the data." },
+      { bit: "alpha", says: "The threshold you agreed to accept, usually 0.05. It is a choice about how often you are willing to be wrong, not a property of the data." },
+      { bit: "reject_the_null", says: "The only thing a test can do. Failing to reject is not proof there is no effect — often it means the sample was too small to see one." },
+    ],
+    note: "A significant p-value says the difference is probably real. It says nothing about whether it is <b>big enough to matter</b> — that is the effect size, and it is the number your stakeholder actually wants.",
+  },
+
+  "ab-testing": {
+    intro: "The same test, applied to the one experiment every product team runs.",
+    form: "from statsmodels.stats.proportion import proportions_ztest\n\ncount = [conversions_a, conversions_b]\nnobs  = [visitors_a, visitors_b]\n\nz_stat, p_value = proportions_ztest(count, nobs)",
+    parts: [
+      { bit: "from", says: "statsmodels carries the proportion tests SciPy does not." },
+      { bit: "import", says: "Loads it." },
+      { bit: "count", says: "Successes per group — conversions, signups, clicks. Not rates: the raw counts." },
+      { bit: "nobs", says: "How many people were in each group. The pair (count, nobs) is what a proportion actually is." },
+      { bit: "conversions_a", says: "Group A's successes. A is the control — the thing already running." },
+      { bit: "visitors_a", says: "Group A's total. Both groups must be assigned at random, or the test measures your assignment rule instead of your change." },
+      { bit: "proportions_ztest(count, nobs)", says: "Compares the two rates and reports whether the gap is bigger than chance." },
+      { bit: "p_value", says: "Same meaning and the same trap as any other test." },
+    ],
+    note: "Decide the sample size and the end date <b>before</b> starting. Checking daily and stopping when it looks significant is how a coin flip becomes a 5% conversion lift.",
+  },
+
+  /* ====================================================== VISUALIZATION ==== */
+
+  "viz-intro": {
+    intro: "Two lines are the whole of plotting. Everything after this is refinement.",
+    form: "import matplotlib.pyplot as plt\n\nplt.plot(x, y)\nplt.show()",
+    parts: [
+      { bit: "import", says: "matplotlib is the foundation. Seaborn and pandas plotting both sit on top of it." },
+      { bit: "as", says: "<code>plt</code>, universally. <code>matplotlib.pyplot</code> is the drawing half of the library." },
+      { bit: "plt.plot(x, y)", says: "Draws. It does not display — it adds to a figure being built up in the background." },
+      { bit: "plt.show()", says: "Displays what has accumulated, and clears it. Forget it in a script and the window never appears; call it too early and later lines draw on a blank figure." },
+    ],
+    note: "Plot the data before summarising it. Four datasets can share a mean, a variance and a correlation and look completely different — that is Anscombe's quartet, and it is why this lesson comes first.",
+  },
+
+  "matplotlib-basics": {
+    intro: "The explicit form: make a figure and an axes, then tell the axes what to draw.",
+    form: "import matplotlib.pyplot as plt\n\nfig, ax = plt.subplots(figsize=(8, 5))\nax.plot(x, y, label=\"series\")\nax.set_xlabel(\"x\")\nax.set_title(\"title\")\nax.legend()\nplt.tight_layout()",
+    parts: [
+      { bit: "import", says: "Same import as the previous lesson — everything below is what to do once it is loaded." },
+      { bit: "as", says: "<code>plt</code>, as always." },
+      { bit: "plt.subplots(figsize=(8, 5))", says: "Creates the canvas and one axes on it, and hands both back. This is the form to learn — the <code>plt.plot</code> shortcut hides which figure it is drawing on." },
+      { bit: "fig", says: "The whole canvas: size, saving, overall title." },
+      { bit: "ax", says: "The plotting area: the data, the labels, the legend. Nearly everything you do is on <code>ax</code>." },
+      { bit: "figsize", says: "Width and height in inches. The single biggest lever on whether a chart is readable." },
+      { bit: "ax.plot(x, y, label=\"series\")", says: "Draws a line. <code>label</code> is what the legend will show — set it here, not later." },
+      { bit: "ax.set_xlabel(\"x\")", says: "Axis labels. An unlabelled axis makes a chart undecipherable to everyone except the person who made it that morning." },
+      { bit: "ax.legend()", says: "Draws the legend from the labels. With no labels set, it draws nothing and warns." },
+      { bit: "plt.tight_layout()", says: "Stops labels being cut off at the edges. Call it last, once everything is drawn." },
+    ],
+    note: "<code>fig, ax = plt.subplots()</code> for anything you will keep. The stateful <code>plt.</code> calls are fine in a notebook and become impossible to follow the moment there are two charts.",
+  },
+
+  seaborn: {
+    intro: "Seaborn takes a DataFrame and column names, and does the statistics for you.",
+    form: "import seaborn as sns\n\nsns.histplot(data=df, x=\"column\", hue=\"group\")\nsns.boxplot(data=df, x=\"group\", y=\"value\")\nsns.scatterplot(data=df, x=\"a\", y=\"b\")\nsns.heatmap(df.corr(), annot=True)",
+    parts: [
+      { bit: "import", says: "Built on matplotlib, so every matplotlib adjustment still works on the result." },
+      { bit: "as", says: "<code>sns</code> by convention." },
+      { bit: "data", says: "The DataFrame. Every seaborn function takes this plus column <b>names</b> — you pass strings, not the columns themselves." },
+      { bit: "x", says: "The column name for the horizontal axis, as a string." },
+      { bit: "hue", says: "Splits by a third column, colouring each group separately. One argument, and a chart becomes a comparison." },
+      { bit: "sns.histplot", says: "Distribution of one column — the shape a mean is hiding." },
+      { bit: "sns.boxplot", says: "Median, quartiles and outliers per group. The IQR lesson, drawn." },
+      { bit: "sns.heatmap(df.corr(), annot=True)", says: "A correlation matrix as colour. <code>annot=True</code> writes the numbers in, without which it is decoration." },
+    ],
+    note: "Seaborn returns a matplotlib axes. Anything it does not offer — a title, a limit, an annotation — you add with the <code>ax.</code> calls from the previous lesson.",
+  },
+
+  "choosing-charts": {
+    intro: "The chart type is decided by the question, not by taste. This is the lookup.",
+    form: "one value over time        ->  line\ncompare across categories  ->  bar\nshape of one column        ->  histogram\ntwo columns together       ->  scatter\nspread across groups       ->  box\nhow strongly all pairs move ->  heatmap",
+    parts: [
+      { bit: "line", says: "Time on the x-axis, and only for time or another ordered scale. A line between unordered categories implies a journey that does not exist." },
+      { bit: "bar", says: "Comparing amounts across categories. Start the axis at zero — a truncated bar chart exaggerates every difference on it." },
+      { bit: "histogram", says: "The distribution of one numeric column. Bin width changes the story, so try more than one." },
+      { bit: "scatter", says: "Two numeric columns, one dot per row. The only chart that shows a relationship rather than a summary of one." },
+      { bit: "box", says: "Comparing spread across groups. Shows the median, the middle half and the outliers at once." },
+      { bit: "heatmap", says: "A matrix as colour — correlations, confusion matrices, anything with two categorical axes and a number." },
+    ],
+    note: "No pie charts past three slices. Human eyes compare lengths well and angles badly, which is why a bar chart beats a pie at almost everything a pie is used for.",
+  },
+
+  "eda-storytelling": {
+    intro: "The same six lines, on every dataset, before any analysis. In this order.",
+    form: "df.shape\ndf.info()\ndf.describe()\ndf.isna().sum()\ndf[\"column\"].value_counts()\ndf.corr()",
+    parts: [
+      { bit: "df.shape", says: "How much data there is. 200 rows and 50 columns is a different problem from 2 million and 5." },
+      { bit: "df.info()", says: "Types and non-null counts. A number stored as text shows up here, before it breaks something later." },
+      { bit: "df.describe()", says: "Count, mean, std and the quartiles per numeric column. Read the min and max first — that is where impossible values hide." },
+      { bit: "df.isna().sum()", says: "Missing values per column, before deciding what to do about any of them." },
+      { bit: "df[\"column\"].value_counts()", says: "For each categorical column. Where \"Delhi\", \"delhi\" and \"Delhi \" reveal themselves as three cities." },
+      { bit: "df.corr()", says: "What moves with what. A first map of where to look, not an answer." },
+    ],
+    note: "EDA ends with a sentence, not a chart. If you cannot say what you found in one line without pointing at a plot, you have not finished looking.",
+  },
+
+  /* ====================================================== DEEP LEARNING ==== */
+
+  "dl-intro": {
+    intro: "A neural network is layers of weights with a bend between them. The bend is the whole trick.",
+    form: "from sklearn.neural_network import MLPClassifier\n\nmodel = MLPClassifier(hidden_layer_sizes=(64,), max_iter=300)\nmodel.fit(X_train, y_train)\nmodel.score(X_test, y_test)",
+    parts: [
+      { bit: "from", says: "scikit-learn carries a small neural network. It is enough to learn on, and it trains in seconds." },
+      { bit: "import", says: "Loads it." },
+      { bit: "MLPClassifier", says: "Multi-layer perceptron: the plain fully-connected network. Everything fancier is a change to its shape, not to what it does." },
+      { bit: "hidden_layer_sizes=(64,)", says: "One hidden layer of 64 neurons. A tuple — <code>(64, 32)</code> is two layers. The trailing comma matters: <code>(64)</code> is just a number." },
+      { bit: "max_iter", says: "How many passes over the data. Too few and it stops before learning; the warning it prints when that happens is worth reading, not silencing." },
+      { bit: "model.fit(X_train, y_train)", says: "Training: adjust every weight until the predictions stop improving." },
+      { bit: "model.score(X_test, y_test)", says: "Accuracy on data it has never seen. The only number that means anything." },
+    ],
+    note: "Without a non-linearity between layers, stacked layers collapse into a single matrix — a hundred of them have the expressive power of a straight line. The bend is what makes depth worth anything.",
+  },
+
+  "dl-types": {
+    intro: "Architectures exist because different data has different structure. Flattening throws that structure away.",
+    form: "flat = image.reshape(-1)          # 8×8 grid becomes 64 numbers\n\nkernel = [[-1, 1],\n          [-1, 1]]                # slid across, multiplied, summed\n\noutput_width = n − k + 1",
+    parts: [
+      { bit: "image.reshape(-1)", says: "Flattens the grid into one long row. Which pixels sat next to which is now gone, and a fully-connected network never had it." },
+      { bit: "-1", says: "\"Work the length out yourself.\" Convenient, and it is also the line where the spatial layout is discarded." },
+      { bit: "kernel", says: "A small grid of weights, slid across the image. At each position it multiplies and sums — this one fires on a dark-to-light edge." },
+      { bit: "n", says: "The image width." },
+      { bit: "k", says: "The kernel width." },
+      { bit: "output_width", says: "<code>n − k + 1</code>, because the window has to fit entirely inside. Stack a few and the image shrinks fast, which is what padding exists to prevent." },
+    ],
+    note: "The one experiment that settles it: shuffle every pixel position the same way and re-score. A plain network barely moves — it was never using the layout. A CNN collapses, because it was.",
+  },
+
+  "dl-nlp": {
+    intro: "A model cannot read. Text has to become numbers first, and how you do it decides what the model can possibly learn.",
+    form: "from sklearn.feature_extraction.text import CountVectorizer\n\nvec = CountVectorizer(ngram_range=(1, 2))\nX = vec.fit_transform(train_documents)\nvec.transform(new_documents)",
+    parts: [
+      { bit: "from", says: "scikit-learn's text feature extraction." },
+      { bit: "import", says: "Loads it." },
+      { bit: "CountVectorizer", says: "Bag of words: one column per vocabulary word, counts as the values. It is called a bag because a bag has no order." },
+      { bit: "ngram_range=(1, 2)", says: "Single words <b>and</b> adjacent pairs. This is what gives the model somewhere to put \"not good\" — without it, \"not\" and \"good\" are two unrelated columns." },
+      { bit: "vec.fit_transform(train_documents)", says: "Learns the vocabulary and converts in one step. Fit on the training documents only — it is a model, and fitting on everything leaks." },
+      { bit: "vec.transform(new_documents)", says: "Converts using the vocabulary already learned. A word it has never seen is <b>silently dropped</b> — no error, no warning, no column." },
+    ],
+    note: "That silent drop is why \"not good food\" can score exactly what \"good food\" scores: the model literally received \"good food\". Print which incoming words are missing from the vocabulary and the bug stops being invisible.",
+  },
+
+  /* ================================================= BUSINESS INTELLIGENCE == */
+
+  "bi-intro": {
+    intro: "A dashboard is not a report. It answers a standing question, over and over, without anyone rerunning anything.",
+    form: "question   ->  metric      ->  visual        ->  action\n\"are we growing?\"  ->  weekly signups  ->  line chart  ->  spend more here",
+    parts: [
+      { bit: "question", says: "Start here, always. A dashboard built from \"what data do we have\" ends up as a wall of charts nobody opens twice." },
+      { bit: "metric", says: "One number that moves when the answer changes. If it can move without the answer changing, it is the wrong metric." },
+      { bit: "visual", says: "The chart type follows from the metric — time series to a line, category comparison to a bar. Not from what looks impressive." },
+      { bit: "action", says: "What somebody does differently because of it. A chart nobody can act on is decoration, however accurate it is." },
+    ],
+    note: "Test every tile with \"what would I do if this number doubled?\" No answer means the tile comes off the dashboard.",
+  },
+
+  "bi-tools": {
+    intro: "Every BI tool works the same way underneath: connect, model, measure, visualise.",
+    form: "connect  ->  the source table\nmodel    ->  relate tables on their keys\nmeasure  ->  Total Sales = SUM(Sales[Amount])\nvisual   ->  drag the measure onto a chart",
+    parts: [
+      { bit: "connect", says: "Point the tool at a database, a file or an API. This is the step everyone remembers." },
+      { bit: "model", says: "Tell the tool how tables relate — the same keys a SQL JOIN would use. Skip it and every chart is stuck inside one table." },
+      { bit: "measure", says: "A calculation defined once and reused everywhere. Power BI calls the language DAX; Tableau calls them calculated fields. The idea is identical." },
+      { bit: "SUM(Sales[Amount])", says: "Aggregates a column. A measure is computed <b>in the context of the visual</b> — the same definition gives a total on one tile and a per-month figure on another." },
+      { bit: "visual", says: "Drag the measure in and pick the chart. The work was the modelling; this part is minutes." },
+    ],
+    note: "If a number is wrong in two charts, the bug is in the model or the measure, not in the charts. Fix it once at the measure and both are right.",
+  },
+
+  "bi-kpis": {
+    intro: "A KPI is a metric somebody is accountable for. Most numbers on a dashboard are not KPIs.",
+    form: "KPI = metric + target + owner + period\n\n\"Monthly active users, 10,000 by March, owned by Growth\"\n\nrate  = numerator / denominator\ngrowth = (current − previous) / previous",
+    parts: [
+      { bit: "metric", says: "What is measured. Precisely — \"active\" needs a definition before it means anything." },
+      { bit: "target", says: "What counts as good. A number with no target cannot be passed or failed, so nobody acts on it." },
+      { bit: "owner", says: "Who is accountable. Without one, a KPI that goes red is a topic of conversation rather than a job." },
+      { bit: "period", says: "By when. \"10,000 users\" with no date is a wish." },
+      { bit: "rate", says: "Conversion, churn, retention — all the same shape. The denominator is where the argument always is: converted out of <b>whom</b>?" },
+      { bit: "growth", says: "Change against the previous period. Watch the base: growth from 2 to 4 is +100% and means almost nothing." },
+    ],
+    note: "Pick few. Fifteen KPIs is no KPIs — nobody can hold fifteen priorities, so in practice they pick their own three and you have lost control of which.",
+  },
+
+  /* ========================================================== DEPLOYMENT == */
+
+  "deploy-model": {
+    intro: "A trained model in a notebook helps nobody. Two steps put it behind a URL.",
+    form: "import joblib\n\njoblib.dump(pipeline, \"model.joblib\")\nmodel = joblib.load(\"model.joblib\")\n\n@app.post(\"/predict\")\ndef predict(payload):\n    return model.predict([payload.features]).tolist()",
+    parts: [
+      { bit: "import", says: "joblib is what scikit-learn recommends for saving models — faster than pickle on the large NumPy arrays inside them." },
+      { bit: "joblib.dump(pipeline, \"model.joblib\")", says: "Saves the <b>whole pipeline</b>, not the estimator. Save only the model and the scaler it was trained with is gone, so live predictions are made on differently-scaled numbers." },
+      { bit: "joblib.load(\"model.joblib\")", says: "Loads it once, when the process starts. Loading per request turns a 5ms prediction into a 500ms one." },
+      { bit: "@app.post(\"/predict\")", says: "The route. POST rather than GET, because the input is data rather than an address." },
+      { bit: "def", says: "The handler. Everything above it happens once; everything inside happens per request." },
+      { bit: "payload", says: "The incoming JSON. Validate it — the model will happily predict from nonsense and return a confident number." },
+      { bit: "return", says: "<code>.tolist()</code> because a NumPy array is not JSON-serialisable, which is the first error everyone hits here." },
+    ],
+    note: "The training environment and the serving environment must match. A model saved under one scikit-learn version and loaded under another may load, warn, and predict differently — pin the versions.",
+  },
+
+  "deploy-portfolio": {
+    intro: "A portfolio project is judged on whether a stranger can understand it in two minutes.",
+    form: "project/\n  README.md          <- what, why, result, how to run\n  notebooks/         <- the exploration\n  src/               <- the code that matters\n  requirements.txt   <- exact versions\n  .gitignore         <- data, secrets, venv",
+    parts: [
+      { bit: "README.md", says: "The only file most people will open. First line: what problem, what result. Not the dataset description." },
+      { bit: "notebooks/", says: "Where the thinking happened. Keep them, but they are not the deliverable — nobody reads 400 cells." },
+      { bit: "src/", says: "The reusable code, pulled out of the notebooks. This is what says you can write software rather than only explore." },
+      { bit: "requirements.txt", says: "Pinned versions. \"It works on my machine\" is the single commonest reason a reviewer gives up." },
+      { bit: ".gitignore", says: "Data, credentials, virtualenv. A key committed once stays in the git history even after the file is deleted." },
+    ],
+    note: "Three finished projects beat ten abandoned ones. Finished means: a README somebody else can follow, and a result stated in one sentence with a number in it.",
+  },
+
+  "deploy-interview": {
+    intro: "A data interview answer has a shape. Using it stops good work sounding like a shrug.",
+    form: "Situation  ->  Task  ->  Action  ->  Result\n\n\"Sales data was 30% missing.\"        (situation)\n\"Forecast monthly revenue.\"          (task)\n\"Compared median fill against drop.\" (action)\n\"Error: 18% down to 11%.\"            (result)",
+    parts: [
+      { bit: "Situation", says: "One line of context. Enough for the problem to make sense, and no more — this is where people spend three minutes and lose the room." },
+      { bit: "Task", says: "What you specifically had to do. Not what the team did." },
+      { bit: "Action", says: "What you tried, and <b>why that</b> rather than the obvious alternative. The reasoning is what is being assessed, not the tool." },
+      { bit: "Result", says: "A number. \"It improved\" is not an answer; \"error went 18% down to 11%\" is. If the project failed, say what you learned — that answer is also fine." },
+    ],
+    note: "Prepare three stories in this shape and nearly every behavioural question maps onto one. Rehearse the numbers — they are the part that goes missing under pressure.",
+  },
+
+  /* =================================================== MACHINE LEARNING ==== */
+
+  "ml-intro": {
+    intro: "Every scikit-learn model is the same four calls. Learn them once and the library stops being a library.",
+    form: "from sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\nmodel.fit(X_train, y_train)\npredictions = model.predict(X_test)\nmodel.score(X_test, y_test)",
+    parts: [
+      { bit: "from", says: "Everything here lives under <code>sklearn</code>, split into submodules by job." },
+      { bit: "import", says: "Loads it." },
+      { bit: "X", says: "The features — the inputs, one row per example, capital X by convention because it is a matrix." },
+      { bit: "y", says: "The target — what you are trying to predict, one value per row, lowercase because it is a vector." },
+      { bit: "train_test_split", says: "Splits the rows in two. The test rows are put aside and the model never sees them, which is the only way a score means anything." },
+      { bit: "test_size=0.2", says: "20% held out. Enough to measure on, small enough to still have something to learn from." },
+      { bit: "random_state=42", says: "Fixes the shuffle so the same split comes back every run. Without it your score changes each time and you cannot tell a real improvement from a lucky draw." },
+      { bit: "model.fit(X_train, y_train)", says: "Learning. Only ever on the training half." },
+      { bit: "model.predict(X_test)", says: "Applies what it learned to unseen rows." },
+      { bit: "model.score(X_test, y_test)", says: "How often it was right. On the test half, always — a score on training data is a measure of memory, not of learning." },
+    ],
+    note: "Every estimator in scikit-learn has <code>.fit</code> and <code>.predict</code>. Swapping a LinearRegression for a RandomForest is one line, which is exactly why the library is shaped this way.",
+  },
+
+  "ml-regression": {
+    intro: "Predicting a number rather than a category, and the three ways to say how wrong you were.",
+    form: "from sklearn.linear_model import LinearRegression\nfrom sklearn.metrics import mean_absolute_error, r2_score\n\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\n\nmodel.coef_\nmodel.intercept_\nmean_absolute_error(y_test, predictions)\nr2_score(y_test, predictions)",
+    parts: [
+      { bit: "from", says: "Estimators and metrics live in different submodules." },
+      { bit: "import", says: "Several names on one line, comma-separated." },
+      { bit: "LinearRegression()", says: "Fits a straight line — or a flat plane, once there is more than one feature." },
+      { bit: "model.coef_", says: "One weight per feature: how much the prediction moves per unit of that feature. The trailing underscore means \"learned during fit\" — it does not exist before." },
+      { bit: "model.intercept_", says: "Where the line crosses zero. The prediction when every feature is 0, which is often a value that could never occur." },
+      { bit: "mean_absolute_error", says: "Average miss, in the target's own units. If it says 12,000, you are typically 12,000 rupees out — the one metric a non-technical person can read." },
+      { bit: "r2_score", says: "The share of the variation the model explains. 1.0 is perfect, 0 is no better than always guessing the mean, and it can go <b>negative</b> for a model worse than that." },
+    ],
+    note: "Read the coefficients. A weight with the wrong sign — more bedrooms lowering the price — usually means correlated features rather than a discovery about houses.",
+  },
+
+  "ml-regression-more": {
+    intro: "When a straight line is not enough, and what stops the fix from overfitting.",
+    form: "from sklearn.linear_model import Ridge, Lasso\nfrom sklearn.preprocessing import PolynomialFeatures\n\nPolynomialFeatures(degree=2)\nRidge(alpha=1.0)\nLasso(alpha=0.1)",
+    parts: [
+      { bit: "from", says: "Preprocessing and estimators, two submodules." },
+      { bit: "import", says: "Loads them." },
+      { bit: "PolynomialFeatures(degree=2)", says: "Adds squares and products of the existing features, so a linear model can fit a curve. The model is still linear — the <b>features</b> changed." },
+      { bit: "degree", says: "How high to go. It explodes: degree 3 on 10 features gives 285 columns, and most of them are noise." },
+      { bit: "Ridge(alpha=1.0)", says: "Linear regression with a penalty on large weights. It shrinks them towards zero without reaching it — the usual first choice when features are correlated." },
+      { bit: "Lasso(alpha=0.1)", says: "The same idea with a penalty that drives some weights <b>exactly</b> to zero, which makes it a feature selector as well as a model." },
+      { bit: "alpha", says: "How hard to penalise. 0 gives plain linear regression back; too high and every weight collapses and the model predicts the mean." },
+    ],
+    note: "Regularisation only works on scaled features — the penalty is on the size of the weight, and an unscaled feature gets a tiny weight for reasons that have nothing to do with importance.",
+  },
+
+  "ml-classification": {
+    intro: "Predicting a class, and the threshold nobody tells you they chose.",
+    form: "from sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import confusion_matrix, classification_report\n\nmodel.predict(X_test)\nprobabilities = model.predict_proba(X_test)[:, 1]\n(probabilities > 0.5).astype(int)\n\nconfusion_matrix(y_test, predictions)",
+    parts: [
+      { bit: "from", says: "Estimator and metrics again." },
+      { bit: "import", says: "Loads them." },
+      { bit: "LogisticRegression", says: "Despite the name, a classifier. It predicts a probability and then cuts it into a class." },
+      { bit: "model.predict(X_test)", says: "The class. Convenient, and it silently applies a 0.5 cut-off you never agreed to." },
+      { bit: "model.predict_proba(X_test)", says: "The probabilities — one column per class. This is the model's actual output." },
+      { bit: "[:, 1]", says: "The positive class's column. Column 0 is the negative one, and they sum to 1." },
+      { bit: "0.5", says: "The threshold. Move it: for fraud you want to catch nearly everything and tolerate false alarms, so 0.5 is the wrong cut and always was." },
+      { bit: "confusion_matrix", says: "The four counts — true and false, positive and negative. Accuracy is a summary of this table, and the table is what tells you which mistake you are making." },
+    ],
+    note: "On imbalanced data accuracy is a trap. A model predicting \"not fraud\" every time scores 99.8% on data that is 0.2% fraud, and is worth nothing.",
+  },
+
+  "ml-roc-auc": {
+    intro: "One number that judges a classifier at every threshold instead of one.",
+    form: "from sklearn.metrics import roc_curve, roc_auc_score\n\nfpr, tpr, thresholds = roc_curve(y_test, probabilities)\nroc_auc_score(y_test, probabilities)",
+    parts: [
+      { bit: "from", says: "Both live in <code>sklearn.metrics</code>." },
+      { bit: "import", says: "Loads them." },
+      { bit: "roc_curve", says: "Sweeps every threshold and records what each one costs. Give it the <b>probabilities</b>, not the predicted classes — hand it classes and you get a three-point curve and a meaningless score." },
+      { bit: "fpr", says: "False positive rate: how many negatives were wrongly flagged. The price." },
+      { bit: "tpr", says: "True positive rate: how many positives were caught. The prize. Plot tpr against fpr and that is the ROC curve." },
+      { bit: "thresholds", says: "The cut-off behind each point, which is how you pick one deliberately rather than accepting 0.5." },
+      { bit: "roc_auc_score", says: "Area under that curve. 0.5 is a coin flip, 1.0 is perfect. Read it as: the chance the model scores a random positive above a random negative." },
+    ],
+    note: "AUC is threshold-free, which is its strength and its blind spot — it says the ranking is good and nothing about whether any single cut-off is usable for your problem.",
+  },
+
+  "ml-evaluation": {
+    intro: "One split is one measurement. Nobody reports one measurement of anything that matters.",
+    form: "from sklearn.model_selection import cross_val_score\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\n\npipe = Pipeline([(\"scale\", StandardScaler()), (\"model\", LogisticRegression())])\nscores = cross_val_score(pipe, X, y, cv=5)\nscores.mean()\nscores.std()",
+    parts: [
+      { bit: "from", says: "Three submodules, three lines." },
+      { bit: "import", says: "Loads them." },
+      { bit: "Pipeline", says: "Chains preprocessing to the model so they are fitted together. This is not tidiness — it is what keeps the scaler from ever seeing the validation rows." },
+      { bit: "StandardScaler()", says: "Learns a mean and a standard deviation, which makes it a model with two parameters. Fit it outside the pipeline and test-set information reaches your training features." },
+      { bit: "cross_val_score", says: "Splits the data <code>cv</code> ways and scores each fold, refitting the whole pipeline inside every one." },
+      { bit: "cv=5", says: "Five folds. Every row is held out exactly once, so every row is measured on." },
+      { bit: "scores.mean()", says: "The headline number." },
+      { bit: "scores.std()", says: "The error bar, and the part people drop. A 3-point difference between two models means nothing when the folds swing 12 points." },
+    ],
+    note: "Anything fitted before the split leaks — a scaler, an imputer, a feature selector. The symptom is a score better than the problem deserves, which is the one result nobody investigates.",
+  },
+
+  "ml-neighbours": {
+    intro: "A model that does not learn anything: it just remembers everything and asks the nearest examples.",
+    form: "from sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.preprocessing import StandardScaler\n\nX_scaled = StandardScaler().fit_transform(X_train)\nKNeighborsClassifier(n_neighbors=5)",
+    parts: [
+      { bit: "from", says: "Estimator and scaler." },
+      { bit: "import", says: "Loads them." },
+      { bit: "KNeighborsClassifier", says: "To predict, it finds the k closest training rows and takes their majority vote. <code>fit</code> stores the data; the work all happens at predict time." },
+      { bit: "n_neighbors=5", says: "How many neighbours vote. 1 follows every bit of noise; too many and every prediction drifts towards the commonest class. Odd numbers avoid ties in two-class problems." },
+      { bit: "StandardScaler().fit_transform(X_train)", says: "Not optional here. \"Closest\" is a distance, so a feature measured in thousands drowns one measured in units — salary would decide every neighbour and age would never matter." },
+    ],
+    note: "It has no training cost and a large prediction cost, which is the opposite of most models. On a big dataset every single prediction searches the whole training set.",
+  },
+
+  "ml-unsupervised": {
+    intro: "No labels. You ask for groups, and you always get exactly as many as you asked for.",
+    form: "from sklearn.cluster import KMeans\n\nkm = KMeans(n_clusters=3, random_state=42, n_init=10)\nlabels = km.fit_predict(X)\nkm.inertia_\nkm.cluster_centers_",
+    parts: [
+      { bit: "from", says: "Clustering algorithms live in <code>sklearn.cluster</code>." },
+      { bit: "import", says: "Loads it." },
+      { bit: "KMeans", says: "Puts every point in one of k groups by moving k centres until they settle." },
+      { bit: "n_clusters=3", says: "How many groups. <b>You</b> choose this, and the algorithm will happily split genuinely uniform data into three confident-looking clusters." },
+      { bit: "n_init=10", says: "How many random starts to try, keeping the best. The result depends on where the centres began, so one start can settle somewhere poor." },
+      { bit: "km.fit_predict(X)", says: "Fits and returns a group number per row. The numbers are arbitrary labels — cluster 0 is not below cluster 1." },
+      { bit: "km.inertia_", says: "Total distance from points to their own centre. Plot it against k and look for the elbow — it always falls as k rises, so the lowest value is not the answer." },
+      { bit: "km.cluster_centers_", says: "The centre of each group. Reading these is how a cluster gets a name a human can use." },
+    ],
+    note: "Clusters are not categories until somebody looks at them and says what they are. An unnamed cluster is a number, and it is very easy to be confidently wrong about it.",
+  },
+
+  "ml-hierarchical": {
+    intro: "Clustering without committing to a number up front: build the whole tree, then cut it.",
+    form: "from sklearn.cluster import AgglomerativeClustering\nfrom scipy.cluster.hierarchy import linkage, dendrogram\n\nAgglomerativeClustering(n_clusters=3, linkage=\"ward\")\ndendrogram(linkage(X, method=\"ward\"))",
+    parts: [
+      { bit: "from", says: "scikit-learn does the clustering; SciPy draws the tree." },
+      { bit: "import", says: "Loads both." },
+      { bit: "AgglomerativeClustering", says: "Starts with every point as its own cluster and merges the two nearest, over and over, until the count you asked for is left." },
+      { bit: "linkage", says: "How the distance between two <b>clusters</b> is measured. <code>ward</code> merges the pair that adds least spread and is the sensible default." },
+      { bit: "dendrogram", says: "Draws the merge history as a tree. The height of each join is how far apart the two groups were." },
+      { bit: "method", says: "SciPy's name for the same linkage choice — keep it identical to the estimator's or the picture describes a different clustering." },
+    ],
+    note: "The dendrogram is the reason to use this: cut it at different heights and you see 2, 4 or 9 clusters from one run. K-means makes you decide before you have looked.",
+  },
+
+  "ml-workflow": {
+    intro: "Searching for the settings, without the search itself leaking the answer.",
+    form: "from sklearn.model_selection import GridSearchCV\n\ngrid = GridSearchCV(pipeline, param_grid={\"model__C\": [0.1, 1, 10]}, cv=5)\ngrid.fit(X_train, y_train)\n\ngrid.best_params_\ngrid.best_estimator_.score(X_test, y_test)",
+    parts: [
+      { bit: "from", says: "Same submodule as the splitters." },
+      { bit: "import", says: "Loads it." },
+      { bit: "GridSearchCV", says: "Tries every combination and cross-validates each. Cost is the product of the lists times <code>cv</code> — three values and 5 folds is 15 fits, and two parameters is 45." },
+      { bit: "pipeline", says: "Pass the whole pipeline, not the bare model, so every fold re-fits the preprocessing too." },
+      { bit: "param_grid", says: "What to try. <code>model__C</code> — double underscore — means \"the <code>C</code> of the step named <code>model</code>\", which is how a pipeline's inner settings are reached." },
+      { bit: "grid.fit(X_train, y_train)", says: "On the <b>training</b> half only. The test rows must stay outside the search." },
+      { bit: "grid.best_params_", says: "The winning combination. Landing on the edge of a list means the real best is outside it — widen and search again." },
+      { bit: "grid.best_estimator_.score(X_test, y_test)", says: "The final, honest number: the winner scored once on data no part of the search ever touched." },
+    ],
+    note: "Every comparison you run against the validation folds fits your choices to them a little more. That is why the held-out set is spent once, at the end, and why a big gap between it and the search's best score is a warning.",
+  },
 };

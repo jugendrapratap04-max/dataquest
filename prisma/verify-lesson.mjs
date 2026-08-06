@@ -188,7 +188,22 @@ if (needsPyodide) {
 const run = runAsm ?? runSql ?? runPyodide ?? runPy;
 
 const cases = [];
+/** Blocks deliberately not run, reported at the end so they stay visible. */
+const skipped = [];
 for (const b of lesson.content) {
+  /* Shell blocks have no runner, so they are skipped rather than failed.
+   *
+   * Every `code` block was handed to python — including deploy-git's `git.sh`,
+   * six lines of git commands, which came back "SyntaxError: invalid syntax"
+   * and made that lesson permanently unverifiable. The block was fine; the
+   * verifier was reading it in the wrong language.
+   *
+   * Skipped loudly, not silently: an unchecked block should show up as one, or
+   * this becomes a way for real snippets to escape verification unnoticed. */
+  if (b.t === "code" && /\.(sh|bash|zsh|ps1)$/.test(b.file ?? "")) {
+    skipped.push(b.file);
+    continue;
+  }
   if (b.t === "code") cases.push({ what: `code ${b.file}`, code: b.code, claim: b.output ?? null, show: b.show });
   if (b.t === "drills") b.items.forEach((d, i) => cases.push({ what: `drill ${i + 1}`, code: d.code, claim: d.out ?? null, show: d.show }));
   if (b.t === "worked") {
@@ -370,5 +385,6 @@ for (const b of lesson.content.filter((x) => x.t === "syntax")) {
 }
 
 const total = cases.length + sxChecked;
+if (skipped.length) console.log(`\n  --   skipped (no runner for this language): ${skipped.join(", ")}`);
 console.log(`\n${total - bad}/${total} checks passed.`);
 process.exit(bad ? 1 : 0);
