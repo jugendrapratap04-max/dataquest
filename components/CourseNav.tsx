@@ -58,21 +58,18 @@ function groupByChapter(lessons: CourseNavLesson[]): Group[] {
   return groups;
 }
 
-export function CourseNav({
-  courseTitle, courseHref, lessons, currentId, doneIds, doneCount,
-}: {
-  courseTitle: string;
-  courseHref: string;
-  lessons: CourseNavLesson[];
-  currentId: string;
-  doneIds: string[];
-  doneCount: number;
-}) {
+/* The list, as its own component so that it owns its OWN refs.
+ *
+ * ⚠️ IT IS RENDERED TWICE — once open for desktop, once inside the phone's
+ * <details> — and that is exactly why this is a component rather than a shared
+ * JSX variable. With one pair of refs in the parent, BOTH copies wrote to them
+ * and React kept the last one, so the centring ran on the hidden mobile copy
+ * and the visible desktop list sat at lesson 1. Caught on the live page:
+ * `currentCentredInScroller: false` while every other check passed. Two copies
+ * of a thing that measures itself need two sets of refs. */
+function NavList({ groups, currentId, done }: { groups: Group[]; currentId: string; done: Set<string> }) {
   const scroller = useRef<HTMLDivElement>(null);
   const active = useRef<HTMLAnchorElement>(null);
-  const done = new Set(doneIds);
-  const groups = groupByChapter(lessons);
-  const pct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
 
   useEffect(() => {
     const box = scroller.current, item = active.current;
@@ -84,7 +81,7 @@ export function CourseNav({
     box.scrollTop = Math.max(0, wanted);
   }, [currentId]);
 
-  const list = (
+  return (
     <div className="cnav-scroll" ref={scroller}>
       {groups.map((g, gi) => (
         <div className="cnav-group" key={gi}>
@@ -111,6 +108,21 @@ export function CourseNav({
       ))}
     </div>
   );
+}
+
+export function CourseNav({
+  courseTitle, courseHref, lessons, currentId, doneIds, doneCount,
+}: {
+  courseTitle: string;
+  courseHref: string;
+  lessons: CourseNavLesson[];
+  currentId: string;
+  doneIds: string[];
+  doneCount: number;
+}) {
+  const done = new Set(doneIds);
+  const groups = groupByChapter(lessons);
+  const pct = lessons.length ? Math.round((doneCount / lessons.length) * 100) : 0;
 
   return (
     <nav className="cnav" aria-label={`Lessons in ${courseTitle}`}>
@@ -132,12 +144,14 @@ export function CourseNav({
           disclosure ABOVE the content — findable in one tap, and costing no
           vertical space until it is wanted. The old layout put it after the
           entire lesson, which is the bug this whole component exists to fix. */}
-      <div className="cnav-open">{list}</div>
+      <div className="cnav-open">
+        <NavList groups={groups} currentId={currentId} done={done} />
+      </div>
       <details className="cnav-fold">
         <summary>
           All {lessons.length} lessons in this course
         </summary>
-        {list}
+        <NavList groups={groups} currentId={currentId} done={done} />
       </details>
     </nav>
   );
