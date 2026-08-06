@@ -97,7 +97,19 @@ Rules that make this work rather than become theatre:
 - [ ] Animation and scroll jank — never once looked at
 - [ ] Empty, loading and error states on every page that fetches
 - [ ] Dead-code sweep. Five starter SVGs and one CSS rule that had never matched
-      anything turned up on the first look; nobody has done a full one
+      anything turned up on the first look; nobody has done a full one.
+      **Partly paid down 2026-08-06** with the course-nav rebuild: `.learn-side`
+      and the three `.llist` rules went with the panel they styled, and a
+      `@media` rule that had been overridden since it was written came out. Not
+      a sweep — three findings from one change
+- [ ] **Quizzes and drills for the HTML course.** `npm run syllabus` reports
+      html at **26/35 passing the bar and 0 at FULL**, and that number is now
+      honest: the interactive-element criterion was fixed on 2026-08-06 (a live
+      code block counts, since LiveHtml makes every one editable), and the rest
+      of the bar was deliberately left alone. What is missing is real: a quiz
+      exists only in Module 0, and drills and debug tasks are patchy. This is
+      the largest single quality debt on the platform and it is content work,
+      not a scoring argument
 - [ ] Split `prisma/seed.mjs`. 1.9 MB in one file is why two sessions collide on
       it, and it is the biggest maintainability problem in the repo
 - [x] ~~Seeded XP on the demo accounts~~ — six accounts held 16,080 XP between
