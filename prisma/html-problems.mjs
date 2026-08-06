@@ -525,4 +525,132 @@ export const htmlProblems = [
       "Positioning the logo beside the text is CSS's job, and not part of this exercise.",
     ],
     "html,tables,semantics"),
+
+  /* ------------------------------------------------- html-forms ----
+   *
+   * Every selector below was checked in linkedom AND the browser's DOMParser
+   * before these were written — including [required], [checked], `label > input`
+   * and `select > option`, all 12 identical. Also confirmed in both: `type` and
+   * `method` match case-INSENSITIVELY (the HTML spec's attribute list), while
+   * `name`, `id` and `for` are case-sensitive. So a student writing TYPE="EMAIL"
+   * passes either way, and one writing name="Email" for name="email" fails in
+   * both — which is the correct behaviour in each case. */
+  P("html-forms", 626, "html-first-form", "A Form That Actually Sends", "Easy",
+    "Build a signup form that posts to `/signup`.\n\nIt needs:\n\n- a `form` with `action=\"/signup\"` and `method=\"post\"`\n- a text field for the username: label reading `Username`, `id` of `user`, `name` of `username`\n- an email field: label reading `Email`, `id` of `mail`, `name` of `email`, and `type=\"email\"`\n- a submit button reading `Create account`\n\nEach label must be attached to its field with `for` — and remember that `name` is the one that decides whether the value is sent at all.",
+    "<form>\n  <!-- two labelled fields and a submit button -->\n</form>\n",
+    "<form action=\"/signup\" method=\"post\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\" name=\"username\">\n\n  <label for=\"mail\">Email</label>\n  <input type=\"email\" id=\"mail\" name=\"email\">\n\n  <button type=\"submit\">Create account</button>\n</form>\n",
+    [
+      { find: "form", attr: "action", equals: "/signup", says: "the form posts to /signup" },
+      { find: "form", attr: "method", equals: "post", says: "it uses method=\"post\"" },
+      { find: "label[for=\"user\"]", text: true, contains: "Username", says: "a label reading \"Username\", attached with for=\"user\"" },
+      { find: "input#user", attr: "name", equals: "username", says: "the username field carries name=\"username\"" },
+      { find: "label[for=\"mail\"]", text: true, contains: "Email", says: "a label reading \"Email\", attached with for=\"mail\"" },
+      { find: "input#mail[name=\"email\"]", attr: "type", equals: "email", says: "the email field is type=\"email\" with name=\"email\"" },
+      { find: "button", text: true, contains: "Create account", says: "a button reading \"Create account\"" },
+    ],
+    [
+      "`<form action=\"/signup\" method=\"post\">` — both attributes on the form itself.",
+      "A label points at its field: `<label for=\"user\">` matches `<input id=\"user\">`.",
+      "`id` is for the label; `name` is what the server receives. Both are needed.",
+    ],
+    "html,forms"),
+
+  P("html-forms", 627, "html-form-not-sending", "Everything Works and Nothing Arrives", "Medium",
+    "This login form looks and behaves perfectly. It has three real problems:\n\n- the **username never arrives** at the server, though the visitor filled it in — the field is missing the one attribute that decides whether a value is sent. It should be `name=\"username\"`\n- the **password label is attached to nothing** — its `for` does not match any field. The password input's `id` is `pw`\n- the form uses **`method=\"get\"`**, which puts the typed password in the URL, and from there into browser history, server logs and the referrer sent to the next site. It should post\n\nChange nothing else — the words, ids and action stay as they are.",
+    "<form action=\"/login\" method=\"get\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\">\n\n  <label for=\"password\">Password</label>\n  <input type=\"password\" id=\"pw\" name=\"password\">\n\n  <button type=\"submit\">Log in</button>\n</form>\n",
+    "<form action=\"/login\" method=\"post\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\" name=\"username\">\n\n  <label for=\"pw\">Password</label>\n  <input type=\"password\" id=\"pw\" name=\"password\">\n\n  <button type=\"submit\">Log in</button>\n</form>\n",
+    [
+      { find: "form", attr: "method", equals: "post", says: "the form posts rather than putting the password in the URL" },
+      { find: "input#user", attr: "name", equals: "username", says: "the username field now has name=\"username\", so it is sent" },
+      { find: "label[for=\"pw\"]", text: true, contains: "Password", says: "the password label points at the field's real id, pw" },
+      { find: "label[for=\"password\"]", count: 0, says: "no label left pointing at an id that does not exist" },
+      { find: "input#pw", attr: "type", equals: "password", says: "the password field is unchanged" },
+      { find: "form", attr: "action", equals: "/login", says: "the action still reads /login" },
+    ],
+    [
+      "A field with no `name` is not submitted at all — it is not even sent empty.",
+      "`for` must match the field's `id` exactly. The input's id is `pw`.",
+      "A password in a GET request ends up in the URL. Passwords post.",
+    ],
+    "html,forms,debugging"),
+
+  /* ------------------------------------------- html-input-types ---- */
+  P("html-input-types", 628, "html-right-types", "The Right Field for the Question", "Easy",
+    "Every field on this booking form is `type=\"text\"`. On a phone that means a full QWERTY keyboard for all of them, and no help from the browser anywhere.\n\nGive each one the type that says what it is actually asking for:\n\n- `email` → an email address\n- `phone` → a phone number (the type that brings up a number pad and does **not** try to validate the format)\n- `guests` → a real quantity, so it takes `min` and `max`. Set `min=\"1\"` and `max=\"9\"`\n- `arrives` → a calendar date\n\nDo not touch the labels, ids or names.",
+    "<form action=\"/book\" method=\"post\">\n  <label for=\"e\">Email</label>\n  <input type=\"text\" id=\"e\" name=\"email\">\n\n  <label for=\"p\">Phone</label>\n  <input type=\"text\" id=\"p\" name=\"phone\">\n\n  <label for=\"g\">Guests</label>\n  <input type=\"text\" id=\"g\" name=\"guests\">\n\n  <label for=\"a\">Arrival date</label>\n  <input type=\"text\" id=\"a\" name=\"arrives\">\n</form>\n",
+    "<form action=\"/book\" method=\"post\">\n  <label for=\"e\">Email</label>\n  <input type=\"email\" id=\"e\" name=\"email\">\n\n  <label for=\"p\">Phone</label>\n  <input type=\"tel\" id=\"p\" name=\"phone\">\n\n  <label for=\"g\">Guests</label>\n  <input type=\"number\" id=\"g\" name=\"guests\" min=\"1\" max=\"9\">\n\n  <label for=\"a\">Arrival date</label>\n  <input type=\"date\" id=\"a\" name=\"arrives\">\n</form>\n",
+    [
+      { find: "input[name=\"email\"]", attr: "type", equals: "email", says: "the email field is type=\"email\"" },
+      { find: "input[name=\"phone\"]", attr: "type", equals: "tel", says: "the phone field is type=\"tel\", not number" },
+      { find: "input[name=\"guests\"]", attr: "type", equals: "number", says: "the guest count is type=\"number\"" },
+      { find: "input[name=\"guests\"]", attr: "min", equals: "1", says: "guests has min=\"1\"" },
+      { find: "input[name=\"guests\"]", attr: "max", equals: "9", says: "guests has max=\"9\"" },
+      { find: "input[name=\"arrives\"]", attr: "type", equals: "date", says: "the arrival is type=\"date\"" },
+      { find: "input[type=\"text\"]", count: 0, says: "no field is left as plain text" },
+    ],
+    [
+      "A phone number is a string of digits, not a quantity — `tel`, never `number`.",
+      "`number` is the one that takes `min` and `max`.",
+      "The date field gets a calendar and submits YYYY-MM-DD.",
+    ],
+    "html,forms,inputs"),
+
+  P("html-input-types", 629, "html-radio-group", "Three Sizes, All Selectable at Once", "Medium",
+    "These three radio buttons should be one choice — pick a size — and instead all three can be selected together. They also submit nothing useful when they are.\n\nTwo fixes:\n\n- what makes radios **one group** is a shared `name`. Give all three `name=\"size\"`\n- a tick has nothing to submit but the fact that it was ticked, so each needs its own `value`: `s`, `m` and `l`\n\nThen make **Medium** the one that starts selected.\n\nThe visible words stay exactly as they are.",
+    "<p>Size</p>\n<label><input type=\"radio\" name=\"small\"> Small</label>\n<label><input type=\"radio\" name=\"medium\"> Medium</label>\n<label><input type=\"radio\" name=\"large\"> Large</label>\n",
+    "<p>Size</p>\n<label><input type=\"radio\" name=\"size\" value=\"s\"> Small</label>\n<label><input type=\"radio\" name=\"size\" value=\"m\" checked> Medium</label>\n<label><input type=\"radio\" name=\"size\" value=\"l\"> Large</label>\n",
+    [
+      { find: "input[name=\"size\"]", count: 3, says: "all three radios share name=\"size\" — that is what groups them" },
+      { find: "input[name=\"size\"][value=\"s\"]", count: 1, says: "Small carries value=\"s\"" },
+      { find: "input[name=\"size\"][value=\"m\"]", count: 1, says: "Medium carries value=\"m\"" },
+      { find: "input[name=\"size\"][value=\"l\"]", count: 1, says: "Large carries value=\"l\"" },
+      { find: "input[checked]", count: 1, says: "exactly one option starts selected" },
+      { find: "input[checked]", attr: "value", equals: "m", says: "and the preselected one is Medium" },
+      { find: "label > input", count: 3, says: "each radio is still inside its label" },
+    ],
+    [
+      "Radios are grouped by a shared `name` — proximity in the markup does nothing.",
+      "`value` is what identifies which option was chosen, since the name is shared.",
+      "`checked` takes no value: it is either present or absent.",
+    ],
+    "html,forms,inputs"),
+
+  /* -------------------------------------- html-form-validation ---- */
+  P("html-form-validation", 630, "html-add-validation", "Let the Browser Check It", "Easy",
+    "This form sends whatever it is given. Add the browser's own checks — no script, no library:\n\n- `username` must not be empty, and must be at least **3** characters: add `required` and `minlength=\"3\"`\n- `qty` must be between **1** and **10**: add `min` and `max`\n- `pin` must be exactly six digits: add `pattern=\"[0-9]{6}\"` and a `title` of `Six digits`\n\nThe `title` is not decoration — without it the browser can only say the format is wrong, which tells the visitor nothing about what would work.",
+    "<form action=\"/order\" method=\"post\">\n  <label for=\"u\">Username</label>\n  <input type=\"text\" id=\"u\" name=\"username\">\n\n  <label for=\"q\">Quantity</label>\n  <input type=\"number\" id=\"q\" name=\"qty\">\n\n  <label for=\"pin\">PIN code</label>\n  <input type=\"text\" id=\"pin\" name=\"pin\">\n\n  <button type=\"submit\">Order</button>\n</form>\n",
+    "<form action=\"/order\" method=\"post\">\n  <label for=\"u\">Username</label>\n  <input type=\"text\" id=\"u\" name=\"username\" required minlength=\"3\">\n\n  <label for=\"q\">Quantity</label>\n  <input type=\"number\" id=\"q\" name=\"qty\" min=\"1\" max=\"10\">\n\n  <label for=\"pin\">PIN code</label>\n  <input type=\"text\" id=\"pin\" name=\"pin\" pattern=\"[0-9]{6}\" title=\"Six digits\">\n\n  <button type=\"submit\">Order</button>\n</form>\n",
+    [
+      { find: "input[name=\"username\"][required]", count: 1, says: "the username is required" },
+      { find: "input[name=\"username\"]", attr: "minlength", equals: "3", says: "and must be at least 3 characters" },
+      { find: "input[name=\"qty\"]", attr: "min", equals: "1", says: "quantity has min=\"1\"" },
+      { find: "input[name=\"qty\"]", attr: "max", equals: "10", says: "quantity has max=\"10\"" },
+      { find: "input[name=\"pin\"]", attr: "pattern", equals: "[0-9]{6}", says: "the PIN has a six-digit pattern" },
+      { find: "input[name=\"pin\"]", attr: "title", notEmpty: true, says: "and a title explaining what the pattern wants" },
+    ],
+    [
+      "`required` and `checked` take no value — they are present or absent.",
+      "`minlength` counts characters; `min`/`max` bound a number.",
+      "`pattern` without `title` produces an error message that helps nobody.",
+    ],
+    "html,forms,validation"),
+
+  P("html-form-validation", 631, "html-labels-and-groups", "Give It Back Its Labels", "Medium",
+    "This form was tidied by deleting the labels and putting each field's name in a `placeholder`. It looks cleaner and is worse in four ways — the text vanishes on typing, it is too faint to read, screen readers announce the fields as unnamed, and there is nothing to click.\n\nTwo jobs:\n\n- give the email field a real `label` reading `Email`, attached with `for` to its id `e`. **Keep the placeholder**, but as what it is for: an example of the format\n- the two radios are one question and nothing says so. Wrap them in a `fieldset` whose `legend` reads `Size` — and the legend must be the fieldset's first child\n\nThe radios already share a name and have values. Leave them alone.",
+    "<form action=\"/order\" method=\"post\">\n  <input type=\"email\" id=\"e\" name=\"email\" placeholder=\"Email\">\n\n  <label><input type=\"radio\" name=\"size\" value=\"s\"> Small</label>\n  <label><input type=\"radio\" name=\"size\" value=\"m\"> Medium</label>\n\n  <button type=\"submit\">Order</button>\n</form>\n",
+    "<form action=\"/order\" method=\"post\">\n  <label for=\"e\">Email</label>\n  <input type=\"email\" id=\"e\" name=\"email\" placeholder=\"you@example.com\">\n\n  <fieldset>\n    <legend>Size</legend>\n    <label><input type=\"radio\" name=\"size\" value=\"s\"> Small</label>\n    <label><input type=\"radio\" name=\"size\" value=\"m\"> Medium</label>\n  </fieldset>\n\n  <button type=\"submit\">Order</button>\n</form>\n",
+    [
+      { find: "label[for=\"e\"]", text: true, contains: "Email", says: "a real label reading \"Email\", attached to the field" },
+      { find: "input#e", attr: "placeholder", notEmpty: true, says: "the placeholder is still there — now showing an example, not the name" },
+      { find: "fieldset > legend", text: true, contains: "Size", says: "a <legend> reading \"Size\", as the fieldset's first child" },
+      { find: "fieldset input[name=\"size\"]", count: 2, says: "both radios are inside the fieldset" },
+      { find: "fieldset input[value=\"m\"]", count: 1, says: "Medium kept its value" },
+      { find: "button", text: true, contains: "Order", says: "the button is unchanged" },
+    ],
+    [
+      "`<label for=\"e\">Email</label>` goes before the input; the id it points at is `e`.",
+      "A placeholder should show the format — `you@example.com` — not repeat the field's name.",
+      "`<legend>` must be the first thing inside `<fieldset>`, before the radios.",
+    ],
+    "html,forms,accessibility"),
 ];

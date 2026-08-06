@@ -1786,4 +1786,305 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 8 — FORMS
+   *
+   * THREE lessons rather than the usual two, because this is the largest topic
+   * in the language and the one with the most ways to be silently wrong. A
+   * form that looks perfect and sends nothing is the beginner experience, and
+   * it has exactly one cause — a missing `name` — which is why that gets a
+   * whole section rather than a bullet.
+   *
+   * ⚠️ THE PREVIEW CANNOT SUBMIT, AND THE LESSONS SAY SO. The workbench frame
+   * is `sandbox=""`, which permits typing but blocks form submission entirely —
+   * not even a submit event fires (measured, not assumed). That is honest and
+   * left alone: there is no server on the other end either. The lessons show
+   * what WOULD be sent instead of pretending, which is the more useful thing
+   * to look at anyway.
+   *
+   * Parser parity for every selector used here was checked in linkedom and the
+   * browser's DOMParser before the problems were written — 12 of 12 identical,
+   * including `[required]`, `[checked]`, `label > input` and `select > option`.
+   * Also confirmed: `type`, `method` and `scope` match case-INSENSITIVELY in
+   * both engines (the HTML spec's list), while `src` and `name` are
+   * case-sensitive in both.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-forms",
+    order: 21,
+    title: "Forms: Where the Web Stops Being Read-Only",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Build a form that actually sends what the visitor typed",
+        "Say what <code>name</code> does, and why a field without one does not exist",
+        "Attach a label to a field in both of the two correct ways",
+        "Choose <code>GET</code> or <code>POST</code> for a reason you can defend",
+      ] },
+
+      { t: "hook",
+        q: "A beginner's form looks perfect. Every field is styled, the button works, the page reloads. The data arrives at the server with one field mysteriously empty — the same one every time. Nothing is misspelt and no tag is unclosed. What is wrong?",
+        why: "That field has no <code>name</code>. A form does not send fields; it sends <b>name and value pairs</b>, so a field with no name has no way to be referred to and is simply not included. It is the single commonest form bug, it produces no error anywhere, and it is invisible on screen." },
+
+      { t: "def",
+        term: "Form",
+        en: "A section of a page that collects input from the visitor and sends it somewhere when submitted." },
+
+      { t: "analogy",
+        concept: "the name attribute",
+        real: "posting a form with no field labels",
+        html: "Imagine filling in a paper form, then cutting off the printed labels before posting it. The clerk receives \"Ravi\", \"1998\", \"Mumbai\" and no idea which is which. HTML solves this by refusing to send an unlabelled answer at all — <code>name</code> is that printed label, and the value never travels without it." },
+
+      { t: "syntax",
+        intro: "The smallest complete form: where it goes, how it travels, one field, and a button.",
+        form: "<form action=\"/subscribe\" method=\"post\">\n  <label for=\"email\">Email address</label>\n  <input type=\"email\" id=\"email\" name=\"email\">\n  <button type=\"submit\">Subscribe</button>\n</form>",
+        parts: [
+          { bit: "<form", says: "The container. Everything that gets sent lives inside it, and everything outside it is ignored on submit however close it looks." },
+          { bit: "action", says: "The URL the data is sent to. Same path rules as a link — relative or absolute. Left out, it posts back to the current page." },
+          { bit: "method", says: "How it travels: <code>get</code> puts the data in the URL, <code>post</code> puts it in the request body. Section 3 is entirely about choosing." },
+          { bit: "<label", says: "The field's visible name. Clicking it focuses the field — which is the small proof that the two are genuinely connected." },
+          { bit: "for", says: "The <code>id</code> of the field this label belongs to. This attribute and that id must match exactly, and it is the association everything non-visual relies on." },
+          { bit: "<input", says: "The field itself. Empty element — no closing tag — and <code>type</code> decides what kind of field it is, which is the next lesson." },
+          { bit: "id", says: "So the label can point at it. Unique on the page, as always." },
+          { bit: "name", says: "<b>What the value is called when it is sent.</b> No name, no data — this is the attribute the hook was about." },
+          { bit: "<button", says: "Submits the form. <code>type=\"submit\"</code> is the default inside a form and worth writing anyway, because a button meaning \"reset\" or \"nothing\" looks identical." },
+        ],
+        note: "<code>id</code> and <code>name</code> look redundant and are not. <code>id</code> is for <b>this page</b> — the label, CSS, scripts. <code>name</code> is for <b>the server</b> — it is the key the value arrives under. Give them the same text by convention, and understand that they are answering different questions.",
+      },
+
+      { t: "code", file: "signup.html", code: "<form action=\"/signup\" method=\"post\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\" name=\"username\">\n\n  <label for=\"mail\">Email</label>\n  <input type=\"email\" id=\"mail\" name=\"email\">\n\n  <button type=\"submit\">Create account</button>\n</form>", output: "Two labelled fields and a button. Clicking a label puts the cursor in its field." },
+      { t: "psoft", html: "Press <b>Try it yourself</b> and click the word <b>Username</b> in the preview — the cursor jumps into the field beside it. That is <code>for</code> and <code>id</code> agreeing. Change one of them by a single character and the click stops working, which is the fastest way to test a label you have ever been given." },
+
+      { t: "note", variant: "warn", html: "<b>The preview cannot submit.</b> The frame your page renders in is sandboxed, so typing works and pressing the button does nothing at all. That is not a bug in your markup — there is no server on the other end either. What the form <i>would</i> send is shown below instead, which is the part worth looking at." },
+
+      { t: "h2", n: "1", text: "What a form actually sends" },
+      { t: "p", html: "It sends a list of <code>name=value</code> pairs — one for every field that has a name and is inside the form. Not the labels, not the ids, not the placeholder text. Just the names and what the visitor typed." },
+
+      { t: "code", file: "what-is-sent.html", code: "<!-- the visitor types Ravi and ravi@example.com, then submits -->\n\n<!-- with method=\"get\" the browser builds a URL: -->\n<!-- /signup?username=Ravi&email=ravi%40example.com -->\n\n<!-- with method=\"post\" the same pairs go in the request body, -->\n<!-- and the address bar still reads /signup -->", output: "The same two pairs, carried two different ways." },
+      { t: "psoft", html: "That query string is the one from Module 0 — <code>?</code> starts it, <code>&amp;</code> joins the pairs, and the <code>@</code> became <code>%40</code> because some characters cannot appear raw in a URL. You have been reading these in your address bar for years; this is where they come from." },
+
+      { t: "h2", n: "2", text: "Labels, and the two correct ways" },
+      { t: "p", html: "A label can be attached explicitly, with <code>for</code> pointing at the field's <code>id</code>, or implicitly, by wrapping the field. Both are correct HTML and both make clicking the text focus the field." },
+
+      { t: "code", file: "labels.html", code: "<!-- explicit: for matches id -->\n<label for=\"city\">City</label>\n<input type=\"text\" id=\"city\" name=\"city\">\n\n<!-- implicit: the input lives inside the label -->\n<label>\n  City\n  <input type=\"text\" name=\"city\">\n</label>", output: "Two labelled fields that behave identically." },
+      { t: "psoft", html: "The explicit form is the one to reach for by default: it survives the two being styled into different parts of the layout, which the wrapping form does not. The implicit form is handy for a checkbox, where the text sits right beside the box anyway." },
+
+      { t: "note", variant: "key", html: "<b>A field with no label is a field a screen reader announces as \"edit, blank\".</b> The visitor hears that there is something to type in and nothing about what. Every input needs a label — and the placeholder is not one, which lesson 23 makes a whole section out of because it is the most common substitute." },
+
+      { t: "h2", n: "3", text: "GET or POST" },
+      { t: "p", html: "<b>GET</b> puts the data in the URL. That makes the result bookmarkable, shareable and re-runnable — which is exactly right for a search, and exactly wrong for a password. Module 0 already listed where a URL ends up: browser history, server logs, and the referrer header sent to the next site." },
+      { t: "p", html: "<b>POST</b> puts the data in the request body. Nothing appears in the address bar, nothing is bookmarked, and the browser warns before re-sending it. Use it for anything private and anything that <b>changes</b> something — creating an account, placing an order, deleting a post." },
+
+      { t: "note", variant: "tip", html: "<b>The test:</b> would you be happy for this to be a link somebody could share? A search for \"blue shirts\" — yes, GET. A login, a payment, a deletion — no, POST.<br><br>And note POST is not encryption: it keeps data out of the URL, nothing more. What protects it in transit is HTTPS, which is a separate decision you already made in Module 0." },
+
+      { t: "debug",
+        intro: "This form looks and behaves correctly, and one field never arrives. Find it before opening the fix.",
+        code: "<form action=\"/signup\" method=\"post\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\">\n\n  <label for=\"mail\">Email</label>\n  <input type=\"email\" id=\"mail\" name=\"email\">\n\n  <button type=\"submit\">Create account</button>\n</form>",
+        symptom: "The server receives email=ravi@example.com and nothing else. The username field was filled in, is spelt correctly, and has a working label.",
+        q: "Both fields have an id and both have a label that focuses them. So why does only one of them travel?",
+        fix: "<form action=\"/signup\" method=\"post\">\n  <label for=\"user\">Username</label>\n  <input type=\"text\" id=\"user\" name=\"username\">\n\n  <label for=\"mail\">Email</label>\n  <input type=\"email\" id=\"mail\" name=\"email\">\n\n  <button type=\"submit\">Create account</button>\n</form>",
+        why: "The username field has no <code>name</code>. A form sends name-and-value pairs, so a field with nothing to be called is left out of the submission entirely — it is not sent empty, it is not sent at all. Everything visible about it works, which is what makes this so hard to spot: the label focuses it, the styling applies, the value is in the box. <code>id</code> serves the label; only <code>name</code> serves the server, and the two attributes get confused precisely because they usually hold the same word." },
+
+      { t: "drills", intro: "Type these — form markup has more moving parts than anything so far.", items: [
+        { task: "A form that posts to /login.", code: "<form action=\"/login\" method=\"post\">\n</form>" },
+        { task: "A labelled text field for a city.", code: "<label for=\"city\">City</label>\n<input type=\"text\" id=\"city\" name=\"city\">" },
+        { task: "The same field, with the label wrapping it.", code: "<label>\n  City\n  <input type=\"text\" name=\"city\">\n</label>" },
+        { task: "A submit button reading Send.", code: "<button type=\"submit\">Send</button>" },
+      ] },
+
+      { t: "mistakes", items: [
+        { bad: "<input type=\"text\" id=\"username\">", why: "No name, so the value is never sent. Nothing on screen shows this and no error appears anywhere.", fix: "<input type=\"text\" id=\"username\" name=\"username\">" },
+        { bad: "<label>Email</label>\n<input type=\"email\" id=\"mail\" name=\"email\">", why: "A label attached to nothing. It looks right and the field is still announced as unlabelled.", fix: "<label for=\"mail\">Email</label>" },
+        { bad: "<form method=\"get\" action=\"/login\"> — with a password field", why: "The password lands in the URL, and from there in browser history, server logs and the referrer sent to the next site.", fix: "<form method=\"post\" action=\"/login\">" },
+        { bad: "An <input> written after </form>", why: "Only fields inside the form are submitted. It looks adjacent and is not part of it.", fix: "Move it inside the <form> element." },
+      ] },
+
+      { t: "recap", items: [
+        "A form sends <b>name=value pairs</b> — no <code>name</code>, no data",
+        "<code>id</code> is for this page (the label); <code>name</code> is for the server",
+        "<code>action</code> is where it goes, <code>method</code> is how it travels",
+        "Label with <code>for</code> matching <code>id</code>, or by wrapping the field",
+        "Clicking a label should focus its field — that is the working test",
+        "GET for shareable searches; POST for private or changing things — and POST is not encryption",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between GET and POST?", a: "GET puts the form data in the URL as a query string, so the result can be bookmarked, shared and re-run — right for searches and filters. POST puts it in the request body, so it stays out of the address bar, history and logs, and the browser warns before re-sending — right for anything private or anything that changes state. POST is not encryption; HTTPS is what protects either of them in transit." },
+        { level: "medium", q: "Why does an input need both id and name?", a: "They answer different questions. id identifies the element on this page, which is how a label's for attribute finds it and how CSS and scripts reach it. name is the key the value is submitted under, so it is what the server sees. A field with an id but no name is fully functional on screen and is silently excluded from the submission — one of the most common form bugs precisely because both attributes usually hold the same word." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-input-types",
+    order: 22,
+    title: "Choosing the Right Input",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Pick an input type by what is being asked for",
+        "Group radio buttons correctly — and know what actually groups them",
+        "Use <code>select</code>, <code>option</code> and <code>textarea</code>",
+        "Say why <code>value</code> matters on some fields and not others",
+      ] },
+
+      { t: "hook",
+        q: "Two phone-number fields, identical on a laptop. On a phone, one opens a full QWERTY keyboard and the other opens a number pad. What is different in the markup?",
+        why: "One attribute: <code>type=\"tel\"</code> instead of <code>type=\"text\"</code>. The type is not a validation rule so much as a <b>declaration of what is being asked for</b>, and every device answers it in its own way — a keyboard layout on a phone, a date picker on a laptop, an autofill suggestion in a password manager." },
+
+      { t: "def",
+        term: "Input type",
+        en: "The attribute that says what kind of value a field expects, which decides how the browser presents and handles it." },
+
+      { t: "note", variant: "tip", html: "<b>text</b> — anything short with no better type.<br><b>email</b> — an address. Phone keyboards add <code>@</code>; browsers check the shape.<br><b>tel</b> — a phone number. Number pad, and <b>no</b> format checking, because phone numbers differ by country.<br><b>url</b> — a web address.<br><b>number</b> — a real quantity, with <code>min</code>, <code>max</code> and <code>step</code>. Not for phone numbers or PIN codes: they are digits, not amounts.<br><b>password</b> — masks what is typed. It hides it from the room, not from the network.<br><b>date</b> / <b>time</b> — a picker, and a value in the machine format from Module 3.<br><b>search</b> — a search box; some browsers add a clear button.<br><b>checkbox</b> — an independent yes/no.<br><b>radio</b> — one choice out of several.<br><b>file</b> — a file from the visitor's machine.<br><b>hidden</b> — a value the visitor never sees and the form still sends." },
+
+      { t: "syntax",
+        intro: "The types you will use most, with the attributes that go with each.",
+        form: "<input type=\"email\" id=\"e\" name=\"email\">\n<input type=\"tel\" id=\"p\" name=\"phone\">\n<input type=\"number\" id=\"q\" name=\"qty\" min=\"1\" max=\"10\">\n<input type=\"password\" id=\"pw\" name=\"password\">\n<input type=\"date\" id=\"d\" name=\"born\">",
+        parts: [
+          { bit: "type=\"email\"", says: "An address. The browser checks it roughly contains the shape of one, and a phone offers the <code>@</code> key without switching layouts." },
+          { bit: "type=\"tel\"", says: "A phone number. Deliberately unvalidated — every country writes them differently — but the number pad appears, which is the whole win." },
+          { bit: "type=\"number\"", says: "A quantity that can be counted or compared. Comes with spinner arrows and accepts <code>min</code>, <code>max</code> and <code>step</code>." },
+          { bit: "min", says: "The smallest acceptable value. <code>max</code> is its pair, and both are enforced by the browser before submission." },
+          { bit: "type=\"password\"", says: "Masks the characters on screen. It does nothing to the data in transit — that is HTTPS's job, and confusing the two is a real mistake." },
+          { bit: "type=\"date\"", says: "Offers a calendar and submits <code>YYYY-MM-DD</code> — the machine format from the <code>&lt;time&gt;</code> lesson, for the same reason." },
+        ],
+        note: "Use <code>number</code> only for things that are genuinely amounts. A phone number, a PIN and a postcode are strings of digits you would never add together — <code>number</code> would let a visitor spin a phone number up by one, and strips a leading zero.",
+      },
+
+      { t: "h2", n: "1", text: "Checkbox and radio: what actually groups them" },
+      { t: "p", html: "A checkbox is independent — tick any number of them. A radio is one choice from a set. What makes several radios <b>a set</b> is not being near each other: it is <b>sharing the same <code>name</code></b>. Give two radios different names and both can be selected at once, because as far as the browser is concerned they are two unrelated questions." },
+
+      { t: "code", file: "choices.html", code: "<p>Size</p>\n<label><input type=\"radio\" name=\"size\" value=\"s\"> Small</label>\n<label><input type=\"radio\" name=\"size\" value=\"m\" checked> Medium</label>\n<label><input type=\"radio\" name=\"size\" value=\"l\"> Large</label>\n\n<p>Extras</p>\n<label><input type=\"checkbox\" name=\"gift\" value=\"yes\"> Gift wrap</label>\n<label><input type=\"checkbox\" name=\"news\" value=\"yes\"> Email me offers</label>", output: "Three sizes where only one can be chosen, then two independent tickboxes." },
+      { t: "psoft", html: "The three sizes share <code>name=\"size\"</code>, which is what makes choosing one clear the others. The two extras have <b>different</b> names because they are different questions — give them the same name and ticking one would untick the other. Press <b>Try it yourself</b> and make both checkboxes <code>name=\"gift\"</code> to watch that happen." },
+
+      { t: "note", variant: "key", html: "<b>A radio or checkbox needs a <code>value</code>, and this is the one place it is not optional.</b> A text field submits what the visitor typed; a tick has nothing to submit but the fact that it was ticked. With no <code>value</code>, a ticked box arrives as the literal string <code>on</code> — so three ticked options all arrive as \"on\" and the server cannot tell them apart. <code>checked</code> preselects one, and takes no value: present or absent." },
+
+      { t: "h2", n: "2", text: "Choosing from a list" },
+      { t: "syntax",
+        intro: "A dropdown, and how to group its options.",
+        form: "<label for=\"city\">City</label>\n<select id=\"city\" name=\"city\">\n  <option value=\"\">Choose one</option>\n  <optgroup label=\"North\">\n    <option value=\"del\">Delhi</option>\n  </optgroup>\n  <option value=\"mum\" selected>Mumbai</option>\n</select>",
+        parts: [
+          { bit: "<select", says: "The dropdown. It carries the <code>name</code> — the options do not." },
+          { bit: "<option", says: "One choice. Its <code>value</code> is what gets submitted; the text between the tags is what the visitor reads." },
+          { bit: "value", says: "What the server receives. Leave it out and the visible text is sent instead — which works until somebody rewrites the wording." },
+          { bit: "<optgroup", says: "A labelled group of options inside the list. The group heading is not selectable, which is exactly what you want." },
+          { bit: "selected", says: "Which option starts chosen. Without it the first one does — which is why a \"Choose one\" placeholder option with an empty value is the usual first entry." },
+        ],
+        note: "A <code>&lt;select&gt;</code> with 4 options is a worse radio group: it hides the choices behind a click and takes two interactions instead of one. Reach for it when the list is long enough that showing it all would swamp the page — countries, states, years.",
+      },
+
+      { t: "h2", n: "3", text: "The long answer" },
+      { t: "p", html: "<code>&lt;textarea&gt;</code> is the multi-line field, and it is the odd one out: it is <b>not</b> an <code>&lt;input&gt;</code>, it has a closing tag, and its value is the content between the tags rather than a <code>value</code> attribute. That is why whitespace inside it is preserved exactly, the same rule as <code>&lt;pre&gt;</code>." },
+
+      { t: "code", file: "message.html", code: "<label for=\"msg\">Your message</label>\n<textarea id=\"msg\" name=\"message\" rows=\"5\"></textarea>", output: "A five-line box that the visitor can drag to resize." },
+      { t: "psoft", html: "Write it as <code>&lt;textarea&gt;&lt;/textarea&gt;</code> with nothing between the tags. Put a newline or spaces in there and that is the field's starting value — so the box opens containing whitespace the visitor has to delete." },
+
+      { t: "mistakes", items: [
+        { bad: "<input type=\"radio\" name=\"small\">\n<input type=\"radio\" name=\"medium\">", why: "Different names, so they are two separate questions and both can be selected at once.", fix: "Both name=\"size\", with different value attributes." },
+        { bad: "<input type=\"checkbox\" name=\"gift\">", why: "No value, so a ticked box submits the literal string \"on\" — useless the moment there is more than one.", fix: "<input type=\"checkbox\" name=\"gift\" value=\"yes\">" },
+        { bad: "<input type=\"number\" name=\"phone\">", why: "A phone number is not a quantity. Spinner arrows appear, leading zeros are stripped, and nothing is gained.", fix: "<input type=\"tel\" name=\"phone\">" },
+        { bad: "<textarea value=\"Hello\"></textarea>", why: "textarea has no value attribute — its content is its value.", fix: "<textarea>Hello</textarea>" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>type</code> declares what is being asked for; the device decides how to help",
+        "<code>tel</code> for phone numbers, <code>number</code> only for real quantities",
+        "Radios are grouped by a <b>shared <code>name</code></b>, nothing else",
+        "Checkboxes and radios need a <code>value</code>, or they submit \"on\"",
+        "<code>&lt;select&gt;</code> carries the name; each <code>&lt;option&gt;</code> carries its value",
+        "<code>&lt;textarea&gt;</code> has a closing tag and its content <b>is</b> its value",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "How do you make several radio buttons work as one choice?", a: "Give them all the same name attribute. That is what defines the group — proximity in the markup does nothing. Each one then needs its own value, because the name is shared and the value is what identifies which option was chosen." },
+        { level: "medium", q: "Why use type=\"tel\" rather than type=\"number\" for a phone number?", a: "number is for quantities. It shows spinner arrows, allows a value to be incremented, and drops leading zeros — all wrong for a phone number, which is a string of digits nobody would arithmetic on. tel declares the intent, brings up the numeric keypad on a phone, and deliberately applies no format validation, because phone number formats differ by country." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-form-validation",
+    order: 23,
+    title: "Validation, Grouping, and the Lie of the Placeholder",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Have the browser check a field before the form is sent",
+        "Say why that checking is a courtesy and never a defence",
+        "Group related fields so the group's question is announced too",
+        "Explain why a placeholder can never replace a label",
+      ] },
+
+      { t: "hook",
+        q: "You add <code>required</code> to every field. The form now refuses to submit until they are all filled in. So the data reaching your server is guaranteed complete — true or false?",
+        why: "False, and it is the most consequential misunderstanding in this module. Everything you write in HTML runs in a browser the <b>visitor controls</b>. They can edit your page in DevTools, or skip the browser and send the request directly. Client-side validation exists to give a helpful person quick feedback, not to stop an unhelpful one." },
+
+      { t: "def",
+        term: "Client-side validation",
+        en: "Checks the browser performs before sending a form — instant, free, and impossible to rely on, because the browser belongs to the visitor." },
+
+      { t: "syntax",
+        intro: "The attributes that make the browser check a field before it lets the form go.",
+        form: "<input type=\"text\" id=\"u\" name=\"user\" required minlength=\"3\" maxlength=\"20\">\n<input type=\"number\" id=\"q\" name=\"qty\" min=\"1\" max=\"10\" step=\"1\">\n<input type=\"text\" id=\"pin\" name=\"pin\" pattern=\"[0-9]{6}\" title=\"Six digits\">",
+        parts: [
+          { bit: "required", says: "Must not be empty. The browser blocks submission and points at the field. Present or absent — no value." },
+          { bit: "minlength", says: "Fewest characters accepted. <code>maxlength</code> is the pair, and it stops further typing rather than complaining afterwards." },
+          { bit: "min", says: "Smallest acceptable number — or earliest date, on a date field. <code>max</code> is its pair." },
+          { bit: "step", says: "The allowed increment. <code>step=\"0.5\"</code> permits halves; <code>step=\"1\"</code> keeps it whole." },
+          { bit: "pattern", says: "A regular expression the value must match, for formats no type covers — a PIN code, a vehicle registration." },
+          { bit: "title", says: "Beside <code>pattern</code>, this is what the browser shows when the value does not match. Without it the message says only that the format is wrong, which helps nobody." },
+        ],
+        note: "Every one of these is free — no script, no library, and the messages come translated into the visitor's own language. What none of them do is protect anything, which the next section is about.",
+      },
+
+      { t: "h2", n: "1", text: "Why the server has to check again" },
+      { t: "p", html: "The browser is the visitor's software, running on the visitor's machine. Two minutes in DevTools removes a <code>required</code> attribute; a single command-line request skips the page entirely. Neither is exotic — the second is how every API is tested." },
+      { t: "note", variant: "warn", html: "<b>Validate in the browser for the visitor. Validate on the server for the system.</b> The first is about not making an honest person fill in the form twice. The second is the only one that is a check at all. Every real application does both, and a beginner who learns only the first ships something that looks careful and defends nothing." },
+
+      { t: "h2", n: "2", text: "The placeholder is not a label" },
+      { t: "p", html: "It is the most common shortcut in web forms: delete the labels, put the field's name in <code>placeholder</code>, enjoy the tidier layout. It fails in four separate ways, and every one of them hurts somebody real." },
+
+      { t: "note", variant: "key", html: "<b>1. It disappears the moment typing starts</b> — so anyone interrupted mid-form has no way to recall what the field was for.<br><b>2. It is grey by design</b>, which usually fails contrast requirements, so partially sighted visitors cannot read it.<br><b>3. Screen reader support is inconsistent</b> — some announce it, some do not, and a field whose name is only in a placeholder may be announced as \"edit, blank\".<br><b>4. There is nothing to click</b> — a label is a second, larger target for the same field, which matters to anyone whose hands are not steady.<br><br>A placeholder is for an <b>example</b> of the format: <code>label</code> says \"Phone\", <code>placeholder</code> shows <code>+91 98765 43210</code>." },
+
+      { t: "h2", n: "3", text: "Grouping fields that ask one question" },
+      { t: "p", html: "Three radio buttons labelled Small, Medium and Large are three labelled controls — and nothing in that markup says the <b>question</b> is \"Size\". A sighted visitor reads the heading above them; a screen reader user hears \"Small, radio button, one of three\" with no idea what is being sized." },
+
+      { t: "syntax",
+        intro: "The pair that gives a group its own name.",
+        form: "<fieldset>\n  <legend>Size</legend>\n\n  <label><input type=\"radio\" name=\"size\" value=\"s\"> Small</label>\n  <label><input type=\"radio\" name=\"size\" value=\"m\"> Medium</label>\n</fieldset>",
+        parts: [
+          { bit: "<fieldset>", says: "Wraps controls that together answer one question. Draws a border by default, which CSS can remove without losing the meaning." },
+          { bit: "<legend>", says: "The group's question, and it must be the fieldset's <b>first</b> child. It is announced with every control inside — \"Size, Small, radio button\"." },
+        ],
+        note: "This is the same shape as a table's <code>&lt;caption&gt;</code> and a figure's <code>&lt;figcaption&gt;</code>: a container for related things, plus one element naming what they are. Three elements in three modules built on one idea.",
+      },
+
+      { t: "note", variant: "tip", html: "<b><code>autocomplete</code> is worth one line of effort.</b> <code>autocomplete=\"email\"</code>, <code>\"tel\"</code>, <code>\"street-address\"</code>, <code>\"new-password\"</code> let the browser and password managers fill fields correctly. It saves everyone time and it saves some people the entire form — anyone for whom typing is slow or painful. Switching it off on a login field, which people still do, helps nobody." },
+
+      { t: "mistakes", items: [
+        { bad: "<input placeholder=\"Email\"> — with no label", why: "Vanishes on typing, usually fails contrast, is announced inconsistently, and gives nothing to click.", fix: "<label for=\"e\">Email</label>\n<input id=\"e\" name=\"email\" placeholder=\"you@example.com\">" },
+        { bad: "\"The form has required on every field, so the data is valid.\"", why: "The browser belongs to the visitor. DevTools removes the attribute; a direct request skips the page.", fix: "Keep required for the visitor's sake, and validate again on the server." },
+        { bad: "<fieldset>\n  <label>...</label>\n  <legend>Size</legend>\n</fieldset>", why: "legend must be the first child. Later, it is invalid and stops naming the group.", fix: "<fieldset>\n  <legend>Size</legend>\n  <label>...</label>\n</fieldset>" },
+        { bad: "<input pattern=\"[0-9]{6}\"> — with no title", why: "When it fails, the browser can only say the format is wrong. The visitor is told to try again with no idea what would work.", fix: "<input pattern=\"[0-9]{6}\" title=\"Six digits\">" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>required</code>, <code>minlength</code>, <code>min</code>/<code>max</code>, <code>step</code>, <code>pattern</code> — free, instant, translated",
+        "<code>pattern</code> needs <code>title</code>, or the error message says nothing useful",
+        "Browser validation is for the visitor; <b>server validation is the only real check</b>",
+        "A placeholder vanishes, is low contrast, is announced unreliably, and cannot be clicked",
+        "Label says what the field is; placeholder shows an example of the format",
+        "<code>&lt;fieldset&gt;</code> + <code>&lt;legend&gt;</code> give a group of controls its question",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What does the required attribute do?", a: "It stops the browser submitting the form while that field is empty, and points the visitor at it with a message in their own language. It costs nothing and is purely a convenience — it does not guarantee the server receives a value, because the check runs in software the visitor controls." },
+        { level: "medium", q: "Why is a placeholder not an acceptable replacement for a label?", a: "It disappears as soon as the visitor types, so anyone interrupted loses the field's name; it is grey by default and usually fails contrast; screen reader support for it is inconsistent, so the field may be announced with no name at all; and it gives no second click target, which matters for anyone with limited dexterity. A placeholder should show an example of the expected format while the label carries the name." },
+        { level: "hard", q: "If HTML validation can be bypassed, why bother writing it?", a: "Because it solves a different problem from security. It gives immediate, local feedback with no round trip and no script — the visitor learns the postcode is malformed before waiting for a server to say so — and the messages arrive translated. It is a user-experience feature that happens to look like a security feature, which is exactly why the distinction has to be stated: it must be paired with server-side validation, never trusted in place of it." },
+      ] },
+    ],
+  },
 ];
