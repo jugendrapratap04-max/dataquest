@@ -960,4 +960,87 @@ export const htmlProblems = [
       "Do not indent the lines inside `pre` to match your HTML — that indentation would show.",
     ],
     "html,entities,code"),
+
+  /* ----------------------------------------- html-accessibility ----
+   *
+   * Parity checked before writing: 13 of 13 identical across aria-*, role,
+   * tabindex, onclick and the skip-link/main pairing. Note `role` is
+   * case-SENSITIVE in both engines — unlike `type`, `method` and `scope`,
+   * which the HTML spec lists as case-insensitive. So `role="BUTTON"` would
+   * fail a `[role="button"]` selector in both, consistently. */
+  P("html-accessibility", 645, "html-real-button", "The Button Nobody Can Reach", "Medium",
+    "This checkout works perfectly with a mouse and cannot be completed with a keyboard. Two faults, and both come from letting appearance decide the markup.\n\n- **Pay now** is a `div`. It is not focusable, so Tab passes straight over it, and it does not respond to Enter — the purchase simply cannot be made without a mouse. Make it a real `button` and keep its `onclick`\n- the Terms list carries **`tabindex=\"3\"`**, which drags it to the front of the *whole page's* tab order, so the first Tab press lands there instead of at the top. Remove the attribute entirely — source order is the tab order\n\nKeep every word and the link exactly as they are.",
+    "<h2>Checkout</h2>\n<div class=\"btn\" onclick=\"pay()\">Pay now</div>\n\n<ul tabindex=\"3\">\n  <li><a href=\"/terms\">Terms</a></li>\n</ul>\n",
+    "<h2>Checkout</h2>\n<button onclick=\"pay()\">Pay now</button>\n\n<ul>\n  <li><a href=\"/terms\">Terms</a></li>\n</ul>\n",
+    [
+      { find: "button", count: 1, says: "\"Pay now\" is a real <button> — focusable, and it fires on Enter and Space" },
+      { find: "button", text: true, contains: "Pay now", says: "with its text unchanged" },
+      { find: "div", count: 0, says: "no <div> pretending to be a control" },
+      { find: "[tabindex]", count: 0, says: "no tabindex left — the tab order follows the source again" },
+      { find: "ul li a[href=\"/terms\"]", exists: true, says: "the Terms link is untouched" },
+      { find: "h2", text: true, contains: "Checkout", says: "the heading is unchanged" },
+    ],
+    [
+      "A `<button>` is focusable, keyboard-operable and announced as a control — a styled `div` is none of those.",
+      "Keep the `onclick` where it is; only the element changes.",
+      "A positive `tabindex` jumps ahead of the entire page. Delete it rather than lowering it.",
+    ],
+    "html,accessibility"),
+
+  P("html-accessibility", 646, "html-skip-link", "Two Lines for Every Visitor", "Easy",
+    "This page makes a keyboard user tab through the whole forty-link menu before reaching the content — on every page they open.\n\nAdd the two one-liners from the lesson:\n\n- a **skip link** as the very first thing in the body: an anchor reading `Skip to content` pointing at `#main`\n- the matching `id=\"main\"` on the `main` element, so the link has somewhere to land\n\nAnd fix one more: the `html` element has **no `lang`**, so a screen reader guesses the language and mispronounces the page. Set it to `en`.",
+    "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Mochi's Kitchen</title>\n</head>\n<body>\n  <header>\n    <nav><ul><li><a href=\"/\">Home</a></li></ul></nav>\n  </header>\n\n  <main>\n    <h1>Poha Chivda</h1>\n  </main>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Mochi's Kitchen</title>\n</head>\n<body>\n  <a href=\"#main\">Skip to content</a>\n\n  <header>\n    <nav><ul><li><a href=\"/\">Home</a></li></ul></nav>\n  </header>\n\n  <main id=\"main\">\n    <h1>Poha Chivda</h1>\n  </main>\n</body>\n</html>\n",
+    [
+      { find: "html", attr: "lang", equals: "en", says: "<html> declares lang=\"en\"" },
+      { find: "a[href=\"#main\"]", count: 1, says: "a skip link pointing at #main" },
+      { find: "a[href=\"#main\"]", text: true, contains: "Skip to content", says: "reading \"Skip to content\"" },
+      { find: "main#main", count: 1, says: "the <main> carries id=\"main\", so the link lands somewhere" },
+      { find: "main h1", text: true, contains: "Poha Chivda", says: "the page content is unchanged" },
+      { find: "header nav ul li a", exists: true, says: "the menu is unchanged" },
+    ],
+    [
+      "The skip link is an ordinary anchor with a fragment: `<a href=\"#main\">Skip to content</a>`.",
+      "A fragment needs a matching id — put `id=\"main\"` on the `<main>` element.",
+      "It goes first in the body, before the header, so it is the first thing Tab reaches.",
+    ],
+    "html,accessibility,semantic"),
+
+  /* -------------------------------------------------- html-aria ---- */
+  P("html-aria", 647, "html-icon-button", "A Button With Nothing to Read", "Medium",
+    "Two icon-only buttons. Both are announced as just **\"button\"**, because there is no text in them to read — a user hears that there is a control and nothing about what it does.\n\nGive each one an accessible name, and hide the symbol that is now only decoration:\n\n- the `×` button → `aria-label=\"Close\"`, and wrap the `×` in a `span` marked `aria-hidden=\"true\"`\n- the search button → `aria-label=\"Search\"`, with its `🔍` in a `span` marked `aria-hidden=\"true\"`\n\nThe pattern is the same both times: **the name goes on the control, the symbol is hidden from assistive tech.** Without hiding it, some readers announce both — \"Close, button, multiplication sign\".",
+    "<button>×</button>\n<button>🔍</button>\n",
+    "<button aria-label=\"Close\"><span aria-hidden=\"true\">×</span></button>\n<button aria-label=\"Search\"><span aria-hidden=\"true\">🔍</span></button>\n",
+    [
+      { find: "button[aria-label=\"Close\"]", count: 1, says: "the × button is named \"Close\"" },
+      { find: "button[aria-label=\"Search\"]", count: 1, says: "the search button is named \"Search\"" },
+      { find: "button[aria-label] span[aria-hidden=\"true\"]", count: 2, says: "each symbol sits in a span hidden from assistive tech" },
+      { find: "button", count: 2, says: "still two buttons" },
+      { find: "button", text: true, contains: "×", says: "the × is still visible on the page" },
+    ],
+    [
+      "`aria-label` goes on the button itself — that is the name that gets announced.",
+      "The symbol becomes decoration once the name exists: `<span aria-hidden=\"true\">×</span>`.",
+      "aria-hidden hides from assistive tech only. The character stays on screen.",
+    ],
+    "html,aria,accessibility"),
+
+  P("html-aria", 648, "html-aria-overuse", "ARIA That Lies, and ARIA That Repeats", "Medium",
+    "Somebody added ARIA everywhere to \"make it accessible\". One of these is harmless noise and one makes the page actively worse.\n\n- `<div role=\"button\">` is the harmful one. It is now **announced** as a button and is still not focusable and still dead to Enter — so a user is told there is a button, tries it, and nothing happens. Make it a real `button` and drop the `role` and `tabindex` entirely\n- `<nav role=\"navigation\">` and `<main role=\"main\">` just repeat what the elements already say. Delete both roles\n\nThat is the first rule of ARIA in one exercise: **a native element brings the behaviour with it; ARIA only changes the claim.**",
+    "<nav role=\"navigation\"><ul><li><a href=\"/\">Home</a></li></ul></nav>\n\n<main role=\"main\">\n  <div role=\"button\" tabindex=\"0\" onclick=\"send()\">Send</div>\n</main>\n",
+    "<nav><ul><li><a href=\"/\">Home</a></li></ul></nav>\n\n<main>\n  <button onclick=\"send()\">Send</button>\n</main>\n",
+    [
+      { find: "button", count: 1, says: "\"Send\" is a real <button>" },
+      { find: "button", text: true, contains: "Send", says: "with its text unchanged" },
+      { find: "[role]", count: 0, says: "no role attributes left — every element already carries its own" },
+      { find: "[tabindex]", count: 0, says: "and no tabindex: a real button is focusable already" },
+      { find: "nav ul li a[href=\"/\"]", exists: true, says: "the navigation still works, minus the redundant role" },
+      { find: "main button", count: 1, says: "the button sits inside <main>, as it did" },
+    ],
+    [
+      "`role=\"button\"` on a div changes the announcement and nothing else — it cannot make anything focusable.",
+      "`<nav>` and `<main>` already have their roles. Repeating them is noise.",
+      "A real `<button>` needs no `tabindex`: it is in the tab order by default.",
+    ],
+    "html,aria,accessibility"),
 ];

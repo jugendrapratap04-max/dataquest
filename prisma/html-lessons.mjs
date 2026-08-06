@@ -2638,4 +2638,190 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 12 — ACCESSIBILITY
+   *
+   * The module that mostly COLLECTS. Every earlier module made an accessibility
+   * argument without naming it — alt text, labels, landmarks, heading levels,
+   * a list's count, a table's scope, the words inside a link — so lesson 30
+   * spends its first section handing those back as receipts. A student who has
+   * followed the course has already been doing this; what they have not had is
+   * the name, the model, and the keyboard.
+   *
+   * The second lesson is ARIA, and it is deliberately mostly a warning. The
+   * dangerous thing about ARIA is that it changes what a page CLAIMS without
+   * changing what it DOES, so a beginner who reaches for it usually makes the
+   * page worse — a div that announces itself as a button and still cannot be
+   * focused or pressed is a lie the previous version was not telling.
+   *
+   * Parser parity checked before writing: 13 of 13 identical across aria-*,
+   * role, tabindex, onclick and the skip-link/main pairing — and `role` is
+   * case-SENSITIVE in both engines, unlike `type`/`method`/`scope`.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-accessibility",
+    order: 30,
+    title: "Accessibility: What You Have Been Doing All Along",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Say who accessibility is for, and get the answer right",
+        "Operate a page with the keyboard alone, and fix what you cannot reach",
+        "Explain what a <code>&lt;div&gt;</code> pretending to be a button actually loses",
+        "Use <code>tabindex</code> correctly — which mostly means barely",
+      ] },
+
+      { t: "hook",
+        q: "Unplug your mouse. Now buy something on your own site — reach the menu, open the product, fill the form, press the button. Most developers cannot finish. What broke?",
+        why: "Almost always the same thing: something that <b>looks</b> like a control is a <code>&lt;div&gt;</code>. It cannot be reached with Tab, it does not respond to Enter, and nothing announces it as a control — so the page works perfectly for a mouse and stops dead for everyone else." },
+
+      { t: "def",
+        term: "Accessibility",
+        en: "Building so that the page works for people who are not using it the way you are — with a keyboard, a screen reader, a magnifier, one hand, or a phone in the sun." },
+
+      { t: "h2", n: "1", text: "Who this is for" },
+      { t: "p", html: "The usual mental picture is a blind user with a screen reader, and that is one group of many. The one worth carrying instead is this: <b>permanent, temporary, situational</b>. A person with one arm, a person with a broken arm, a person holding a baby — all three need the same one-handed page." },
+      { t: "note", variant: "key", html: "<b>Situational is the category that changes people's minds, because it is everybody.</b> Bright sunlight is low vision. A noisy train is deafness. A cracked screen, a slow connection, a hand holding a bag on the metro. You have used your own site under at least three of these this month, and every fix in this module helped you." },
+
+      { t: "h2", n: "2", text: "The receipts: you have been doing this since Module 2" },
+      { t: "note", variant: "tip", html: "<b>Module 2</b> — the right element, because CSS cannot restore meaning.<br><b>Module 3</b> — heading levels as the page's outline, which is a menu a screen reader user navigates by.<br><b>Module 4</b> — link text that names its destination, because links are read out of context.<br><b>Module 5</b> — <code>alt</code>, and <code>alt=\"\"</code> for decoration.<br><b>Module 6</b> — a real list, so its count is announced.<br><b>Module 7</b> — <code>th</code> and <code>scope</code>, so a number is read with its labels.<br><b>Module 8</b> — a label per field, and <code>fieldset</code> for the group's question.<br><b>Module 9</b> — landmarks, so the whole menu can be skipped.<br><br><b>None of that was framed as accessibility, and all of it was.</b> This module adds the part that was missing: the keyboard." },
+
+      { t: "h2", n: "3", text: "Everything interactive must work from the keyboard" },
+      { t: "p", html: "Tab moves forward, Shift+Tab back, Enter activates a link or button, Space presses a button and scrolls the page, Escape closes things. That is the whole vocabulary — and the rule is that <b>anything a mouse can do, the keyboard must be able to do too</b>." },
+      { t: "p", html: "The good news is how little work this is when you use real elements. <code>&lt;a&gt;</code>, <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code> and <code>&lt;textarea&gt;</code> are focusable, operable and announced — for free, in every browser, forever." },
+
+      { t: "syntax",
+        intro: "What you get from a real button, and what a styled div is missing.",
+        form: "<button>Send</button>\n\n<div class=\"btn\" onclick=\"send()\">Send</div>",
+        parts: [
+          { bit: "<button>", says: "Focusable with Tab. Fires on Enter <b>and</b> Space. Announced as \"Send, button\". Supports <code>disabled</code>. Works before any of your CSS or JavaScript has loaded." },
+          { bit: "<div", says: "None of the above. It is a box with a click handler: unreachable by Tab, silent to a screen reader, dead to Enter — and it looks identical, which is why it ships." },
+        ],
+        note: "You can bolt the missing pieces onto a div with <code>tabindex</code>, key handlers and a role, and people do. It is four things to get right, in every browser, instead of one element that already does them.",
+      },
+
+      { t: "h2", n: "4", text: "tabindex, in three values" },
+      { t: "note", variant: "tip", html: "<b><code>tabindex=\"0\"</code></b> — put this in the natural tab order, where it sits in the source. The only value you will use often.<br><b><code>tabindex=\"-1\"</code></b> — focusable by script but not by Tab. For a dialog you move focus into, or a target you jump to.<br><b><code>tabindex=\"3\"</code></b> and any positive number — <b>never.</b> It jumps to the front of the tab order for the whole page, so the sequence stops matching what is on screen and every later addition makes it worse." },
+      { t: "p", html: "The rule underneath: <b>tab order follows source order</b>. If the tab sequence feels wrong, the markup is usually in the wrong order — and moving the element is the fix, not a number." },
+
+      { t: "h2", n: "5", text: "Two lines that help everybody" },
+      { t: "code", file: "a11y-basics.html", code: "<html lang=\"en\">\n<body>\n  <a href=\"#main\" class=\"skip\">Skip to content</a>\n\n  <header>\n    <nav><!-- forty links --></nav>\n  </header>\n\n  <main id=\"main\">\n    <h1>Poha Chivda</h1>\n  </main>\n</body>\n</html>", output: "A normal page with one extra link at the very top." },
+      { t: "psoft", html: "The <b>skip link</b> is the first focusable thing on the page and is usually hidden until focused. Without it a keyboard user tabs through the entire menu on every page they visit. <b><code>lang=\"en\"</code></b> is the other one-liner: it tells a screen reader which language to pronounce, and a French page read with English pronunciation is genuinely unintelligible." },
+
+      { t: "debug",
+        intro: "This checkout page works perfectly with a mouse and cannot be completed with a keyboard. Find both problems before opening the fix.",
+        code: "<div class=\"btn\" onclick=\"pay()\">Pay now</div>\n\n<ul tabindex=\"3\">\n  <li><a href=\"/terms\">Terms</a></li>\n</ul>",
+        symptom: "Tab never reaches \"Pay now\" at all, and the first Tab press on the page jumps straight to the Terms list, skipping the header and the form above it.",
+        q: "Nothing here is invalid HTML. So why can a keyboard user not finish?",
+        fix: "<button onclick=\"pay()\">Pay now</button>\n\n<ul>\n  <li><a href=\"/terms\">Terms</a></li>\n</ul>",
+        why: "Two separate faults with the same cause — appearance decided the markup. The <code>&lt;div&gt;</code> is not focusable, so Tab passes it by and the purchase cannot be made without a mouse; a real <code>&lt;button&gt;</code> is focusable, fires on Enter and Space, and announces itself. The positive <code>tabindex=\"3\"</code> pulled that list to the <b>front of the whole page's</b> tab order, so the sequence no longer matches what is on screen. Removing it puts the list back where it visually is. <b>Neither produces an error, and both are invisible with a mouse in your hand.</b>" },
+
+      { t: "mistakes", items: [
+        { bad: "<div class=\"button\" onclick=\"send()\">Send</div>", why: "Not focusable, not keyboard-operable, not announced as a control. It works for a mouse and for nothing else.", fix: "<button onclick=\"send()\">Send</button>" },
+        { bad: "<ul tabindex=\"5\">", why: "A positive tabindex jumps to the front of the page's tab order, so the sequence stops matching the layout.", fix: "Remove it — source order is the tab order." },
+        { bad: "<html> with no lang", why: "The screen reader guesses a language, and the wrong pronunciation makes text unintelligible rather than merely odd.", fix: "<html lang=\"en\">" },
+        { bad: "a:focus { outline: none } — with nothing replacing it", why: "The focus ring is how a keyboard user knows where they are. Removing it is like hiding the mouse pointer.", fix: "Style the focus, never delete it." },
+      ] },
+
+      { t: "recap", items: [
+        "Permanent, temporary, <b>situational</b> — the last one is everybody",
+        "Every module so far was already teaching this; the new part is the keyboard",
+        "Anything a mouse can do, the keyboard must do — Tab, Enter, Space, Escape",
+        "Real elements are focusable, operable and announced for free",
+        "<code>tabindex=\"0\"</code> yes, <code>-1</code> sometimes, <b>positive never</b>",
+        "A skip link and <code>lang</code> are two lines that help every visitor",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "Why use a button element instead of a styled div with a click handler?", a: "A button is focusable with Tab, activates on both Enter and Space, is announced as a button by assistive technology, supports the disabled state, and works before any CSS or JavaScript arrives. A div has none of that — it renders identically and is unreachable for anyone not using a mouse. Recreating those four behaviours by hand is more work than using the element." },
+        { level: "medium", q: "When would you use a positive tabindex?", a: "Never in practice. A positive value moves the element to the front of the whole page's tab order, ahead of everything with tabindex 0 or none, so the sequence stops matching the visual order and every element added later makes it worse. tabindex=\"0\" puts something in the natural order and tabindex=\"-1\" makes it focusable by script only — those two cover the real cases." },
+        { level: "hard", q: "How would you check whether a page is keyboard accessible?", a: "Put the mouse away and complete a real task with Tab, Shift+Tab, Enter, Space and Escape. Three things to watch: can you reach every control, can you see where focus is at each step, and does the order match what is on screen. That walk catches the common failures — unreachable fake buttons, a removed focus ring, and focus staying behind a dialog — faster than any automated tool, which is why it is the first thing to do rather than the last." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-aria",
+    order: 31,
+    title: "ARIA: the First Rule Is Not to Use It",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "State the first rule of ARIA and explain why it exists",
+        "Give a control an accessible name when its label is not text",
+        "Hide decoration from a screen reader without hiding it from the page",
+        "Recognise ARIA that is redundant, and ARIA that is actively harmful",
+      ] },
+
+      { t: "hook",
+        q: "You add <code>role=\"button\"</code> to a <code>&lt;div&gt;</code>. A screen reader now announces it as a button. Is the page more accessible than it was?",
+        why: "<b>It is worse.</b> It was a div that nobody could use; it is now a div that <i>claims to be a button</i> and still cannot be focused with Tab or pressed with Enter. A user is told there is a button, tries to use it, and nothing happens. ARIA changed what the page <b>says</b> and nothing about what it <b>does</b>." },
+
+      { t: "def",
+        term: "ARIA",
+        en: "Accessible Rich Internet Applications — attributes that change what assistive technology is told about an element. They add no behaviour of any kind." },
+
+      { t: "note", variant: "key", html: "<b>The first rule of ARIA is: do not use ARIA.</b> That is not a joke and it is close to the actual wording of the specification. If a native element does the job, use it — because it brings the behaviour, the keyboard support and the announcement together. Reach for ARIA when there is genuinely no element for what you are building, which for the pages in this course is almost never." },
+
+      { t: "analogy",
+        concept: "ARIA on a div",
+        real: "a label saying FIRE EXIT on a wall",
+        html: "The sign is real, the wall is real, and there is no door. Everyone who can see works around it; the person following the signs walks into a wall. That is <code>role=\"button\"</code> on something that cannot be focused or pressed — the announcement is now correct and the thing behind it still does not work." },
+
+      { t: "h2", n: "1", text: "What ARIA actually offers" },
+      { t: "syntax",
+        intro: "Three kinds of attribute, and the two you will genuinely use.",
+        form: "role=\"button\"                what this element IS\naria-label=\"Close\"           its accessible NAME\naria-labelledby=\"title-id\"   its name, taken from another element\naria-describedby=\"help-id\"   extra description\naria-hidden=\"true\"           hide from assistive tech only\naria-expanded=\"false\"        current STATE",
+        parts: [
+          { bit: "role", says: "Overrides what the element claims to be. The most dangerous one, because it changes the claim and nothing else — and a native element already carries the right role for free." },
+          { bit: "aria-label", says: "A name for a control that has no visible text — an icon-only button. This is the one you will reach for most often, and it is genuinely useful." },
+          { bit: "aria-labelledby", says: "The same, taking the name from text already on the page by its <code>id</code>. Better than <code>aria-label</code> when that text exists, because the two cannot drift apart." },
+          { bit: "aria-describedby", says: "Extra detail read after the name — a password rule, a format hint." },
+          { bit: "aria-hidden", says: "Remove from the accessibility tree while leaving it on screen. For decoration only, and <b>never</b> on anything focusable." },
+          { bit: "aria-expanded", says: "State, for a control that opens something. State attributes must be kept in step by script, which is why they belong with the JavaScript that changes them." },
+        ],
+        note: "Notice what is not in the list: anything that makes something work. There is no ARIA attribute that makes an element focusable, clickable, or operable by keyboard.",
+      },
+
+      { t: "h2", n: "2", text: "The accessible name" },
+      { t: "p", html: "Every control needs a name — the thing announced when focus lands on it. A button gets it from its text, a field from its <code>&lt;label&gt;</code>, an image from its <code>alt</code>. All three came from earlier modules, and they cover almost everything." },
+      { t: "p", html: "The gap is a control whose label is <b>not text</b>: a close button that is an ×, a search button that is a magnifier. There is nothing to read, so it is announced as \"button\" and nothing more." },
+
+      { t: "code", file: "names.html", code: "<!-- announced as \"button\" — a user hears nothing useful -->\n<button>&times;</button>\n\n<!-- announced as \"Close, button\" -->\n<button aria-label=\"Close\">&times;</button>\n\n<!-- the visible × is decoration; the NAME carries the meaning -->\n<button aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>", output: "Three identical-looking buttons; only two of them can be used without sight." },
+      { t: "psoft", html: "The third is the pattern to copy for any icon button: the <b>name</b> on the control, the <b>symbol</b> hidden from assistive tech. Without <code>aria-hidden</code> some readers announce both — \"Close, button, multiplication sign\" — which is the icon leaking into the label." },
+
+      { t: "note", variant: "warn", html: "<b><code>aria-hidden=\"true\"</code> must never go on anything focusable.</b> It removes the element from the accessibility tree while leaving it in the tab order, so a keyboard user lands on something that announces <i>nothing at all</i> — focus simply vanishes into silence. It is the one ARIA attribute that can break a page outright, and it is usually applied to a wrapper without noticing there is a button inside it." },
+
+      { t: "h2", n: "3", text: "Redundant ARIA" },
+      { t: "code", file: "redundant.html", code: "<!-- all four say what the element already said -->\n<nav role=\"navigation\">\n<main role=\"main\">\n<button role=\"button\">\n<input type=\"checkbox\" role=\"checkbox\">\n\n<!-- what to write -->\n<nav>\n<main>\n<button>\n<input type=\"checkbox\">", output: "Two identical sets of elements, one of them repeating itself." },
+      { t: "psoft", html: "Harmless in itself and worth deleting anyway: it is noise, it suggests the author was unsure, and copying that habit is how <code>role=\"button\"</code> ends up on a <code>&lt;div&gt;</code> where it does real damage. Module 9's elements already carry their roles." },
+
+      { t: "h2", n: "4", text: "How to check any of this" },
+      { t: "note", variant: "tip", html: "<b>Put the mouse away</b> and do the task with Tab, Enter, Space and Escape. This finds more than any tool.<br><b>Open DevTools' accessibility panel</b> and read the name and role of each control — the name is what a screen reader will say.<br><b>Run Lighthouse</b> for the mechanical checks (missing alt, low contrast, no label).<br><br><b>And know Lighthouse's limit:</b> it can tell you a button has <i>a</i> name, not whether that name makes sense. \"Button 3\" scores full marks. A score of 100 means nothing obviously mechanical is broken — it is a floor, not a pass." },
+
+      { t: "mistakes", items: [
+        { bad: "<div role=\"button\" onclick=\"go()\">Send</div>", why: "Announced as a button, still not focusable and still dead to Enter. The page now lies about what it can do, which is worse than being silent.", fix: "<button onclick=\"go()\">Send</button>" },
+        { bad: "<button><span class=\"icon-close\"></span></button>", why: "No text and no aria-label — announced as \"button\", which tells the user nothing about what it does.", fix: "<button aria-label=\"Close\"><span class=\"icon-close\" aria-hidden=\"true\"></span></button>" },
+        { bad: "<div aria-hidden=\"true\"><button>Send</button></div>", why: "The button is still in the tab order and now announces nothing. Focus lands on silence.", fix: "Never put aria-hidden on anything containing a focusable element." },
+        { bad: "<nav role=\"navigation\">", why: "The element already has that role. Harmless, and the habit leads to putting roles where they do damage.", fix: "<nav>" },
+      ] },
+
+      { t: "recap", items: [
+        "<b>First rule of ARIA: do not use ARIA</b> — a native element brings behaviour with it",
+        "ARIA changes what is <b>announced</b>, never what <b>works</b>",
+        "<code>role</code> on a <code>&lt;div&gt;</code> makes the page claim something untrue",
+        "<code>aria-label</code> names an icon-only control; <code>aria-labelledby</code> reuses text already on the page",
+        "<code>aria-hidden=\"true\"</code> for decoration, and <b>never</b> on anything focusable",
+        "Test by unplugging the mouse; Lighthouse 100 is a floor, not a pass",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the first rule of ARIA?", a: "Do not use ARIA — use the native element instead. It is close to the specification's own wording. A native button or checkbox brings the role, the keyboard behaviour and the focus handling together, whereas ARIA supplies only the announcement, so recreating a control by hand means reimplementing everything the browser already gave you." },
+        { level: "medium", q: "What is an accessible name, and where does it come from?", a: "It is what assistive technology announces when it reaches a control. It comes from the element's own text for a button, its label for a form field, its alt for an image — and from aria-label or aria-labelledby when there is no visible text, as with an icon-only button. A control with no accessible name is announced as just \"button\" or \"edit\", which tells the user nothing." },
+        { level: "hard", q: "Why can adding role=\"button\" to a div make a page worse rather than better?", a: "Because ARIA only changes what the element claims to be. The div is still not in the tab order, still does not respond to Enter or Space, and still has no disabled state — so a screen reader user is now told there is a button, tries to use it, and nothing happens. Before the role they would at least have known there was nothing there. Making it genuinely work means adding tabindex, key handlers for both Enter and Space, and the role — which is four things to maintain instead of one element." },
+      ] },
+    ],
+  },
 ];

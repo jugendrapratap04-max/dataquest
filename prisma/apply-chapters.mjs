@@ -101,6 +101,10 @@ const PLANS = {
     // Anything past the final boundary gets no chapter at all, which drops it
     // out of /book AND out of the course navigation's grouping.
     { slug: "html-entities", title: "Entities and special characters", upto: 29, summary: "How to write about HTML in HTML without the page eating it, the double-escape bug and its unmistakable symptom, and everything else you can simply type now that a page declares UTF-8." },
+    // ⚠️ LAST ENTRY: bump this `upto` with every lesson appended to the track.
+    // Anything past the final boundary gets no chapter at all, which drops it
+    // out of /book AND out of the course navigation's grouping.
+    { slug: "html-accessibility", title: "Accessibility", upto: 31, summary: "The argument every earlier module was already making, given its name — plus the part that was missing: the keyboard. Then ARIA, which is mostly a warning, because it changes what a page claims and never what it does." },
   ],
 };
 
