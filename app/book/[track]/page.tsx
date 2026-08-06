@@ -31,6 +31,15 @@ export default async function BookTrack({ params }: { params: Promise<{ track: s
     where: { slug: track },
     include: {
       chapters: {
+        // Only chapters that have something to read.
+        //
+        // A chapter plan is written for the FULL syllabus, so it names chapters
+        // whose lessons are not written yet — the microprocessor course has
+        // seven of them. In a roadmap that is honest; in the book it is seven
+        // entries that open onto an empty page, and the subject's own header
+        // counted them, so /book advertised eleven chapters and could show
+        // four. They come back on their own the moment a lesson lands in one.
+        where: { lessons: { some: {} } },
         orderBy: { order: "asc" },
         include: { lessons: { orderBy: { order: "asc" }, select: { slug: true, title: true } } },
       },

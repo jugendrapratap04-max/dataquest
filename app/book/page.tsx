@@ -12,7 +12,11 @@ export default async function BookIndex() {
     orderBy: { order: "asc" },
     include: {
       lessons: { orderBy: { order: "asc" }, select: { id: true, title: true, order: true } },
-      chapters: { select: { id: true } },
+      // Count only chapters that have a lesson in them, so this number matches
+      // what /book/<track> actually lists — a plan names chapters whose lessons
+      // are not written yet, and counting those made the index promise more
+      // than the page behind it could show.
+      chapters: { where: { lessons: { some: {} } }, select: { id: true } },
     },
   });
   const total = tracks.reduce((n, t) => n + t.lessons.length, 0);
