@@ -1043,4 +1043,87 @@ export const htmlProblems = [
       "A real `<button>` needs no `tabindex`: it is in the tab order by default.",
     ],
     "html,aria,accessibility"),
+
+  /* --------------------------------------------------- html-seo ----
+   *
+   * These two are deliberately SYNTHESIS problems. Almost every on-page SEO
+   * rule was taught in an earlier module under a different name, so the
+   * exercises pull those back together on one page rather than introducing
+   * anything new — which is also what an audit actually feels like. */
+  P("html-seo", 649, "html-seo-audit", "Audit the Page", "Medium",
+    "This recipe page is invisible to search for four reasons, and you have already learned every one of them in an earlier module.\n\n- **two `h1` elements**. One page, one subject — `Poha Chivda` is the page; `Ingredients` is a section, so it should be an `h2`\n- the photo has **no `alt`**, so image search and any visitor who cannot see it are told nothing. Describe it\n- the link reads **`click here`**, which tells a crawler nothing about the destination. Move the anchor onto the words `the full method` — keep the whole sentence\n- the recipe card is a **`div` with an onclick**, so no crawler can follow it and no keyboard can reach it. Make it a real link to `/recipes/masala-peanuts` with the text `Masala Peanuts`\n\nNothing here is new. That is the point of the exercise.",
+    "<h1>Poha Chivda</h1>\n<img src=\"/img-lab/photo.png\">\n\n<h1>Ingredients</h1>\n<p>Poha, peanuts, curry leaves.</p>\n\n<p>Click <a href=\"/method\">click here</a> for the full method.</p>\n\n<div class=\"card\" onclick=\"location='/recipes/masala-peanuts'\">Masala Peanuts</div>\n",
+    "<h1>Poha Chivda</h1>\n<img src=\"/img-lab/photo.png\" alt=\"A bowl of poha chivda\">\n\n<h2>Ingredients</h2>\n<p>Poha, peanuts, curry leaves.</p>\n\n<p>Read <a href=\"/method\">the full method</a>.</p>\n\n<a class=\"card\" href=\"/recipes/masala-peanuts\">Masala Peanuts</a>\n",
+    [
+      { find: "h1", count: 1, says: "exactly one <h1> — the page has one subject" },
+      { find: "h2", text: true, contains: "Ingredients", says: "\"Ingredients\" is a section heading, not a second page title" },
+      { find: "img", attr: "alt", notEmpty: true, says: "the photo has alt text describing it" },
+      { find: "a[href=\"/method\"]", text: true, contains: "the full method", says: "the link text names its destination instead of saying \"click here\"" },
+      { find: "a[href=\"/recipes/masala-peanuts\"]", count: 1, says: "the recipe card is a real link a crawler can follow" },
+      { find: "div", count: 0, says: "no <div> pretending to be a link" },
+    ],
+    [
+      "One h1 per page — Module 3. The second one is a section.",
+      "Link text is read out of context, by people and crawlers alike — Module 4.",
+      "Only an `<a href>` is a link. A div with an onclick is invisible to search and to the keyboard.",
+    ],
+    "html,seo,semantic"),
+
+  P("html-seo", 650, "html-crawlable-head", "The Head That Blocks Itself", "Medium",
+    "This page was launched from staging and has never appeared in search. Its head is fighting itself.\n\n- **`noindex` is still there** from staging. That alone keeps the page out of results entirely — remove the robots meta\n- there is **no canonical**, and this page is reachable both with and without tracking parameters, so search engines see duplicates. Add `<link rel=\"canonical\">` pointing at `https://mochis.example/poha-chivda`\n- the **title is `Home`**, which identifies nothing in a result, a bookmark or twenty open tabs. Make it `Poha Chivda Recipe | Mochi's Kitchen`\n- there is **no description**, so the grey line under the result is whatever Google scrapes. Add one\n\nLeave the charset, the viewport and the body alone.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Home</title>\n  <meta name=\"robots\" content=\"noindex\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n  <link rel=\"canonical\" href=\"https://mochis.example/poha-chivda\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    [
+      { find: "meta[name=\"robots\"]", count: 0, says: "the leftover noindex is gone — the page can be listed" },
+      { find: "title", text: true, contains: "Poha Chivda Recipe", says: "the title names the page, specific part first" },
+      { find: "meta[name=\"description\"]", attr: "content", notEmpty: true, says: "a description for the grey line under the result" },
+      { find: "link[rel=\"canonical\"]", attr: "href", equals: "https://mochis.example/poha-chivda", says: "a canonical naming the page's real address" },
+      { find: "meta[name=\"viewport\"]", exists: true, says: "the viewport line is untouched" },
+      { find: "body h1", text: true, contains: "Poha Chivda", says: "the page content is unchanged" },
+    ],
+    [
+      "`noindex` keeps a page out of search entirely — on a live page, delete the whole line.",
+      "The canonical is a `<link>`, not a `<meta>`.",
+      "\"Home\" identifies nothing. Put the specific part of the title first.",
+    ],
+    "html,seo,metadata"),
+
+  /* ------------------------------------------ html-structured-data ---- */
+  P("html-structured-data", 651, "html-json-ld", "Tell It What the Page Is", "Easy",
+    "This recipe page renders correctly and says nothing about **what it is**. Add a structured-data block so search engines can offer a rich result.\n\nIn the head, add a `script` with `type=\"application/ld+json\"` containing:\n\n- `\"@context\": \"https://schema.org\"`\n- `\"@type\": \"Recipe\"`\n- `\"name\": \"Poha Chivda\"` — the same name the page shows\n- `\"cookTime\": \"PT20M\"` — twenty minutes, in the machine format\n\nIt renders nothing. That is expected: the block is a note pinned to the page for machines.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <!-- a JSON-LD block describing this recipe -->\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n  <p>Ready in <time datetime=\"PT20M\">20 minutes</time>.</p>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <script type=\"application/ld+json\">\n  {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Recipe\",\n    \"name\": \"Poha Chivda\",\n    \"cookTime\": \"PT20M\"\n  }\n  </script>\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n  <p>Ready in <time datetime=\"PT20M\">20 minutes</time>.</p>\n</body>\n</html>\n",
+    [
+      { find: "script[type=\"application/ld+json\"]", count: 1, says: "one JSON-LD script block" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "schema.org", says: "its @context is schema.org" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "Recipe", says: "its @type says the page is a Recipe" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "Poha Chivda", says: "the name matches the recipe on the page" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "PT20M", says: "the cook time is in the machine format" },
+      { find: "body h1", text: true, contains: "Poha Chivda", says: "the visible page is unchanged" },
+    ],
+    [
+      "The tag is `<script type=\"application/ld+json\">` — the type is what marks it as data rather than code.",
+      "Inside it is plain JSON: keys in quotes, a comma between pairs, no comma after the last one.",
+      "`PT20M` is the ISO duration for twenty minutes — the same idea as `<time datetime>`.",
+    ],
+    "html,seo,structured-data"),
+
+  P("html-structured-data", 652, "html-json-ld-mismatch", "Data That Contradicts the Page", "Medium",
+    "This block is valid JSON and would earn a penalty rather than a rich result. Three things are wrong, and two of them describe a page that does not exist.\n\n- the **`@type` says `Article`** on a recipe page, so it asks for a rich result this page can never qualify for. It should be `Recipe`\n- the **`name` says `Masala Peanuts`** and the page is Poha Chivda. Make it match the `h1`\n- there is an **`aggregateRating`** and no rating appears anywhere on the page. Describing something the visitor cannot see is the exact pattern search engines penalise manually — delete that property\n\nThe rule in one line: **could a person reading the page verify every value in the block?**",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <script type=\"application/ld+json\">\n  {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Article\",\n    \"name\": \"Masala Peanuts\",\n    \"cookTime\": \"PT20M\",\n    \"aggregateRating\": \"4.8\"\n  }\n  </script>\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n  <p>Ready in <time datetime=\"PT20M\">20 minutes</time>.</p>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <script type=\"application/ld+json\">\n  {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Recipe\",\n    \"name\": \"Poha Chivda\",\n    \"cookTime\": \"PT20M\"\n  }\n  </script>\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n  <p>Ready in <time datetime=\"PT20M\">20 minutes</time>.</p>\n</body>\n</html>\n",
+    [
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "Recipe", says: "the @type says Recipe, which is what this page is" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "Poha Chivda", says: "the name matches the page's <h1>" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "PT20M", says: "the cook time is kept — the page shows it too" },
+      { find: "script[type=\"application/ld+json\"]", text: true, contains: "schema.org", says: "the @context is unchanged" },
+      { find: "script[type=\"application/ld+json\"]", count: 1, says: "still one block" },
+      { find: "body h1", text: true, contains: "Poha Chivda", says: "the visible page is unchanged" },
+    ],
+    [
+      "The @type is the block's main claim. A recipe page is a `Recipe`.",
+      "Every value has to be verifiable by a person reading the page.",
+      "There is no rating on this page, so no rating belongs in the block.",
+    ],
+    "html,seo,structured-data"),
 ];

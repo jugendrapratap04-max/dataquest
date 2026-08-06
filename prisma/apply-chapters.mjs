@@ -105,6 +105,10 @@ const PLANS = {
     // Anything past the final boundary gets no chapter at all, which drops it
     // out of /book AND out of the course navigation's grouping.
     { slug: "html-accessibility", title: "Accessibility", upto: 31, summary: "The argument every earlier module was already making, given its name — plus the part that was missing: the keyboard. Then ARIA, which is mostly a warning, because it changes what a page claims and never what it does." },
+    // ⚠️ LAST ENTRY: bump this `upto` with every lesson appended to the track.
+    // Anything past the final boundary gets no chapter at all, which drops it
+    // out of /book AND out of the course navigation's grouping.
+    { slug: "html-seo", title: "SEO", upto: 33, summary: "What a crawler actually reads, why blocking a page can leave it in search anyway, and structured data — the one modern SEO surface the rest of the course does not already cover by another name." },
   ],
 };
 

@@ -2824,4 +2824,180 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 13 — SEO
+   *
+   * WRITTEN TO AVOID BEING A REPEAT. Most of an SEO syllabus has already been
+   * taught here under other names: title and description (M10), canonical and
+   * robots (M10), headings (M3), alt (M5), link text (M4), main and landmarks
+   * (M9). Re-teaching those would fill two lessons and add nothing, so they
+   * appear ONCE, as an audit checklist the reader ticks off — and the lessons
+   * spend their length on the parts that are genuinely new:
+   *
+   *   - how a crawler actually works, and the robots.txt / noindex trap, which
+   *     is the highest-value thing in the module and is counter-intuitive
+   *   - that a crawler follows real <a href> links and nothing else
+   *   - sitemap.xml and robots.txt as files rather than tags
+   *   - structured data, which is the one modern SEO surface not covered by
+   *     anything else in the course
+   *
+   * JSON-LD parses identically in both engines (checked, including
+   * JSON.parse of the script's textContent), and the problems use bare
+   * `script[type="application/ld+json"]` selectors for the Module 10 reason.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-seo",
+    order: 32,
+    title: "SEO: What a Crawler Actually Reads",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Describe the four stages between a crawler arriving and a page ranking",
+        "Explain why blocking a page in <code>robots.txt</code> can leave it in search anyway",
+        "Say which links a crawler can follow, and which it cannot",
+        "Audit a page against what you already know",
+      ] },
+
+      { t: "hook",
+        q: "You do not want a page in Google, so you block it in <code>robots.txt</code>. Weeks later it is in the results — with your URL, no description, and a note that no information is available. How did a blocked page get indexed?",
+        why: "Because <code>robots.txt</code> blocks <b>crawling</b>, not <b>indexing</b>. Google found the URL from a link elsewhere, was not allowed to fetch it, and listed it anyway with nothing to show. Worse: the <code>noindex</code> you also added is <i>inside</i> the page — and a crawler that is forbidden to fetch the page can never read it." },
+
+      { t: "def",
+        term: "Crawler",
+        en: "A program that fetches pages, follows the links it finds, and reports what it saw — a very well-organised visitor, as Module 0 put it." },
+
+      { t: "h2", n: "1", text: "Crawl, render, index, rank" },
+      { t: "note", variant: "tip", html: "<b>Crawl</b> — fetch the HTML. From a sitemap, a link on another page, or a previous visit.<br><b>Render</b> — build the page, running JavaScript. This happens, and it happens <i>later</i> and on a budget.<br><b>Index</b> — store what the page is about: its title, its headings, its text, its structured data.<br><b>Rank</b> — decide where it appears for a given search. This part is not yours to control.<br><br><b>Only the first three are affected by your HTML, and that is the useful half of SEO.</b> The last one attracts all the attention and all the nonsense." },
+      { t: "p", html: "The stage worth understanding is <b>render</b>. Crawlers do run JavaScript now, so a page whose content only appears after a script has run will usually be indexed eventually. \"Eventually\" is the catch: rendering is queued and budgeted, so content that is in the HTML from the start is seen immediately and reliably. That is the whole SEO argument for server-rendered pages, and it is a timing argument rather than a capability one." },
+
+      { t: "h2", n: "2", text: "Two files, and the trap between them" },
+      { t: "syntax",
+        intro: "Neither of these is a tag. Both sit at the root of the site as real files.",
+        form: "/robots.txt\n  User-agent: *\n  Disallow: /admin/\n  Sitemap: https://mochis.example/sitemap.xml\n\n/sitemap.xml\n  a list of every URL you want found, with a last-modified date",
+        parts: [
+          { bit: "User-agent", says: "Which crawler the rules apply to. <code>*</code> means all of them." },
+          { bit: "Disallow", says: "Do not <b>fetch</b> anything under this path. It is a request, obeyed by the major search engines and by nobody else — it is not security." },
+          { bit: "Sitemap", says: "Where the sitemap lives. Worth the one line: it is how a crawler finds pages nothing links to yet." },
+        ],
+        note: "A sitemap does not make a page rank. It makes a page <b>findable</b> — which matters most for a new site, a deep page, or one nothing links to.",
+      },
+
+      { t: "note", variant: "key", html: "<b><code>robots.txt</code> stops crawling. <code>&lt;meta name=\"robots\" content=\"noindex\"&gt;</code> stops indexing. They are not alternatives and using both together breaks the second one</b> — the crawler is forbidden to fetch the page, so it never reads the <code>noindex</code> inside it.<br><br><b>To keep a page out of search: allow it to be crawled, and put <code>noindex</code> on it.</b> That sounds backwards and it is the correct answer." },
+
+      { t: "h2", n: "3", text: "A crawler follows anchors, and nothing else" },
+      { t: "p", html: "Links are how pages are discovered, and only one thing counts as a link: an <code>&lt;a&gt;</code> with an <code>href</code>. A <code>&lt;div&gt;</code> that navigates when clicked is invisible to a crawler exactly as it was invisible to the keyboard in Module 12 — the same markup mistake, failing twice." },
+
+      { t: "code", file: "links.html", code: "<!-- a crawler cannot follow this, and neither can a keyboard -->\n<div class=\"card\" onclick=\"location='/recipes/poha'\">Poha Chivda</div>\n\n<!-- discovered, followed, and its text describes the destination -->\n<a href=\"/recipes/poha\">Poha Chivda</a>", output: "Two things that look and behave the same under a mouse. One of them exists as far as search is concerned." },
+      { t: "psoft", html: "This is the pattern the whole course has: <b>one wrong element, several unrelated things broken at once.</b> The keyboard, the screen reader and the crawler all fail on the same div, for the same reason." },
+
+      { t: "h2", n: "4", text: "The audit: you already did most of this" },
+      { t: "note", variant: "tip", html: "<b>One <code>&lt;h1&gt;</code> saying what the page is</b> — Module 3.<br><b>Headings in order, describing structure</b> — Module 3.<br><b>Descriptive link text</b> — Module 4, and it is how a crawler learns what the destination is about.<br><b><code>alt</code> on every content image</b> — Module 5, and it is the only thing image search has.<br><b>A specific <code>&lt;title&gt;</code> and a real description</b> — Module 10.<br><b><code>canonical</code> when a page has several addresses</b> — Module 10.<br><b>Content in <code>&lt;main&gt;</code>, not repeated furniture</b> — Module 9.<br><br><b>That is most of on-page SEO, and none of it was taught as SEO.</b> A page built the way this course teaches is already most of the way there — which is the point worth taking, because the alternative industry does sell it back to you as a service." },
+
+      { t: "debug",
+        intro: "A staging site was launched. Six weeks later it has no search traffic at all and the homepage is not in Google. Read the two files and find it before opening the fix.",
+        code: "<!-- /robots.txt -->\nUser-agent: *\nDisallow: /\n\n<!-- every page's head -->\n<meta name=\"robots\" content=\"noindex\">",
+        symptom: "Not one page appears in search. The team added the noindex during staging and removed it from the homepage before launch — but the homepage is still missing.",
+        q: "The homepage no longer contains a noindex. So why is it still absent?",
+        fix: "<!-- /robots.txt -->\nUser-agent: *\nDisallow: /admin/\nSitemap: https://mochis.example/sitemap.xml\n\n<!-- every page's head: the tag is simply gone -->",
+        why: "<code>Disallow: /</code> blocks the <b>entire site</b> from being fetched, so the crawler has not read the homepage since launch and does not know the <code>noindex</code> was removed. The two changes fight each other: the file stops the crawl, and the tag needs a crawl to be seen. <b>Fix the file first</b> — until crawling is allowed, no change inside any page can have any effect. This is the commonest launch-day SEO failure there is, and it costs weeks because nothing about it produces an error." },
+
+      { t: "mistakes", items: [
+        { bad: "Disallow: / in robots.txt, plus noindex in the pages", why: "The crawler cannot fetch the pages, so it never reads the noindex — and may still list bare URLs it found from links elsewhere.", fix: "Allow crawling and use noindex. To hide it entirely, require a login." },
+        { bad: "\"robots.txt keeps the page private.\"", why: "It is a public file that politely asks well-behaved crawlers not to look — and it advertises the paths you wanted hidden.", fix: "Anything genuinely private needs authentication." },
+        { bad: "<div onclick=\"location='/page'\">Read more</div>", why: "Not a link. A crawler cannot follow it, so the destination may never be discovered — and a keyboard cannot reach it either.", fix: "<a href=\"/page\">Read more about poha chivda</a>" },
+        { bad: "Submitting a sitemap and expecting rankings", why: "A sitemap affects discovery, not position. It helps a new or deep page be found at all.", fix: "Treat it as plumbing: list real URLs and reference it from robots.txt." },
+      ] },
+
+      { t: "recap", items: [
+        "<b>Crawl → render → index → rank</b>; your HTML affects the first three",
+        "JavaScript is rendered, but later and on a budget — HTML is read immediately",
+        "<code>robots.txt</code> stops <b>crawling</b>; <code>noindex</code> stops <b>indexing</b>",
+        "Using both breaks the second: a blocked page is never read",
+        "Only a real <code>&lt;a href&gt;</code> is a link a crawler can follow",
+        "Most on-page SEO is the markup this course already taught",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between robots.txt and a noindex meta tag?", a: "robots.txt asks crawlers not to fetch certain paths; noindex asks them not to list the page in results. They act at different stages, so combining them is self-defeating: a page blocked in robots.txt is never fetched, so its noindex is never read, and the URL can still be listed with no content from links elsewhere. To keep a page out of search, allow the crawl and use noindex." },
+        { level: "medium", q: "Does a search engine see content that JavaScript adds after load?", a: "Usually yes — crawlers render pages and run scripts — but it happens in a second pass that is queued and budgeted rather than immediately. Content present in the HTML response is seen on the first visit and reliably; script-inserted content may be seen later, or not at all if rendering fails. That timing difference is the real SEO argument for server-rendered HTML, not a claim that crawlers cannot run JavaScript." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-structured-data",
+    order: 33,
+    title: "Structured Data: Saying What the Page Is",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Explain what structured data adds that headings and text cannot",
+        "Write a JSON-LD block for a page",
+        "Pick a schema type without guessing",
+        "State the one rule that turns structured data into a penalty",
+      ] },
+
+      { t: "hook",
+        q: "Your recipe page says \"45 minutes\" and \"4.8 out of 5\". A search result for someone else's recipe shows a star rating, a cook time and a photo, right there in the listing. Both pages contain the same facts. Why does only one of them show?",
+        why: "Because theirs said which fact was which. Your page has the characters \"45 minutes\" somewhere in a paragraph; theirs has a small block stating <code>cookTime</code>. <b>Everything so far has described a page's structure. Structured data describes its meaning</b> — that this page is a recipe, and this number is how long it takes." },
+
+      { t: "def",
+        term: "Structured data",
+        en: "A machine-readable description of what a page is about, written in a vocabulary search engines agree on." },
+
+      { t: "def",
+        term: "JSON-LD",
+        en: "The format that description is written in — a block of JSON inside a <code>&lt;script&gt;</code> tag, kept separate from the visible markup." },
+
+      { t: "syntax",
+        intro: "One script tag, four lines that always look like this, and then the facts.",
+        form: "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Recipe\",\n  \"name\": \"Poha Chivda\",\n  \"cookTime\": \"PT20M\",\n  \"recipeYield\": \"4 servings\"\n}\n</script>",
+        parts: [
+          { bit: "type=\"application/ld+json\"", says: "Marks this script as data, not code. The browser does not execute it and does not display it — it is there for machines that ask." },
+          { bit: "@context", says: "Which vocabulary. Always <code>https://schema.org</code> in practice." },
+          { bit: "@type", says: "What this page <b>is</b>: Recipe, Article, Product, Event, Organization, FAQPage. Choosing this correctly is most of the work." },
+          { bit: "name", says: "The properties themselves — the fields depend on the type, and schema.org lists them all." },
+          { bit: "cookTime", says: "\"PT20M\" is ISO 8601 duration: 20 minutes. Machine-readable for the same reason <code>&lt;time datetime&gt;</code> was in Module 3." },
+        ],
+        note: "It goes in <code>&lt;head&gt;</code> by convention and works anywhere in the document. Unlike every other element in this course it renders <b>nothing</b> — it is a note pinned to the page for machines.",
+      },
+
+      { t: "h2", n: "1", text: "What it buys you" },
+      { t: "p", html: "A <b>rich result</b>: the listing with stars, a price, a cook time, an image, an FAQ that expands. It is not a ranking boost — it is the same position looking substantially more useful than the results around it, which is often worth more than a position." },
+      { t: "note", variant: "tip", html: "<b>Article</b> — headline, author, date published.<br><b>Product</b> — price, availability, rating.<br><b>Recipe</b> — cook time, yield, ingredients, rating.<br><b>FAQPage</b> — questions and answers, expandable in the result.<br><b>Organization</b> / <b>LocalBusiness</b> — name, logo, address, opening hours.<br><br>Start with the one type that describes the page. Most pages need exactly one." },
+
+      { t: "h2", n: "2", text: "The rule that matters more than the syntax" },
+      { t: "note", variant: "warn", html: "<b>The structured data must match what a visitor actually sees.</b> A rating in the markup that appears nowhere on the page, a price that is not the price, an FAQ nobody can read — these are not clever, they are the specific thing search engines issue manual penalties for. The block describes the page; it does not get to invent it.<br><br>The honest test: <b>could a person reading the page verify every value in your JSON?</b> If not, remove the value." },
+
+      { t: "code", file: "match.html", code: "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Recipe\",\n  \"name\": \"Poha Chivda\",\n  \"cookTime\": \"PT20M\"\n}\n</script>\n\n<article>\n  <h1>Poha Chivda</h1>\n  <p>Ready in <time datetime=\"PT20M\">20 minutes</time>.</p>\n</article>", output: "A normal recipe page, plus a block stating the same two facts in a form a machine can read." },
+      { t: "psoft", html: "Both facts appear twice — once for a person, once for a machine — and they agree. That agreement is the whole contract. The <code>&lt;time&gt;</code> element from Module 3 was the same idea at the scale of one value; this is it at the scale of a page." },
+
+      { t: "h2", n: "3", text: "Checking it" },
+      { t: "p", html: "You cannot see structured data by looking at the page — it renders nothing, which is exactly the situation from Module 10's share cards. Google's <b>Rich Results Test</b> takes a URL or a block of markup and tells you which rich result the page qualifies for and which required properties are missing. Use it; the failure mode otherwise is a JSON typo that silently disables the whole block." },
+      { t: "note", variant: "key", html: "<b>One misplaced comma disables all of it.</b> JSON-LD is parsed as a single unit, so a syntax error anywhere means the entire block is discarded — and nothing on the page changes, no error appears in the console, and the rich result simply never arrives. It is the same silent-failure shape as <code>name=</code> on an Open Graph tag." },
+
+      { t: "mistakes", items: [
+        { bad: "\"aggregateRating\" with no rating visible on the page", why: "Markup that describes something the visitor cannot see. This is the specific pattern search engines penalise manually.", fix: "Only describe what is on the page." },
+        { bad: "<script type=\"text/javascript\"> around JSON-LD", why: "The wrong type. The browser tries to execute it as code and no crawler recognises it as data.", fix: "<script type=\"application/ld+json\">" },
+        { bad: "\"@type\": \"Article\" — on a product page", why: "The type is the main claim in the block. The wrong one asks for a rich result the page can never qualify for.", fix: "\"@type\": \"Product\"" },
+        { bad: "A trailing comma after the last property", why: "Invalid JSON, so the whole block is discarded — silently, with nothing on the page to show for it.", fix: "Validate with the Rich Results Test before shipping." },
+      ] },
+
+      { t: "recap", items: [
+        "Structured data says what a page <b>is</b>, where headings said what it <b>contains</b>",
+        "JSON-LD lives in <code>&lt;script type=\"application/ld+json\"&gt;</code> and renders nothing",
+        "<code>@context</code> is always schema.org; <code>@type</code> is the real decision",
+        "It earns a <b>rich result</b>, not a ranking boost",
+        "<b>Every value must match what a visitor can see</b> — the mismatch is what gets penalised",
+        "One JSON typo silently discards the entire block; test it",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is structured data for?", a: "It tells search engines what a page is and what its facts mean — that this is a recipe, that this number is the cook time, that this is the price. Headings and paragraphs describe how a page is organised; structured data describes what it is about. The payoff is a rich result: stars, prices, cook times or FAQs shown in the listing itself." },
+        { level: "medium", q: "Does adding structured data improve rankings?", a: "Not directly. It makes a result eligible for a richer presentation at whatever position it already has, and a listing with a rating and an image typically earns more clicks than the plain ones around it. The real risk is in the other direction: describing values the visitor cannot see on the page is what search engines issue manual penalties for." },
+      ] },
+    ],
+  },
 ];
