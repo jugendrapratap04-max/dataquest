@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { pathToFileURL } from "url";
 import { SYNTAX } from "./syntax-blocks.mjs";
+import { htmlTrack, htmlLessons } from "./html-lessons.mjs";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
@@ -17,7 +18,15 @@ const hashPassword = (pw) => {
 /* ------------------------------------------------------------------ */
 /* Tracks (the 9-phase skill sheet)                                    */
 /* ------------------------------------------------------------------ */
+/* The HTML course lives in its own files, not in here.
+ *
+ * This file is 1.9 MB and that is the single biggest obstacle to working in
+ * this repo — two sessions cannot edit it without colliding, and splitting it
+ * is on the list in AGENTS.md. A new course is the one chance to not make it
+ * worse, so `html-lessons.mjs` and `html-problems.mjs` are imported rather
+ * than pasted, and every course added after this one should follow suit. */
 export const tracks = [
+  htmlTrack,
   { slug: "python", order: 1, title: "Programming Foundations — Python", subtitle: "the base of everything", icon: "Py", weeks: "~4 weeks", level: "Beginner",
     whyText: "Python is the universal language of data science. Get this solid and everything after it comes easier.",
     milestone: "CLI quiz / expense tracker app", toolsCsv: "Python 3,Jupyter,VS Code",
@@ -13089,6 +13098,7 @@ export const trackLessons = {
   viz: vizLessons, sql: sqlLessons, bi: biLessons,
   ml: mlLessons, dl: dlLessons, deploy: deployLessons,
   microprocessor: mpLessons,
+  html: htmlLessons,
 };
 
 // Only seed when run directly (`node prisma/seed.mjs`) — importing this file to

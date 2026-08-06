@@ -7,6 +7,7 @@
 // Add a new content module here and it flows into both this and the full seed.
 
 import { PrismaClient } from "@prisma/client";
+import { htmlProblems } from "./html-problems.mjs";
 import { sqlProblems } from "./sql-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
@@ -20,6 +21,7 @@ import { trackLessons, extraProblems } from "./seed.mjs";
 const prisma = new PrismaClient();
 
 const SETS = [
+  ["HTML", htmlProblems],
   ["SQL", sqlProblems],
   ["pandas/numpy", pandasProblems],
   ["viz/EDA", vizProblems],

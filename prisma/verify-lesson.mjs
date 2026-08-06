@@ -190,6 +190,8 @@ const run = runAsm ?? runSql ?? runPyodide ?? runPy;
 const cases = [];
 /** Blocks deliberately not run, reported at the end so they stay visible. */
 const skipped = [];
+/** Nothing in an HTML lesson is executable — see the note in the loop below. */
+const isHtml = track === "html";
 for (const b of lesson.content) {
   /* Shell blocks have no runner, so they are skipped rather than failed.
    *
@@ -200,7 +202,18 @@ for (const b of lesson.content) {
    *
    * Skipped loudly, not silently: an unchecked block should show up as one, or
    * this becomes a way for real snippets to escape verification unnoticed. */
-  if (b.t === "code" && /\.(sh|bash|zsh|ps1)$/.test(b.file ?? "")) {
+  /* An HTML lesson has no executable snippet at all.
+   *
+   * Its `code`, `drills`, `worked` and `debug` blocks are markup, and markup
+   * has no output to diff — which is the whole reason HTML practice is graded
+   * by DOM assertions instead (lib/html-check.ts). Handing any of it to python
+   * reports a SyntaxError on content that is perfectly correct, which is how
+   * deploy-git spent its whole life "failing". */
+  if (isHtml) {
+    if (b.t === "code") skipped.push(b.file ?? "snippet");
+    continue;
+  }
+  if (b.t === "code" && /\.(sh|bash|zsh|ps1|html|htm|css)$/.test(b.file ?? "")) {
     skipped.push(b.file);
     continue;
   }
