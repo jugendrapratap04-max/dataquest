@@ -799,7 +799,13 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .guest-banner p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; max-width:62ch; }
 .gb-cta { display:flex; gap:10px; flex-wrap:wrap; }
 
-.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:12px; padding:13px 20px; background:var(--panel); cursor:pointer; } .lnav a.next { text-align:right; } .lnav .dir { font-family:var(--mono); font-size:11px; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { opacity:.5; pointer-events:none; }
+.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:12px; padding:13px 20px; background:var(--panel); cursor:pointer; } .lnav a.next { text-align:right; } .lnav .dir { font-family:var(--mono); font-size:11px; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { pointer-events:none; background:var(--panel-2); border-style:dashed; }
+/* Disabled state without opacity. Fading text is the usual way to show it and
+   the wrong one: it multiplies the contrast down — this link measured 2.34:1,
+   unreadable — while the reader still needs to know which lesson is not there.
+   A dashed border and a recessed background say inactive and leave the words
+   legible. */
+.lnav a.dis .ttl { color:var(--ink-faint); font-weight:500; }
 .learn-side { position:sticky; top:20px; display:flex; flex-direction:column; gap:18px; }
 .llist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; } .llist li { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:8px; font-size:13px; cursor:pointer; }
 .llist li .lic { width:19px; height:19px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:10px; font-family:var(--mono); border:1.5px solid var(--line); color:var(--ink-faint); }
