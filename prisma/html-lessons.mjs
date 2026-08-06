@@ -2459,4 +2459,183 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 11 — ENTITIES AND SPECIAL CHARACTERS
+   *
+   * A small module that removes a specific kind of stuck. Every beginner who
+   * tries to write ABOUT html on a page hits it — the tag vanishes, or the
+   * page fills with &amp;lt; — and neither symptom explains itself.
+   *
+   * ⚠️ TWO THINGS IN HERE CANNOT BE GRADED, and both were checked before the
+   * problems were written rather than after:
+   *
+   *   &nbsp; — the grader normalises text with /\s+/g, and JavaScript's \s
+   *   MATCHES U+00A0. So "1&nbsp;000" and "1 000" are identical by the time any
+   *   assertion sees them. Measured in both engines.
+   *
+   *   & versus &amp; inside an href — the parser decodes the entity, and a bare
+   *   ampersand stays an ampersand, so both spellings produce exactly "?a=1&b=2"
+   *   in the DOM. Nothing downstream can tell them apart.
+   *
+   * Both are taught here and neither is set as an exercise. This is the same
+   * rule Module 2 wrote down: only set an exercise on something that changes
+   * the parsed tree.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-entities",
+    order: 28,
+    title: "Characters That Mean Something Else",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Write about HTML <b>in</b> HTML without the page eating it",
+        "Name the characters that must be escaped, and say why each one",
+        "Read a numeric entity as well as a named one",
+        "Recognise the double-escape bug on sight",
+      ] },
+
+      { t: "hook",
+        q: "You write a paragraph explaining the paragraph element: <code>Use the &lt;p&gt; element for text.</code> The page shows \"Use the\" and then <b>nothing</b> — the rest of the sentence has disappeared. Where did it go?",
+        why: "Nowhere. The browser read <code>&lt;p&gt;</code> as the start of a paragraph, exactly as you told it to, and \"element for text\" is now inside that new paragraph. You meant to show the characters; the browser took them as markup — and it has no way to know the difference unless you say so." },
+
+      { t: "def",
+        term: "Character entity",
+        en: "A code that stands in for a character the browser would otherwise read as markup — or one that is hard to type." },
+
+      { t: "analogy",
+        concept: "escaping",
+        real: "quoting someone who is shouting",
+        html: "Writing <i>she said \"stop\"</i> needs the quotation marks to be visibly not yours. Programming languages have the same problem and solve it the same way: some characters do a job, so when you mean the character itself rather than the job, you have to mark it. <code>&amp;lt;</code> is you saying \"a less-than sign, not the start of a tag\"." },
+
+      { t: "syntax",
+        intro: "Every entity has the same three parts, and the semicolon is not optional.",
+        form: "&name;      &lt;      less-than sign\n&#number;   &#60;     the same character, by its number\n&#xhex;     &#x3C;     the same number, in hexadecimal",
+        parts: [
+          { bit: "&", says: "Starts an entity. Which is exactly why the ampersand itself has to be escaped — it is the character that begins the escape." },
+          { bit: ";", says: "Ends it. Leave it off and browsers often still guess correctly, which is worse than failing: the habit survives until the one case where the guess is wrong." },
+          { bit: "&#number;", says: "The character's Unicode number in decimal. Works for every character there is, including ones with no name." },
+          { bit: "&#xhex;", says: "The same number written in hexadecimal — the form you will see in specifications and CSS." },
+        ],
+        note: "Named entities exist for a few hundred characters; numeric ones exist for all of them. Prefer the name when there is one — <code>&amp;copy;</code> is readable and <code>&amp;#169;</code> is a lookup.",
+      },
+
+      { t: "h2", n: "1", text: "The five that matter" },
+      { t: "note", variant: "key", html: "<b><code>&amp;lt;</code></b> → <b>&lt;</b> — starts a tag, so it must be escaped in text.<br><b><code>&amp;gt;</code></b> → <b>&gt;</b> — ends one. Less dangerous alone, escaped for symmetry and safety.<br><b><code>&amp;amp;</code></b> → <b>&amp;</b> — starts an entity, so it must escape itself.<br><b><code>&amp;quot;</code></b> → <b>\"</b> — needed <i>inside</i> a double-quoted attribute value.<br><b><code>&amp;apos;</code></b> → <b>'</b> — the same, inside a single-quoted one.<br><br>In ordinary text you only really need the first three. In attribute values you need whichever quote you used to open the value." },
+
+      { t: "code", file: "escaped.html", code: "<p>Use the &lt;p&gt; element for text.</p>\n<p>Tom &amp; Jerry</p>\n<p>5 &lt; 10 and 10 &gt; 5</p>\n<a href=\"/x\" title=\"She said &quot;hello&quot;\">link</a>", output: "Use the <p> element for text. / Tom & Jerry / 5 < 10 and 10 > 5 / a link whose tooltip contains real quotation marks." },
+      { t: "psoft", html: "Press <b>Try it yourself</b> and change the first line's <code>&amp;lt;p&amp;gt;</code> back to a plain <code>&lt;p&gt;</code>. The sentence breaks apart in the preview exactly as the hook described — which is the fastest way to believe any of this." },
+
+      { t: "h2", n: "2", text: "Showing code on a page" },
+      { t: "p", html: "This is where escaping stops being trivia. Every tutorial, every documentation page, every blog post with a snippet in it — including every code block in this course — is markup <b>about</b> markup, and all of it is escaped." },
+      { t: "code", file: "docs.html", code: "<pre><code>&lt;h1&gt;Title&lt;/h1&gt;\n&lt;p&gt;A paragraph&lt;/p&gt;</code></pre>", output: "A code block showing the two tags as text, on two lines." },
+      { t: "psoft", html: "<code>&lt;pre&gt;</code> preserves the line break and <code>&lt;code&gt;</code> says it is code — both from Module 3 — and the escaping is what stops the browser rendering the example instead of displaying it. Three separate ideas, and a code block needs all three." },
+
+      { t: "h2", n: "3", text: "The double-escape bug" },
+      { t: "p", html: "The mirror-image mistake, and the more confusing one: the page displays <code>&amp;lt;p&amp;gt;</code> literally, entity and all. It means the ampersand itself got escaped — the source says <code>&amp;amp;lt;</code>, so the browser correctly renders an ampersand followed by <code>lt;</code>." },
+      { t: "note", variant: "warn", html: "<b>Escaped text that is escaped again is the commonest bug in any system that generates HTML.</b> A template escapes the value, then a second layer escapes it once more, and the page fills with <code>&amp;amp;</code>. The symptom is unmistakable once you have seen it: <b>visible entity codes on the page</b>. Working out which layer did it twice is the actual job." },
+
+      { t: "debug",
+        intro: "Two lines of a tutorial page, each broken the opposite way. Work out both before opening the fix.",
+        code: "<p>Use the <strong> element for importance.</p>\n<p>To show a tag, write &amp;lt;p&amp;gt; in your source.</p>",
+        symptom: "The first line reads \"Use the\" and then the rest of the page turns bold. The second line displays &lt;p&gt; on screen, entity codes and all, instead of showing a tag.",
+        q: "One line escaped nothing and one escaped twice. Which is which?",
+        fix: "<p>Use the &lt;strong&gt; element for importance.</p>\n<p>To show a tag, write &lt;p&gt; in your source.</p>",
+        why: "The first line typed a real tag where it meant to show one, so the browser opened a <code>&lt;strong&gt;</code> that nothing ever closes — and everything after it inherits the bold. The second escaped the ampersand of an entity that was already correct, so <code>&amp;amp;lt;</code> renders as the four characters <code>&amp;lt;</code>. <b>Both look like typos and neither is: each one is a decision about whether these characters are markup or content, made wrongly in opposite directions.</b>" },
+
+      { t: "drills", intro: "Write the source that would display each of these.", items: [
+        { task: "The text: 5 < 10", code: "<p>5 &lt; 10</p>" },
+        { task: "The text: Tom & Jerry", code: "<p>Tom &amp; Jerry</p>" },
+        { task: "The text: <br> is an empty element", code: "<p>&lt;br&gt; is an empty element</p>" },
+        { task: "A title attribute containing double quotes.", code: "<a href=\"/x\" title=\"She said &quot;hi&quot;\">link</a>" },
+      ] },
+
+      { t: "mistakes", items: [
+        { bad: "<p>Use the <p> element</p>", why: "A real tag where the text was meant. The browser opens a paragraph and the sentence falls apart.", fix: "<p>Use the &lt;p&gt; element</p>" },
+        { bad: "<p>Tom & Jerry &amp; friends</p>", why: "Inconsistent, and the bare ampersand only works because browsers are forgiving. The moment it is followed by a word that looks like an entity name, it stops.", fix: "<p>Tom &amp; Jerry &amp; friends</p>" },
+        { bad: "&amp;lt;p&amp;gt; — meaning to show <p>", why: "Escaped twice. The page displays the entity code instead of the character.", fix: "&lt;p&gt;" },
+        { bad: "&lt p &gt", why: "No semicolons. Browsers guess, sometimes correctly, and the habit fails on the day the guess is wrong.", fix: "&lt;p&gt;" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>&amp;lt;</code> <code>&amp;gt;</code> <code>&amp;amp;</code> are the three that matter in text",
+        "<code>&amp;quot;</code> / <code>&amp;apos;</code> matter inside an attribute value",
+        "<code>&amp;</code> must escape itself, because it is what starts an entity",
+        "Named for readability, numeric (<code>&amp;#60;</code>) when there is no name",
+        "The semicolon is part of the entity — always write it",
+        "Entity codes <b>visible on the page</b> means something escaped twice",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "Why do you need character entities in HTML?", a: "Because a few characters already have a job. A less-than sign starts a tag and an ampersand starts an entity, so writing them literally in text makes the browser act on them instead of displaying them. &lt; and &amp; say \"I mean the character, not the job\" — which is why every page that shows code on screen is escaped." },
+        { level: "medium", q: "A page is displaying &amp;lt;p&amp;gt; on screen instead of a tag. What happened?", a: "Something escaped the text twice. The source contains &amp;amp;lt;, so the browser renders an ampersand followed by lt; — exactly what it was told. It is nearly always two layers of a system both escaping the same value: a template escaping output that was already escaped when it was stored." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-symbols",
+    order: 29,
+    title: "Symbols, Spaces and Emoji",
+    minutes: 14,
+    content: [
+      { t: "objectives", items: [
+        "Put ©, ₹, → and — on a page the modern way",
+        "Use a non-breaking space where it belongs, and nowhere else",
+        "Choose the right dash and the right quotation marks",
+        "Know what a screen reader does with a row of emoji",
+      ] },
+
+      { t: "hook",
+        q: "Every list of HTML entities has hundreds of rows — <code>&amp;copy;</code>, <code>&amp;rarr;</code>, <code>&amp;hellip;</code>, page after page. How many of them do you actually need to memorise in 2026?",
+        why: "About five, and they are the ones from the last lesson. Everything else you can simply <b>type</b> — because Module 2's <code>&lt;meta charset=\"UTF-8\"&gt;</code> means your file can hold any character there is. Those hundreds of rows are a survival from when it could not." },
+
+      { t: "def",
+        term: "UTF-8",
+        en: "The character encoding that covers every writing system, symbol and emoji in one scheme — and what your pages already declare." },
+
+      { t: "h2", n: "1", text: "Type it, do not encode it" },
+      { t: "p", html: "With UTF-8 declared, <code>©</code> in your file is <code>©</code> on the page. The entity <code>&amp;copy;</code> produces exactly the same character and is harder to read in the source. The rule is simple: <b>escape the characters that are markup; type everything else.</b>" },
+
+      { t: "code", file: "symbols.html", code: "<p>&copy; 2026 Mochi's Kitchen</p>\n<p>Price: ₹499 &mdash; down from ₹699</p>\n<p>Delhi &rarr; Mumbai &times; 2 flights</p>\n\n<p>© 2026 Mochi's Kitchen</p>\n<p>Price: ₹499 — down from ₹699</p>\n<p>Delhi → Mumbai × 2 flights</p>", output: "Two identical sets of three lines. The second set is what you would write today." },
+      { t: "psoft", html: "Both halves render the same. The entities are worth <b>recognising</b> — you will meet them in code written by other people and in older documents — and worth <b>writing</b> only when a character is invisible or ambiguous, which is the next section." },
+
+      { t: "h2", n: "2", text: "The space that refuses to break" },
+      { t: "p", html: "<code>&amp;nbsp;</code> is a space with two special properties: a line will never wrap at it, and it never collapses. Module 3's rule was that HTML squashes any run of whitespace into one space — this is the exception, and it is the one entity you still write by hand every week." },
+
+      { t: "note", variant: "tip", html: "<b>Use it where a break would look wrong or read wrong:</b><br>• <code>10&amp;nbsp;km</code> — the number and its unit belong on one line<br>• <code>₹&amp;nbsp;500</code>, <code>Mr&amp;nbsp;Sharma</code>, <code>Figure&amp;nbsp;3</code><br>• between the last two words of a heading, so one word cannot be left alone on its own line" },
+      { t: "note", variant: "warn", html: "<b>And do not use it for spacing.</b> Five <code>&amp;nbsp;</code>s to push something across is the same mistake as three <code>&lt;br&gt;</code>s to push something down: it puts fake content in the text, a screen reader reads through it, and CSS does the job properly in one line. <b>Spacing is layout, not content</b> — the same sentence Module 3 ended on." },
+
+      { t: "h2", n: "3", text: "Dashes and quotation marks" },
+      { t: "note", variant: "tip", html: "<b>Hyphen -</b> joins words: <code>well-known</code>.<br><b>En dash –</b> spans a range: <code>2020–2026</code>, <code>Mumbai–Delhi</code>.<br><b>Em dash —</b> breaks a sentence — like this.<br><b>Curly quotes “ ” ‘ ’</b> are the typographic ones; the straight <code>\"</code> and <code>'</code> on your keyboard are a typewriter compromise nobody has to keep.<br><br>None of these need entities. Type them, or let your editor do it." },
+      { t: "p", html: "One caution worth the sentence: <b>never let curly quotes into code</b>. An editor that helpfully converts <code>\"text\"</code> to <code>“text”</code> inside an attribute produces markup that does not work, and the character looks almost identical at normal size — which is a genuinely miserable half hour." },
+
+      { t: "h2", n: "4", text: "Emoji are text, and they are read aloud" },
+      { t: "p", html: "An emoji is an ordinary character, so it works with no entity and no image. What beginners do not expect is that each one has a <b>name</b>, and a screen reader speaks it: 🎉 is announced as \"party popper\", 🔥 as \"fire\"." },
+      { t: "note", variant: "key", html: "<b>Five emoji in a row are read as five names, in full, one after another.</b> \"Fire fire fire fire fire.\" Used as punctuation that is noise; used as content — a 🎉 next to a result — it is information, and it needs no extra markup. The test is the same as everywhere else in this course: <b>would you want this read out?</b>" },
+
+      { t: "mistakes", items: [
+        { bad: "<p>Total:&nbsp;&nbsp;&nbsp;&nbsp;₹500</p>", why: "Non-breaking spaces used as layout. It is fake content in the text, and a screen reader reads through it.", fix: "<p>Total: <span class=\"amount\">₹500</span></p> with CSS spacing." },
+        { bad: "<p>The flight is 500 km long.</p>", why: "Not wrong, and \"500\" can end a line with \"km\" starting the next one.", fix: "<p>The flight is 500&nbsp;km long.</p>" },
+        { bad: "<a href=“/about”>About</a>", why: "Curly quotes in markup. They are not quotation marks to the parser, so the attribute is broken — and at normal size the difference is nearly invisible.", fix: "<a href=\"/about\">About</a>" },
+        { bad: "<h2>New! 🔥🔥🔥 Sale 🎉🎉</h2>", why: "Announced as \"fire fire fire party popper party popper\". Emoji as punctuation becomes noise the moment it is read rather than seen.", fix: "<h2>Sale 🎉</h2>" },
+      ] },
+
+      { t: "recap", items: [
+        "With UTF-8 you can <b>type</b> ©, ₹, →, — directly; entities are for markup characters",
+        "Recognise the named ones — you will read them in other people's code",
+        "<code>&amp;nbsp;</code> never wraps and never collapses: <code>10&amp;nbsp;km</code>, <code>Mr&amp;nbsp;Sharma</code>",
+        "Never use <code>&amp;nbsp;</code> for spacing — that is CSS's job",
+        "Hyphen joins, en dash spans, em dash interrupts",
+        "Curly quotes belong in prose and <b>never</b> in markup",
+        "Emoji are read aloud by name — one carries meaning, five are noise",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "When do you actually need HTML entities today?", a: "For the characters that are markup — &lt;, &gt; and &amp; — and inside an attribute for whichever quote opened it. Everything else can be typed directly, because the page declares UTF-8 and the file can hold any character. The long entity tables are a survival from when encodings could not be relied on." },
+        { level: "medium", q: "What is a non-breaking space for?", a: "A space that will not wrap and will not collapse, so two things stay on the same line: a number and its unit, a title and a name, a figure and its number. It is the one entity still written by hand routinely. What it is not for is spacing — pushing content across with several of them puts fake content into the text, and a screen reader reads straight through it." },
+      ] },
+    ],
+  },
 ];

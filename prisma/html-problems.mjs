@@ -853,4 +853,111 @@ export const htmlProblems = [
       "Only the attribute names and the image path change; every content value stays.",
     ],
     "html,metadata,debugging"),
+
+  /* ---------------------------------------------- html-entities ----
+   *
+   * ⚠️ TWO THINGS FROM THIS MODULE ARE UNGRADEABLE, checked before writing:
+   *
+   *   &nbsp; — `norm()` collapses whitespace with /\s+/g and JavaScript's \s
+   *   MATCHES U+00A0, so "1&nbsp;000" and "1 000" are the same string by the
+   *   time any assertion sees them. Confirmed in both engines.
+   *
+   *   & versus &amp; inside an href — the parser decodes the entity and leaves
+   *   a bare ampersand alone, so both spellings give exactly "?a=1&b=2".
+   *
+   * Both are taught in the lessons and neither is set as an exercise. What IS
+   * gradeable is the escaping itself, because it genuinely changes the tree: an
+   * unescaped <strong> becomes an ELEMENT, and a double-escaped &amp;lt; shows
+   * up in textContent as the literal characters "&lt;".
+   *
+   * ⓘ A BENIGN ENGINE DIFFERENCE, recorded so nobody re-investigates it. An
+   * UNCLOSED inline tag in a starter counts 2 in the browser and 1 in linkedom
+   * — the browser reopens it in the following paragraph (the HTML spec's
+   * adoption-agency recovery) and linkedom does not. The COUNTS differ; the
+   * VERDICTS cannot, because the assertion is `count: 0` and both engines
+   * produce a non-zero number from the same unescaped tag. That is the line
+   * worth holding when a parity check reports a mismatch: ask whether the
+   * verdict can differ, not whether the numbers do. */
+  P("html-entities", 641, "html-escape-text", "Writing About HTML, in HTML", "Easy",
+    "This tutorial page is trying to explain two elements and the browser keeps eating them: the tags were typed literally, so they became **real elements** instead of text on the page.\n\nEscape them so the reader actually sees the tags:\n\n- the first paragraph should display `Use the <p> element for text.`\n- the second should display `Wrap important words in <strong>.`\n- the third has a bare ampersand in `Tom & Jerry` — escape that too\n\nNo tag should survive as a real element inside those paragraphs. When it is right, the page shows the angle brackets as characters.",
+    "<h2>Common elements</h2>\n<p>Use the <p> element for text.</p>\n<p>Wrap important words in <strong>.</p>\n<p>Tom & Jerry</p>\n",
+    "<h2>Common elements</h2>\n<p>Use the &lt;p&gt; element for text.</p>\n<p>Wrap important words in &lt;strong&gt;.</p>\n<p>Tom &amp; Jerry</p>\n",
+    [
+      { find: "p", count: 3, says: "exactly three paragraphs — no stray <p> opened by the text" },
+      { find: "strong", count: 0, says: "no real <strong> element: it should be text, not markup" },
+      { find: "p", text: true, contains: "<p> element", says: "the first paragraph shows the characters <p>" },
+      { find: "p", text: true, contains: "<strong>", says: "the second shows the characters <strong>" },
+      { find: "p", text: true, contains: "Tom & Jerry", says: "the ampersand displays as itself" },
+      { find: "h2", text: true, contains: "Common elements", says: "the heading is unchanged" },
+    ],
+    [
+      "`&lt;` is a less-than sign, `&gt;` is a greater-than sign — and both need the semicolon.",
+      "`&amp;` for the ampersand: it has to escape itself, because it is what starts an entity.",
+      "If a tag is still a real element, the browser is acting on it instead of showing it.",
+    ],
+    "html,entities"),
+
+  P("html-entities", 642, "html-double-escape", "Escaped Twice, and Not at All", "Medium",
+    "Two lines, broken in **opposite** directions — this is the pair that confuses everyone once.\n\n- the first line typed a real `<em>` where it meant to show one, so the browser opened an emphasis element and the rest of the page is now italic. It should **display** `Use the <em> element.`\n- the second line escaped the ampersand of an entity that was already correct, so the page shows `&lt;p&gt;` on screen — entity codes and all. It should display `Write <p> in your source.`\n\nFix both. One needs escaping added; the other needs escaping removed.",
+    "<h2>Two mistakes</h2>\n<p>Use the <em> element.</p>\n<p>Write &amp;lt;p&amp;gt; in your source.</p>\n",
+    "<h2>Two mistakes</h2>\n<p>Use the &lt;em&gt; element.</p>\n<p>Write &lt;p&gt; in your source.</p>\n",
+    [
+      { find: "em", count: 0, says: "no real <em> element — the first line shows the tag as text" },
+      { find: "p", text: true, contains: "<em> element", says: "the first paragraph displays the characters <em>" },
+      { find: "p", text: true, contains: "Write <p> in your source", says: "the second displays <p>, not the entity code" },
+      { find: "p", count: 2, says: "still two paragraphs" },
+      { find: "h2", text: true, contains: "Two mistakes", says: "the heading is unchanged" },
+    ],
+    [
+      "The first line escaped nothing; the second escaped one time too many.",
+      "`&amp;lt;` displays as the four characters `&lt;`. You want `&lt;`, which displays as `<`.",
+      "Visible entity codes on a page always mean something escaped twice.",
+    ],
+    "html,entities,debugging"),
+
+  /* ----------------------------------------------- html-symbols ---- */
+  /* NOTE FOR ANYONE ADDING A SYMBOLS PROBLEM.
+   *
+   * "Replace &copy; with ©" is the obvious exercise here and it CANNOT BE SET.
+   * An entity and its character are the same character once parsed, so the
+   * starter passes every assertion the solution does — it was written, caught
+   * by the starter-must-fail check, and replaced by this one. The gradeable
+   * half of the symbols lesson is the two places where a character genuinely
+   * changes the tree: a curly quote breaks an attribute, and emoji are text
+   * that can be counted. */
+  P("html-symbols", 643, "html-smart-quotes", "The Quotes That Are Not Quotes", "Medium",
+    "Two problems, and the first one is the most miserable half hour in web development.\n\n- an editor \"helpfully\" turned the link's straight quotes into **curly** ones: `href=“/about”`. They look almost identical at normal size and they are not quotation marks to the parser, so the attribute is broken and the link goes nowhere. It should point at `/about`\n- the heading is padded with emoji as punctuation. A screen reader announces every one by name — \"fire fire fire party popper party popper\" — so cut it down to the single `🎉` that carries meaning, leaving the heading reading `Sale 🎉`\n\nThe link text stays `About`.",
+    "<h2>New! 🔥🔥🔥 Sale 🎉🎉</h2>\n<a href=“/about”>About</a>\n",
+    "<h2>Sale 🎉</h2>\n<a href=\"/about\">About</a>\n",
+    [
+      { find: "a[href=\"/about\"]", count: 1, says: "the link's href is a real, straight-quoted /about" },
+      { find: "a", text: true, contains: "About", says: "the link text is unchanged" },
+      { find: "h2", text: true, equals: "Sale 🎉", says: "the heading reads \"Sale 🎉\" — one emoji, not five" },
+      { find: "h2", count: 1, says: "still one heading" },
+    ],
+    [
+      "Curly quotes “ ” are not quotation marks to a parser. Retype them as straight `\"`.",
+      "The broken attribute is why the link matches nothing — check what its href actually contains.",
+      "Emoji are read aloud by name, so a row of them becomes a row of names.",
+    ],
+    "html,symbols,accessibility"),
+
+  P("html-symbols", 644, "html-code-block-escaped", "A Code Block That Shows Its Code", "Medium",
+    "A documentation page needs to **display** this exact markup to the reader, on two lines, with the indentation kept:\n\n```\n<h1>Title</h1>\n<p>A paragraph</p>\n```\n\nThree things have to be true at once, and each comes from a different module:\n\n- the block preserves its line break → the element from Module 3 that keeps whitespace exactly\n- it is marked as code → the element that says so, inside that one\n- the tags are **escaped**, or the browser will render them instead of showing them\n\nWrite it under the existing heading. If a real `h1` appears in your page, the escaping is missing.",
+    "<h2>Your first page</h2>\n\n<!-- a code block that DISPLAYS the two tags -->\n",
+    "<h2>Your first page</h2>\n\n<pre><code>&lt;h1&gt;Title&lt;/h1&gt;\n&lt;p&gt;A paragraph&lt;/p&gt;</code></pre>\n",
+    [
+      { find: "pre code", exists: true, says: "a <code> inside a <pre> — the pair a code block needs" },
+      { find: "pre code", text: true, contains: "<h1>Title</h1>", says: "the block displays the h1 line as text" },
+      { find: "pre code", text: true, contains: "<p>A paragraph</p>", says: "and the p line too" },
+      { find: "h1", count: 0, says: "no real <h1> on the page — the tag is shown, not rendered" },
+      { find: "pre p", count: 0, says: "and no real paragraph either" },
+      { find: "h2", text: true, contains: "Your first page", says: "the heading above it is unchanged" },
+    ],
+    [
+      "`pre` keeps the shape, `code` says what it is — neither alone is right.",
+      "Every `<` becomes `&lt;` and every `>` becomes `&gt;`, closing tags included.",
+      "Do not indent the lines inside `pre` to match your HTML — that indentation would show.",
+    ],
+    "html,entities,code"),
 ];
