@@ -1417,4 +1417,186 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 6 — LISTS
+   *
+   * Three elements that look trivial and are not. The through-line: a list is a
+   * COUNT that gets announced ("list, four items") before its contents, which is
+   * why faking one with paragraphs and bullet characters loses information no
+   * amount of CSS puts back.
+   *
+   * THE NESTING EXERCISE IS GRADEABLE HERE, and that is worth writing down
+   * because Module 2's note says the opposite about markup tidying. A nested
+   * list put in the wrong place — a <ul> as a sibling of <li> rather than
+   * inside one — SURVIVES parsing as `ul > ul` in both linkedom and the
+   * browser's DOMParser. Verified in both before the problem was written. The
+   * general rule stands (crossed tags and missing closers are repaired away);
+   * this particular error changes the tree, so it can be checked.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-lists",
+    order: 17,
+    title: "Lists: When Order Means Something",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Choose between <code>ul</code> and <code>ol</code> for a reason you can state",
+        "Nest a list inside another one — in the right place",
+        "Make an ordered list start where you need it to",
+        "Stop faking lists with paragraphs and dashes",
+      ] },
+
+      { t: "hook",
+        q: "A screen reader reaches your list and announces \"list, four items\" before reading any of them. Now write those same four things as four paragraphs starting with a dash. What did the listener just lose?",
+        why: "The count, and the boundary. They no longer know how many there are, when the list ends, or that it was a list at all — and they cannot skip past it, because nothing told them it was one thing. The bullets on screen looked the same the whole time." },
+
+      { t: "def",
+        term: "List",
+        en: "A group of related items marked as a group, so that everything reading the page knows how many there are and where the group ends." },
+
+      { t: "analogy",
+        concept: "ul vs ol",
+        real: "a shopping list vs a recipe",
+        html: "Shuffle a shopping list and nothing is lost — you needed all of it anyway. Shuffle a recipe and you are icing a cake before baking it. That is the entire test: <b>if reordering the items changes the meaning, it is ordered</b>. Bullets and numbers are only how the two look." },
+
+      { t: "syntax",
+        intro: "Two containers, one item element between them.",
+        form: "<ul>\n  <li>Onions</li>\n  <li>Rice</li>\n</ul>\n\n<ol>\n  <li>Heat the oil</li>\n  <li>Add the onions</li>\n</ol>",
+        parts: [
+          { bit: "<ul>", says: "Unordered list. The items belong together and their sequence carries no meaning." },
+          { bit: "<ol>", says: "Ordered list. The sequence <b>is</b> information — steps, rankings, anything numbered." },
+          { bit: "<li>", says: "One list item. The only element allowed directly inside either container — and it may hold anything: text, a link, a paragraph, another list." },
+        ],
+        note: "The bullet and the number are the browser's defaults, not the point. CSS can remove bullets entirely and the list is still a list to everything that reads the page — which is exactly why navigation menus are built from them.",
+      },
+
+      { t: "code", file: "lists.html", code: "<h3>What to buy</h3>\n<ul>\n  <li>Onions</li>\n  <li>Rice</li>\n  <li>Yoghurt</li>\n</ul>\n\n<h3>How to cook it</h3>\n<ol>\n  <li>Heat the oil</li>\n  <li>Add the onions</li>\n  <li>Add the rice and water</li>\n</ol>", output: "A bulleted list of three items, then a numbered list of three steps." },
+      { t: "psoft", html: "Press <b>Try it yourself</b> and swap the two container names over. The shopping list becomes numbered, which is harmless nonsense — and the recipe becomes bulleted, which is a genuine lie: it now claims those three steps could be done in any order." },
+
+      { t: "h2", n: "1", text: "Nesting: inside the item, not beside it" },
+      { t: "p", html: "A list inside a list goes <b>inside an <code>&lt;li&gt;</code></b> — because the sub-list belongs to that item. Putting it between two <code>&lt;li&gt;</code> elements instead is the single commonest list mistake, and it is not repaired away: the browser keeps your wrong tree, so the sub-list belongs to nothing." },
+
+      { t: "code", file: "nesting.html", code: "<ul>\n  <li>Fruit\n    <ul>\n      <li>Mangoes</li>\n      <li>Bananas</li>\n    </ul>\n  </li>\n  <li>Vegetables</li>\n</ul>", output: "Fruit, with Mangoes and Bananas indented under it, then Vegetables." },
+      { t: "psoft", html: "Notice where <code>&lt;/li&gt;</code> is: <b>after</b> the inner list. The Fruit item is not finished until everything belonging to Fruit has been written — which is what makes the nesting mean \"these are kinds of fruit\"." },
+
+      { t: "debug",
+        intro: "This list looks almost right on screen and is structurally broken. Work out where before opening the fix.",
+        code: "<ul>\n  <li>Fruit</li>\n  <ul>\n    <li>Mangoes</li>\n  </ul>\n  <li>Vegetables</li>\n</ul>",
+        symptom: "Mangoes appears indented, so it looks fine. But a screen reader announces the outer list as having two items, and Mangoes belongs to neither of them.",
+        q: "Every tag is closed and the indentation looks tidy. So what is the browser being told?",
+        fix: "<ul>\n  <li>Fruit\n    <ul>\n      <li>Mangoes</li>\n    </ul>\n  </li>\n  <li>Vegetables</li>\n</ul>",
+        why: "The inner <code>&lt;ul&gt;</code> is a <b>sibling</b> of the items, not a child of one — Fruit was closed before the sub-list started, so nothing connects them. Only <code>&lt;li&gt;</code> may sit directly inside a list, and the browser does not move the stray one; it keeps the structure you wrote and indents it anyway, which is why the screen never shows the bug. Moving <code>&lt;/li&gt;</code> to after the inner list makes Mangoes part of Fruit." },
+
+      { t: "h2", n: "2", text: "Changing where the numbers start" },
+      { t: "syntax",
+        intro: "Three attributes for ordered lists. Each answers a real need, not a styling whim.",
+        form: "<ol start=\"5\">      continue from 5\n<ol reversed>       count down\n<ol type=\"a\">       a, b, c instead of 1, 2, 3",
+        parts: [
+          { bit: "start", says: "The first number. For a list continued after an interruption — step 5 onwards, after a paragraph explaining steps 1 to 4." },
+          { bit: "reversed", says: "Count down instead of up. A countdown, a top-ten read from tenth upward. Present or absent, no value needed." },
+          { bit: "type", says: "Which marker: <code>1</code> numbers, <code>a</code>/<code>A</code> letters, <code>i</code>/<code>I</code> roman numerals. Use it when the marker <b>is</b> the reference — a legal clause called 4(a) is not clause 4.1." },
+        ],
+        note: "<code>type</code> is the one place where a list's appearance is legitimately content: if the document elsewhere says \"see item (c)\", the letter has to be a letter. For everything else, leave the marker alone and let CSS decide how it looks.",
+      },
+
+      { t: "mistakes", items: [
+        { bad: "<ul>\n  <li>Fruit</li>\n  <ul><li>Mangoes</li></ul>\n</ul>", why: "The nested list is a sibling of the item, not inside it — so it belongs to nothing. Only <li> may sit directly inside a list.", fix: "<ul>\n  <li>Fruit\n    <ul><li>Mangoes</li></ul>\n  </li>\n</ul>" },
+        { bad: "<p>- Onions</p>\n<p>- Rice</p>", why: "Bullet characters typed by hand. It looks like a list and is three unrelated paragraphs to everything that is not a pair of eyes — no count, no boundary, no way to skip.", fix: "<ul>\n  <li>Onions</li>\n  <li>Rice</li>\n</ul>" },
+        { bad: "<ol> — for a shopping list", why: "Numbers claim the sequence matters. Nothing changes if you buy the rice first.", fix: "<ul> for the shopping list; <ol> for the recipe." },
+        { bad: "<ul>\n  <li>One</li>\n  <p>A note about it</p>\n</ul>", why: "A paragraph directly inside a list. It has no item to belong to.", fix: "<ul>\n  <li>One\n    <p>A note about it</p>\n  </li>\n</ul>" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>ul</code> when order carries no meaning, <code>ol</code> when it does — reorder it and see",
+        "<code>li</code> is the only element allowed directly inside either",
+        "A nested list goes <b>inside</b> an <code>li</code>, before its closing tag",
+        "That mistake survives parsing — the page looks right and the structure is wrong",
+        "<code>start</code>, <code>reversed</code> and <code>type</code> change the numbering when the number is content",
+        "A list announces its <b>count</b>; hand-typed dashes announce nothing",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "How do you decide between ul and ol?", a: "Reorder the items in your head. If the meaning survives, it is unordered; if it breaks — steps, rankings, anything the text refers to by number — it is ordered. The bullets and numbers are only defaults; CSS can swap the appearance either way, which is exactly why the choice has to be made on meaning." },
+        { level: "medium", q: "Why does it matter that a list is marked up as a list rather than styled to look like one?", a: "Because a list is announced as a group with a count — \"list, four items\" — and can be skipped as a unit. Paragraphs with dash characters give a screen reader user no count, no boundary and no way past. The visual result is identical, which is what makes this so easy to get wrong and impossible to see." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-description-lists",
+    order: 18,
+    title: "Description Lists, and Lists as Page Furniture",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Mark up a glossary or spec table with <code>dl</code>, <code>dt</code> and <code>dd</code>",
+        "Give one term several descriptions, and several terms one",
+        "Build a navigation menu out of a list, and say why it is one",
+        "Recognise the third list type when you meet it in real markup",
+      ] },
+
+      { t: "hook",
+        q: "A phone's spec sheet: Screen — 6.1 inches. Battery — 3200 mAh. Weight — 174 g. You could write that as a two-column table, or as paragraphs with dashes. Both are wrong, and HTML has an element for exactly this. Why does it exist?",
+        why: "Because it is neither a table nor prose — it is a set of <b>name–value pairs</b>, and the relationship is the content. A table implies rows and columns that can be compared across; paragraphs imply nothing at all. The description list says \"each of these labels owns what follows it\"." },
+
+      { t: "def",
+        term: "Description list",
+        en: "A list of terms and their descriptions — a glossary, a spec sheet, a set of questions and answers, any name-and-value pairing." },
+
+      { t: "syntax",
+        intro: "Three elements. The container, the term, the description.",
+        form: "<dl>\n  <dt>Screen</dt>\n  <dd>6.1 inches</dd>\n\n  <dt>Battery</dt>\n  <dd>3200 mAh</dd>\n</dl>",
+        parts: [
+          { bit: "<dl>", says: "Description list — the container for the whole set of pairs." },
+          { bit: "<dt>", says: "Description term: the name, the label, the word being defined." },
+          { bit: "<dd>", says: "Description details: what that term is. Indented by default, and the indent is a consequence of the meaning, not the reason to use it." },
+        ],
+        note: "The pairing is by <b>order</b>, not by wrapping — every <code>dd</code> belongs to the <code>dt</code> above it. That is why the source order matters here in a way it does not in a <code>ul</code>, and why a stray <code>dd</code> before any <code>dt</code> belongs to nothing.",
+      },
+
+      { t: "code", file: "glossary.html", code: "<h3>Glossary</h3>\n<dl>\n  <dt>HTML</dt>\n  <dd>The language that labels the parts of a page.</dd>\n\n  <dt>DNS</dt>\n  <dd>The service that turns a domain name into an IP address.</dd>\n</dl>", output: "Two terms, each with its description indented beneath it." },
+      { t: "psoft", html: "Every <code>def</code> box in this course is this shape underneath — a term and what it means. Press <b>Try it yourself</b> and add a third pair for a word from an earlier lesson; you have just written a glossary." },
+
+      { t: "h2", n: "1", text: "One term, several descriptions — and the other way round" },
+      { t: "p", html: "The pairing is not strictly one to one. A term may be followed by several <code>&lt;dd&gt;</code> elements — one word with three meanings — and several <code>&lt;dt&gt;</code> elements may share a single <code>&lt;dd&gt;</code>, which is how you say \"these two names mean the same thing\"." },
+
+      { t: "code", file: "many.html", code: "<dl>\n  <dt>Cache</dt>\n  <dd>A copy kept nearby so it need not be fetched again.</dd>\n  <dd>The verb: to keep such a copy.</dd>\n\n  <dt>Link</dt>\n  <dt>Hyperlink</dt>\n  <dd>Two names for the same thing.</dd>\n</dl>", output: "Cache with two descriptions under it, then two terms sharing one description." },
+
+      { t: "note", variant: "warn", html: "<b><code>&lt;dl&gt;</code> is not a layout tool.</b> It was misused for years to get two indented columns, and the indent is available from CSS on anything. Use it when the content genuinely is <b>pairs of name and value</b> — and when it is, nothing else says so." },
+
+      { t: "h2", n: "2", text: "Navigation is a list" },
+      { t: "p", html: "Every navigation menu you have ever used is a list of links, and the professional way to write one is to say so. The bullets are removed with one line of CSS; what the markup keeps is the count and the grouping — \"list, five items\" — which is how a screen reader user knows how big the menu is before walking it." },
+
+      { t: "code", file: "nav.html", code: "<ul>\n  <li><a href=\"index.html\">Home</a></li>\n  <li><a href=\"about.html\">About</a></li>\n  <li><a href=\"contact.html\">Contact</a></li>\n</ul>", output: "Three bulleted links — which CSS turns into a horizontal menu without changing any of this." },
+      { t: "psoft", html: "The anchor goes <b>inside</b> the <code>&lt;li&gt;</code>: the item is the thing in the menu, and the link is what that item does. Wrapping the other way round — a list item inside a link — is invalid and says something nobody means." },
+
+      { t: "note", variant: "key", html: "Module 12 adds <code>&lt;nav&gt;</code> around this to say <i>which</i> list is the navigation. The list stays exactly as it is — the two elements answer different questions, and both are worth having." },
+
+      { t: "h2", n: "3", text: "The three, side by side" },
+      { t: "note", variant: "tip", html: "<b><code>ul</code></b> — the order does not matter. Shopping list, feature list, menu.<br><b><code>ol</code></b> — the order is information. Steps, rankings, anything referred to by number.<br><b><code>dl</code></b> — name and value pairs. Glossary, spec sheet, FAQ, metadata.<br><br>If you cannot say which of the three it is, it is probably not a list — it is prose." },
+
+      { t: "mistakes", items: [
+        { bad: "<dl>\n  <dd>6.1 inches</dd>\n  <dt>Screen</dt>\n</dl>", why: "Reversed. Pairing is by order — a dd before any dt describes nothing.", fix: "<dl>\n  <dt>Screen</dt>\n  <dd>6.1 inches</dd>\n</dl>" },
+        { bad: "<dl> — used to indent a block of text", why: "A layout hack from before CSS was reliable. It claims name-and-value pairs where there are none.", fix: "A <p> with a CSS margin." },
+        { bad: "<a href=\"about.html\"><li>About</li></a>", why: "A list item inside a link, and the li is no longer inside a list. Invalid both ways round.", fix: "<li><a href=\"about.html\">About</a></li>" },
+        { bad: "<ul>\n  <li><a href=\"index.html\">Home</a>\n  <li><a href=\"about.html\">About</a>\n</ul>", why: "Missing closing tags. Browsers repair this one silently, so it works — until an editor's formatter or a future nested list turns the guess into the wrong tree.", fix: "Close every <li> explicitly." },
+      ] },
+
+      { t: "recap", items: [
+        "<code>dl</code> is for <b>name and value</b> pairs — glossary, specs, FAQ",
+        "<code>dt</code> is the term, <code>dd</code> is its description; pairing is by <b>order</b>",
+        "One <code>dt</code> may take several <code>dd</code>s, and several <code>dt</code>s may share one",
+        "Never use <code>dl</code> for indentation — that is CSS's job",
+        "A navigation menu is a <code>ul</code> of links, with the anchor <b>inside</b> the <code>li</code>",
+        "Three list types: order irrelevant, order meaningful, name–value",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "When would you use a dl instead of a ul?", a: "When each item is a pair — a term and what it means. A glossary, a product's specifications, a set of questions and answers. A ul holds single items; a dl holds a relationship between two things, and that relationship is the reason the element exists." },
+        { level: "medium", q: "Why are navigation menus built from unordered lists?", a: "Because a menu is a group of related links and a list is the element that says \"group, this many items\". Assistive tech announces the count so the user knows the size of the menu before walking it, and can skip it as one unit. The bullets are removed in CSS — the structure is what is being kept, not the appearance." },
+      ] },
+    ],
+  },
 ];

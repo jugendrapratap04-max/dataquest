@@ -350,4 +350,79 @@ export const htmlProblems = [
       "`loading=\"lazy\"` goes on the below-the-fold photo only. The banner loads normally.",
     ],
     "html,images,performance"),
+
+  /* ------------------------------------------------- html-lists ---- */
+  P("html-lists", 618, "html-two-lists", "One of Each", "Easy",
+    "A recipe page needs both kinds of list.\n\n- under `What to buy`, an **unordered** list of exactly three ingredients — buying them in any order changes nothing\n- under `How to cook it`, an **ordered** list of exactly three steps — doing those in any order changes dinner\n\nThe words are yours. What is being graded is that you picked the right container for each, and that the items are list items rather than anything else.",
+    "<h3>What to buy</h3>\n<!-- the shopping list -->\n\n<h3>How to cook it</h3>\n<!-- the steps -->\n",
+    "<h3>What to buy</h3>\n<ul>\n  <li>Onions</li>\n  <li>Rice</li>\n  <li>Yoghurt</li>\n</ul>\n\n<h3>How to cook it</h3>\n<ol>\n  <li>Heat the oil</li>\n  <li>Add the onions</li>\n  <li>Add the rice and water</li>\n</ol>\n",
+    [
+      { find: "ul", count: 1, says: "one unordered list for the shopping" },
+      { find: "ul > li", count: 3, says: "three items in it" },
+      { find: "ol", count: 1, says: "one ordered list for the steps" },
+      { find: "ol > li", count: 3, says: "three steps in it" },
+      { find: "li", text: true, notEmpty: true, says: "the items are not empty" },
+    ],
+    [
+      "`<ul>` when reordering the items loses nothing; `<ol>` when it does.",
+      "Every item is `<li>text</li>` — the only element allowed directly inside a list.",
+      "Three items in each. Close each `<li>`.",
+    ],
+    "html,lists"),
+
+  P("html-lists", 619, "html-fix-nesting", "The Sub-List That Belongs to Nothing", "Medium",
+    "This list looks right on screen — Mangoes and Bananas are indented under Fruit. The structure underneath is wrong, and a screen reader announces the outer list as having **two** items with the fruits belonging to neither.\n\nThe inner `<ul>` is a **sibling** of the list items instead of living inside one. Move the `</li>` so that Fruit is not finished until everything belonging to Fruit has been written.\n\nDo not change any of the words. This is the one markup-tidying bug that genuinely changes the parsed page — most do not, which is why the preview looks unchanged when you fix it.",
+    "<h3>Shopping</h3>\n<ul>\n  <li>Fruit</li>\n  <ul>\n    <li>Mangoes</li>\n    <li>Bananas</li>\n  </ul>\n  <li>Vegetables</li>\n</ul>\n",
+    "<h3>Shopping</h3>\n<ul>\n  <li>Fruit\n    <ul>\n      <li>Mangoes</li>\n      <li>Bananas</li>\n    </ul>\n  </li>\n  <li>Vegetables</li>\n</ul>\n",
+    [
+      { find: "li ul", exists: true, says: "the inner list is inside a list item" },
+      { find: "ul > ul", count: 0, says: "no list is a direct child of another list" },
+      { find: "li ul > li", count: 2, says: "Mangoes and Bananas are items of the inner list" },
+      { find: "ul > li", count: 4, says: "four list items in total — two outer, two inner" },
+      { find: "li", text: true, contains: "Mangoes", says: "the words are unchanged" },
+    ],
+    [
+      "Only `<li>` may sit directly inside a `<ul>`. The inner list currently is not inside one.",
+      "Move `</li>` from after the word Fruit to after the inner `</ul>`.",
+      "The item is not finished until everything belonging to it has been written.",
+    ],
+    "html,lists,debugging"),
+
+  /* ------------------------------------- html-description-lists ---- */
+  P("html-description-lists", 620, "html-spec-list", "A Spec Sheet", "Easy",
+    "Write a phone's specifications as a **description list** — pairs of a name and its value, which is neither a table nor prose.\n\nThree pairs, exactly these:\n\n- `Screen` → `6.1 inches`\n- `Battery` → `3200 mAh`\n- `Weight` → `174 g`\n\nRemember the pairing is by order: every description belongs to the term above it.",
+    "<h3>Specifications</h3>\n\n<!-- a dl with three term-and-description pairs -->\n",
+    "<h3>Specifications</h3>\n\n<dl>\n  <dt>Screen</dt>\n  <dd>6.1 inches</dd>\n\n  <dt>Battery</dt>\n  <dd>3200 mAh</dd>\n\n  <dt>Weight</dt>\n  <dd>174 g</dd>\n</dl>\n",
+    [
+      { find: "dl", count: 1, says: "one description list" },
+      { find: "dl > dt", count: 3, says: "three terms" },
+      { find: "dl > dd", count: 3, says: "three descriptions" },
+      { find: "dt", text: true, contains: "Battery", says: "one of the terms is \"Battery\"" },
+      { find: "dd", text: true, contains: "3200 mAh", says: "its description reads \"3200 mAh\"" },
+    ],
+    [
+      "The container is `<dl>`; inside it, `<dt>` for the name and `<dd>` for the value.",
+      "Term first, then its description — the pairing is by order, not by wrapping.",
+      "Three of each, alternating.",
+    ],
+    "html,lists,semantics"),
+
+  P("html-description-lists", 621, "html-nav-list", "A Menu That Says It Is One", "Medium",
+    "This navigation is three loose links separated by pipe characters. On screen it reads as a menu; to a screen reader it is three unrelated links with no count, no grouping and no way to skip past.\n\nRebuild it as an **unordered list** — one `<li>` per link, with the anchor **inside** the item.\n\nKeep the same three destinations (`index.html`, `about.html`, `contact.html`) and the same words. Drop the `|` characters: the list does the separating now, and CSS decides how it looks.",
+    "<h3>My Site</h3>\n<p>\n  <a href=\"index.html\">Home</a> |\n  <a href=\"about.html\">About</a> |\n  <a href=\"contact.html\">Contact</a>\n</p>\n",
+    "<h3>My Site</h3>\n<ul>\n  <li><a href=\"index.html\">Home</a></li>\n  <li><a href=\"about.html\">About</a></li>\n  <li><a href=\"contact.html\">Contact</a></li>\n</ul>\n",
+    [
+      { find: "ul", count: 1, says: "the menu is an unordered list" },
+      { find: "ul > li", count: 3, says: "three list items, one per link" },
+      { find: "li > a", count: 3, says: "each anchor sits inside its list item" },
+      { find: "li > a", attr: "href", equals: "about.html", says: "the About link kept its destination" },
+      { find: "li a", text: true, contains: "Contact", says: "the words are unchanged" },
+      { find: "p a", count: 0, says: "the links are no longer loose in a paragraph" },
+    ],
+    [
+      "One `<li>` per menu entry: `<li><a href=\"index.html\">Home</a></li>`.",
+      "The anchor goes inside the item, never the other way round.",
+      "Delete the `|` characters — the list structure replaces them.",
+    ],
+    "html,lists,accessibility"),
 ];
