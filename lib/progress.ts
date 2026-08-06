@@ -38,6 +38,11 @@ export type TrackProgress = {
   whyText: string; weeks: string; level: string; milestone: string;
   toolsCsv: string; checkpoint: string | null;
   firstLesson?: string;
+  /** Where a click on this subject should actually land: the first lesson the
+   *  student has not finished, or lesson one if they have not started. Added
+   *  because the dashboard's subject tiles all linked to /roadmap, so choosing
+   *  a subject meant arriving at a page where you had to choose it again. */
+  nextLesson?: string;
   lessonsDone: number; totalLessons: number;
   problemsDone: number; totalProblems: number;
   pct: number;
@@ -138,6 +143,9 @@ async function getProgressImpl(userId: string): Promise<Progress> {
       icon: r.t.icon, whyText: r.t.whyText, weeks: r.t.weeks, level: r.t.level,
       milestone: r.t.milestone, toolsCsv: r.t.toolsCsv, checkpoint: r.t.checkpoint,
       firstLesson: r.t.lessons[0]?.slug,
+      // Lessons come back ordered, so the first unfinished one IS where they
+      // stopped. Falls back to lesson one for a subject not yet started.
+      nextLesson: (r.t.lessons.find((l) => !doneLessonIds.has(l.id)) ?? r.t.lessons[0])?.slug,
       lessonsDone: r.lessonsDone, totalLessons: r.totalLessons,
       problemsDone: r.problemsDone, totalProblems: r.totalProblems,
       pct: r.pct, status,

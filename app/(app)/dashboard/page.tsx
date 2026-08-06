@@ -122,10 +122,23 @@ export default async function DashboardPage() {
         </section>
 
         <section className="card pad">
-          <div className="sec-head"><h2>Your Roadmap<span className="sub">nine subjects, in order</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
+          <div className="sec-head"><h2>Your Roadmap<span className="sub">{p.tracks.length} subjects, in order</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
           <div className="trackrow">
-            {p.tracks.map((t) => (
-              <Link key={t.id} href="/roadmap" className={`node ${t.status}`}>
+            {/* A SUBJECT TILE OPENS THE SUBJECT.
+                Every one of these linked to /roadmap, so picking a subject
+                landed you on a page where you had to find and pick it again —
+                two clicks and a scroll to reach what you had already chosen.
+                Jugendra put it plainly: "fir se course select karna padta hai,
+                kya fayda".
+                A ready subject now goes straight to where you stopped. A locked
+                one still goes to the roadmap, because it has no lessons to open
+                and the roadmap is where it explains itself. */}
+              {p.tracks.map((t) => (
+              <Link
+                key={t.id}
+                href={t.status !== "locked" && t.nextLesson ? `/learn/${t.nextLesson}` : "/roadmap"}
+                className={`node ${t.status}`}
+              >
                 <div className={`ic tinted subject-tint`} style={subjectStyle(t.slug)}>{t.icon}</div>
                 <div className="t">{t.shortTitle}</div>
                 {/* "0%" on a locked subject reads as progress you have not made

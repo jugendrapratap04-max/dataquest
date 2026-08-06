@@ -252,7 +252,7 @@ function share(a: Achievement) {
 export function CoursePanel({
   tracks, certificates, own,
 }: {
-  tracks: { id: string; slug: string; icon: string; shortTitle: string; pct: number }[];
+  tracks: { id: string; slug: string; icon: string; shortTitle: string; pct: number; nextLesson?: string }[];
   certificates: number;
   own: boolean;
 }) {
@@ -270,16 +270,29 @@ export function CoursePanel({
         </p>
       ) : (
         <div className="prof-courses">
-          {tracks.map((t) => (
-            <div className="pc-row" key={t.id}>
-              <span className="ic tinted subject-tint" style={subjectStyle(t.slug)}>{t.icon}</span>
-              <div className="pc-body">
-                <div className="pc-t">{t.shortTitle}</div>
-                <div className="pbar sm"><i style={{ width: `${t.pct}%` }} /></div>
-              </div>
-              <span className="pc-v">{t.pct === 100 ? "✓" : `${t.pct}%`}</span>
-            </div>
-          ))}
+          {/* On your own profile these rows are the obvious thing to click to
+              get back into a subject, and they were plain divs — a course, a
+              progress bar, and nothing happens. Same complaint as the dashboard
+              tiles: the subject is shown and cannot be opened. Somebody else's
+              profile keeps them inert, because "continue where you stopped" is
+              not a sentence about their progress. */}
+          {tracks.map((t) => {
+            const row = (
+              <>
+                <span className="ic tinted subject-tint" style={subjectStyle(t.slug)}>{t.icon}</span>
+                <div className="pc-body">
+                  <div className="pc-t">{t.shortTitle}</div>
+                  <div className="pbar sm"><i style={{ width: `${t.pct}%` }} /></div>
+                </div>
+                <span className="pc-v">{t.pct === 100 ? "✓" : `${t.pct}%`}</span>
+              </>
+            );
+            return own && t.nextLesson ? (
+              <Link className="pc-row" key={t.id} href={`/learn/${t.nextLesson}`}>{row}</Link>
+            ) : (
+              <div className="pc-row" key={t.id}>{row}</div>
+            );
+          })}
         </div>
       )}
     </section>

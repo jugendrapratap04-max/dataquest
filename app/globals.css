@@ -2448,6 +2448,11 @@ select.inp { cursor:pointer; }
 /* --- courses --- */
 .prof-courses { display:grid; gap:13px; }
 .pc-row { display:flex; align-items:center; gap:11px; }
+/* The row is a link on your own profile — see the note in ProfileParts. Keep
+   it looking like a row, and say so on hover rather than colouring it blue. */
+a.pc-row { text-decoration:none; color:inherit; border-radius:9px; margin:0 -7px; padding:3px 7px; transition:background .15s; }
+a.pc-row:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); }
+a.pc-row:hover .pc-t { color:var(--accent); }
 .pc-row .ic { width:32px; height:32px; border-radius:9px; display:grid; place-items:center; font-size:15px; flex:none; }
 .pc-body { flex:1; min-width:0; }
 .pc-t { font-size:13px; font-weight:600; margin-bottom:5px; }
