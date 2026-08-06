@@ -4,10 +4,10 @@
 // lesson would delete every user's progress along with it — so this updates
 // contentJson (and title/minutes) by slug and leaves everything else alone.
 
-import { PrismaClient } from "@prisma/client";
+import { prisma, via } from "./db.mjs";
+console.log(`db: ${via}`);
 import { trackLessons, lessonContent, tracks } from "./seed.mjs";
 
-const prisma = new PrismaClient();
 
 // The teaching blocks this pass introduced. Reported per lesson so it's obvious
 // which lessons still have no definition rather than having to guess.

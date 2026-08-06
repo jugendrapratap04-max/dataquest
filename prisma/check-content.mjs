@@ -17,14 +17,14 @@
 // Content arrives in batches, so this runs against whatever is in the database
 // rather than a fixture — a check that can't see the real content isn't a check.
 
-import { PrismaClient } from "@prisma/client";
+import { prisma, via } from "./db.mjs";
+console.log(`db: ${via}`);
 import { loadPyodide } from "pyodide";
 import initSqlJs from "sql.js";
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { readSchema } from "../lib/sql-schema.ts";
 
-const prisma = new PrismaClient();
 
 // Mirror lib/pyodide-runner.ts and lib/verify.ts exactly. JSON.stringify makes
 // 45.0 == 45, which is the comparison the real grader uses — a stricter one here
@@ -48,11 +48,50 @@ const fails = [];
 // ---------------------------------------------------------------- problems ---
 const problems = await prisma.problem.findMany({
   orderBy: [{ kind: "asc" }, { slug: "asc" }],
-  select: { slug: true, kind: true, functionName: true, solutionCode: true, testsJson: true, sqlSetup: true },
+  // starterCode is selected for the HTML check below, which compares it against
+  // the reference. Without it that comparison silently graded an empty string,
+  // so a starter that already solved the problem would always have looked fine.
+  select: { slug: true, kind: true, functionName: true, solutionCode: true, testsJson: true, sqlSetup: true, starterCode: true },
 });
 const sqlProblems = problems.filter((p) => p.kind === "sql");
 const pyProblems = problems.filter((p) => p.kind === "python");
 const asmProblems = problems.filter((p) => p.kind === "asm8085");
+const htmlProblems = problems.filter((p) => p.kind === "html");
+
+/* HTML: the reference answer must pass its own checks, and the starter must NOT.
+ *
+ * The second half is the one that matters and the one nothing else would catch.
+ * A DOM assertion cannot see crossed nesting or a missing closing tag — the
+ * parser repairs both before grading — so an exercise built around tidying up
+ * markup grades as already-solved, and the student is told "correct" without
+ * having done anything. That exact problem was written and only caught because
+ * this comparison was run by hand; running it here means the next one cannot
+ * ship.
+ */
+if (htmlProblems.length) {
+  const { parseHTML } = await import("linkedom");
+  const { gradeHtml, validateHtmlTests } = await import("../lib/html-check.ts");
+  for (const p of htmlProblems) {
+    let tests;
+    try { tests = JSON.parse(p.testsJson || "[]"); }
+    catch { fails.push(`[html] ${p.slug}: testsJson is not valid JSON`); continue; }
+
+    const shape = validateHtmlTests(tests);
+    if (shape) { fails.push(`[html] ${p.slug}: ${shape}`); continue; }
+    if (!p.solutionCode?.trim()) { fails.push(`[html] ${p.slug}: no reference answer`); continue; }
+
+    const ref = gradeHtml(parseHTML(p.solutionCode).document, tests);
+    if (ref.passed !== ref.total) {
+      const missed = ref.results.filter((r) => !r.pass).map((r) => `${r.says} (${r.detail})`);
+      fails.push(`[html] ${p.slug}: reference fails its own checks ${ref.passed}/${ref.total} — ${missed.join("; ")}`);
+      continue;
+    }
+    const start = gradeHtml(parseHTML(p.starterCode || "").document, tests);
+    if (start.passed === start.total) {
+      fails.push(`[html] ${p.slug}: the STARTER code already passes ${start.total}/${start.total} — there is nothing to solve`);
+    }
+  }
+}
 
 // 8085: the reference program must assemble, run, and — this is the part worth
 // checking — actually SATISFY its own tests. Grading diffs a student's answer
@@ -217,14 +256,30 @@ const pick = (obj, spec) => {
 };
 const TAG = /<\/?(code|b|i|strong|em|pre|br|span|p|ul|li|div)\b[^>]*>/i;
 
-const lessons = await prisma.lesson.findMany({ select: { slug: true, contentJson: true }, orderBy: { order: "asc" } });
+/* On the HTML course, markup inside a `mistakes` example IS the lesson.
+ *
+ * The check below exists because markup in a plain-text field usually means an
+ * author expected it to render and it will not. `mistakes.bad` and `.fix` are
+ * different: both renderers put them in `<pre>{value}</pre>`, so React escapes
+ * them and the tags appear on screen exactly as written — which is the entire
+ * point of showing a student `<p>My heading</p>` as the wrong way to write a
+ * heading. Every other field, and every other track, is still checked.
+ */
+const MARKUP_IS_THE_CONTENT = { html: new Set(["mistakes.items[].bad", "mistakes.items[].fix"]) };
+
+const lessons = await prisma.lesson.findMany({
+  select: { slug: true, contentJson: true, track: { select: { slug: true } } },
+  orderBy: { order: "asc" },
+});
 let blocks = 0;
 for (const L of lessons) {
   let content;
   try { content = JSON.parse(L.contentJson || "[]"); } catch { fails.push(`[lesson] ${L.slug}: contentJson is not valid JSON`); continue; }
   for (const b of content) {
     blocks++;
+    const exempt = MARKUP_IS_THE_CONTENT[L.track?.slug];
     for (const spec of PLAIN[b.t] ?? []) for (const [where, v] of pick(b, spec)) {
+      if (exempt?.has(`${b.t}.${spec}`)) continue;
       if (typeof v === "string" && TAG.test(v))
         fails.push(`[lesson] ${L.slug}: markup in plain-text field ${b.t}.${where} would print literally — ${v.slice(0, 60)}`);
     }
@@ -270,7 +325,9 @@ if (quizQs >= 40) seen.forEach((c, i) => {
 });
 
 // ------------------------------------------------------------------ report ---
-console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql, ${asmProblems.length} asm8085)`);
+// Counted per kind and summed, so a kind nobody added to this line shows up as
+// a total that does not add up rather than as silence.
+console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql, ${asmProblems.length} asm8085, ${htmlProblems.length} html)`);
 console.log(`lessons:  ${lessons.length} (${blocks} blocks)`);
 console.log(`quizzes:  ${quizQs} questions, answers at ${JSON.stringify(seen)} across A/B/C/D`);
 if (fails.length === 0) {

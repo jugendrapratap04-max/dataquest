@@ -14,10 +14,8 @@
 // Safe to re-run: chapters are upserted by slug and a lesson is only moved if
 // its chapter is wrong.
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
+import { prisma, via } from "./db.mjs";
+console.log(`db: ${via}`);
 // Chapter plans, by subject slug. `upto` is the last lesson order in that
 // chapter. Only Python is split for real so far — it is the only subject whose
 // 39 lessons are all written.

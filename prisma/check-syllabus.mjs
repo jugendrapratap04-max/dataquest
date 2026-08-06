@@ -8,7 +8,8 @@
  * Usage: npm run syllabus            (summary)
  *        npm run syllabus -- --full  (every topic, including the done ones)
  */
-import { PrismaClient } from "@prisma/client";
+import { prisma, via } from "./db.mjs";
+console.log(`db: ${via}`);
 import { SYLLABUS } from "./syllabus.mjs";
 import { ML_SYLLABUS } from "./ml-syllabus.mjs";
 import { DL_SYLLABUS } from "./dl-syllabus.mjs";
@@ -27,7 +28,7 @@ const SYLLABI = [
   { subject: "dl", label: "no W3Schools section exists - the floor here is any textbook chapter one", groups: DL_SYLLABUS },
 ];
 
-const prisma = new PrismaClient();
+
 const FULL = process.argv.includes("--full");
 
 // A lesson has to clear all of these to count as taught rather than sketched.

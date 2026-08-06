@@ -83,7 +83,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "The World Wide Web",
-        en: "One of the things that runs <i>on</i> the Internet: a system of documents that link to each other, reached through a browser." },
+        en: "One of the things that runs on the Internet: a system of documents that link to each other, reached through a browser." },
 
       { t: "analogy",
         concept: "Internet vs Web",
@@ -237,7 +237,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "IP address",
-        en: "The number that identifies a machine on a network — like <code>142.250.4.100</code>. Every device that talks to the Internet has one." },
+        en: "The number that identifies a machine on a network, such as 142.250.4.100. Every device that talks to the Internet has one." },
 
       { t: "def",
         term: "DNS",
@@ -576,7 +576,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Document structure",
-        en: "The fixed outer shape of an HTML file: a doctype, an <code>html</code> element, and inside it a <code>head</code> for information about the page and a <code>body</code> for the page itself." },
+        en: "The fixed outer shape of an HTML file: a doctype, an html element, and inside it a head for information about the page and a body for the page itself." },
 
       { t: "analogy",
         concept: "head and body",
@@ -655,7 +655,7 @@ export const htmlLessons = [
 
       { t: "def",
         term: "Attribute",
-        en: "Extra information written inside an element's opening tag, as <code>name=\"value\"</code>, that configures what the element does." },
+        en: "Extra information written inside an element's opening tag, in the form name=\"value\", that configures what the element does." },
 
       { t: "analogy",
         concept: "attributes",
