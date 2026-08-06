@@ -84,8 +84,12 @@ Rules that make this work rather than become theatre:
 
 ### The list (take one per session, cross it off, add what you find)
 
-- [ ] Responsive sweep at 320 / 375 / 425 / 768 / 1024 / 1280 / 1440 — only 320
-      and 375 have been checked, and only on some pages
+- [x] ~~Responsive sweep~~ — done on the lesson page at 320, 375, 425, 768,
+      1024 and 1440: no page-level horizontal scroll at any of them, and one
+      left edge throughout (30px on phones, 262px once the rail appears, with
+      the 760px measure holding at 1440). 1280 was not measured directly; it
+      sits between two widths that behave identically. **Only the lesson page** —
+      practice, profile and the dashboard have not been swept
 - [ ] Screen-reader pass. Lighthouse scores 100 on accessibility; that is not
       the same as NVDA or VoiceOver being usable
 - [ ] Keyboard walk of one real flow — tab order, focus return after a dialog,
