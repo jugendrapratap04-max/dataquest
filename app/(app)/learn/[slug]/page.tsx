@@ -19,6 +19,7 @@ import { Fragment } from "react";
 import { RailControls } from "@/components/LayoutControls";
 import { VizBlock } from "@/components/viz/VizBlock";
 import { LiveCode } from "@/components/LiveCode";
+import { LiveHtml } from "@/components/LiveHtml";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* Subjects whose `code` blocks are plain Python printing to stdout, and are
@@ -55,8 +56,8 @@ const LIVE_TRACKS = new Set(["python", "statistics", "pandas", "ml", "dl"]);
 // example records which lesson an explained error came from. Both optional, so
 // the /book renderer — no student, no quiz — keeps calling this unchanged.
 function Block({
-  b, pyLive = false, lessonId, lessonSlug,
-}: { b: any; pyLive?: boolean; lessonId?: string; lessonSlug?: string }) {
+  b, pyLive = false, htmlLive = false, lessonId, lessonSlug,
+}: { b: any; pyLive?: boolean; htmlLive?: boolean; lessonId?: string; lessonSlug?: string }) {
   switch (b.t) {
     case "objectives":
       return (
@@ -197,6 +198,9 @@ function Block({
       // Every code block is verified runnable by `npm run verify:lesson`, so on
       // a Python subject it can simply be handed over as an editable example.
       if (pyLive) return <LiveCode file={b.file} code={b.code} output={b.output} runnable lessonSlug={lessonSlug} />;
+      // HTML examples are rendered rather than executed, so their editable
+      // form previews in a sandboxed frame instead of running anything.
+      if (htmlLive) return <LiveHtml file={b.file} code={b.code} output={b.output} />;
       return (
         <div className="code">
           <div className="bar">
@@ -602,7 +606,7 @@ export default async function LessonPage({
         <div className="prose">
           {visible.map((b, i) => (
             <Fragment key={i}>
-              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} lessonId={lesson.id} lessonSlug={slug} />
+              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} htmlLive={lesson.track.slug === "html"} lessonId={lesson.id} lessonSlug={slug} />
             </Fragment>
           ))}
         </div>

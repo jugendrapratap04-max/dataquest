@@ -934,6 +934,62 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 }
 .out.err { color:#FF8B8B; white-space:pre-wrap; font-family:var(--mono); font-size:12.5px; }
 
+/* Editable HTML lesson examples (components/LiveHtml). Same shell as LiveCode —
+   the bar, the Try button, the Reset — but "run" means render, so the result is
+   a live preview pane under the editor rather than printed output. White on
+   purpose: the student's page is drawn on white, whatever theme the app is in. */
+.lh-view { border-top:1px solid #23262F; }
+.lh-cap { padding:7px 15px; font-size:11.5px; color:var(--muted); background:var(--code-bg);
+          border-bottom:1px solid #23262F; }
+.lh-view iframe { display:block; width:100%; height:230px; border:0; background:#fff; }
+
+/* The HTML practice workbench (components/HtmlWorkbench).
+   THESE RULES DID NOT EXIST when the workbench first shipped — it ran on
+   browser defaults: a 43px-tall system-font textarea for an editor and a
+   300x150 iframe for the preview. Functional and unusable at once, and nothing
+   automated could see it; only opening the page did. Layout follows .psplit
+   (brief | work), the editor follows .editor-wrap/.lc-area, and the preview is
+   a real white pane for the same reason as .lh-view above. */
+.hw-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:16px; }
+.hw-head h1 { margin:0 0 7px; font-size:22px; }
+.hw-meta { display:flex; flex-wrap:wrap; align-items:center; gap:7px; }
+.hw-xp { font-family:var(--mono); font-size:11.5px; font-weight:600; color:var(--accent); }
+.hw-solved { font-family:var(--mono); font-size:11.5px; font-weight:600; color:var(--good); }
+.hw-tag { font-family:var(--mono); font-size:11px; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:2px 9px; }
+.hw-grid { display:grid; grid-template-columns:minmax(0,40%) minmax(0,60%); gap:18px; align-items:start; }
+@media (max-width:900px){ .hw-grid { grid-template-columns:1fr; } }
+.hw-desc p { margin:0 0 10px; font-size:14px; line-height:1.65; }
+.hw-checks h2, .hw-hints h2 { font-size:12px; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); margin:18px 0 9px; }
+.hw-checks ul { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.hw-checks li { display:grid; grid-template-columns:18px 1fr; column-gap:8px; font-size:13.5px; line-height:1.5; }
+.hw-mark { font-family:var(--mono); color:var(--muted); }
+.hw-checks li.ok .hw-mark, .hw-checks li.ok .hw-says { color:var(--good); }
+.hw-checks li.no .hw-mark, .hw-checks li.no .hw-says { color:var(--bad); }
+/* The failure detail is the teaching line — it names what was found instead.
+   Mono and muted so it reads as evidence under the claim, not a second claim. */
+.hw-detail { grid-column:2; font-family:var(--mono); font-size:11.5px; color:var(--muted); overflow-wrap:anywhere; }
+.hw-hint { font-size:13.5px; line-height:1.6; margin:0 0 9px; }
+.hw-work { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.hw-editor { border:1px solid #23262F; border-radius:var(--radius); overflow:hidden; background:var(--code-bg); }
+.hw-bar { display:flex; align-items:center; gap:10px; padding:9px 13px; border-bottom:1px solid #23262F; background:var(--code-bg); }
+.hw-file { font-family:var(--mono); font-size:11.5px; color:#8890A0; }
+.hw-acts { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.hw-area { display:block; width:100%; box-sizing:border-box; resize:vertical; border:0; outline:0;
+           min-height:250px; padding:13px 15px; font-family:var(--mono); font-size:13px; line-height:1.65;
+           color:var(--code-fg, #E6E9EF); background:transparent; tab-size:2; }
+.hw-preview { border:1px solid #23262F; border-radius:var(--radius); overflow:hidden; }
+.hw-preview iframe { display:block; width:100%; height:300px; border:0; background:#fff; }
+.hw-verdict { margin-top:14px; padding:11px 14px; border-radius:10px; font-weight:600; font-size:14px; border:1px solid transparent; }
+.hw-verdict.ok { color:var(--good); background:var(--good-soft); border-color:color-mix(in srgb, var(--good) 40%, transparent); }
+.hw-verdict.no { color:var(--bad); background:var(--bad-soft); border-color:color-mix(in srgb, var(--bad) 40%, transparent); }
+.hw-note { margin-top:9px; color:var(--muted); font-size:13.5px; }
+.hw-next { margin-top:12px; }
+@media (max-width:720px){
+  .hw-head { flex-direction:column; }
+  .hw-area { min-height:200px; font-size:13.5px; }
+  .hw-preview iframe { height:240px; }
+}
+
 /* The keyboard hint inside the Run / Submit buttons. Deliberately low-contrast:
    it should be findable when you look for it and invisible when you are not. */
 .kb { margin-left:7px; padding:1px 5px; border-radius:5px; font-family:var(--mono); font-size:10.5px; line-height:1.5;
