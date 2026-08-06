@@ -8,7 +8,7 @@
      values put #fff cards on a near-#fff ground with a barely-there shadow, so
      everything looked like one flat sheet. */
   --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#958E7E;
+  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656;
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6;
   --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB;
@@ -36,7 +36,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-    --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#6B7383;
+    --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1;
     --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F;
     --teal:#2DD4BF; --teal-soft:#10322E; --indigo:#8C93F2; --indigo-soft:#1E2145;
     --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
@@ -51,7 +51,7 @@
     --farrow-col:#5A6478; --gbtn-bg:rgba(255,255,255,.09); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.16); }
 }
 :root[data-theme="light"]{ --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#958E7E;
+  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656;
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6; --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB; --good:#1FA85A; --good-soft:#DBF3E4; --bad:#E23D3D; --bad-soft:#FBE3E3; --locked:#B7BAC4;
   --code-bg:#12141C; --shadow:0 1px 2px rgba(70,52,20,.05), 0 4px 10px -2px rgba(70,52,20,.07), 0 14px 30px -12px rgba(70,52,20,.13);
@@ -65,7 +65,7 @@
   --chip-bg:var(--panel-2); --chip-border:var(--line); --chip-ink:var(--ink-soft); --chip-done:var(--good);
   --farrow-col:var(--ink-faint); --gbtn-bg:var(--panel-2); --gbtn-ink:var(--ink); --gbtn-border:var(--line); }
 :root[data-theme="dark"]{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-  --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#6B7383;
+  --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1;
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F; --teal:#2DD4BF; --teal-soft:#10322E;
   --indigo:#8C93F2; --indigo-soft:#1E2145; --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
   --code-bg:#0A0C12; --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
@@ -81,7 +81,7 @@
    prefers-color-scheme block. Each carries the full token set incl. feature-card
    vars, same as light/dark, so nothing falls back to the wrong palette. */
 :root[data-theme="focus"]{ --ground:#0F1A2E; --panel:#182338; --panel-2:#1F2C46; --panel-3:#273656; --line:#2F4066;
-  --ink:#EAF0FB; --ink-soft:#9FADCB; --ink-faint:#647291;
+  --ink:#EAF0FB; --ink-soft:#9FADCB; --ink-faint:#919FBE;
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#2A2712;
   --teal:#2DD4BF; --teal-soft:#0E332F; --indigo:#93A4F5; --indigo-soft:#20294F;
   --good:#34D07F; --good-soft:#123322; --bad:#F26D6D; --bad-soft:#3A1D22; --locked:#3B4C6E;
@@ -94,7 +94,7 @@
   --chip-bg:rgba(255,255,255,.06); --chip-border:rgba(255,255,255,.11); --chip-ink:#C5CFE6; --chip-done:#7ee0b0;
   --farrow-col:#5C6C90; --gbtn-bg:rgba(255,255,255,.07); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.14); }
 :root[data-theme="sunset"]{ --ground:#1B1012; --panel:#251819; --panel-2:#301F21; --panel-3:#3B2A2C; --line:#473537;
-  --ink:#F7ECE7; --ink-soft:#CBAFA7; --ink-faint:#8E7772;
+  --ink:#F7ECE7; --ink-soft:#CBAFA7; --ink-faint:#A7908B;
   --accent:#FF9E5A; --accent-2:#F0862F; --accent-soft:#3C2417;
   --teal:#4FD1C5; --teal-soft:#123330; --indigo:#C2A7F5; --indigo-soft:#2B2149;
   --good:#5BD08A; --good-soft:#163220; --bad:#FF8484; --bad-soft:#3E1F1F; --locked:#4E3C3F;
@@ -709,7 +709,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .st-flag.no { color:var(--ink-faint); background:var(--panel-2); border:1px solid var(--line); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
 .lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
-.obj { padding:18px 20px; margin-bottom:24px; } .obj h3 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
+.obj { padding:18px 20px; margin-bottom:24px; } .obj :is(h2,h3) { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
 .obj ul { margin:0; padding:0; list-style:none; display:grid; gap:9px; } .obj li { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; } .obj li svg { width:17px; height:17px; color:var(--teal); flex:none; margin-top:2px; }
 /* Margins deliberately absent here. Spacing is set once, for every block type,
    in the layout system at the bottom of this file; a `.prose h2` rule outranks
@@ -731,7 +731,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .note.tip { background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); } .note.warn { background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 30%,transparent); } .note.key { background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
 .dtypes { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:4px 0 18px; } @media (max-width:560px){ .dtypes{ grid-template-columns:1fr;} }
 .dt { border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--panel); } .dt .dtag { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--indigo); background:var(--indigo-soft); border-radius:6px; padding:2px 8px; } .dt h4 { font-size:14px; margin:10px 0 4px; } .dt p { font-size:12.5px; color:var(--ink-soft); margin:0; } .dt .ex { font-family:var(--mono); font-size:12px; color:var(--teal); margin-top:8px; }
-.recap { padding:20px; margin:30px 0; } .recap h3 { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
+.recap { padding:20px; margin:30px 0; } .recap :is(h2,h3) { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
 .cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:24px 0; background:var(--feat-teal-bg); }
 .cta .pad { padding:24px; } .cta .eyebrow { color:var(--teal); } .cta h3 { font-size:20px; color:var(--feat-ink); margin:8px 0 6px; } .cta p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; }
 /* Challenges — the async half of the battle arena. Built on the existing card,
@@ -804,7 +804,13 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .llist { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:2px; } .llist li { display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:8px; font-size:13px; cursor:pointer; }
 .llist li .lic { width:19px; height:19px; border-radius:50%; flex:none; display:grid; place-items:center; font-size:10px; font-family:var(--mono); border:1.5px solid var(--line); color:var(--ink-faint); }
 .llist li.done .lic { background:var(--good); border-color:var(--good); color:#fff; } .llist li.cur { background:var(--accent-soft); font-weight:650; } .llist li.cur .lic { background:var(--accent); border-color:var(--accent); color:#21160A; } .llist li.lock { color:var(--ink-faint); }
-.side-card h4 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin-bottom:14px; }
+/* `.side-card`, not `.side-card h4`.
+   The class sits ON the heading, so the descendant form matched nothing and
+   both sidebar labels have been rendering at default browser heading size this
+   whole time instead of as the small-caps label they were written to be.
+   Tag-agnostic now, so the element can change for heading order without this
+   silently detaching again. */
+.side-card { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin:0 0 14px; font-weight:600; }
 
 /* practice */
 .psplit { display:grid; grid-template-columns:minmax(0,42%) minmax(0,58%); gap:18px; align-items:start; } @media (max-width:900px){ .psplit{ grid-template-columns:1fr;} }
@@ -970,7 +976,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .analogy p { font-size:13.5px; color:var(--ink-soft); margin:0; line-height:1.65; }
 
 .mistakes { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--bad) 28%, var(--line)); }
-.mistakes h3 { font-size:14px; margin:0 0 12px; }
+.mistakes :is(h2,h3) { font-size:14px; margin:0 0 12px; }
 .mk { border-top:1px solid var(--line); padding:12px 0; }
 .mk:first-of-type { border-top:0; padding-top:0; }
 /* align-items:start so the label stays at the top of a multi-line snippet */
@@ -983,7 +989,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .mk-why { font-size:13px; color:var(--ink-soft); margin:7px 0; line-height:1.6; }
 
 .iv { padding:16px 20px; margin:20px 0; }
-.iv h3 { font-size:14px; margin:0 0 11px; }
+.iv :is(h2,h3) { font-size:14px; margin:0 0 11px; }
 .iv-q { border-top:1px solid var(--line); }
 .iv-q:first-of-type { border-top:0; }
 .iv-q > summary { cursor:pointer; padding:11px 0; font-size:13.5px; font-weight:600; display:flex; align-items:center; gap:9px; list-style:none; }
@@ -1248,7 +1254,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 
 /* ---- Scaffolding ladder: worked example -> faded -> trace -> debug ---- */
 .worked { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--accent-2) 26%, var(--line)); }
-.worked h3, .faded h3, .trace h3, .debug h3 { font-size:14px; margin:0 0 6px; }
+.worked :is(h2,h3), .faded :is(h2,h3), .trace :is(h2,h3), .debug :is(h2,h3) { font-size:14px; margin:0 0 6px; }
 .wk-goal { font-size:13px; color:var(--ink-soft); margin:0 0 14px; }
 .wk-steps { list-style:none; margin:0; padding:0; counter-reset:wk; }
 .wk-steps > li { position:relative; padding:0 0 0 18px; margin-bottom:16px; border-left:2px solid var(--line); }
@@ -1291,7 +1297,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 
 /* ---- Lesson drills (one per operation, self-checked) ---- */
 .drills { padding:16px 20px; margin:20px 0; }
-.drills h3 { font-size:14px; margin:0 0 6px; }
+.drills :is(h2,h3) { font-size:14px; margin:0 0 6px; }
 .dr-intro { font-size:12.5px; color:var(--ink-soft); margin:0 0 10px; }
 .dr { border-top:1px solid var(--line); }
 .dr:first-of-type { border-top:0; }
@@ -2512,7 +2518,7 @@ select.inp { cursor:pointer; }
    rather than a runnable example: the form contains placeholders like
    "condition" and "body" that are not valid code, so it must not look like
    something you can press Run on. */
-.syntax h3 { font-size:14px; margin:0 0 10px; }
+.syntax :is(h2,h3) { font-size:14px; margin:0 0 10px; }
 .sx-intro { font-size:13px; color:var(--ink-soft); margin:0 0 12px; }
 .sx-form { font-family:var(--mono); font-size:13.5px; line-height:1.8; background:var(--panel-2);
   border:1px dashed color-mix(in srgb,var(--accent) 40%,var(--line)); border-radius:9px;

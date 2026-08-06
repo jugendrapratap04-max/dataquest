@@ -61,7 +61,7 @@ function Block({
     case "objectives":
       return (
         <div className="card obj">
-          <h3>What you&apos;ll be able to do after this lesson</h3>
+          <h2>What you&apos;ll be able to do after this lesson</h2>
           <ul>
             {b.items.map((it: string, i: number) => (
               <li key={i}>
@@ -127,7 +127,7 @@ function Block({
     case "syntax":
       return (
         <div className="card syntax">
-          <h3>🧩 Syntax</h3>
+          <h2>🧩 Syntax</h2>
           {b.intro && <p className="sx-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
           <pre className="sx-form">{b.form}</pre>
           <div className="sx-sub">What each part means</div>
@@ -158,7 +158,7 @@ function Block({
     case "mistakes":
       return (
         <div className="card mistakes">
-          <h3>🚩 Where beginners get stuck</h3>
+          <h2>🚩 Where beginners get stuck</h2>
           {b.items.map((m: any, i: number) => (
             <div className="mk" key={i}>
               <div className="mk-bad"><span>Wrong</span><pre>{m.bad}</pre></div>
@@ -172,7 +172,7 @@ function Block({
     case "interview":
       return (
         <div className="card iv">
-          <h3>🎤 How this is asked in interviews</h3>
+          <h2>🎤 How this is asked in interviews</h2>
           {b.items.map((q: any, i: number) => (
             <details className="iv-q" key={i}>
               {/* q.q carries inline <code> markup like the answer does — render it,
@@ -280,7 +280,7 @@ function Block({
     case "worked":
       return (
         <div className="card worked">
-          <h3>🧩 Worked example — {b.title}</h3>
+          <h2>🧩 Worked example — {b.title}</h2>
           {b.goal && <p className="wk-goal" dangerouslySetInnerHTML={{ __html: b.goal }} />}
           <ol className="wk-steps">
             {b.steps.map((s: any, i: number) => (
@@ -306,7 +306,7 @@ function Block({
     case "faded":
       return (
         <div className="card faded">
-          <h3>🪜 Your turn — fill the blanks</h3>
+          <h2>🪜 Your turn — fill the blanks</h2>
           {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
           <FadedExample code={b.code} blanks={b.blanks} output={b.output} />
         </div>
@@ -317,7 +317,7 @@ function Block({
     case "trace":
       return (
         <div className="card trace">
-          <h3>🔍 Trace the code</h3>
+          <h2>🔍 Trace the code</h2>
           {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
           <TraceCheck code={b.code} steps={b.steps} />
         </div>
@@ -328,7 +328,7 @@ function Block({
     case "debug":
       return (
         <div className="card debug">
-          <h3>🐞 Find the bug</h3>
+          <h2>🐞 Find the bug</h2>
           {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
           <pre className="dbg-code" dangerouslySetInnerHTML={{ __html: highlightPython(b.code) }} />
           {b.symptom && <div className="dbg-symptom"><span>What Python says</span><pre>{b.symptom}</pre></div>}
@@ -353,7 +353,7 @@ function Block({
     case "drills":
       return (
         <div className="card drills">
-          <h3>✍️ Try these yourself</h3>
+          <h2>✍️ Try these yourself</h2>
           {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
           {b.items.map((d: any, i: number) => (
             <details className="dr" key={i}>
@@ -377,7 +377,7 @@ function Block({
     case "recap":
       return (
         <div className="card recap">
-          <h3>⚡ Quick Recap</h3>
+          <h2>⚡ Quick Recap</h2>
           <ul>{b.items.map((it: string, i: number) => <li key={i} dangerouslySetInnerHTML={{ __html: it }} />)}</ul>
         </div>
       );
@@ -684,11 +684,11 @@ export default async function LessonPage({
       <aside className="learn-side">
         <RailControls />
         <div className="card pad">
-          <h4 className="side-card">{lesson.track.title.split(" — ")[0]} — {doneIds.size} / {siblings.length}</h4>
+          <h3 className="side-card">{lesson.track.title.split(" — ")[0]} — {doneIds.size} / {siblings.length}</h3>
           <div className="pbar"><i style={{ width: `${Math.round((doneIds.size / siblings.length) * 100)}%` }} /></div>
         </div>
         <div className="card pad">
-          <h4 className="side-card" style={{ marginBottom: 14 }}>Lessons in this module</h4>
+          <h3 className="side-card" style={{ marginBottom: 14 }}>Lessons in this module</h3>
           <ul className="llist">
             {siblings.map((s) => {
               const cls = s.id === lesson.id ? "cur" : doneIds.has(s.id) ? "done" : "lock";
