@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/session";
 import { PracticeWorkbench, type ProblemData } from "@/components/PracticeWorkbench";
 import { SqlWorkbench, type SqlProblemData } from "@/components/SqlWorkbench";
 import { Asm8085Workbench, type AsmProblemData } from "@/components/Asm8085Workbench";
+import { HtmlWorkbench, type HtmlProblemData } from "@/components/HtmlWorkbench";
 
 // Match the /practice list's order: Easy → Medium → Hard → Super Hard, then by
 // each problem's own order, then title.
@@ -161,6 +162,16 @@ export default async function ProblemPage({ params }: { params: Promise<{ slug: 
     // key remounts the workbench when navigating problem→problem so the editor
     // and results reset instead of carrying over the previous problem's state.
     return <SqlWorkbench key={problem.slug} p={sqlData} />;
+  }
+
+  if (problem.kind === "html") {
+    const htmlData: HtmlProblemData = {
+      ...common,
+      starterCode: problem.starterCode || "<!-- write your HTML here -->\n",
+      solutionCode: problem.solutionCode,
+      tests: JSON.parse(problem.testsJson || "[]"),
+    };
+    return <HtmlWorkbench key={problem.slug} p={htmlData} />;
   }
 
   if (problem.kind === "asm8085") {

@@ -30,7 +30,10 @@ export const LANGUAGES: Record<string, Language> = {
   // all; the rest are content-only until their runtime exists, and marking that
   // honestly here is better than shipping a Run button that cannot run.
   javascript: { monaco: "javascript", label: "JavaScript", name: "JavaScript", runnable: false },
-  html: { monaco: "html", label: "HTML", name: "HTML", runnable: false },
+  // runnable since the HTML workbench landed: the student's markup is rendered
+  // in a sandboxed frame and graded against the resulting DOM, so it is as
+  // runnable as anything else here — just not by executing it.
+  html: { monaco: "html", label: "HTML", name: "HTML", runnable: true },
   css: { monaco: "css", label: "CSS", name: "CSS", runnable: false },
   java: { monaco: "java", label: "Java", name: "Java", runnable: false },
   c: { monaco: "c", label: "C", name: "C", runnable: false },

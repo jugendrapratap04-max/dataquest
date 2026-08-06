@@ -325,10 +325,53 @@ async function verifyAsm8085(problem: ProblemLike, code: string): Promise<Verify
   return { passed: true };
 }
 
+/* HTML, re-graded on the server.
+ *
+ * The workbench already ran these checks in the browser, and that verdict is
+ * worth exactly nothing here — a POST of {problemId, passed:true} with no
+ * markup at all would otherwise buy the XP, which is the hole this whole file
+ * exists to close for every other language.
+ *
+ * linkedom rather than a headless browser: nothing about these assertions needs
+ * layout, styles or scripts, only the parsed tree. It is a devDependency-sized
+ * parser doing a devDependency-sized job.
+ */
+async function verifyHtml(problem: ProblemLike, code: string): Promise<VerifyResult> {
+  let tests: unknown;
+  try {
+    tests = JSON.parse(problem.testsJson || "[]");
+  } catch {
+    return { passed: false, reason: "This problem's tests could not be read." };
+  }
+
+  const { validateHtmlTests, gradeHtml } = await import("./html-check");
+  const bad = validateHtmlTests(tests);
+  if (bad) return { passed: false, reason: `This problem's tests are malformed: ${bad}` };
+
+  const { parseHTML } = await import("linkedom");
+
+  // The reference answer is graded first. If it cannot pass its own checks the
+  // problem is broken, and telling the student they failed would be a lie.
+  if (problem.solutionCode?.trim()) {
+    const ref = gradeHtml(parseHTML(problem.solutionCode).document, tests as never);
+    if (ref.passed !== ref.total) {
+      return { passed: false, reason: "This problem's own reference answer does not pass its checks." };
+    }
+  }
+
+  const r = gradeHtml(parseHTML(code).document, tests as never);
+  if (r.passed !== r.total) {
+    const missed = r.results.filter((x) => !x.pass).map((x) => x.says);
+    return { passed: false, reason: `Re-checked on the server and this did not pass: ${missed.join("; ")}` };
+  }
+  return { passed: true };
+}
+
 export async function verifySolution(problem: ProblemLike, code: string): Promise<VerifyResult> {
   if (!code.trim()) return { passed: false, reason: "No code was submitted." };
   try {
     if (problem.kind === "sql") return await verifySql(problem, code);
+    if (problem.kind === "html") return await verifyHtml(problem, code);
     if (problem.kind === "asm8085") return await verifyAsm8085(problem, code);
     return await verifyPython(problem, code);
   } catch (e: any) {
