@@ -389,10 +389,15 @@ for (const b of lesson.content.filter((x) => x.t === "syntax")) {
 
   // The reverse gap is quieter and just as bad: a form introducing a keyword the
   // breakdown never mentions is the part the beginner was going to ask about.
-  const named = new Set(b.parts.map((p) => String(p.bit)));
-  const keywords = (form.match(/\b(def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|lambda|yield|global|nonlocal|assert|del|pass|break|continue|in|is|not|and|or)\b/g) ?? []);
-  for (const k of new Set(keywords)) {
-    if (!named.has(k)) say(`the form uses \`${k}\` but the breakdown never says what it does`);
+  // The keyword list is Python's, so the scan only runs for tracks whose forms
+  // ARE Python — an HTML form annotates its lines in English prose, where
+  // `as`, `from` and `is` are just words and every hit is a false alarm.
+  if (!isHtml) {
+    const named = new Set(b.parts.map((p) => String(p.bit)));
+    const keywords = (form.match(/\b(def|class|return|if|elif|else|for|while|import|from|as|with|try|except|finally|raise|lambda|yield|global|nonlocal|assert|del|pass|break|continue|in|is|not|and|or)\b/g) ?? []);
+    for (const k of new Set(keywords)) {
+      if (!named.has(k)) say(`the form uses \`${k}\` but the breakdown never says what it does`);
+    }
   }
   if (!broke) console.log(`  ok   syntax block: ${b.parts.length} parts, all present in the form`);
 }

@@ -202,4 +202,78 @@ export const htmlProblems = [
       "Do not indent the lines inside `pre` to match your HTML — that indentation would show on screen.",
     ],
     "html,text,code"),
+
+  /* ------------------------------------------------- html-links ---- */
+  P("html-links", 610, "html-nav-links", "Wire the Site Together", "Easy",
+    "This is the home page of a three-page site. The other two files — `about.html` and `contact.html` — sit in the **same folder**, and nothing links to them yet.\n\nAdd three links to the paragraph area:\n\n- one to `about.html`, reading `About`\n- one to `contact.html`, reading `Contact`\n- one to `https://developer.mozilla.org`, reading `MDN`\n\nUse a relative path for your own pages and the full URL for the external one — that split is the whole point of the exercise.",
+    "<h1>My Site</h1>\n<p>Welcome. There is an about page and a contact page, but no way to reach them.</p>\n\n<!-- add the three links below -->\n",
+    "<h1>My Site</h1>\n<p>Welcome. There is an about page and a contact page, but no way to reach them.</p>\n\n<a href=\"about.html\">About</a>\n<a href=\"contact.html\">Contact</a>\n<a href=\"https://developer.mozilla.org\">MDN</a>\n",
+    [
+      { find: "a", attr: "href", equals: "about.html", says: "a relative link to about.html" },
+      { find: "a", attr: "href", equals: "contact.html", says: "a relative link to contact.html" },
+      { find: "a", attr: "href", equals: "https://developer.mozilla.org", says: "an absolute link to developer.mozilla.org, scheme included" },
+      { find: "a", text: true, contains: "About", says: "one link reads \"About\"" },
+      { find: "a", text: true, contains: "MDN", says: "the external link reads \"MDN\"" },
+    ],
+    [
+      "A file in the same folder needs only its name: `href=\"about.html\"`.",
+      "The external link needs the whole address, `https://` included — without a scheme it becomes a relative path.",
+      "Each link is `<a href=\"...\">text</a>` — destination in the attribute, words in the content.",
+    ],
+    "html,links,paths"),
+
+  P("html-links", 611, "html-fix-the-address", "Three Links, Three Wrong Addresses", "Medium",
+    "Every link on this page is broken, and each one differently:\n\n- the Wikipedia link has no scheme, so the browser treats it as a **relative path** and 404s on this site\n- the About link is a **disk path from the author's own computer** — it cannot work for any visitor; the file is just `about.html`, next to this page\n- the Contact link has **no destination at all**, so it is not a link — it should go to `contact.html`\n\nFix all three. The link text is already right — only the addresses are wrong.",
+    "<h2>Footer</h2>\n<a href=\"www.wikipedia.org\">Wikipedia</a>\n<a href=\"C:\\Users\\ravi\\site\\about.html\">About</a>\n<a>Contact</a>\n",
+    "<h2>Footer</h2>\n<a href=\"https://www.wikipedia.org\">Wikipedia</a>\n<a href=\"about.html\">About</a>\n<a href=\"contact.html\">Contact</a>\n",
+    [
+      { find: "a", attr: "href", equals: "https://www.wikipedia.org", says: "the Wikipedia link carries its scheme" },
+      { find: "a", attr: "href", equals: "about.html", says: "the About link is a relative path to about.html" },
+      { find: "a", attr: "href", equals: "contact.html", says: "the Contact link now has a destination" },
+      { find: "a[href]", count: 3, says: "all three anchors have an href" },
+      { find: "h2", text: true, contains: "Footer", says: "the heading is unchanged" },
+    ],
+    [
+      "No scheme means relative — `www.wikipedia.org` needs `https://` in front to be an external link.",
+      "A `C:\\` path exists on one computer in the world. The page and about.html share a folder, so the file name alone is the address.",
+      "An `<a>` without `href` is not a link at all — add `href=\"contact.html\"`.",
+    ],
+    "html,links,debugging"),
+
+  /* ------------------------------------------ html-link-targets ---- */
+  P("html-link-targets", 612, "html-toc", "A Table of Contents", "Easy",
+    "This guide has two long sections and no way to jump to them.\n\n- give the `Setup` heading an id of `setup`, and the `FAQ` heading an id of `faq`\n- at the top, where the comment is, add two fragment links — `Setup` and `FAQ` — that jump to them\n\nRemember the case rule: fragments match ids exactly, so keep everything lowercase.",
+    "<h1>The Guide</h1>\n<!-- the two jump links go here -->\n\n<h2>Setup</h2>\n<p>Imagine several screens of text here.</p>\n\n<h2>FAQ</h2>\n<p>And several more here.</p>\n",
+    "<h1>The Guide</h1>\n<a href=\"#setup\">Setup</a>\n<a href=\"#faq\">FAQ</a>\n\n<h2 id=\"setup\">Setup</h2>\n<p>Imagine several screens of text here.</p>\n\n<h2 id=\"faq\">FAQ</h2>\n<p>And several more here.</p>\n",
+    [
+      { find: "h2#setup", exists: true, says: "the Setup heading carries id=\"setup\"" },
+      { find: "h2#faq", exists: true, says: "the FAQ heading carries id=\"faq\"" },
+      { find: "a[href=\"#setup\"]", exists: true, says: "a link jumping to #setup" },
+      { find: "a[href=\"#faq\"]", exists: true, says: "a link jumping to #faq" },
+      { find: "a", text: true, contains: "Setup", says: "the first jump link reads \"Setup\"" },
+    ],
+    [
+      "The id goes on the heading itself: `<h2 id=\"setup\">Setup</h2>`.",
+      "A fragment link is an anchor whose href starts with #: `<a href=\"#setup\">Setup</a>`.",
+      "The `#` appears in the link, never in the id.",
+    ],
+    "html,links,fragments"),
+
+  P("html-link-targets", 613, "html-link-manners", "Links, Behaving Properly", "Medium",
+    "This page has two problems a visitor would actually feel:\n\n- the guide link says `here` — meaningless in a screen reader's links list, so move the anchor onto the words `the guide`. It leaves this site, so make it open in a **new tab**, with the attribute that politely goes along with that\n- the email address is plain text — turn it into a link that opens the visitor's mail program addressed to `hi@example.com`\n\nKeep every visible word on the page the same.",
+    "<p>Click <a href=\"https://example.com/guide\">here</a> to read the guide.</p>\n<p>Questions? Email hi@example.com any time.</p>\n",
+    "<p>Click here to read <a href=\"https://example.com/guide\" target=\"_blank\" rel=\"noopener\">the guide</a>.</p>\n<p>Questions? Email <a href=\"mailto:hi@example.com\">hi@example.com</a> any time.</p>\n",
+    [
+      { find: "a[href=\"https://example.com/guide\"]", text: true, contains: "guide", says: "the link text names the destination — it contains \"guide\"" },
+      { find: "a[href=\"https://example.com/guide\"]", attr: "target", equals: "_blank", says: "the external link opens in a new tab" },
+      { find: "a[href=\"https://example.com/guide\"]", attr: "rel", contains: "noopener", says: "rel=\"noopener\" rides along with target=\"_blank\"" },
+      { find: "a", attr: "href", equals: "mailto:hi@example.com", says: "the email address is a mailto: link" },
+      { find: "a", text: true, contains: "hi@example.com", says: "the visible address is the link's text" },
+    ],
+    [
+      "Move the anchor, not the words: wrap `the guide` instead of `here`.",
+      "`target=\"_blank\"` opens a new tab; `rel=\"noopener\"` belongs beside it.",
+      "A mail link is a scheme, like https: `<a href=\"mailto:hi@example.com\">hi@example.com</a>`.",
+    ],
+    "html,links,accessibility"),
 ];

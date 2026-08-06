@@ -155,7 +155,7 @@ export const htmlLessons = [
       ] },
 
       { t: "hook",
-        q: "The HTML file you wrote in the last module opened perfectly in your browser. Why can nobody else see it?",
+        q: "An HTML file sitting on your own computer opens perfectly in your browser. Why can nobody else on earth see it?",
         why: "Because your browser opened a file from your disk. Nothing asked anyone for it and nothing sent it anywhere. A website is a file that some machine, somewhere, is willing to hand to anybody who asks — and that machine is not your laptop." },
 
       { t: "def",
@@ -671,7 +671,7 @@ export const htmlLessons = [
       { t: "code", file: "first.html", code: "<h1>My first page</h1>\n<p>This is a paragraph. It is smaller than the heading.</p>\n<p>This is a second paragraph.</p>", output: "A large \"My first page\", then two normal-sized lines of text." },
       { t: "psoft", html: "No styling anywhere, and the heading is still large and bold. That is the browser's default for <code>h1</code> — it was told this is the most important heading on the page, so it made it look like one." },
 
-      { t: "note", variant: "tip", html: "<b>Try it now.</b> Make a file called <code>index.html</code>, paste those three lines in, and open it in your browser. That is a website. It is on your computer rather than the internet, and the difference between the two is Module 1." },
+      { t: "note", variant: "tip", html: "<b>Try it now.</b> Make a file called <code>index.html</code>, paste those three lines in, and open it in your browser. That is a web page — on your own disk, not the internet. The address bar will start <code>file:///</code>, and Module 0 explained why that prefix means you have a document rather than a website." },
 
       { t: "h2", n: "2", text: "The browser is guessing until you tell it" },
       { t: "p", html: "Give a browser plain text with no tags and it shows you one grey wall of words. It has no way to know which line was a title. HTML removes the guessing — and when you leave it out, the guessing comes back." },
@@ -1030,6 +1030,204 @@ export const htmlLessons = [
       { t: "interview", items: [
         { level: "easy", q: "What is the difference between b and strong?", a: "strong means the content is important — a screen reader may announce it differently, and it survives into anything that reads the page's meaning. b only says \"offset this visually\" with no claim about importance. Both usually render bold, which is why the choice gets made carelessly." },
         { level: "medium", q: "Why does time have a datetime attribute when the text already shows the date?", a: "Because the visible text is for people and is ambiguous — 06/08 is two different days depending on the country, and \"last Tuesday\" is not a date at all. datetime is an unambiguous machine format, which is what lets a search result show the date and a calendar offer to add the event." },
+      ] },
+    ],
+  },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 4 — LINKS
+   *
+   * The element the whole system is named for. Module 0 made the argument that
+   * the Web exists because documents can point at each other; these two lessons
+   * are where the student's own pages finally do. The first is the anchor and
+   * the two kinds of address; the second is everything a link can do besides
+   * fetching a page — and the words inside it, which matter more than beginners
+   * ever expect.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-links",
+    order: 13,
+    title: "Links: the Element the Web Is Named After",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Write a link to another site, and name each part of it",
+        "Link between pages of your own site with relative paths",
+        "Climb out of a folder with <code>..</code> instead of guessing",
+        "Choose between an absolute and a relative address, deliberately",
+      ] },
+
+      { t: "hook",
+        q: "Module 0 opened with the claim that the entire Web was invented for one idea: a document pointing at another document. Twelve lessons in, nothing you have written points anywhere. What are your pages, until they do?",
+        why: "Documents. Well-structured, honestly marked up — and each one alone in its folder. The anchor element is what turns a pile of pages into a site, and it is the reason the H in HTML stands for <b>hypertext</b>." },
+
+      { t: "def",
+        term: "Hyperlink",
+        en: "A piece of content that, when activated, takes the reader somewhere else — another site, another page of this one, or another place on this page." },
+
+      { t: "analogy",
+        concept: "absolute vs relative addresses",
+        real: "a full postal address vs \"two doors down\"",
+        html: "An absolute address works from anywhere on earth — that is what all the parts are for. \"Two doors down\" is shorter and works perfectly, but only from where you are standing. Relative paths are directions from the file the link is written in — move that file and every direction in it now starts from the wrong place." },
+
+      { t: "syntax",
+        intro: "The anchor. One element, one attribute, and the text a reader clicks.",
+        form: "<a href=\"https://example.com/menu.html\">See the menu</a>",
+        parts: [
+          { bit: "<a", says: "The anchor element — the original idea the Web was built around, which is why it got the shortest name in the language." },
+          { bit: "href", says: "<b>H</b>ypertext <b>ref</b>erence: where this link goes. Without it, an <code>&lt;a&gt;</code> is not a link at all — it draws like text, cannot be focused, and does nothing." },
+          { bit: "https://example.com/menu.html", says: "The destination — any URL from Module 0: a page, a section, an email address." },
+          { bit: "See the menu", says: "The content. This is what renders, what gets clicked, and what a screen reader announces. The next lesson is partly about choosing it well." },
+        ],
+        note: "Anything can be the content — wrap an image in an anchor and the image becomes clickable. The browser's defaults for a text link are blue and underlined, and like every default so far, that is CSS's business to change, not a reason to pick a different element.",
+      },
+
+      { t: "code", file: "out.html", code: "<p>The reference for every element is\n<a href=\"https://developer.mozilla.org\">MDN Web Docs</a>,\nand the language itself is specified at\n<a href=\"https://html.spec.whatwg.org\">WHATWG</a>.</p>", output: "One paragraph with two clickable links in it." },
+      { t: "psoft", html: "Notice the links sit <b>inside</b> the paragraph, mid-sentence. An anchor is an inline element like <code>strong</code> or <code>em</code> — it wraps a few words wherever those words happen to be." },
+
+      { t: "h2", n: "1", text: "Two kinds of address" },
+      { t: "p", html: "An <b>absolute</b> URL is the whole thing, scheme first: <code>https://example.com/about.html</code>. It means the same destination from anywhere — written on your page, pasted in a chat, printed on paper." },
+      { t: "p", html: "A <b>relative</b> URL leaves all of that out and gives directions from the file it is written in. <code>about.html</code> means \"the file called about.html, in the same folder as me\". Shorter to write — and it keeps working when the whole site moves, because the pages have not moved <i>relative to each other</i>. That is why links between your own pages should be relative: rename the domain, move from Live Server to real hosting, and not one internal link breaks." },
+
+      { t: "syntax",
+        intro: "Every shape a relative path takes, measured from the file the link is in.",
+        form: "about.html            same folder as this file\nblog/post.html        down into a folder\n../index.html         up one folder, then the file\n../../images/logo.png  up two, then down\n/contact.html         from the site's root, wherever this file is",
+        parts: [
+          { bit: "about.html", says: "A bare name looks in this file's own folder. The commonest case and the shortest to write." },
+          { bit: "blog/post.html", says: "A name with a slash walks down: into <code>blog</code>, then to <code>post.html</code>." },
+          { bit: "..", says: "Up one level. It means \"my parent folder\" — the same <code>..</code> you may have met in a terminal, doing the same job." },
+          { bit: "../../", says: "They chain. Two levels up, then whatever path follows." },
+          { bit: "/contact.html", says: "A leading slash starts from the site root instead of from this file — the same address from every page on the site, however deep." },
+        ],
+        note: "The root-relative form needs a root to exist, so it works on a server — including Live Server — and misbehaves on <code>file:///</code>, where \"the root\" is your whole disk. One more thing that quietly depends on the difference Module 1 set up.",
+      },
+
+      { t: "code", file: "blog/post.html", code: "<!-- this file lives in the blog/ folder -->\n<a href=\"../index.html\">Home</a>\n<a href=\"second-post.html\">Next post</a>\n<img src=\"../images/banner.png\" alt=\"Banner\">", output: "Two links and an image, each path measured from blog/, where this file lives." },
+      { t: "psoft", html: "The same rules drive <code>src</code> on an image, <code>href</code> on a stylesheet — every attribute that names a file. Learn the path rules once here and you have learned them for the whole language." },
+
+      { t: "h2", n: "2", text: "The mistake the browser cannot warn you about" },
+      { t: "p", html: "Write <code>href=\"www.wikipedia.org\"</code> and the link is broken — but not in the way you might guess. There is no error. The browser applies the rule it always applies: <b>no scheme means relative</b>. So it looks for a file called <code>www.wikipedia.org</code> in your own folder, fails to find one, and 404s on your own site." },
+
+      { t: "debug",
+        intro: "A student's footer link goes wrong in a way that looks impossible. Read the markup and the symptom, and work out what the browser did before opening the fix.",
+        code: "<p>Sources: <a href=\"www.wikipedia.org\">Wikipedia</a></p>",
+        symptom: "Clicking the link shows a 404 page — and the address bar reads mysite.com/www.wikipedia.org.",
+        q: "The destination is right there in the tag. Why did the browser go looking for it on the student's own site?",
+        fix: "<p>Sources: <a href=\"https://www.wikipedia.org\">Wikipedia</a></p>",
+        why: "There is no scheme, and a URL without a scheme is relative — that is the rule, with no exception for values that happen to look like domains. So <code>www.wikipedia.org</code> was treated exactly like <code>about.html</code>: a file to find near this one. The address bar in the symptom says all of this in one line, which is why reading it beats re-reading the markup. Every external link starts <code>https://</code>." },
+
+      { t: "h2", n: "3", text: "index.html, paid off" },
+      { t: "p", html: "Module 1 insisted the home page be called <code>index.html</code> and promised a reason. Here it is: link to a <b>folder</b> — <code>href=\"blog/\"</code> — and the server serves that folder's <code>index.html</code> without the name ever appearing in the address. It is why <code>example.com</code> works with no filename in it, and why every folder of a well-organised site has an index." },
+
+      { t: "drills", intro: "Write these out — the path rules only become automatic through your fingers.", items: [
+        { task: "From index.html, a link to about.html in the same folder.", code: "<a href=\"about.html\">About</a>" },
+        { task: "From index.html, a link to the first post, at blog/first.html.", code: "<a href=\"blog/first.html\">First post</a>" },
+        { task: "From blog/first.html, a link back to the home page.", code: "<a href=\"../index.html\">Home</a>" },
+        { task: "From anywhere at all, a link to Wikipedia.", code: "<a href=\"https://www.wikipedia.org\">Wikipedia</a>" },
+      ] },
+
+      { t: "mistakes", items: [
+        { bad: "<a href=\"www.example.com\">Visit</a>", why: "No scheme, so it is a relative path — the browser looks for a file called www.example.com on your own site.", fix: "<a href=\"https://www.example.com\">Visit</a>" },
+        { bad: "<a href=\"C:\\Users\\ravi\\site\\about.html\">About</a>", why: "That is a disk path on one particular computer. It cannot work for any visitor, and backslashes are not path separators on the web.", fix: "<a href=\"about.html\">About</a>" },
+        { bad: "<a>Contact</a>", why: "No href — so it is not a link. It renders as plain text, cannot be reached with the keyboard, and clicking does nothing.", fix: "<a href=\"contact.html\">Contact</a>" },
+        { bad: "<a href=\"About.html\">About</a> — for a file named about.html", why: "Works on Windows, which ignores case, and 404s on almost every real server, which does not. The same trap DevTools caught with the Images/ folder in Module 1.", fix: "<a href=\"about.html\">About</a>" },
+      ] },
+
+      { t: "recap", items: [
+        "<code>&lt;a href=\"...\"&gt;text&lt;/a&gt;</code> — no <code>href</code>, no link",
+        "Absolute = the full URL, works from anywhere; relative = directions from this file",
+        "Internal links should be relative — the site can then move without breaking",
+        "<code>..</code> climbs one folder; a leading <code>/</code> starts from the site root",
+        "No scheme means relative — <code>www.site.com</code> is a broken link, not a shortcut",
+        "Linking to a folder serves its <code>index.html</code> — the payoff of the name",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "When would you use a relative URL rather than an absolute one?", a: "For every link between pages of the same site. Relative paths are measured between the files, so the whole site can change domain or move from local development to hosting without a single internal link breaking. Absolute URLs are for destinations you do not control — other people's sites." },
+        { level: "medium", q: "A link written as href=\"example.com\" goes to a 404 on the developer's own site. What happened?", a: "There is no scheme, so the browser treated it as a relative path — a file called example.com next to the current page — exactly as it would treat about.html. Nothing distinguishes a value that looks like a domain; the rule is purely about the scheme. External links must carry https:// for this reason." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-link-targets",
+    order: 14,
+    title: "Fragments, New Tabs and the Words You Click",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Link to a specific place on a page — this one or any other",
+        "Open a link in a new tab, and know when you should not",
+        "Write links that start an email or a phone call",
+        "Choose link text that works out of context — because it is read out of context",
+      ] },
+
+      { t: "hook",
+        q: "A screen reader user presses one key and hears every link on the page read out as a plain list, with the sentences around them gone. Half your links say \"click here\". What does that list sound like?",
+        why: "\"Click here. Click here. Read more. Here.\" — a menu with no dishes on it. The sentence that explained each link did not come along. Nothing else this lesson covers matters as much as the words you put inside the anchor." },
+
+      { t: "def",
+        term: "id attribute",
+        en: "A name you give to one element so that it can be pointed at — by a link, and later by CSS and JavaScript. Each id may appear once per page." },
+
+      { t: "analogy",
+        concept: "fragment links",
+        real: "handing over a book open at the right page",
+        html: "A normal link hands someone the whole book and lets them find the passage. A fragment link hands it over already open at the paragraph you meant. The <code>id</code> is the bookmark you left; the <code>#</code> in the link is you saying \"start there\"." },
+
+      { t: "syntax",
+        intro: "Give an element a name, and links can jump straight to it — from this page or any other.",
+        form: "<h2 id=\"pricing\">Pricing</h2>\n\n<a href=\"#pricing\">Jump to pricing</a>\n<a href=\"plans.html#pricing\">Pricing, over on the plans page</a>",
+        parts: [
+          { bit: "id=\"pricing\"", says: "The name. One element per page may hold it, and the convention is lowercase with hyphens — the same habits as filenames." },
+          { bit: "#pricing", says: "A fragment on its own: jump to that id on <b>this</b> page. Module 0 said the fragment never reaches the server — this is why the jump is instant, with no request at all." },
+          { bit: "plans.html#pricing", says: "A path and a fragment together: fetch that page, then land at that spot on it." },
+        ],
+        note: "Fragments are <b>case-sensitive</b> even though most of HTML is not: <code>href=\"#Pricing\"</code> does not find <code>id=\"pricing\"</code>, and the browser says nothing — the link simply scrolls nowhere. Lowercase both, every time, and the problem cannot exist.",
+      },
+
+      { t: "code", file: "guide.html", code: "<a href=\"#setup\">Setup</a> | <a href=\"#faq\">FAQ</a>\n\n<h2 id=\"setup\">Setup</h2>\n<p>Long section...</p>\n\n<h2 id=\"faq\">FAQ</h2>\n<p>Long section...</p>\n\n<a href=\"#top\">Back to top</a>", output: "A tiny table of contents that jumps down the page, and a link at the bottom that jumps back up." },
+      { t: "psoft", html: "This is the entire mechanism behind every \"table of contents\" and every \"back to top\" you have ever clicked — and behind the address bar's <code>#reviews</code> from Module 0, which you can now write yourself." },
+
+      { t: "h2", n: "1", text: "New tabs — the attribute and the manners" },
+      { t: "syntax",
+        intro: "Two attributes that travel together, and two schemes that make a link do something other than fetch a page.",
+        form: "<a href=\"https://example.com\" target=\"_blank\" rel=\"noopener\">Example</a>\n\n<a href=\"mailto:hi@example.com\">Email us</a>\n<a href=\"tel:+911234567890\">Call us</a>",
+        parts: [
+          { bit: "target=\"_blank\"", says: "Open in a new tab instead of navigating this one." },
+          { bit: "rel=\"noopener\"", says: "Rides along with <code>_blank</code>. Without it, the opened page keeps a handle back to yours and can redirect it while the visitor is not looking — a real attack with a name, tabnabbing. One attribute closes the door." },
+          { bit: "mailto:", says: "A scheme, like https — but it opens the visitor's mail program with the address filled in, instead of fetching anything." },
+          { bit: "tel:", says: "The same idea for phone numbers. On a phone it dials; include the country code so it works from every country." },
+        ],
+        note: "The default — same tab — is right more often than beginners believe. The back button belongs to the visitor, and it already does everything a new tab does. Reserve <code>_blank</code> for genuine departures, like an external reference leaving your site, and never reach for it just to \"keep people on the page\".",
+      },
+
+      { t: "h2", n: "2", text: "The words inside the anchor" },
+      { t: "p", html: "Link text is read in three places where the surrounding sentence is missing: the screen reader's links list from the hook, a search engine weighing what the destination page is about, and a visitor scanning the page for the blue underlines alone. In all three, <code>click here</code> carries nothing." },
+      { t: "p", html: "The test is simple: read only the linked words, and ask whether they say where the link goes. \"<a>Click here</a> to see the price list\" fails it. \"See <a>the price list</a>\" passes — same sentence, same length, and the link now describes its destination." },
+
+      { t: "note", variant: "key", html: "<b>Move the link onto the words that name the destination.</b> The fix is almost never new words — the sentence already contains the right ones, and the anchor is just wrapped around the wrong ones. \"Click here\" also fails a second way: it assumes a mouse. Nobody taps \"here\" on a phone or presses \"click\" on a keyboard." },
+
+      { t: "mistakes", items: [
+        { bad: "Click <a href=\"guide.html\">here</a> to read the guide.", why: "Out of context — in the links list, in a search index, at a glance — \"here\" says nothing about the destination.", fix: "Read <a href=\"guide.html\">the guide</a>." },
+        { bad: "<a href=\"#Setup\">Setup</a> — for id=\"setup\"", why: "Fragments are case-sensitive. The link scrolls nowhere and no error says why.", fix: "<a href=\"#setup\">Setup</a>" },
+        { bad: "<a href=\"#\">Products</a>", why: "A placeholder that ships. Clicking it jumps to the top of the page and puts a stray # in the address bar.", fix: "<a href=\"products.html\">Products</a>" },
+        { bad: "target=\"_blank\" on every link in the navigation", why: "Every click breeds a tab, the back button dies, and the visitor's browser fills with copies of your site. It is their tab — let them decide.", fix: "Same tab for your own pages; _blank only for genuine departures." },
+      ] },
+
+      { t: "recap", items: [
+        "<code>id</code> names a spot; <code>#name</code> jumps to it — instantly, with no request",
+        "<code>page.html#name</code> combines a fetch and a jump",
+        "Fragments are case-sensitive, and fail silently when they miss",
+        "<code>target=\"_blank\"</code> opens a new tab; <code>rel=\"noopener\"</code> goes with it",
+        "<code>mailto:</code> and <code>tel:</code> are links that act instead of fetching",
+        "Link text must name its destination — it is read with the sentence stripped away",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What does target=\"_blank\" do, and what should accompany it?", a: "It opens the link in a new tab. rel=\"noopener\" should ride along, because without it the opened page holds a reference back to the opener and can navigate it — the tabnabbing attack. Modern browsers have closed most of the hole by default, but the attribute states the intent and costs nothing." },
+        { level: "medium", q: "Why is \"click here\" considered bad link text?", a: "Because link text is consumed out of context: screen readers present links as a bare list, search engines use the anchor text to understand the destination, and scanning readers read only the underlines. In all three, \"here\" carries no information. The fix is to move the anchor onto the words that already name the destination — \"read the pricing guide\", not \"click here\"." },
       ] },
     ],
   },

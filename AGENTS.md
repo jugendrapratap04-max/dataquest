@@ -105,8 +105,13 @@ Rules that make this work rather than become theatre:
       exactly right, which is what made the correction safe to run. XP is now
       recomputed from earned, the seed no longer writes any, and `db:check`
       reports any account holding more than its submissions justify
-- [ ] Read a lesson end to end as a beginner would. Every content check so far
-      has counted sections, not judged them
+- [x] ~~Read a lesson end to end as a beginner would~~ — done for all 12 HTML
+      lessons (2026-08-06), read in course order as a first-timer. Two things a
+      beginner would trip on, both fixed: lesson 2's hook referred to "the HTML
+      file you wrote in the last module" when the first file is only written in
+      Module 2, and lesson 8 called a local file "a website" six lessons after
+      lesson 2's own mistake block said that exact phrase is wrong. NOT checked:
+      the other 127 lessons — this pass judged one course, not the platform
 
 ## Where the rest is written down
 
