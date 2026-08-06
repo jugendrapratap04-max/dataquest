@@ -1,0 +1,14 @@
+WEBVTT
+
+NOTE
+A real caption file for the media module's exercises, so a <track> element
+has something to load rather than pointing at nothing. The timings match
+media-lab/tone.wav: two notes, one per second.
+
+1
+00:00:00.000 --> 00:00:01.000
+The first note plays: A above middle C.
+
+2
+00:00:01.000 --> 00:00:02.000
+The second note is a D, a fourth higher.

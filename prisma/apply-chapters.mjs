@@ -109,6 +109,10 @@ const PLANS = {
     // Anything past the final boundary gets no chapter at all, which drops it
     // out of /book AND out of the course navigation's grouping.
     { slug: "html-seo", title: "SEO", upto: 33, summary: "What a crawler actually reads, why blocking a page can leave it in search anyway, and structured data — the one modern SEO surface the rest of the course does not already cover by another name." },
+    // ⚠️ LAST ENTRY: bump this `upto` with every lesson appended to the track.
+    // Anything past the final boundary gets no chapter at all, which drops it
+    // out of /book AND out of the course navigation's grouping.
+    { slug: "html-media", title: "Media and embeds", upto: 35, summary: "Video and audio without a plugin, the reason autoplay usually does not work, captions for everyone watching without sound — and then somebody else's page inside yours, plus how to choose between an image, an inline SVG and a canvas." },
   ],
 };
 

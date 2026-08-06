@@ -1126,4 +1126,99 @@ export const htmlProblems = [
       "There is no rating on this page, so no rating belongs in the block.",
     ],
     "html,seo,structured-data"),
+
+  /* ------------------------------------------------- html-media ----
+   *
+   * The practice area ships REAL media at /media-lab/: `tone.wav` (two seconds,
+   * generated as raw PCM) and `captions.vtt`. Both measured, not assumed — the
+   * WAV decodes to duration 2.00 INSIDE a `sandbox=""` frame, which is the
+   * workbench's actual condition, and the VTT is served as text/vtt. So the
+   * audio exercise genuinely plays in the preview.
+   *
+   * There is deliberately no video file: an MP4 needs a real encoder, so the
+   * video exercises use `poster`, and what the student sees IS the poster doing
+   * its job.
+   *
+   * ⚠️ NEVER ASSERT ON `svg[viewBox]`. The browser matches both `[viewBox]` and
+   * `[viewbox]`; linkedom matches NEITHER, so such a test would pass in the
+   * workbench and fail on submit. Everything else used below was checked in
+   * both engines: video/source/poster/controls, track with kind/srclang/label/
+   * default, iframe with title/loading, and `svg[role="img"] > title`. */
+  P("html-media", 653, "html-first-player", "A Player That Can Be Played", "Easy",
+    "Two media elements, and the practice area ships a real sound file so the first one genuinely works.\n\n- an **audio** player for `/media-lab/tone.wav` — and it needs `controls`, or there is no way to start it at all\n- a **video** player with `controls`, a `poster` of `/img-lab/photo.png`, and real dimensions of `320` by `200` so the page does not jump when it loads\n\nThere is no video file in the lab, so what you will see is the poster. That is not a bug — it is exactly what a poster is for, and it is what a visitor on a slow connection sees before the first frame arrives.\n\nPress play on the audio once it is right.",
+    "<h3>Listen</h3>\n<!-- an audio player for /media-lab/tone.wav -->\n\n<h3>Watch</h3>\n<!-- a video player with a poster and dimensions -->\n",
+    "<h3>Listen</h3>\n<audio src=\"/media-lab/tone.wav\" controls></audio>\n\n<h3>Watch</h3>\n<video controls poster=\"/img-lab/photo.png\" width=\"320\" height=\"200\"></video>\n",
+    [
+      { find: "audio[controls]", count: 1, says: "an <audio> element with controls, or nothing can start it" },
+      { find: "audio", attr: "src", equals: "/media-lab/tone.wav", says: "pointing at the lab's real sound file" },
+      { find: "video[controls]", count: 1, says: "a <video> element with controls" },
+      { find: "video", attr: "poster", equals: "/img-lab/photo.png", says: "with a poster to show before playback" },
+      { find: "video", attr: "width", equals: "320", says: "and a declared width of 320" },
+      { find: "video", attr: "height", equals: "200", says: "and a height of 200, so the layout does not shift" },
+    ],
+    [
+      "`controls` takes no value — it is present or absent, like `required`.",
+      "The audio's file is `/media-lab/tone.wav`; the video's poster is `/img-lab/photo.png`.",
+      "Dimensions are bare numbers, exactly as on an image.",
+    ],
+    "html,media"),
+
+  P("html-media", 654, "html-media-fix", "The Video That Will Not Start", "Medium",
+    "This background video never plays, and when it did it was unusable. Three problems:\n\n- it has **`autoplay` without `muted`**. Every major browser blocks autoplay that has sound, so the video sits there and nothing anywhere says why. Add `muted`\n- there is **no `controls`**, so a visitor who wants to play or pause it cannot. Add them\n- there are **no captions**, so it is useless without sound and its content is invisible to search. Add a `track` pointing at `/media-lab/captions.vtt` with `kind=\"captions\"`, `srclang=\"en\"`, `label=\"English\"` and `default`\n\nLeave the poster, the dimensions and the source alone.",
+    "<video autoplay loop poster=\"/img-lab/photo.png\" width=\"320\" height=\"200\">\n  <source src=\"clip.mp4\" type=\"video/mp4\">\n</video>\n",
+    "<video autoplay muted loop controls poster=\"/img-lab/photo.png\" width=\"320\" height=\"200\">\n  <source src=\"clip.mp4\" type=\"video/mp4\">\n  <track kind=\"captions\" src=\"/media-lab/captions.vtt\" srclang=\"en\" label=\"English\" default>\n</video>\n",
+    [
+      { find: "video[autoplay][muted]", count: 1, says: "autoplay is paired with muted — the only way a browser will start it" },
+      { find: "video[controls]", count: 1, says: "controls are there, so a visitor can play and pause" },
+      { find: "video track[kind=\"captions\"]", count: 1, says: "a captions track inside the video" },
+      { find: "track", attr: "src", equals: "/media-lab/captions.vtt", says: "pointing at the lab's real caption file" },
+      { find: "track[srclang=\"en\"][label=\"English\"]", count: 1, says: "with its language and its menu label" },
+      { find: "track[default]", count: 1, says: "and marked default, so it is on without being asked" },
+      { find: "video source[src=\"clip.mp4\"]", count: 1, says: "the source is unchanged" },
+    ],
+    [
+      "`autoplay` alone is blocked because it has sound. `autoplay muted` is the working pair.",
+      "`<track>` is an empty element and goes inside the `<video>`, after the sources.",
+      "`default` takes no value — present or absent.",
+    ],
+    "html,media,accessibility"),
+
+  /* ----------------------------------------------- html-embeds ---- */
+  P("html-embeds", 655, "html-iframe-embed", "An Embed With a Name", "Easy",
+    "This map embed works and costs more than it should, and a screen reader announces it as just **\"iframe\"** — a box in the page with no indication of what is inside.\n\nAdd three attributes:\n\n- a `title` of `Map of the restaurant` — this is the one that stops it being anonymous\n- real dimensions: `width=\"560\"` and `height=\"315\"`, so the page does not jump when the frame loads\n- `loading=\"lazy\"`, because it sits far below the first screen and an embed pulls in an entire other page with its own scripts\n\nLeave the `src` exactly as it is.",
+    "<h2>Find us</h2>\n<p>Several screens of directions here.</p>\n\n<iframe src=\"https://maps.example/embed?id=42\"></iframe>\n",
+    "<h2>Find us</h2>\n<p>Several screens of directions here.</p>\n\n<iframe src=\"https://maps.example/embed?id=42\" title=\"Map of the restaurant\" width=\"560\" height=\"315\" loading=\"lazy\"></iframe>\n",
+    [
+      { find: "iframe", attr: "title", equals: "Map of the restaurant", says: "the embed has a title, so it is not announced as just \"iframe\"" },
+      { find: "iframe", attr: "width", equals: "560", says: "a declared width of 560" },
+      { find: "iframe", attr: "height", equals: "315", says: "and a height of 315" },
+      { find: "iframe[loading=\"lazy\"]", count: 1, says: "loading=\"lazy\", because an embed below the fold costs a whole page" },
+      { find: "iframe", attr: "src", equals: "https://maps.example/embed?id=42", says: "the src is unchanged" },
+      { find: "h2", text: true, contains: "Find us", says: "the heading is unchanged" },
+    ],
+    [
+      "`title` is what a screen reader announces instead of \"iframe\".",
+      "Dimensions are bare numbers, as on an image or a video.",
+      "`loading=\"lazy\"` matters more on an embed than anywhere else — it defers an entire page.",
+    ],
+    "html,embeds,accessibility"),
+
+  P("html-embeds", 656, "html-svg-vs-canvas", "The Right Tool, and a Name for It", "Medium",
+    "Two graphics on this page, and both are wrong in a different way.\n\n- the chart is an **empty `<canvas>`**. A canvas is a blank rectangle that only JavaScript can draw on, and there is no script here — so it shows nothing and contains nothing a screen reader or a search engine can read. It is a fixed two-bar chart, so replace the whole `<canvas>` with the **inline `<svg>`** given in the hints: two `rect` elements, `role=\"img\"`, and a `<title>` reading `Sales rose in the second quarter`\n- the decorative swirl is an inline `<svg>` that assistive tech reads as a pile of shapes. It carries no meaning, so mark it `aria-hidden=\"true\"` — the same decision as `alt=\"\"` in Module 5\n\nKeep the heading.",
+    "<h2>Quarterly sales</h2>\n\n<canvas width=\"80\" height=\"40\"></canvas>\n\n<svg width=\"60\" height=\"10\"><circle cx=\"30\" cy=\"5\" r=\"4\" fill=\"#c9b98a\"></circle></svg>\n",
+    "<h2>Quarterly sales</h2>\n\n<svg role=\"img\" width=\"80\" height=\"40\">\n  <title>Sales rose in the second quarter</title>\n  <rect x=\"0\" y=\"20\" width=\"20\" height=\"20\" fill=\"#3a7ca5\"></rect>\n  <rect x=\"30\" y=\"8\" width=\"20\" height=\"32\" fill=\"#f5a524\"></rect>\n</svg>\n\n<svg aria-hidden=\"true\" width=\"60\" height=\"10\"><circle cx=\"30\" cy=\"5\" r=\"4\" fill=\"#c9b98a\"></circle></svg>\n",
+    [
+      { find: "canvas", count: 0, says: "no empty <canvas> left — nothing was ever going to draw on it" },
+      { find: "svg[role=\"img\"]", count: 1, says: "the chart is an inline <svg> marked as an image" },
+      { find: "svg[role=\"img\"] > title", text: true, contains: "Sales rose in the second quarter", says: "with a <title> that says what it shows" },
+      { find: "svg[role=\"img\"] rect", count: 2, says: "two bars, drawn as <rect> elements" },
+      { find: "svg[aria-hidden=\"true\"]", count: 1, says: "the decorative swirl is hidden from assistive tech" },
+      { find: "svg[aria-hidden=\"true\"] circle", count: 1, says: "and is otherwise unchanged" },
+    ],
+    [
+      "The chart: `<svg role=\"img\" width=\"80\" height=\"40\"><title>Sales rose in the second quarter</title>` then two `<rect>` elements.",
+      "`<title>` must be the first child of the svg — it is inline SVG's version of `alt`.",
+      "A decorative graphic gets `aria-hidden=\"true\"`, exactly as a decorative image gets `alt=\"\"`.",
+    ],
+    "html,embeds,accessibility"),
 ];
