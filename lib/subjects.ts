@@ -60,6 +60,11 @@ const SHORT: Record<string, string> = {
   dl: "Deep Learning",
   deploy: "Deployment",
   microprocessor: "Microprocessor",
+  // Without this the fallback takes everything after the em-dash and produces
+  // "the Structure of Every Web Page" — so the subject pill on all 35 lessons,
+  // and the card on /learn, never said the word HTML. A student scanning for
+  // it could not find it, which is the whole job of a short name.
+  html: "HTML",
 };
 
 /** A short label for a subject: the pinned one, else derived from the title.

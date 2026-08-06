@@ -71,11 +71,14 @@ export default async function LearnIndex() {
               style={subjectStyle(t.slug)}
               href={`/learn/${nextUp.slug}`}
             >
+              {/* The heading is the subject's NAME — the word a student is
+                  scanning for. Using the tail of the title instead produced
+                  headings like "the Structure of Every Web Page", which is a
+                  description of HTML that never mentions HTML. */}
               <div className="subj-top">
-                <span className="subject-pill">{subjectName(t.title, t.slug)}</span>
+                <h2>{subjectName(t.title, t.slug)}</h2>
                 {t.level && <span className="subj-level">{t.level}</span>}
               </div>
-              <h2>{t.title.split(" — ").pop()}</h2>
               {t.subtitle && <p className="subj-sub">{t.subtitle}</p>}
               <div className="subj-meta">
                 <span>{t.lessons.length} lessons</span>
