@@ -120,7 +120,13 @@ export function TopicPanel({ stats }: { stats: SolvedStats }) {
         {stats.byTopic.map((t) => (
           <div className="tp-row" key={t.tag}>
             <span className="tp-name">{t.tag}</span>
-            <span className="tp-bar"><i style={{ width: `${Math.round((t.solved / top) * 100)}%` }} /></span>
+            {/* ⚠️ Scaled to the topic's OWN total, not to the busiest topic.
+                It used to divide by `top` — the highest solved count on the
+                page — so a row reading "1/13" drew a FULL bar whenever that 1
+                was the best you had done anywhere. The number said one in
+                thirteen and the bar said finished. A progress bar beside a
+                fraction has to mean that fraction. */}
+            <span className="tp-bar"><i style={{ width: `${t.total ? Math.round((t.solved / t.total) * 100) : 0}%` }} /></span>
             <span className="tp-n">{t.solved}<span className="tp-of">/{t.total}</span></span>
           </div>
         ))}

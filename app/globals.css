@@ -931,7 +931,15 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lt-head { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
            display:flex; align-items:center; gap:8px; margin-bottom:9px; }
 .lt-count { margin-left:auto; letter-spacing:0; text-transform:none; font-weight:600; color:var(--accent); }
-.lt-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; }
+/* ⚠️ CAPPED, because this box was pushing the lesson off the first screen.
+   Measured on a live lesson: crumb 19 + header 127 + objectives 181 + THIS 317
+   = 484px of furniture, so the teaching began at y=825 against a 720 fold — a
+   reader's first screen was entirely chrome. The cap is a scroller, so nothing
+   is lost: the current topic is still highlighted and the rest is one flick
+   away. A short lesson with few topics never reaches the cap and is unchanged.
+   (The same cap already existed below 720px; it was the desktop that had none.) */
+.lt-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;
+           max-height:196px; overflow-y:auto; overscroll-behavior:contain; }
 .lt-item a { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:7px;
              text-decoration:none; color:var(--muted); font-size:13.5px; line-height:1.4; }
 .lt-item a:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); color:var(--fg); }
@@ -2370,7 +2378,12 @@ select.inp { cursor:pointer; }
   transition: color .15s, background .15s, width .15s; }
 .rail-tab:hover { color: var(--ink); background: var(--panel-2); width: 27px; }
 
-.focus-fab { position: fixed; left: 20px; bottom: 20px; z-index: 70; display: inline-flex; align-items: center; gap: 7px;
+/* ⚠️ CLEAR OF THE SIDEBAR. `left:20px` put this on top of the nav's own
+   bottom-left corner — which is where the userbox lives — so on every page the
+   "Focus reading" pill sat across the reader's name and XP. The sidebar column
+   is 232px, so the pill starts after it; below 1000px the nav is a drawer and
+   20px is correct again. */
+.focus-fab { position: fixed; left: 252px; bottom: 20px; z-index: 70; display: inline-flex; align-items: center; gap: 7px;
   background: var(--panel); color: var(--ink-soft); border: 1px solid var(--line); border-radius: 999px;
   padding: 9px 15px; font-size: 12.5px; font-weight: 600; cursor: pointer; box-shadow: 0 8px 22px -10px rgba(0,0,0,.45);
   transition: border-color .15s, color .15s, background .15s; }

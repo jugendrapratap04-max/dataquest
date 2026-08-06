@@ -8,7 +8,10 @@ import { isMuted as soundIsMuted, setMuted as soundSetMuted, play as playCue } f
 
 const titles: Record<string, [string, string]> = {
   "/dashboard": ["{greeting}, {name}", "Today's target — read one topic, then solve five problems."],
-  "/roadmap": ["Skill Sheet", "Nine subjects in the order that works — learn it, practise it, build with it."],
+  // No count here on purpose: this map is a static Record with no access to the
+  // database, so any number typed into it goes stale the day a subject ships —
+  // which is exactly what "Nine subjects" did while eleven were live.
+  "/roadmap": ["Skill Sheet", "Every subject in the order that works — learn it, practise it, build with it."],
   "/learn": ["Lessons", "Understand it first, then move on — one topic at a time."],
   "/practice": ["Practice Arena", "Write code for what you just read — that is what makes it stick."],
   "/challenge": ["Challenges", "Same questions, sent to a friend — compare scores and see what you both missed."],

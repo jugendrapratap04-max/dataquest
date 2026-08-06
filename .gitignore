@@ -50,3 +50,7 @@ next-env.d.ts
 
 # scratch space for one-off helper scripts (real tools belong in prisma/)
 scratchpad/
+
+# Screenshot runs for UI review — 16 MB of PNGs and an assembled HTML, all
+# reproducible from scratchpad/shoot.mjs. Not source.
+ui-shots/

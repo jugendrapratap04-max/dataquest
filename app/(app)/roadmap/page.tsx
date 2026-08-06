@@ -33,7 +33,10 @@ export default async function RoadmapPage() {
           {/* No salary figures and no job promise. We can be held to what we
               teach; we cannot be held to what somebody is paid afterwards, and
               a number we cannot stand behind is worth less than none. */}
-          <p>Nine subjects, each built the same way: <b>understand it, practise it, then build something real with it</b> — that is what makes it stick. What you get from us is the skill and the evidence you have it. What you do with that is yours.</p>
+          {/* Counted, not typed. The word said "Nine" while the stat box four
+              lines below it said 11 — the same page contradicting itself
+              because one number was live and the other was prose. */}
+          <p>{tracks.length} subjects, each built the same way: <b>understand it, practise it, then build something real with it</b> — that is what makes it stick. What you get from us is the skill and the evidence you have it. What you do with that is yours.</p>
           <div className="method">
             <span className="mstep"><b>1</b> Learn</span><span className="farrow" style={{color:"#5A6478"}}>→</span>
             <span className="mstep"><b>2</b> Practice</span><span className="farrow" style={{color:"#5A6478"}}>→</span>

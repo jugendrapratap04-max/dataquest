@@ -18,12 +18,21 @@ import { highlightPython } from "@/lib/highlight";
 // widens the gap. Counted for real now, but cached for an hour and wrapped in a
 // fallback, because the rule above still holds: a visitor must never wait on a
 // cold database, and a database hiccup must not take the front door down.
-const FALLBACK_COUNTS = { lessons: 83, problems: 156 };
+const FALLBACK_COUNTS = { lessons: 83, problems: 156, subjects: 9 };
 
 const getLandingCounts = unstable_cache(
   async () => {
-    const [lessons, problems] = await Promise.all([prisma.lesson.count(), prisma.problem.count()]);
-    return { lessons, problems };
+    // The subject count was typed into the page as "9" and stayed there while
+    // two more subjects were finished and shipped, so the front door advertised
+    // nine and the roadmap listed eleven. Counted like the other two now — only
+    // subjects that actually have lessons, since an empty track is not a
+    // subject anyone can start.
+    const [lessons, problems, subjects] = await Promise.all([
+      prisma.lesson.count(),
+      prisma.problem.count(),
+      prisma.track.count({ where: { lessons: { some: {} } } }),
+    ]);
+    return { lessons, problems, subjects };
   },
   ["landing-counts"],
   { revalidate: 3600 }
@@ -65,9 +74,15 @@ const FLOW = [
   { n: "Prove it", d: "A three-level quiz that only clears if the concept truly landed." },
 ];
 
+/* The list under "The full road, start to finish" — which was nine of eleven.
+   HTML (35 lessons) and the microprocessor course (19) were both finished and
+   both missing, so the page promised the full road and left two subjects off
+   it. Hardcoded still, because the order is editorial rather than the `order`
+   column — but it has to be COMPLETE. Add a subject here when you ship one. */
 const TRACKS = [
   "Python", "Statistics", "Data Manipulation", "Data Visualization", "SQL",
   "BI Tools", "Machine Learning", "Deep Learning", "Deployment",
+  "Microprocessor", "HTML",
 ];
 
 export default async function LandingPage() {
@@ -135,7 +150,7 @@ export default async function LandingPage() {
       <section className="lp-stats">
         <div><b className="num">{counts.lessons}</b><span>lessons</span></div>
         <div><b className="num">{counts.problems}</b><span>practice problems</span></div>
-        <div><b className="num">9</b><span>subjects on the path</span></div>
+        <div><b className="num">{counts.subjects}</b><span>subjects on the path</span></div>
         <div><b className="num">₹0</b><span>to learn everything</span></div>
       </section>
 

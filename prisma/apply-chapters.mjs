@@ -155,8 +155,35 @@ async function main() {
     }
   }
 
+  /* Chapters this track no longer plans, holding no lessons, get removed.
+   *
+   * ⚠️ WHY: a track with no PLANS entry gets the fallback chapter `<slug>-all`.
+   * When a real plan is written later, that fallback stops being used — and
+   * nothing deleted it. The html track carried an empty "html-all" for exactly
+   * that reason, so /book reported "16 chapters" for a course with 15 and one
+   * of them opened onto nothing. Only EMPTY chapters are removed, so this can
+   * never take a chapter that still has lessons in it. */
+  let pruned = 0;
+  for (const subject of subjects) {
+    if (!subject.lessons.length) continue;
+    const planned = new Set(
+      (PLANS[subject.slug] ?? [{ slug: `${subject.slug}-all` }]).map((c) => c.slug)
+    );
+    const stale = await prisma.chapter.findMany({
+      where: { trackId: subject.id, slug: { notIn: [...planned] } },
+      select: { id: true, slug: true, _count: { select: { lessons: true } } },
+    });
+    for (const c of stale) {
+      if (c._count.lessons > 0) { console.log(`   ! kept ${c.slug} — still holds ${c._count.lessons} lessons`); continue; }
+      await prisma.chapter.delete({ where: { id: c.id } });
+      console.log(`   - removed empty chapter no longer planned: ${c.slug}`);
+      pruned++;
+    }
+  }
+
   const unplaced = await prisma.lesson.count({ where: { chapterId: null } });
   console.log(`\n   chapters written: ${created}`);
+  console.log(`   empty chapters removed: ${pruned}`);
   console.log(`   lessons placed:   ${moved}`);
   console.log(`   lessons still without a chapter: ${unplaced}`);
 }
