@@ -2274,4 +2274,189 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 10 — METADATA AND THE HEAD
+   *
+   * The one module about content nobody ever sees on the page. That is exactly
+   * why it is taught late and why it is taught at all: a page can be perfect
+   * from the first screen to the footer and still be unreadable on a phone,
+   * invisible in search, and ugly the moment anybody shares it — and all three
+   * are decided in six lines of <head>.
+   *
+   * ⚠️ WRITE HEAD PROBLEMS AGAINST A FULL DOCUMENT, AND ASSERT WITH BARE
+   * SELECTORS. The browser's DOMParser hoists a stray <meta> or <title> into an
+   * implicit <head>; linkedom leaves it where it was. Measured: on the fragment
+   * `<meta name="description">…`, `head meta` counts 1 in the browser and 0 in
+   * linkedom. Since the workbench grades with DOMParser and submit grades with
+   * linkedom, a `head meta[...]` assertion can go green and then be rejected.
+   * With an explicit <head> present the two agree 9 of 9 — so the starters here
+   * supply the whole skeleton, and every test still uses `meta[name="…"]`
+   * rather than `head meta[…]` so the divergence cannot be reached at all.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-metadata",
+    order: 26,
+    title: "The Head: What the Page Says About Itself",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Make a page readable on a phone with one line",
+        "Write a description that a search result will actually use",
+        "Point at the canonical version of a page, and say why duplicates happen",
+        "Add a favicon and know which files a browser really asks for",
+      ] },
+
+      { t: "hook",
+        q: "You build a page, test it on your laptop, and open it on a phone. Everything is there and everything is <b>tiny</b> — as if the phone photographed a desktop screen and shrank it. Nothing in your CSS says any of this. What is missing?",
+        why: "One line: the viewport meta tag. Without it a phone pretends to be a 980px desktop and then zooms out to fit, which is a workaround invented in 2007 for a web that had no mobile pages. Your page is being treated as one of those." },
+
+      { t: "def",
+        term: "Metadata",
+        en: "Information <b>about</b> the page rather than in it — read by browsers, search engines and share previews, and never drawn on screen." },
+
+      { t: "analogy",
+        concept: "the head",
+        real: "the spine and back cover of a book",
+        html: "Nobody reads the spine as part of the story, and it decides whether the book is ever picked up: the title on the shelf, the blurb, the category it is filed under, the barcode a machine scans. <code>&lt;head&gt;</code> is all of that for a page — Module 2 called it the envelope, and this is what goes on the envelope." },
+
+      { t: "syntax",
+        intro: "The head worth writing on every page you ever make.",
+        form: "<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n\n  <link rel=\"canonical\" href=\"https://mochis.example/poha-chivda\">\n  <link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\">\n  <link rel=\"stylesheet\" href=\"/css/style.css\">\n</head>",
+        parts: [
+          { bit: "charset", says: "First, always — Module 2's reason: the browser has to decode bytes into characters before it can read anything else." },
+          { bit: "viewport", says: "The line from the hook. <code>width=device-width</code> says \"the page is as wide as this device\", and <code>initial-scale=1</code> says \"do not zoom out\". Nothing responsive works without it." },
+          { bit: "<title>", says: "The tab, the bookmark, and the blue line in a search result — the most-read text on the page. Specific first, site name last: a tab shows the beginning." },
+          { bit: "description", says: "The grey text under that blue line. Google is not obliged to use it and often does; write it as a sentence for a person, around 150 characters, and never stuff it with keywords." },
+          { bit: "canonical", says: "\"This is the real address of this page.\" The fix for one page being reachable at several URLs — with and without a trailing slash, with tracking parameters, printed versions." },
+          { bit: "icon", says: "The favicon: the tab icon and the bookmark icon. An SVG scales to every size a browser asks for, which is the reason to prefer one." },
+          { bit: "stylesheet", says: "How CSS gets attached. It is a <code>&lt;link&gt;</code> because it points at another file — the same element as the two above it, doing a different job through <code>rel</code>." },
+        ],
+        note: "Everything here is one line and none of it renders. The whole module is worth about six lines per page, and they decide how the page behaves on a phone, how it appears in search, and what it looks like when somebody shares it.",
+      },
+
+      { t: "h2", n: "1", text: "Viewport: the line that makes a page mobile" },
+      { t: "p", html: "When the iPhone arrived there were no mobile-friendly pages, so it invented one: pretend the screen is 980 pixels wide, render the desktop page, then shrink the result to fit. It worked, and it is still the default — because a page from 2004 must not break." },
+      { t: "p", html: "<code>width=device-width</code> opts out: this page knows what a phone is, so give it the real width. Every media query, every flexible layout and every readable font size on mobile depends on that opt-out having happened." },
+
+      { t: "note", variant: "warn", html: "<b>Do not add <code>user-scalable=no</code> or <code>maximum-scale=1</code>.</b> They appear in copied snippets everywhere and they take pinch-zoom away from the visitor. For anyone with low vision that is not a polish decision — it is the page becoming unusable, and it fails accessibility requirements. There is no good reason for either." },
+
+      { t: "h2", n: "2", text: "Title and description, as a search result" },
+      { t: "code", file: "search-result.html", code: "<!-- what you write -->\n<title>Poha Chivda Recipe | Mochi's Kitchen</title>\n<meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n\n<!-- what a search result shows -->\n<!-- Poha Chivda Recipe | Mochi's Kitchen          <- the title, blue -->\n<!-- mochis.example > poha-chivda                 <- the URL -->\n<!-- A twenty-minute Maharashtrian snack made...  <- the description -->", output: "Three lines a stranger uses to decide whether to click." },
+      { t: "psoft", html: "Both are cut off if they are long — roughly 60 characters of title and 155 of description, though it varies by device. That is why the <b>specific</b> part goes first: \"Poha Chivda Recipe\" survives the truncation and \"| Mochi's Kitchen\" is the part you can afford to lose." },
+
+      { t: "note", variant: "tip", html: "<b><code>&lt;meta name=\"keywords\"&gt;</code> is dead.</b> Search engines stopped using it decades ago because it was abused within months of being invented. It is still in old tutorials and still copied into new pages; it does nothing at all." },
+
+      { t: "h2", n: "3", text: "Canonical, robots and the favicon" },
+      { t: "p", html: "The same page is often reachable at several addresses — <code>/shop</code> and <code>/shop/</code>, with and without <code>?ref=twitter</code>, an <code>m.</code> version. A search engine sees several pages with identical content and has to guess which to rank. <code>canonical</code> removes the guess." },
+      { t: "note", variant: "tip", html: "<b><code>&lt;meta name=\"robots\" content=\"noindex\"&gt;</code></b> — keep this page out of search results. Right for a thank-you page or a staging site, and catastrophic left on a live homepage, which happens more than anyone admits.<br><br><b><code>&lt;link rel=\"icon\"&gt;</code></b> — one SVG covers every size. A browser also asks for <code>/favicon.ico</code> at the site root whether you declared one or not, so that 404 in your logs is normal.<br><br><b><code>&lt;meta name=\"theme-color\"&gt;</code></b> — tints the browser chrome on mobile. Small, and it makes a site feel deliberate." },
+
+      { t: "debug",
+        intro: "This page is a correct, responsive layout that is unreadable on a phone. Work out why before opening the fix.",
+        code: "<head>\n  <meta charset=\"UTF-8\">\n  <title>Mochi's Kitchen</title>\n  <link rel=\"stylesheet\" href=\"/css/style.css\">\n</head>",
+        symptom: "On a laptop it is perfect. On a phone the whole page appears zoomed out, text about 4px tall, and every media query behaves as if the screen were 980px wide.",
+        q: "The CSS is right and the media queries are right. So what is the phone being told?",
+        fix: "<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Mochi's Kitchen</title>\n  <link rel=\"stylesheet\" href=\"/css/style.css\">\n</head>",
+        why: "Nothing — and that is the problem. With no viewport declaration a phone falls back to its 2007 compatibility behaviour: render at 980px, then scale the whole thing down. The media queries were never wrong; they were being evaluated against 980px, so the mobile rules never matched. <b>One line, and it is the difference between a responsive page and a photograph of one.</b>" },
+
+      { t: "mistakes", items: [
+        { bad: "<head> with no viewport meta", why: "The phone renders at 980px and zooms out. Every responsive rule you wrote is evaluated against the wrong width.", fix: "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" },
+        { bad: "content=\"width=device-width, user-scalable=no\"", why: "Removes pinch-zoom. For a low-vision visitor the page simply becomes unreadable, and it fails accessibility requirements.", fix: "content=\"width=device-width, initial-scale=1\"" },
+        { bad: "<title>Home</title>", why: "In a search result, a bookmark list and twenty open tabs, \"Home\" identifies nothing.", fix: "<title>Poha Chivda Recipe | Mochi's Kitchen</title>" },
+        { bad: "<meta name=\"keywords\" content=\"recipe, snack, poha, indian\">", why: "Ignored by every major search engine for over a decade. Copied from old tutorials, does nothing.", fix: "Delete it, and write a real description instead." },
+      ] },
+
+      { t: "recap", items: [
+        "<code>viewport</code> is what makes a page mobile — without it a phone renders at 980px",
+        "Never <code>user-scalable=no</code>: it takes zoom away from people who need it",
+        "<code>title</code> is the most-read text on the page — specific part first",
+        "<code>description</code> is the grey line in a search result; write it for a person",
+        "<code>canonical</code> names the real address when a page has several",
+        "<code>keywords</code> is dead; <code>robots=noindex</code> is powerful and dangerous",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What does the viewport meta tag do?", a: "It tells the browser to lay the page out at the device's real width instead of pretending to be a 980px desktop and scaling down — the compatibility behaviour phones adopted when almost no site had a mobile version. width=device-width plus initial-scale=1 is the whole line, and without it no media query or flexible layout produces what you designed." },
+        { level: "medium", q: "What is a canonical link for?", a: "It declares the real URL for a page that is reachable at more than one address — trailing slashes, tracking parameters, print versions, http and https. Without it search engines see near-duplicate pages and have to pick one themselves, splitting whatever ranking signals the page has earned across the copies." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-social-meta",
+    order: 27,
+    title: "Link Previews: the Card Your Page Becomes",
+    minutes: 15,
+    content: [
+      { t: "objectives", items: [
+        "Control exactly what appears when your page is shared",
+        "Write the five Open Graph tags that matter",
+        "Avoid the one-word mistake that silently disables all of them",
+        "Say why you cannot test this by looking at your own page",
+      ] },
+
+      { t: "hook",
+        q: "You paste your site's link into WhatsApp. Somebody else's link becomes a card with a picture, a headline and a line of text. Yours becomes a bare blue URL. Neither of you wrote any code for it. What does the other page have?",
+        why: "Four or five lines in its <code>&lt;head&gt;</code>. Every chat app, social network and search preview asks the page what it should look like when shared — and a page that answers nothing gets whatever the crawler can scrape, which is usually a URL and no picture at all." },
+
+      { t: "def",
+        term: "Open Graph",
+        en: "A small set of <code>&lt;meta&gt;</code> tags, originally from Facebook and now read by nearly everything, that describe how a page should appear when it is shared." },
+
+      { t: "analogy",
+        concept: "Open Graph tags",
+        real: "the cover you send when someone asks about your book",
+        html: "If you supply nothing, they photograph the spine. If you supply a cover, a title and a one-line pitch, that is what everyone sees. The share card is the first impression for people who never reach your page — and for the ones who decide not to." },
+
+      { t: "syntax",
+        intro: "The five that do almost all the work, plus the one line for Twitter's larger card.",
+        form: "<meta property=\"og:title\" content=\"Poha Chivda Recipe\">\n<meta property=\"og:description\" content=\"A twenty-minute snack made in one pan.\">\n<meta property=\"og:image\" content=\"https://mochis.example/img/poha-card.jpg\">\n<meta property=\"og:url\" content=\"https://mochis.example/poha-chivda\">\n<meta property=\"og:type\" content=\"article\">\n\n<meta name=\"twitter:card\" content=\"summary_large_image\">",
+        parts: [
+          { bit: "property", says: "<b>The attribute Open Graph uses — not <code>name</code>.</b> Section 2 is about this and only this, because it is the mistake that quietly turns every tag below it off." },
+          { bit: "og:title", says: "The card's headline. It may differ from <code>&lt;title&gt;</code>, and usually should: no site name, no separator, just the thing itself." },
+          { bit: "og:description", says: "One line under the headline. Around 60 to 90 characters survive on most apps." },
+          { bit: "og:image", says: "The picture. <b>An absolute URL</b> — crawlers do not resolve a relative path here, so <code>/img/card.jpg</code> fetches nothing." },
+          { bit: "og:url", says: "The page's canonical address, so shares of the same page with different tracking parameters are counted as one." },
+          { bit: "og:type", says: "<code>website</code> for a normal page, <code>article</code> for a post. Rarely more than these two." },
+          { bit: "twitter:card", says: "Twitter's own, and it takes <code>name</code> rather than <code>property</code> — the two systems genuinely disagree. <code>summary_large_image</code> gives the wide card instead of the thumbnail." },
+        ],
+        note: "Make the image about <b>1200 by 630</b>. Every platform crops to its own shape, and that ratio is the one they all crop from acceptably — put nothing important within about 60px of any edge.",
+      },
+
+      { t: "h2", n: "1", text: "What happens with none of this" },
+      { t: "p", html: "The crawler falls back and guesses: the <code>&lt;title&gt;</code>, then the meta description, then the first image on the page it considers large enough. Sometimes that produces something reasonable. Often it produces your logo, a navigation icon, or nothing — and you find out when a link you cared about is already posted." },
+
+      { t: "h2", n: "2", text: "The one-word mistake" },
+      { t: "code", file: "the-mistake.html", code: "<!-- silently ignored: Open Graph uses property, not name -->\n<meta name=\"og:title\" content=\"Poha Chivda Recipe\">\n\n<!-- read correctly -->\n<meta property=\"og:title\" content=\"Poha Chivda Recipe\">\n\n<!-- and Twitter is the other way round, on purpose -->\n<meta name=\"twitter:card\" content=\"summary_large_image\">", output: "Two tags that look interchangeable; one of them does nothing." },
+      { t: "psoft", html: "Nothing warns you. The markup is valid, the page renders identically, and the tag is simply not the tag Open Graph is looking for — so the crawler falls back to guessing as if you had written nothing. This is the commonest reason a page \"has Open Graph tags\" and still previews badly." },
+
+      { t: "note", variant: "key", html: "<b>Open Graph uses <code>property=</code>. Twitter uses <code>name=</code>.</b> There is no elegant reason — they come from different specifications that were designed a year apart. Memorise it as a pair, because half the copied snippets on the web get one of them wrong." },
+
+      { t: "h2", n: "3", text: "You cannot test this by looking" },
+      { t: "p", html: "Nothing about a share card appears when you open your own page: it only exists inside somebody else's app, built from what their crawler fetched. So you test it with the platforms' own debuggers — Facebook's sharing debugger, Twitter's card validator, LinkedIn's post inspector — each of which shows you exactly what it sees." },
+      { t: "note", variant: "warn", html: "<b>Every platform caches the result, sometimes for days.</b> Fix a broken card and the old one keeps appearing, which reads as \"my fix did not work\". It usually did — the debuggers all have a \"scrape again\" button, and that button is the actual fix." },
+
+      { t: "mistakes", items: [
+        { bad: "<meta name=\"og:title\" content=\"…\">", why: "Open Graph reads property, not name. The tag is valid, ignored, and produces no warning anywhere.", fix: "<meta property=\"og:title\" content=\"…\">" },
+        { bad: "<meta property=\"og:image\" content=\"/img/card.jpg\">", why: "A relative path. The crawler is on another machine and does not resolve it — the card comes back with no image.", fix: "<meta property=\"og:image\" content=\"https://site.example/img/card.jpg\">" },
+        { bad: "<meta property=\"twitter:card\" content=\"summary\">", why: "Backwards: Twitter's tags use name. The pair is genuinely inconsistent and worth memorising as a pair.", fix: "<meta name=\"twitter:card\" content=\"summary_large_image\">" },
+        { bad: "\"I fixed the tags but the old card still shows.\"", why: "The platform cached the previous scrape, often for days.", fix: "Re-scrape it in that platform's own debugger." },
+      ] },
+
+      { t: "recap", items: [
+        "Share cards are built from <code>&lt;head&gt;</code> tags, not from the page",
+        "The five: <code>og:title</code>, <code>og:description</code>, <code>og:image</code>, <code>og:url</code>, <code>og:type</code>",
+        "<b>Open Graph uses <code>property=</code>; Twitter uses <code>name=</code></b>",
+        "<code>og:image</code> must be an <b>absolute</b> URL — about 1200x630",
+        "With no tags the crawler guesses, and usually guesses badly",
+        "Test in the platforms' debuggers, and re-scrape after a fix",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What are Open Graph tags for?", a: "They tell any app that unfurls a link — chat apps, social networks, search previews — what the page's share card should say and show: a headline, a line of description, an image and the canonical URL. Without them the crawler falls back to guessing from the title, the meta description and whatever image it finds first." },
+        { level: "medium", q: "Why do og:title and twitter:card use different attributes?", a: "Open Graph came from Facebook's specification, which is built on RDFa and therefore uses property. Twitter's card tags were designed separately and use the ordinary name attribute. There is no deeper reason and no way to reconcile them — writing name=\"og:title\" produces a tag that is valid, ignored, and warns you about nothing, which is why it is such a common silent failure." },
+      ] },
+    ],
+  },
 ];

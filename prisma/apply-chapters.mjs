@@ -93,6 +93,10 @@ const PLANS = {
     // Anything past the final boundary gets no chapter at all, which drops it
     // out of /book AND now out of the course navigation's grouping.
     { slug: "html-semantic", title: "Semantic HTML", upto: 25, summary: "The argument the whole course has been making, given its name and its page-level elements: landmarks a reader can jump between, and the test that separates an article from a section from a plain div." },
+    // ⚠️ LAST ENTRY: bump this `upto` with every lesson appended to the track.
+    // Anything past the final boundary gets no chapter at all, which drops it
+    // out of /book AND out of the course navigation's grouping.
+    { slug: "html-metadata", title: "Metadata and the head", upto: 27, summary: "The content nobody sees on the page and everybody sees somewhere else: the line that makes a page work on a phone, the two lines a search result is built from, and the tags that decide what your link looks like when somebody shares it." },
   ],
 };
 

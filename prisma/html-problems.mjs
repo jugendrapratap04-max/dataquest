@@ -762,4 +762,95 @@ export const htmlProblems = [
       "Keep the class on the wrapper; only the element name changes.",
     ],
     "html,semantic,structure"),
+
+  /* ---------------------------------------------- html-metadata ----
+   *
+   * ⚠️ EVERY TEST BELOW USES A BARE SELECTOR — `meta[name="viewport"]`, never
+   * `head meta[name="viewport"]`. The browser's DOMParser hoists a stray <meta>
+   * or <title> into an implicit <head>; linkedom leaves it where it sits.
+   * Measured on `<meta name="description">…` with no skeleton: `head meta` is 1
+   * in the browser and 0 in linkedom. The workbench grades with DOMParser and
+   * submit grades with linkedom, so a head-scoped assertion could go green and
+   * then be rejected. With an explicit <head> the two agree 9 of 9 — the
+   * starters here supply the whole skeleton for that reason, and the bare
+   * selectors mean the divergence cannot be reached even if a student deletes
+   * it. Where the exercise is about placement, assert the SKELETON separately
+   * (`html[lang]`, `body h1`) instead of scoping the meta test to it. */
+  P("html-metadata", 637, "html-head-basics", "The Six Lines Every Page Needs", "Easy",
+    "The skeleton is here and the head is nearly empty. Add the four things every page you ever build should carry:\n\n- the **viewport** line that makes the page render at the phone's real width: `name=\"viewport\"`, `content=\"width=device-width, initial-scale=1\"`\n- a `title` of `Poha Chivda Recipe | Mochi's Kitchen` — the specific part first, because a search result and a tab both cut the end off\n- a **description**: `name=\"description\"`, with any sentence describing the page\n- a **canonical** link pointing at `https://mochis.example/poha-chivda`\n\nNone of it appears on the page. All of it decides how the page behaves on a phone and how it looks in a search result.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <!-- viewport, title, description, canonical -->\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n  <link rel=\"canonical\" href=\"https://mochis.example/poha-chivda\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    [
+      { find: "meta[name=\"viewport\"]", attr: "content", contains: "width=device-width", says: "a viewport meta with width=device-width" },
+      { find: "meta[name=\"viewport\"]", attr: "content", contains: "initial-scale=1", says: "and initial-scale=1, so the phone does not zoom out" },
+      { find: "title", text: true, contains: "Poha Chivda Recipe", says: "a <title> starting with the specific part" },
+      { find: "meta[name=\"description\"]", attr: "content", notEmpty: true, says: "a description meta that is not blank" },
+      { find: "link[rel=\"canonical\"]", attr: "href", equals: "https://mochis.example/poha-chivda", says: "a canonical link with the page's real URL" },
+      { find: "meta[charset]", exists: true, says: "the charset declaration is still there" },
+      { find: "body h1", text: true, contains: "Poha Chivda", says: "the visible page is unchanged" },
+    ],
+    [
+      "`<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">` — one line, and it is what makes a page mobile.",
+      "The canonical is a `<link rel=\"canonical\" href=\"...\">`, not a meta.",
+      "All four go inside `<head>`; nothing here renders on the page.",
+    ],
+    "html,metadata,seo"),
+
+  P("html-metadata", 638, "html-head-fix", "A Head Full of Bad Advice", "Medium",
+    "Every line in this head was copied from an old tutorial, and three of them are actively harmful:\n\n- the viewport carries **`user-scalable=no`**, which takes pinch-zoom away from the visitor. For anyone with low vision that makes the page unusable. The content should be exactly `width=device-width, initial-scale=1`\n- there is a **`keywords`** meta. Search engines stopped reading it decades ago because it was abused immediately — delete it\n- **`robots` is set to `noindex`**, left over from staging. On a live page that means it never appears in search at all. It should be `index, follow`\n\nLeave the charset, the title and the description exactly as they are.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n  <meta name=\"keywords\" content=\"recipe, snack, poha, indian, easy\">\n  <meta name=\"robots\" content=\"noindex\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"description\" content=\"A twenty-minute Maharashtrian snack made in one pan.\">\n  <meta name=\"robots\" content=\"index, follow\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    [
+      { find: "meta[name=\"viewport\"]", attr: "content", equals: "width=device-width, initial-scale=1", says: "the viewport no longer disables zoom" },
+      { find: "meta[name=\"keywords\"]", count: 0, says: "the dead keywords meta is gone" },
+      { find: "meta[name=\"robots\"]", attr: "content", contains: "index", says: "robots allows indexing" },
+      { find: "meta[name=\"robots\"][content*=\"noindex\"]", count: 0, says: "and noindex is gone — the page can appear in search" },
+      { find: "title", text: true, contains: "Poha Chivda Recipe", says: "the title is untouched" },
+      { find: "meta[name=\"description\"]", attr: "content", contains: "twenty-minute", says: "the description is untouched" },
+    ],
+    [
+      "`user-scalable=no` removes pinch-zoom — never ship it. The content is just the two settings.",
+      "Delete the whole keywords line; nothing reads it.",
+      "`noindex` keeps a page out of search entirely. On a live page it should be `index, follow`.",
+    ],
+    "html,metadata,accessibility"),
+
+  /* -------------------------------------------- html-social-meta ---- */
+  P("html-social-meta", 639, "html-open-graph", "Make the Link a Card", "Easy",
+    "Pasted into a chat app, this page becomes a bare blue URL. Give it a share card.\n\nAdd five Open Graph tags to the head — and remember Open Graph uses **`property`**, not `name`:\n\n- `og:title` → `Poha Chivda Recipe`\n- `og:description` → any short line about the page\n- `og:image` → `https://mochis.example/img/poha-card.jpg` — an **absolute** URL, because the crawler is on another machine and will not resolve a relative one\n- `og:url` → `https://mochis.example/poha-chivda`\n- `og:type` → `article`\n\nThen one Twitter tag for the wide card: `twitter:card` set to `summary_large_image` — and that one uses `name`, because the two systems genuinely disagree.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <!-- five og: tags, then twitter:card -->\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta property=\"og:title\" content=\"Poha Chivda Recipe\">\n  <meta property=\"og:description\" content=\"A twenty-minute snack made in one pan.\">\n  <meta property=\"og:image\" content=\"https://mochis.example/img/poha-card.jpg\">\n  <meta property=\"og:url\" content=\"https://mochis.example/poha-chivda\">\n  <meta property=\"og:type\" content=\"article\">\n  <meta name=\"twitter:card\" content=\"summary_large_image\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    [
+      { find: "meta[property=\"og:title\"]", attr: "content", contains: "Poha Chivda Recipe", says: "og:title, written with property=" },
+      { find: "meta[property=\"og:description\"]", attr: "content", notEmpty: true, says: "og:description is present and not blank" },
+      { find: "meta[property=\"og:image\"]", attr: "content", equals: "https://mochis.example/img/poha-card.jpg", says: "og:image is the absolute URL" },
+      { find: "meta[property=\"og:url\"]", attr: "content", equals: "https://mochis.example/poha-chivda", says: "og:url is the page's real address" },
+      { find: "meta[property=\"og:type\"]", attr: "content", equals: "article", says: "og:type is article" },
+      { find: "meta[name=\"twitter:card\"]", attr: "content", equals: "summary_large_image", says: "twitter:card uses name= and asks for the wide card" },
+    ],
+    [
+      "All five Open Graph tags are `<meta property=\"og:...\" content=\"...\">`.",
+      "`og:image` must start with `https://` — a relative path fetches nothing for a crawler.",
+      "The Twitter tag is the odd one out: `name=\"twitter:card\"`.",
+    ],
+    "html,metadata,social"),
+
+  P("html-social-meta", 640, "html-og-property", "Tags That Look Right and Do Nothing", "Medium",
+    "This page has Open Graph tags and still previews as a bare link. Three reasons, and none of them produce a warning anywhere:\n\n- the two `og:` tags use **`name=`**. Open Graph reads **`property=`**, so both are valid, ignored, and silently fall back to guessing\n- `og:image` is a **relative path**. The crawler runs on another machine and does not resolve it — the card comes back with no picture. Make it `https://mochis.example/img/poha-card.jpg`\n- the `twitter:card` tag uses `property=`, which is backwards: Twitter's tags use `name=`\n\nFix all three. Keep every `content` value except the image path.",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta name=\"og:title\" content=\"Poha Chivda Recipe\">\n  <meta name=\"og:image\" content=\"/img/poha-card.jpg\">\n  <meta property=\"twitter:card\" content=\"summary_large_image\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Poha Chivda Recipe | Mochi's Kitchen</title>\n  <meta property=\"og:title\" content=\"Poha Chivda Recipe\">\n  <meta property=\"og:image\" content=\"https://mochis.example/img/poha-card.jpg\">\n  <meta name=\"twitter:card\" content=\"summary_large_image\">\n</head>\n<body>\n  <h1>Poha Chivda</h1>\n</body>\n</html>\n",
+    [
+      { find: "meta[property=\"og:title\"]", attr: "content", contains: "Poha Chivda Recipe", says: "og:title now uses property=" },
+      { find: "meta[property=\"og:image\"]", attr: "content", equals: "https://mochis.example/img/poha-card.jpg", says: "og:image uses property= and an absolute URL" },
+      { find: "meta[name=\"og:title\"]", count: 0, says: "no og: tag left on the name attribute" },
+      { find: "meta[name=\"og:image\"]", count: 0, says: "including the image one" },
+      { find: "meta[name=\"twitter:card\"]", attr: "content", equals: "summary_large_image", says: "twitter:card is back on name=, where Twitter reads it" },
+      { find: "meta[property=\"twitter:card\"]", count: 0, says: "and no longer on property=" },
+    ],
+    [
+      "Open Graph: `property=`. Twitter: `name=`. Memorise it as a pair — half the snippets online get one wrong.",
+      "A crawler on another machine cannot resolve `/img/...` — give it the full https:// URL.",
+      "Only the attribute names and the image path change; every content value stays.",
+    ],
+    "html,metadata,debugging"),
 ];
