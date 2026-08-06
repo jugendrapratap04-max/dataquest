@@ -19,6 +19,14 @@ const eslintConfig = defineConfig([
     // wholesale on upgrade, so there is nothing here a linter can fix.
     "public/pyodide/**",
     "public/sqljs/**",
+    // The screenshot tooling's throwaway Chrome profile, which carries whole
+    // bundled browser extensions inside it. Same argument as the two above and
+    // a larger number: linting it produced 2,798 warnings and 50 errors — every
+    // error in the run — against a directory that is gitignored, never edited,
+    // and deleted whenever the shots are rebuilt. `npm run lint` reported
+    // "0 errors" before this directory existed and could not be read at all
+    // after, which is the whole cost of leaving it in.
+    "ui-shots/**",
   ]),
   {
     // The visualisations exist to put Python and JSON syntax on screen, so

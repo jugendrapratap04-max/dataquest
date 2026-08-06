@@ -6,7 +6,7 @@ import { SITE_URL, clamp } from "@/lib/seo";
 import { subjectStyle, subjectName } from "@/lib/subjects";
 import { lockStateFor } from "@/lib/unlock";
 import { getCurrentUser } from "@/lib/session";
-import { highlightPython } from "@/lib/highlight";
+import { highlightFor, highlightPython } from "@/lib/highlight";
 import { LessonComplete } from "@/components/LessonComplete";
 import { LessonQuiz } from "@/components/LessonQuiz";
 import { FadedExample, TraceCheck } from "@/components/LessonPractice";
@@ -56,8 +56,9 @@ const LIVE_TRACKS = new Set(["python", "statistics", "pandas", "ml", "dl"]);
 // example records which lesson an explained error came from. Both optional, so
 // the /book renderer — no student, no quiz — keeps calling this unchanged.
 function Block({
-  b, pyLive = false, htmlLive = false, lessonId, lessonSlug,
-}: { b: any; pyLive?: boolean; htmlLive?: boolean; lessonId?: string; lessonSlug?: string }) {
+  b, pyLive = false, htmlLive = false, lessonId, lessonSlug, hl = highlightPython,
+}: { b: any; pyLive?: boolean; htmlLive?: boolean; lessonId?: string; lessonSlug?: string;
+     hl?: (code: string) => string }) {
   switch (b.t) {
     case "objectives":
       return (
@@ -209,7 +210,7 @@ function Block({
             <span className="dot" style={{ background: "#28C840" }} />
             <span className="fn">{b.file}</span>
           </div>
-          <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.code) }} />
+          <pre dangerouslySetInnerHTML={{ __html: hl(b.code) }} />
           {b.output && <div className="out">Output:<br /><b>{b.output}</b></div>}
         </div>
       );
@@ -290,7 +291,7 @@ function Block({
             {b.steps.map((s: any, i: number) => (
               <li key={i}>
                 <div className="wk-label">{s.label}</div>
-                <pre dangerouslySetInnerHTML={{ __html: highlightPython(s.code) }} />
+                <pre dangerouslySetInnerHTML={{ __html: hl(s.code) }} />
                 {s.why && <div className="wk-why" dangerouslySetInnerHTML={{ __html: s.why }} />}
               </li>
             ))}
@@ -298,7 +299,7 @@ function Block({
           {b.full && (
             <div className="wk-full">
               <div className="wk-label">All together</div>
-              <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.full) }} />
+              <pre dangerouslySetInnerHTML={{ __html: hl(b.full) }} />
               {b.output && <div className="wk-out">Output: <b>{b.output}</b></div>}
             </div>
           )}
@@ -334,7 +335,7 @@ function Block({
         <div className="card debug">
           <h2>🐞 Find the bug</h2>
           {b.intro && <p className="dr-intro" dangerouslySetInnerHTML={{ __html: b.intro }} />}
-          <pre className="dbg-code" dangerouslySetInnerHTML={{ __html: highlightPython(b.code) }} />
+          <pre className="dbg-code" dangerouslySetInnerHTML={{ __html: hl(b.code) }} />
           {b.symptom && <div className="dbg-symptom"><span>What Python says</span><pre>{b.symptom}</pre></div>}
           <details className="dr">
             <summary>
@@ -343,7 +344,7 @@ function Block({
               <span className="dr-hint">show the fix</span>
             </summary>
             <div className="dr-a">
-              <pre dangerouslySetInnerHTML={{ __html: highlightPython(b.fix) }} />
+              <pre dangerouslySetInnerHTML={{ __html: hl(b.fix) }} />
               {b.why && <div className="wk-why" dangerouslySetInnerHTML={{ __html: b.why }} />}
             </div>
           </details>
@@ -367,7 +368,7 @@ function Block({
                 <span className="dr-hint">show answer</span>
               </summary>
               <div className="dr-a">
-                <pre dangerouslySetInnerHTML={{ __html: highlightPython(d.code) }} />
+                <pre dangerouslySetInnerHTML={{ __html: hl(d.code) }} />
                 {d.out && <div className="dr-out">Output: <b>{d.out}</b></div>}
               </div>
             </details>
@@ -633,7 +634,7 @@ export default async function LessonPage({
         <div className="prose">
           {visible.map((b, i) => (
             <Fragment key={i}>
-              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} htmlLive={lesson.track.slug === "html"} lessonId={lesson.id} lessonSlug={slug} />
+              <Block b={b} pyLive={LIVE_TRACKS.has(lesson.track.slug)} htmlLive={lesson.track.slug === "html"} lessonId={lesson.id} lessonSlug={slug} hl={highlightFor(lesson.track.slug)} />
             </Fragment>
           ))}
         </div>

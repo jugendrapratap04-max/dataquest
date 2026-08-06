@@ -134,7 +134,7 @@ export default async function BookChapterPage({
         <p className="bk-empty">This chapter has no written topics yet.</p>
       ) : (
         topics.map((t, i) => (
-          <BookChapter key={t.slug} n={i + 1} title={t.title} blocks={t.blocks} slug={t.slug} />
+          <BookChapter key={t.slug} n={i + 1} title={t.title} blocks={t.blocks} slug={t.slug} track={c.track.slug} />
         ))
       )}
 

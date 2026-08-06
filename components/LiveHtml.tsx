@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { highlightPython } from "@/lib/highlight";
+import { highlightHtml } from "@/lib/highlight";
 
 /* An HTML lesson example the student can change and watch.
  *
@@ -114,7 +114,7 @@ export function LiveHtml({ file, code, output }: { file: string; code: string; o
           rows={Math.max(3, draft.split("\n").length)}
         />
       ) : (
-        <pre dangerouslySetInnerHTML={{ __html: highlightPython(code) }} />
+        <pre dangerouslySetInnerHTML={{ __html: highlightHtml(code) }} />
       )}
 
       {editing ? (
