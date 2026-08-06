@@ -666,16 +666,53 @@ export default async function LessonPage({
 
         <div className="cta">
           <div className="pad">
+            {/* A GUEST IS OFFERED THE PRACTICE, NOT ONLY A SIGNUP.
+                Walking the site as a signed-out student found this: the lesson
+                header advertises "2 practice questions", the reader finishes,
+                and the only thing on offer is Create free account. Meanwhile
+                the practice pages grade perfectly well without an account —
+                verified live, starter 0/6 to solution 6/6 as a guest. So the
+                exercise existed, worked, and had no door.
+
+                Activation is this product's actual problem (14 signups, 2 of
+                whom ever opened a lesson), and asking someone to register
+                BEFORE they have tried anything is the wrong order. Practice
+                first, account second — and the account pitch is now about
+                keeping what they did rather than reaching it. */}
             {!user ? (
-              <>
-                <div className="eyebrow">You&apos;re reading as a guest</div>
-                <h3>Keep this progress — it&apos;s free</h3>
-                <p>
-                  Reading stays free forever. An account saves which lessons you&apos;ve finished,
-                  checks your code and pays XP, and unlocks certificates and study rooms.
-                </p>
-                <Link className="btn btn-primary" href="/signup">Create free account →</Link>
-              </>
+              lesson.problems.length > 0 ? (
+                <>
+                  <div className="eyebrow">The step that actually matters</div>
+                  <h3>Read it? Now write it 💪</h3>
+                  <p>
+                    Reading does not build the skill — writing does. The {lesson.problems.length}{" "}
+                    {lesson.problems.length === 1 ? "question" : "questions"} for this lesson run in
+                    your browser and check themselves, with no account needed.
+                  </p>
+                  <Link className="btn btn-primary" href={practiceHref}>Start practice →</Link>
+                  <p className="cta-second">
+                    <Link href="/signup">Create a free account</Link> to save what you solve, earn XP
+                    and keep your place.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="eyebrow">You&apos;re reading as a guest</div>
+                  <h3>{next ? "On to the next one" : "Keep this progress — it’s free"}</h3>
+                  <p>
+                    Reading stays free forever. An account saves which lessons you&apos;ve finished,
+                    checks your code and pays XP, and unlocks certificates and study rooms.
+                  </p>
+                  {next
+                    ? <Link className="btn btn-primary" href={`/learn/${next.slug}`}>Next lesson →</Link>
+                    : <Link className="btn btn-primary" href="/signup">Create free account →</Link>}
+                  {next && (
+                    <p className="cta-second">
+                      Or <Link href="/signup">create a free account</Link> to save your progress.
+                    </p>
+                  )}
+                </>
+              )
             ) : lesson.problems.length > 0 ? (
               <>
                 <div className="eyebrow">The step that actually matters</div>
