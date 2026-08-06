@@ -100,8 +100,11 @@ Rules that make this work rather than become theatre:
       anything turned up on the first look; nobody has done a full one
 - [ ] Split `prisma/seed.mjs`. 1.9 MB in one file is why two sessions collide on
       it, and it is the biggest maintainability problem in the repo
-- [ ] Seeded XP on the `@dq.dev` demo accounts — 1,450 to 3,940 XP against zero
-      submissions. Fixed in the leaderboard, still wrong on the profile
+- [x] ~~Seeded XP on the demo accounts~~ — six accounts held 16,080 XP between
+      them against zero passing submissions. Every real account was already
+      exactly right, which is what made the correction safe to run. XP is now
+      recomputed from earned, the seed no longer writes any, and `db:check`
+      reports any account holding more than its submissions justify
 - [ ] Read a lesson end to end as a beginner would. Every content check so far
       has counted sections, not judged them
 

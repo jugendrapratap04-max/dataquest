@@ -328,6 +328,33 @@ if (quizQs >= 40) seen.forEach((c, i) => {
 // Counted per kind and summed, so a kind nobody added to this line shows up as
 // a total that does not add up rather than as silence.
 console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlProblems.length} sql, ${asmProblems.length} asm8085, ${htmlProblems.length} html)`);
+/* ------------------------------------------------------------------- XP ---
+ * No account may hold XP it did not earn.
+ *
+ * XP is paid in /api/submit — problem.xp, once, on the first passing
+ * submission. Anything above that sum was put there by hand, and six seeded
+ * demo accounts held 16,080 XP between them against zero submissions for
+ * months. It was visible the whole time and nothing was looking: the profile
+ * page showed "Level 9" beside "0 problems solved, 0 of 25 badges", and the
+ * leaderboard had already been fixed for the same accounts without anyone
+ * noticing the number itself was the problem.
+ *
+ * Reported rather than corrected. A checker that quietly rewrites user rows is
+ * a checker nobody can trust to only read. */
+const accounts = await prisma.user.findMany({ select: { id: true, email: true, xp: true } });
+for (const u of accounts) {
+  if (u.xp === 0) continue;
+  const passed = await prisma.submission.findMany({
+    where: { userId: u.id, passed: true },
+    select: { problem: { select: { xp: true } } },
+    distinct: ["problemId"],
+  });
+  const earned = passed.reduce((n, s) => n + s.problem.xp, 0);
+  if (u.xp > earned) {
+    fails.push(`[xp] ${u.email}: holds ${u.xp} XP but has earned ${earned} across ${passed.length} solved problem(s)`);
+  }
+}
+
 console.log(`lessons:  ${lessons.length} (${blocks} blocks)`);
 console.log(`quizzes:  ${quizQs} questions, answers at ${JSON.stringify(seen)} across A/B/C/D`);
 if (fails.length === 0) {
