@@ -192,7 +192,13 @@ export default async function DashboardPage() {
           <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
             {streak > 0 ? <>+20 XP · keep your 🔥 {streak}-day streak alive</> : <>+20 XP · solve one today and your streak starts here</>}
           </p>
-          <Link className="btn btn-primary" style={{width:"100%",justifyContent:"center"}} href="/practice">Solve now</Link>
+          {/* Secondary, not primary. There were two orange buttons on this
+              screen — "Resume learning" in the hero and this one — and two
+              primary actions is the same as none: the eye has to choose, which
+              is the decision fatigue the dashboard exists to remove. The card
+              keeps its accent border, so the daily challenge still stands out
+              as the second thing without competing to be the first. */}
+          <Link className="btn btn-ghost" style={{width:"100%",justifyContent:"center"}} href="/practice">Solve now</Link>
         </section>
       </div>
     </div>

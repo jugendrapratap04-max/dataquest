@@ -334,7 +334,20 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .resume .rfoot { display:flex; align-items:center; gap:12px; margin-top:16px; flex-wrap:wrap; } .resume .pct { margin-left:auto; font-family:var(--mono); font-size:12px; color:#9AA3B4; }
 .resume .btn-ghost { background:var(--gbtn-bg); color:var(--gbtn-ink); border-color:var(--gbtn-border); }
 .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; } @media (max-width:640px){ .stats{ grid-template-columns:repeat(2,1fr);} }
-.stat { padding:15px 16px; } .stat .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; }
+/* ---- Card hierarchy ---------------------------------------------------
+   Measured on the dashboard: ELEVEN cards, and nine of them carried the
+   identical border, background and shadow. Everything asked for the same
+   amount of attention, so a student's eye had nothing to follow — which is
+   the whole of the "no clear primary focus" finding, and it is a weight
+   problem rather than a colour one.
+   `.quiet` is the recessive step: no border, a flat inset ground, no shadow.
+   A card only earns the full treatment if it is something to act on. */
+.card.quiet { background:var(--panel-2); border-color:transparent; box-shadow:none; }
+
+/* Stat tiles are readouts, not actions — they should recede. Applied here
+   rather than in the markup so every stat row on the platform moves together. */
+.stat { padding:15px 16px; background:var(--panel-2); border-color:transparent; box-shadow:none; }
+.stat .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; }
 .stat .v { font-family:var(--mono); font-weight:700; font-size:25px; margin-top:5px; display:flex; align-items:baseline; gap:6px; } .stat .v small { font-size:11.5px; color:var(--good); font-weight:600; font-family:var(--sans); }
 .spark { margin-top:9px; width:100%; height:28px; display:block; }
 .trackrow { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
