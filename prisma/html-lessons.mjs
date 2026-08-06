@@ -1599,4 +1599,191 @@ export const htmlLessons = [
       ] },
     ],
   },
+
+  /* ---------------------------------------------------------------------------
+   * MODULE 7 — TABLES
+   *
+   * The elements with the worst history in the language: for about a decade
+   * tables were how every page was laid out, and the damage is still quoted as
+   * a rule ("never use tables") by people who then have real tabular data and
+   * do not know what to reach for. Both halves are taught here — the right use
+   * in lesson 19, the wrong one in lesson 20 — because only knowing the ban
+   * produces developers who build data grids out of divs.
+   *
+   * ⚠️ THE IMPLICIT-TBODY DIVERGENCE, for anyone writing table problems.
+   * The browser's DOMParser INSERTS a <tbody> around loose <tr>s; linkedom does
+   * NOT. Grading runs in both — the workbench uses DOMParser, db:check and
+   * lib/verify.ts use linkedom — so a test written as `tbody tr` against markup
+   * with no explicit <tbody> PASSES in the browser and FAILS on submit. Both
+   * engines were checked before these lessons were written. The rule that comes
+   * out of it: assert with descendant selectors (`table tr`, `table th`), and
+   * only mention `tbody` when the exercise itself requires the student to type
+   * one.
+   * ------------------------------------------------------------------------- */
+
+  {
+    slug: "html-tables",
+    order: 19,
+    title: "Tables: Data That Has Rows and Columns",
+    minutes: 17,
+    content: [
+      { t: "objectives", items: [
+        "Build a table from rows and cells, and know which is which",
+        "Mark header cells so a screen reader can say which column a value is in",
+        "Use <code>thead</code>, <code>tbody</code> and <code>caption</code> for what they are for",
+        "Say what <code>scope</code> does, and why a table without it is a wall of numbers",
+      ] },
+
+      { t: "hook",
+        q: "A sighted reader looks at the number 82 in a table and instantly knows it is Ravi's score in Physics — the eye follows the row left and the column up. A screen reader user hears \"82\". How do they find out whose, and in what?",
+        why: "From the header cells — <b>if</b> you marked them as header cells. Mark them as ordinary cells and the announcement is just \"82\", and the two pieces of information the eye got for free are gone. That is the entire subject of this lesson." },
+
+      { t: "def",
+        term: "Table",
+        en: "A grid of data where each value belongs to both a row and a column, and the meaning comes from that pairing." },
+
+      { t: "analogy",
+        concept: "th vs td",
+        real: "the labels on a bus timetable",
+        html: "The times mean nothing without the column that says which stop and the row that says which service. Take away the labels and you have a page of numbers that is technically complete and useless. <code>&lt;th&gt;</code> is the label; <code>&lt;td&gt;</code> is the number — and a screen reader reads the labels back with every value, which is the whole reason to tell them apart." },
+
+      { t: "syntax",
+        intro: "A table is built in rows. Cells live inside rows; nothing lives directly inside the table but rows and the sections that hold them.",
+        form: "<table>\n  <caption>Term results</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Name</th>\n      <th scope=\"col\">Physics</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Ravi</th>\n      <td>82</td>\n    </tr>\n  </tbody>\n</table>",
+        parts: [
+          { bit: "<table>", says: "The grid itself. Only rows and the section elements go directly inside it." },
+          { bit: "<caption>", says: "The table's title, and it must be the <b>first</b> child. Visible, and announced before the contents — a screen reader user decides from it whether to walk the table at all." },
+          { bit: "<thead>", says: "The header row or rows. Not decoration: a long table printed across several pages repeats these, and some readers keep them pinned." },
+          { bit: "<tbody>", says: "The body rows. Write it even though the browser will insert one for you — a tool that reads your source rather than the rendered page will not." },
+          { bit: "<tr>", says: "One row. Every cell belongs to exactly one." },
+          { bit: "<th", says: "A header cell — a label. Bold and centred by default, and that appearance is the least useful thing about it." },
+          { bit: "scope", says: "Which direction this header labels: <code>col</code> for the column below, <code>row</code> for the row beside. It is what lets \"82\" be announced as \"Ravi, Physics, 82\"." },
+          { bit: "<td>", says: "An ordinary data cell — a value under some header." },
+        ],
+        note: "Rows are horizontal and columns are what you get by stacking them. There is no column element: the third cell of every row <i>is</i> the third column. That is why a missing cell shifts everything after it one place left.",
+      },
+
+      { t: "code", file: "results.html", code: "<table>\n  <caption>Term results</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Name</th>\n      <th scope=\"col\">Physics</th>\n      <th scope=\"col\">Maths</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Ravi</th>\n      <td>82</td>\n      <td>91</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Meera</th>\n      <td>88</td>\n      <td>79</td>\n    </tr>\n  </tbody>\n</table>", output: "A titled grid: three columns, a header row, and two rows of results." },
+      { t: "psoft", html: "The names are <code>&lt;th scope=\"row\"&gt;</code>, not <code>&lt;td&gt;</code> — a name is a label for its row, exactly as \"Physics\" is a label for its column. Press <b>Try it yourself</b>, change one <code>th</code> to a <code>td</code>, and notice the page barely changes while the meaning does." },
+
+      { t: "h2", n: "1", text: "Why scope earns its keep" },
+      { t: "p", html: "Without <code>scope</code>, a screen reader has to guess which headers apply to a cell — and it guesses from position, which works on a simple grid and falls apart on anything real. With it, every value is announced with its labels: \"Ravi, Physics, 82\"." },
+      { t: "p", html: "It costs one attribute per header cell and it is the difference between a table a blind user can read and one they cannot. On a simple table the guess is usually right; the habit is what makes the complicated one work." },
+
+      { t: "note", variant: "key", html: "<b>A table's structure is announced, like a list's count.</b> \"Table, three columns, three rows\" comes before anything else — so a screen reader user knows the size and shape before deciding to walk it. A grid faked out of <code>&lt;div&gt;</code> elements announces nothing at all, however identical it looks." },
+
+      { t: "h2", n: "2", text: "The parts people leave out" },
+      { t: "p", html: "A table works without <code>caption</code>, <code>thead</code> or <code>scope</code>. It renders, it lines up, and the missing pieces are invisible on screen — which is exactly why they get left out and why leaving them out is the default state of most tables on the web." },
+
+      { t: "note", variant: "tip", html: "<b><code>caption</code></b> — what this table is. First child, always.<br><b><code>thead</code>/<code>tbody</code></b> — which rows are labels and which are data.<br><b><code>tfoot</code></b> — a totals row. It may be written before <code>tbody</code> in the source and still renders last, which is useful when a long table is generated a row at a time.<br><b><code>scope</code></b> — which way a header points." },
+
+      { t: "debug",
+        intro: "This table lines up perfectly and is unreadable to a screen reader. Find what is missing before opening the fix.",
+        code: "<table>\n  <tr>\n    <td>Name</td>\n    <td>Score</td>\n  </tr>\n  <tr>\n    <td>Ravi</td>\n    <td>82</td>\n  </tr>\n</table>",
+        symptom: "Renders as a neat two-by-two grid. A screen reader announces the cells as \"Name, Score, Ravi, 82\" — four values with nothing saying which are labels.",
+        q: "Every tag is closed and the grid is correct. What did the markup never say?",
+        fix: "<table>\n  <thead>\n    <tr>\n      <th scope=\"col\">Name</th>\n      <th scope=\"col\">Score</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Ravi</th>\n      <td>82</td>\n    </tr>\n  </tbody>\n</table>",
+        why: "That there are any headers. Every cell is a <code>&lt;td&gt;</code>, so nothing in the table is a label — the first row only looks like one because it is at the top. The fix marks the column labels as <code>&lt;th scope=\"col\"&gt;</code> and the name as <code>&lt;th scope=\"row\"&gt;</code>, and now 82 is announced with both of its headers. On screen the difference is that headers are bold, which is the least important thing that changed." },
+
+      { t: "drills", intro: "Type these out — table markup is verbose and the shape only sticks through the fingers.", items: [
+        { task: "A table row with two data cells.", code: "<tr>\n  <td>Ravi</td>\n  <td>82</td>\n</tr>" },
+        { task: "A header row for Name and Score.", code: "<tr>\n  <th scope=\"col\">Name</th>\n  <th scope=\"col\">Score</th>\n</tr>" },
+        { task: "A caption saying what the table is.", code: "<caption>Term results</caption>" },
+        { task: "A row whose first cell is the row's label.", code: "<tr>\n  <th scope=\"row\">Ravi</th>\n  <td>82</td>\n</tr>" },
+      ] },
+
+      { t: "mistakes", items: [
+        { bad: "<table>\n  <td>Ravi</td>\n</table>", why: "A cell with no row. Cells live inside <tr> and nothing else does.", fix: "<table>\n  <tr><td>Ravi</td></tr>\n</table>" },
+        { bad: "<td>Name</td> — for a column label", why: "It looks like a header because it is on top. Nothing reading the page can tell, so the value below it is announced with no label at all.", fix: "<th scope=\"col\">Name</th>" },
+        { bad: "<table>\n  <tr>...</tr>\n  <caption>Results</caption>\n</table>", why: "The caption must be the table's first child. Placed later it is invalid, and the announcement that would have introduced the table comes after it.", fix: "<table>\n  <caption>Results</caption>\n  <tr>...</tr>\n</table>" },
+        { bad: "A row with three cells where every other row has four", why: "There is no column element — the third cell IS the third column. One missing cell shifts every value after it one column left, silently.", fix: "Give the empty position an empty cell: <td></td>" },
+      ] },
+
+      { t: "recap", items: [
+        "A table is built from rows; cells live inside <code>&lt;tr&gt;</code> and nowhere else",
+        "<code>&lt;th&gt;</code> is a label, <code>&lt;td&gt;</code> is a value — the bold is not the point",
+        "<code>scope=\"col\"</code> / <code>scope=\"row\"</code> says which way a header points",
+        "<code>&lt;caption&gt;</code> is the table's title and must come first",
+        "<code>thead</code>/<code>tbody</code> separate labels from data; write <code>tbody</code> even though it is implied",
+        "No column element exists — a missing cell shifts the whole row",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between th and td?", a: "th is a header cell — a label for a row or a column — and td is a data cell. Browsers render th bold and centred, but the reason to use it is that assistive technology reads the relevant headers back with each value, so a number is announced with what it means rather than on its own." },
+        { level: "medium", q: "What does the scope attribute do?", a: "It states which cells a header labels: scope=\"col\" for the column beneath it, scope=\"row\" for the row beside it. Without it a screen reader infers the association from position, which is usually right on a simple grid and unreliable on anything with multiple header levels. It is one attribute per header cell and it is what makes a data table readable non-visually." },
+      ] },
+    ],
+  },
+
+  {
+    slug: "html-table-layout",
+    order: 20,
+    title: "Spanning Cells, and the Decade Tables Were Misused",
+    minutes: 16,
+    content: [
+      { t: "objectives", items: [
+        "Merge cells across columns and down rows, and count the remaining cells correctly",
+        "Explain why tables were used for layout, and why that ended",
+        "Recognise a layout table in real markup and know what to replace it with",
+        "Stop a wide table breaking a phone screen",
+      ] },
+
+      { t: "hook",
+        q: "\"Never use tables\" is advice you will hear from working developers. It is also why teams build sortable data grids out of nested <code>&lt;div&gt;</code>s that no screen reader can read. What was the advice actually about?",
+        why: "Layout — not data. For about a decade a table was the only reliable way to place two things side by side, so entire pages were built inside one. CSS ended that, the warning stayed, and the warning lost the half that mattered: <b>tables are still exactly right for tabular data</b>." },
+
+      { t: "def",
+        term: "Layout table",
+        en: "A table used to position unrelated content on a page rather than to present data that has rows and columns." },
+
+      { t: "syntax",
+        intro: "Two attributes that merge cells. Both are counts of cells, not distances.",
+        form: "<tr>\n  <th scope=\"row\" rowspan=\"2\">Ravi</th>\n  <td>Physics</td>\n  <td>82</td>\n</tr>\n<tr>\n  <td>Maths</td>\n  <td>91</td>\n</tr>\n<tr>\n  <td colspan=\"3\">Averages published Friday</td>\n</tr>",
+        parts: [
+          { bit: "rowspan=\"2\"", says: "This cell occupies its own row and the one below. The next row then has <b>one fewer</b> cell written, because that position is already filled." },
+          { bit: "colspan=\"3\"", says: "This cell occupies three columns. That row therefore contains one cell where the others contain three." },
+        ],
+        note: "The commonest table bug is arithmetic. Every row must add up to the same number of columns, counting a spanned cell as the number it spans — miss by one and the grid tears, usually several rows further down than where the mistake is.",
+      },
+
+      { t: "code", file: "span.html", code: "<table>\n  <caption>Results by subject</caption>\n  <tbody>\n    <tr>\n      <th scope=\"row\" rowspan=\"2\">Ravi</th>\n      <td>Physics</td>\n      <td>82</td>\n    </tr>\n    <tr>\n      <td>Maths</td>\n      <td>91</td>\n    </tr>\n    <tr>\n      <td colspan=\"3\">Averages published Friday</td>\n    </tr>\n  </tbody>\n</table>", output: "Ravi's name spanning two rows beside his two subjects, and a full-width note underneath." },
+      { t: "psoft", html: "Count the cells: row one has three written, row two has <b>two</b> — Ravi's name is still occupying the first position — and row three has one that covers all three. Every row is three columns wide. Press <b>Try it yourself</b> and change <code>rowspan</code> to 3: the grid tears, and it tears in a row you did not touch." },
+
+      { t: "h2", n: "1", text: "Why layout tables happened, and why they stopped" },
+      { t: "p", html: "In 1996 CSS barely existed and browsers disagreed about the little of it they had. A table was the one construct that reliably put two things side by side, so designers nested them — a table for the page, a table inside the header, a table inside that for the menu. It worked, and it was the only thing that did." },
+      { t: "p", html: "What it cost became clear later. Content order in the source stops matching the reading order, so a screen reader walks the page in whatever sequence the layout happened to produce. It cannot reflow on a narrow screen — a table is a grid by definition. And nothing about the markup describes the content: everything is a cell, so nothing is a heading, an article, or a menu." },
+
+      { t: "note", variant: "warn", html: "<b>The rule is about intent, not the element.</b> Data with rows and columns → a table, with headers and a caption, and anyone who tells you otherwise has learned half of this history. Positioning things on a page → CSS, always. The question to ask is: <i>would this still make sense as a grid if I read it aloud?</i>" },
+
+      { t: "h2", n: "2", text: "What a layout table becomes" },
+      { t: "p", html: "The replacement is almost never another single element. A page laid out as a table is really a heading, some paragraphs, an image and a menu — each of which has an element that says what it is. Module 12's semantic elements finish the job; the elements you already have get most of the way." },
+
+      { t: "code", file: "was-a-table.html", code: "<!-- what a 2003 page looked like -->\n<table>\n  <tr>\n    <td><h2>About us</h2></td>\n    <td><img src=\"/img-lab/logo.svg\" alt=\"Home\"></td>\n  </tr>\n</table>\n\n<!-- what it is -->\n<h2>About us</h2>\n<img src=\"/img-lab/logo.svg\" alt=\"Home\">", output: "Both draw roughly the same thing; only the second says what any of it is." },
+
+      { t: "h2", n: "3", text: "Wide tables on narrow screens" },
+      { t: "p", html: "A table with six columns cannot shrink to a 375px phone — its content decides its width, and a grid does not wrap. Left alone, it pushes the whole page sideways and every other element on it goes off-screen with it." },
+      { t: "note", variant: "tip", html: "The fix is one line of CSS on a wrapper: <code>overflow-x: auto</code> around the table. The table then scrolls <b>inside its own box</b> and the rest of the page stays put. It is the standard treatment and worth knowing now, because the alternative is a page that is broken on the device most of your visitors are using." },
+
+      { t: "mistakes", items: [
+        { bad: "<tr><td colspan=\"2\">A</td><td>B</td><td>C</td></tr> — in a three-column table", why: "That row is four columns wide: two plus one plus one. The grid tears, usually visibly in a different row.", fix: "<tr><td colspan=\"2\">A</td><td>B</td></tr>" },
+        { bad: "A <table> used to put a sidebar next to an article", why: "Layout, not data. The reading order stops matching the source, it cannot reflow on a phone, and nothing in the markup says what any of it is.", fix: "Real elements for the content, and CSS for the placement." },
+        { bad: "\"Never use tables\" — applied to a price comparison grid", why: "Half the advice. That IS tabular data, and rebuilding it from divs removes the row and column relationships that make it readable non-visually.", fix: "A proper <table> with <th>, scope and a caption." },
+        { bad: "A six-column table dropped straight into a phone layout", why: "The table cannot shrink, so the whole page scrolls sideways and everything else goes with it.", fix: "Wrap it in an element with overflow-x: auto so only the table scrolls." },
+      ] },
+
+      { t: "recap", items: [
+        "<code>colspan</code> and <code>rowspan</code> count <b>cells</b>, not pixels",
+        "A spanned cell fills positions in later rows — write one fewer cell there",
+        "Every row must total the same column count, spans included",
+        "Tables were the only layout tool once; CSS replaced that, and the warning outlived the reason",
+        "Tabular data still belongs in a table — headers, <code>scope</code> and a caption",
+        "Wrap a wide table in <code>overflow-x: auto</code> so the page does not scroll sideways",
+      ] },
+
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between colspan and rowspan?", a: "colspan merges a cell across columns, to the right; rowspan merges it down across rows. Both take a count of cells. The consequence people forget is on the other rows: a cell spanning two rows already occupies a position in the row below, so that row is written with one fewer cell." },
+        { level: "medium", q: "Is it true that you should never use tables?", a: "Only for layout. Tables were the only reliable way to position content before CSS, and pages built that way lose the match between source order and reading order, cannot reflow on a phone, and describe nothing about their content. But tabular data — anything with real rows and columns — belongs in a table, with th, scope and a caption. Rebuilding a data grid out of divs to obey a half-remembered rule removes exactly the relationships that make the data readable to anyone not looking at it." },
+      ] },
+    ],
+  },
 ];

@@ -425,4 +425,104 @@ export const htmlProblems = [
       "Delete the `|` characters — the list structure replaces them.",
     ],
     "html,lists,accessibility"),
+
+  /* ------------------------------------------------ html-tables ----
+   *
+   * ⚠️ NEVER ASSERT ON AN IMPLICIT <tbody> IN A TABLE PROBLEM.
+   *
+   * The browser's DOMParser inserts a <tbody> around loose <tr>s. linkedom does
+   * not. Grading runs in both — the workbench parses with DOMParser, db:check
+   * and lib/verify.ts parse with linkedom — so a test written as `tbody tr`
+   * against markup with no explicit <tbody> PASSES in the workbench and FAILS
+   * when the student presses Submit. Verified in both engines before these
+   * problems were written.
+   *
+   * So: NO TEST BELOW ASSERTS ON `tbody` AT ALL, even where the exercise tells
+   * the student to write one. "Require it and check for it" is the tempting
+   * middle ground and it is the broken one: a student who writes thead and
+   * caption but forgets tbody gets `tbody td` = 2 from the browser (green,
+   * "press Submit") and 0 from linkedom (rejected on submit). An assertion that
+   * cannot be made consistently is better not made — the lesson still teaches
+   * tbody, and `thead` IS safe to assert, because only tbody is auto-inserted.
+   *
+   * Everything here uses descendant selectors (`table tr`, `table td`) or
+   * elements the parser never invents (`caption`, `thead`, `th[scope]`).
+   * Engine parity for all four problems was checked by running every selector
+   * through both engines and diffing the counts. */
+  P("html-tables", 622, "html-first-table", "A Table Worth Reading Aloud", "Easy",
+    "Build the results table properly — the structure, not just the grid.\n\nIt needs:\n\n- a `caption` reading `Term results`\n- a `thead` with one row of **three** header cells: `Name`, `Physics`, `Maths`, each with `scope=\"col\"`\n- a `tbody` with **two** rows, and in each one the student's name is a **row header** (`scope=\"row\"`) followed by two ordinary cells of marks\n\nUse Ravi (82, 91) and Meera (88, 79). The caption goes first — it is the table's title, and it must be the table's first child.",
+    "<table>\n  <!-- caption, thead, tbody -->\n</table>\n",
+    "<table>\n  <caption>Term results</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Name</th>\n      <th scope=\"col\">Physics</th>\n      <th scope=\"col\">Maths</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Ravi</th>\n      <td>82</td>\n      <td>91</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Meera</th>\n      <td>88</td>\n      <td>79</td>\n    </tr>\n  </tbody>\n</table>\n",
+    [
+      { find: "table > caption", text: true, contains: "Term results", says: "a <caption> reading \"Term results\", as the table's first child" },
+      { find: "thead th[scope=\"col\"]", count: 3, says: "three column headers in <thead>, each with scope=\"col\"" },
+      { find: "table tr", count: 3, says: "three rows in all — one of headers, two of results" },
+      { find: "th[scope=\"row\"]", count: 2, says: "each result row starts with a row header — scope=\"row\"" },
+      { find: "table td", count: 4, says: "four ordinary cells of marks" },
+      { find: "th", text: true, contains: "Physics", says: "one of the column headers is \"Physics\"" },
+    ],
+    [
+      "Order inside the table: `<caption>`, then `<thead>`, then `<tbody>`.",
+      "A header cell is `<th>`; scope=\"col\" labels the column below, scope=\"row\" the row beside.",
+      "The names are row headers, the marks are `<td>`.",
+    ],
+    "html,tables"),
+
+  P("html-tables", 623, "html-fix-headers", "A Grid Nobody Can Read Aloud", "Medium",
+    "This table lines up perfectly on screen and is unreadable to a screen reader: **every cell is a `<td>`**, so nothing in it is a label. The number 82 is announced as \"82\", with no column and no name attached.\n\nFix the structure without changing a single word:\n\n- the first row's cells are column labels — make them header cells with `scope=\"col\"`, and put that row in a `thead`\n- each person's name labels its own row — make it a header cell with `scope=\"row\"`\n- put the two data rows in a `tbody`\n- add a `caption` reading `Term results`\n\nThe page will barely change. That is the point: everything that was wrong was invisible.",
+    "<table>\n  <tr>\n    <td>Name</td>\n    <td>Physics</td>\n  </tr>\n  <tr>\n    <td>Ravi</td>\n    <td>82</td>\n  </tr>\n  <tr>\n    <td>Meera</td>\n    <td>88</td>\n  </tr>\n</table>\n",
+    "<table>\n  <caption>Term results</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Name</th>\n      <th scope=\"col\">Physics</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Ravi</th>\n      <td>82</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Meera</th>\n      <td>88</td>\n    </tr>\n  </tbody>\n</table>\n",
+    [
+      { find: "table > caption", text: true, contains: "Term results", says: "a caption titles the table" },
+      { find: "thead th[scope=\"col\"]", count: 2, says: "two column headers in <thead> with scope=\"col\"" },
+      { find: "th[scope=\"row\"]", count: 2, says: "each name is a row header with scope=\"row\"" },
+      { find: "table td", count: 2, says: "only the two marks are left as ordinary cells" },
+      { find: "th", text: true, contains: "Physics", says: "\"Physics\" is now a header, not a data cell" },
+      { find: "td", text: true, contains: "82", says: "the marks are unchanged" },
+    ],
+    [
+      "A label is `<th>`, a value is `<td>` — change both the opening and closing tag.",
+      "`scope=\"col\"` on the top row, `scope=\"row\"` on each name.",
+      "The caption must be the table's first child, before `<thead>`.",
+    ],
+    "html,tables,accessibility"),
+
+  /* ------------------------------------------ html-table-layout ---- */
+  P("html-table-layout", 624, "html-spanning", "Make the Cells Span", "Medium",
+    "This three-column table has two problems, and both are arithmetic.\n\n- Ravi has two subjects and his name is written twice. Write it **once**, in the first row, and have it span **both** rows — then delete it from the second row, because that position is already filled\n- the note at the bottom sits in one narrow cell. It should span all **three** columns\n\nEvery row must still total three columns, counting a spanned cell as the number it spans. Do not change any words.",
+    "<table>\n  <caption>Results by subject</caption>\n  <tr>\n    <th scope=\"row\">Ravi</th>\n    <td>Physics</td>\n    <td>82</td>\n  </tr>\n  <tr>\n    <th scope=\"row\">Ravi</th>\n    <td>Maths</td>\n    <td>91</td>\n  </tr>\n  <tr>\n    <td>Averages published Friday</td>\n  </tr>\n</table>\n",
+    "<table>\n  <caption>Results by subject</caption>\n  <tr>\n    <th scope=\"row\" rowspan=\"2\">Ravi</th>\n    <td>Physics</td>\n    <td>82</td>\n  </tr>\n  <tr>\n    <td>Maths</td>\n    <td>91</td>\n  </tr>\n  <tr>\n    <td colspan=\"3\">Averages published Friday</td>\n  </tr>\n</table>\n",
+    [
+      { find: "th[rowspan=\"2\"]", count: 1, says: "one row header spanning two rows" },
+      { find: "th[rowspan=\"2\"]", text: true, contains: "Ravi", says: "the spanning header is Ravi's name" },
+      { find: "th", count: 1, says: "the name is written once, not twice" },
+      { find: "td[colspan=\"3\"]", count: 1, says: "the note spans all three columns" },
+      { find: "td[colspan=\"3\"]", text: true, contains: "Averages published Friday", says: "the note's words are unchanged" },
+      { find: "table td", count: 5, says: "five data cells left — two subjects, two marks, one note" },
+    ],
+    [
+      "`rowspan=\"2\"` on Ravi's cell in the FIRST row, then delete the duplicate below.",
+      "`colspan=\"3\"` on the note's cell.",
+      "Both attributes count cells. After the fix every row is three columns wide.",
+    ],
+    "html,tables,layout"),
+
+  P("html-table-layout", 625, "html-untable-layout", "Undo a 2003 Layout", "Medium",
+    "This is how pages were built before CSS could place anything: a table holding content that has no rows or columns at all. It is a heading, a paragraph and an image — none of which is tabular data.\n\nRewrite it **without any table**. Keep exactly the same content:\n\n- the `About us` heading as an `h2`\n- the sentence as a `p`\n- the logo as an `img` with `src` `/img-lab/logo.svg` and alt text of `Home`\n\nNothing else changes. The page will look a little different, and every part of it will finally say what it is.",
+    "<table>\n  <tr>\n    <td>\n      <h2>About us</h2>\n      <p>We have been building things since 2003.</p>\n    </td>\n    <td>\n      <img src=\"/img-lab/logo.svg\" alt=\"Home\">\n    </td>\n  </tr>\n</table>\n",
+    "<h2>About us</h2>\n<p>We have been building things since 2003.</p>\n<img src=\"/img-lab/logo.svg\" alt=\"Home\">\n",
+    [
+      { find: "table", count: 0, says: "no table left — this was never tabular data" },
+      { find: "td", count: 0, says: "and no table cells either" },
+      { find: "h2", text: true, contains: "About us", says: "the heading is an <h2>" },
+      { find: "p", text: true, contains: "since 2003", says: "the sentence is a paragraph" },
+      { find: "img", attr: "src", equals: "/img-lab/logo.svg", says: "the logo is still there" },
+      { find: "img", attr: "alt", equals: "Home", says: "its alt text still reads \"Home\"" },
+    ],
+    [
+      "Delete the table, the row and both cells — keep everything that was inside them.",
+      "The content already has the right elements: an h2, a p and an img.",
+      "Positioning the logo beside the text is CSS's job, and not part of this exercise.",
+    ],
+    "html,tables,semantics"),
 ];
