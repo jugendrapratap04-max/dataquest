@@ -214,7 +214,14 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
   .top-actions { flex-wrap:wrap; row-gap:8px; }
   .search-wrap { flex:1 1 100%; }
 }
+/* The input's own outline is off because the ring belongs on the box around it —
+   the input has no border of its own, so an outline would draw inside the
+   rounded container and look like a mistake. But nothing ever put the ring on
+   the container either, so tabbing into search changed literally nothing on
+   screen: measured, focused and blurred were byte-identical. A keyboard user
+   landed in the search box with no way to know it. */
 .search input { border:0; background:none; outline:none; color:var(--ink); font-size:13px; width:100%; font-family:var(--sans); }
+.search:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent); }
 .search input::placeholder { color:var(--ink-faint); }
 .search-drop { position:absolute; top:calc(100% + 6px); right:0; left:0; min-width:280px; background:var(--panel); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); z-index:40; max-height:340px; overflow-y:auto; }
 .search-empty { padding:14px; font-size:12.5px; color:var(--ink-faint); font-family:var(--mono); text-align:center; }
