@@ -114,6 +114,19 @@ a { color:inherit; text-decoration:none; }
 button { font:inherit; cursor:pointer; }
 h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 :focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
+/* ⚠️ THE RULE ABOVE IS GLOBAL AND WORKS — and six controls used to delete it.
+   `outline:none` on an input is fine only when something visible replaces it,
+   and in these six nothing did: the topbar search, the todo input, the note
+   form, one settings field, and BOTH code editors — the places a keyboard user
+   spends the most time. Focus landed on them and vanished.
+   Each gets the ring back on :focus-visible, which fires for keyboard focus and
+   not for a mouse click, so the editors stay visually quiet while typing. */
+.search input:focus-visible,
+.todo-add input:focus-visible,
+.note-form input:focus-visible,
+.note-form textarea:focus-visible,
+.lc-area:focus-visible,
+.hw-area:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
 .mono { font-family:var(--mono); }
 .eyebrow { font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); font-weight:600; }
 .num { font-family:var(--mono); font-variant-numeric:tabular-nums; }
@@ -1200,6 +1213,28 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(140%); transition:transform .35s cubic-bezier(.2,.9,.3,1.3); background:var(--good); color:#04240F; padding:13px 20px; border-radius:12px; font-weight:700; font-size:14px; display:flex; align-items:center; gap:10px; box-shadow:0 12px 30px -8px rgba(0,0,0,.4); z-index:50; } .toast.show { transform:translateX(-50%) translateY(0); } .toast svg { width:18px; height:18px; }
 
 .page-intro { color:var(--ink-soft); font-size:13.5px; margin:0 0 22px; max-width:62ch; }
+
+/* ---- Skeletons --------------------------------------------------------
+   There were NO loading states anywhere: every page went blank, then whole.
+   On a slow connection that reads as broken rather than busy, and it is the
+   first thing a new visitor sees.
+   Rules these follow, from the audit: a skeleton must match the layout it is
+   standing in for, the shimmer must be quiet, and nothing here animates when
+   the reader has asked for less motion. */
+.sk { background:var(--panel-2); border-radius:8px; position:relative; overflow:hidden; }
+.sk::after { content:""; position:absolute; inset:0; transform:translateX(-100%);
+             background:linear-gradient(90deg, transparent, color-mix(in srgb, var(--fg) 5%, transparent), transparent);
+             animation:sk-shimmer 1.4s ease-in-out infinite; }
+@keyframes sk-shimmer { to { transform:translateX(100%); } }
+.sk-line { height:12px; margin-bottom:9px; }
+.sk-line.sm { width:40%; } .sk-line.md { width:65%; } .sk-line.lg { width:88%; }
+.sk-title { height:22px; width:45%; margin-bottom:16px; border-radius:9px; }
+.sk-card { border:1px solid var(--line); border-radius:var(--radius); padding:18px; background:var(--card); margin-bottom:16px; }
+.sk-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(270px,1fr)); gap:16px; }
+.sk-block { height:180px; border-radius:var(--radius); }
+/* A reader who has asked for reduced motion gets the shape and no shimmer —
+   the skeleton still communicates "loading" through its presence. */
+@media (prefers-reduced-motion: reduce) { .sk::after { animation:none; } }
 
 /* The subject picker at /learn. Every subject, because a screen that quietly
    knows about nine of eleven is how a course becomes invisible — see the note

@@ -110,7 +110,6 @@ function formatSeconds(s: number) {
  *  language bar. */
 export function TopicPanel({ stats }: { stats: SolvedStats }) {
   if (stats.byTopic.length === 0) return null;
-  const top = stats.byTopic[0].solved || 1;
   return (
     <section className="card pad">
       <div className="sec-head">
