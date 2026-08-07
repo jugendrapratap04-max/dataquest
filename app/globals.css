@@ -2892,3 +2892,34 @@ summary:active,
 .lc-try:active, .lc-reset:not(:disabled):active, .tnav-btn:active, .logout-btn:active {
   transform: translateY(1px);
 }
+
+/* ---------------------------------------------------------------------------
+ * TAP TARGETS ON TOUCH
+ *
+ * MEASURED at 375x812 with real layout: the lesson page rendered 78 controls,
+ * 54 of them under 44px and SIX UNDER 24px. That last group is not a nicety —
+ * WCAG 2.5.8 makes 24x24 the AA floor — and they were 18px: the three footer
+ * legal links, and `.gb-alt`, which is "I already have one" on the guest
+ * banner. A sign-in link, 18 pixels tall, on the page a new visitor lands on.
+ *
+ * `pointer: coarse` rather than a width breakpoint, because this is about what
+ * is doing the pointing. A desktop window narrowed to 375px keeps its density;
+ * a tablet at 1024px gets the bigger targets.
+ *
+ * ⚠️ THIS IS DELIBERATELY NOT "EVERY CONTROL UNDER 44PX". The same measurement
+ * found the lesson's first sentence starting at y=1118 on a phone, and the
+ * 34px controls are mostly IN that furniture — growing all of them would buy
+ * a better tap target by pushing the content further out of reach. So this
+ * covers the AA failures and the controls that cost no fold: the drawer nav,
+ * the footer, and the course title inside a collapsed disclosure.
+ * ------------------------------------------------------------------------- */
+@media (pointer: coarse) {
+  .nav-item, .rail-tab, .legal-foot a, .side-legal a, .legal-tabs a,
+  .cnav-course, .gb-alt, .theme-opt {
+    min-height:44px;
+    display:flex;
+    align-items:center;
+  }
+  .legal-foot a, .side-legal a, .legal-tabs a, .cnav-course { display:inline-flex; }
+  .gb-alt { justify-content:center; }
+}
