@@ -3,11 +3,18 @@
  * AGENTS.md carried "nobody has done a full one" for a long time. This is it,
  * scripted so it can be re-run instead of remembered.
  *
- * Four questions, highest-signal first:
+ * Five questions, highest-signal first:
+ *   0. does the stylesheet still PARSE                <- silent rule loss
  *   1. custom properties USED but never DEFINED   <- finds real, invisible bugs
  *   2. custom properties DEFINED but never used
  *   3. component files never referenced anywhere
  *   4. CSS classes never referenced by any source
+ *
+ * ⚠️ CHECK 0 EXISTS BECAUSE OF A REAL LOSS. A paragraph appended to a comment
+ * past its closing marker left prose loose in the stylesheet; CSS error
+ * recovery glued it onto the selector list below and dropped that whole rule,
+ * and four controls lost their keyboard focus ring. The build passed. The
+ * linter passed. This sweep passed. Only parsing the file catches it.
  *
  * ⚠️ FALSE POSITIVES ARE THE WHOLE DIFFICULTY, and the first run of this
  * produced ten of them out of nineteen. Everything below exists because of one:
@@ -50,6 +57,38 @@ const bounded = (name) =>
   new RegExp(`(^|[^\\w-])${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^\\w-]|$)`);
 
 let problems = 0;
+
+// ---------------------------------------------------------------------- 0 ---
+/* Does the stylesheet parse, and did any rule end up with prose for a selector?
+ * A dropped rule is invisible everywhere else — see the note at the top. */
+console.log("=== 0. STYLESHEET PARSES");
+{
+  const { default: postcss } = await import("postcss");
+  const raw = readFileSync(CSS, "utf8");
+  try {
+    const root = postcss.parse(raw, { from: CSS });
+    const junk = [];
+    root.walkRules((r) => {
+      // A selector holding a sentence, an emoji or a comment marker is what
+      // error recovery produces when a comment leaks into the rule stream.
+      if (/⚠|\*\/|[a-z]{3,}\s+[a-z]{3,}\s+[a-z]{3,}/i.test(r.selector)) {
+        junk.push(`line ${r.source?.start?.line}: ${r.selector.replace(/\s+/g, " ").slice(0, 90)}`);
+      }
+    });
+    if (junk.length) {
+      problems += junk.length;
+      console.log(`    ${junk.length} rule(s) have prose for a selector — a comment leaked:`);
+      junk.forEach((j) => console.log("      " + j));
+    } else {
+      console.log("    parses clean, no rule has prose for a selector");
+    }
+  } catch (e) {
+    problems++;
+    console.log(`    ⛔ PARSE ERROR at line ${e.line}: ${e.reason}`);
+    console.log("       Everything after this point may be silently dropped.");
+  }
+}
+console.log();
 
 // ------------------------------------------------------------------ 1 & 2 ---
 const defined = new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));

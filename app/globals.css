@@ -164,12 +164,23 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    form, one settings field, and BOTH code editors — the places a keyboard user
    spends the most time. Focus landed on them and vanished.
    Each gets the ring back on :focus-visible, which fires for keyboard focus and
-   not for a mouse click, so the editors stay visually quiet while typing. */
+   not for a mouse click, so the editors stay visually quiet while typing.
+
    ⚠️ The topbar search is NOT in this list, and that is deliberate: its
    wrapper draws the ring (`.search:focus-within`, border + 3px glow), so an
    outline on the input as well painted TWO rings, one inside the other. One
    control, one indicator — the wrapper's, which also shows for a mouse click,
-   which is right for a text field you are about to type in. */
+   which is right for a text field you are about to type in.
+
+   ⚠️⚠️ NEVER WRITE A CLOSING COMMENT MARKER INSIDE A COMMENT — not even in
+   backticks, because CSS comments have no escape. It happened twice here in
+   one session: a paragraph appended past the first marker left prose loose in
+   the stylesheet, CSS error recovery glued it onto the selector list below,
+   the whole rule was dropped, and FOUR controls silently lost their focus ring
+   (the todo input, both note fields, both code editors). Then the comment
+   explaining that quoted the marker and broke it a second time.
+   NOTHING catches this: not the build, not the linter, not the dead-code
+   sweep. Only `npx postcss app/globals.css -o /dev/null` does. */
 .todo-add input:focus-visible,
 .note-form input:focus-visible,
 .note-form textarea:focus-visible,
