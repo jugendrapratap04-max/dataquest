@@ -1466,6 +1466,12 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .quiz-sec.hard .quiz-lvl { border-left-color:var(--bad); }
 
 /* ---- Reading progress + lesson outline ---- */
+/* THE ONE PROGRESS BAR THAT IS NOT ON --t-slow, and it must stay that way.
+   Every other fill in the app animates a value that CHANGED — a lesson
+   completed, a timer ticking, a subject advancing — so a quarter-second makes
+   the change legible. This one tracks the scroll position, which is a
+   continuous input the reader is moving right now, so any easing longer than a
+   frame or two reads as the bar lagging behind the page. Fast and linear. */
 .readbar { position:fixed; top:0; left:0; right:0; height:3px; background:transparent; z-index:60; pointer-events:none; }
 .readbar > i { display:block; height:100%; background:linear-gradient(90deg, var(--accent-2), var(--accent)); transition:width var(--t-fast) linear; }
 
@@ -1758,7 +1764,10 @@ select.inp { cursor:pointer; }
 .fring { width:200px; height:200px; transform:rotate(-90deg); }
 .fring circle { fill:none; stroke-width:9; stroke-linecap:round; }
 .fring-bg { stroke:var(--panel-3); }
-.fring-fg { stroke:var(--accent); transition:stroke-dashoffset .3s linear, stroke .6s ease; }
+/* The fill is on the shared progress duration; the STROKE COLOUR is not, and
+   that .6s is deliberate — it is the calm shift into break mode, not a
+   progress step. Same reason `.focus-stage` above holds .6s. */
+.fring-fg { stroke:var(--accent); transition:stroke-dashoffset var(--t-slow) linear, stroke .6s ease; }
 .is-break .fring-fg { stroke:var(--teal); }
 .fring-mid { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .fring-time { font-size:38px; font-weight:700; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
@@ -1842,7 +1851,7 @@ select.inp { cursor:pointer; }
 .rh-timer { margin-left:auto; text-align:center; min-width:120px; }
 .rh-clock { font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.1; margin-top:3px; }
 .rh-prog { height:3px; background:var(--panel-3); border-radius:3px; overflow:hidden; margin-top:5px; }
-.rh-prog span { display:block; height:100%; background:var(--accent); transition:width .3s linear; }
+.rh-prog span { display:block; height:100%; background:var(--accent); transition:width var(--t-slow) linear; }
 .is-break .rh-prog span { background:var(--teal); }
 .rh-cycle { font-size:10.5px; color:var(--ink-faint); margin-top:4px; }
 .rh-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
@@ -2303,7 +2312,7 @@ select.inp { cursor:pointer; }
 /* Where you are in this subject. Uses progress that already existed — the header
    used to say "Lesson 6" with nothing to measure it against. */
 .subject-bar { height:4px; max-width:320px; margin-top:11px; border-radius:var(--r-xl); background:var(--sub-bg); overflow:hidden; }
-.subject-bar span { display:block; height:100%; border-radius:var(--r-xl); background:var(--sub-fg); transition:width .4s ease; }
+.subject-bar span { display:block; height:100%; border-radius:var(--r-xl); background:var(--sub-fg); transition:width var(--t-slow) ease; }
 /* No padding override for the title here any more. It used to drop to 12px
    below 640px while every card on the same screen kept landing at 21, so the
    lesson title sat 6px left of its own content on every phone — the desktop
@@ -2810,3 +2819,54 @@ a.pc-row:hover .pc-t { color:var(--accent); }
   background:var(--accent); color:#1a1205; font-size:13px; font-weight:600;
   padding:10px 16px; border-radius:0 0 10px 0; text-decoration:none; }
 .skip-link:focus { left:0; outline:2px solid var(--ink); outline-offset:2px; }
+
+/* ---------------------------------------------------------------------------
+ * PRESS FEEDBACK
+ *
+ * MEASURED BEFORE THIS WAS WRITTEN: 57 rules in this file respond to :hover
+ * and NOT ONE responded to :active. Every control in the app acknowledged a
+ * mouse arriving, and none of them acknowledged being pressed.
+ *
+ * Press is the half that matters on a phone, where there is no hover at all —
+ * so on the device most of these students are using, tapping anything did
+ * nothing visible until the action itself finished. On a slow connection that
+ * is the gap in which people tap a second time.
+ *
+ * WHAT IS COVERED, AND WHY THAT LIST. The hover set IS the control inventory —
+ * a thing that reacts to a pointer arriving is a thing you can press. So this
+ * is that same set, minus three entries whose hover is an affordance inside a
+ * visualisation rather than a control: `.mem-box`, `.oi-bark` and `.tl-t`.
+ * Element selectors and class selectors are both listed on purpose: several of
+ * these classes are attached in template literals, so matching the element is
+ * what makes the rule hold when a class name moves.
+ *
+ * One pixel down, which sits inside the design system's "most interactions are
+ * opacity, colour, or <=2px of movement". No transition is declared here on
+ * purpose: a press should register at the instant of pressing, and the release
+ * animates back through whatever transition the element already had.
+ *
+ * ⚠️ IT IS AT THE END OF THE FILE ON PURPOSE. `.pcard:hover` and `.pcard:active`
+ * have identical specificity, so the later one wins — and several of these
+ * controls LIFT on hover, which a press has to be able to overrule. Move this
+ * block higher up and every lifted control silently stops responding to a
+ * press. That is the same trap that made `.learn-side` undismissable on mobile:
+ * a rule beaten by a later one of equal specificity, failing in total silence.
+ * ------------------------------------------------------------------------- */
+button:not(:disabled):active,
+summary:active,
+[role="button"]:not([aria-disabled="true"]):active,
+.btn:not(:disabled):active,
+.nav-item:active, .rail-tab:active, .nav-collapse:active, .rail-collapse:active,
+.pcard:active, .subj-card:active, .note-card:active, .bk-chapter-card:active,
+.bki-card:active, a.pc-row:active, .search-item:active,
+.ch-opt:active, .ch-row:active, .quiz-opt:not(:disabled):active,
+.lt-item a:active, .cnav-course:active, .cnav-scroll li a:active,
+.toc li a:active, .bk-toc a:active, .crumb a:active,
+.idstrip:active, .userbox:active, .ob-chip:active, .prof-chip.link-chip:active,
+.theme-opt:active, .ss-preset:active, .todo li:active,
+.eh-link:active, .gc-link:active, .lp-link:active, .gb-alt:active,
+.legal-tabs a:active, .legal-foot a:active, .side-legal a:active, .legal-back:active,
+.fb-fab:active, .focus-fab:active, .fb-x:active, .fnote-del:active,
+.lc-try:active, .lc-reset:not(:disabled):active, .tnav-btn:active, .logout-btn:active {
+  transform: translateY(1px);
+}
