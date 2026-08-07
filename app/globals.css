@@ -1009,12 +1009,34 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 /* On a phone an 18-entry list is 736px of navigation above 49 words of content —
    the topic you opened starts below the fold, which defeats the point of showing
    one topic at a time. Cap it and let the list scroll inside itself. */
+/* The phone copy of the list is the one inside <details>; desktop shows the
+   open copy. Exactly one is ever displayed, which is why the markup renders the
+   list twice — the same arrangement CourseNav uses. */
+.lt-fold { display:none; }
+
 @media (max-width: 720px) {
   /* Padding stays 20 so the topic list keeps the same left edge as the title
      and every card below it. Only the vertical margin tightens on a phone. */
-  .lt { margin-bottom:16px; padding:11px 20px; }
-  .lt-list { max-height:152px; overflow-y:auto; overscroll-behavior:contain;
-             -webkit-overflow-scrolling:touch; padding-right:2px; }
+  .lt { margin-bottom:16px; padding:0; }
+  .lt-open { display:none; }
+  .lt-fold { display:block; }
+
+  /* MEASURED at 375x812 before this existed: `.lt` was 202px and the lesson's
+     first sentence started at y=1118 against an 812 fold. The list was already
+     capped at 152px with its own scrollbar, so the cap was not the problem —
+     offering ten navigation links before the reader has read one word was.
+     Closed, this is a 44px row that says where you are. */
+  .lt-fold > summary { min-height:44px; display:flex; align-items:center; gap:10px;
+                       padding:0 20px; cursor:pointer; list-style:none;
+                       font-size:13px; color:var(--ink-soft); }
+  .lt-fold > summary::-webkit-details-marker { display:none; }
+  .lt-fold-n { flex:none; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; }
+  .lt-fold-label { flex:1; color:var(--fg); font-weight:600; overflow:hidden;
+                   text-overflow:ellipsis; white-space:nowrap; }
+  .lt-fold-hint { flex:none; font-size:11.5px; color:var(--muted); }
+  .lt-fold[open] > summary { border-bottom:1px solid var(--line); }
+  .lt-fold .lt-list { max-height:152px; overflow-y:auto; overscroll-behavior:contain;
+             -webkit-overflow-scrolling:touch; padding:8px 20px 12px; }
   .lt-item a { padding:7px 8px; }   /* a little taller: this is a touch target */
 }
 
