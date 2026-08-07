@@ -9658,6 +9658,8 @@ const deployLessons = [
 
     { t: "h2", n: "3", text: "Pin your versions" },
     { t: "p", html: "The host installs your dependencies fresh. If <code>requirements.txt</code> says <code>scikit-learn</code> with no version, it installs whatever is newest today — which may not be the version that wrote your model file, and loading a model across versions ranges from a warning to a crash to, worst of all, silently different behaviour." },
+    { t: "viz", name: "scaler-left-behind" },
+
     { t: "note", variant: "key", html: "<b>Pin the versions you actually trained with.</b> <code>scikit-learn==1.4.2</code>, not <code>scikit-learn</code>. Generate the file from the environment that produced the model rather than writing it by hand, and treat it as part of the model: the pair only works together." },
 
     { t: "debug",

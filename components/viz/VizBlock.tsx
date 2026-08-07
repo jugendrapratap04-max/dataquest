@@ -137,6 +137,7 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "style-lab": dynamic(() => import("./StyleLab").then((m) => m.StyleLab)),
   "git-flow": dynamic(() => import("./GitFlow").then((m) => m.GitFlow)),
   "kpi-test": dynamic(() => import("./KpiTest").then((m) => m.KpiTest)),
+  "scaler-left-behind": dynamic(() => import("./ScalerLeftBehind").then((m) => m.ScalerLeftBehind)),
   "report-vs-dashboard": dynamic(() => import("./ReportVsDashboard").then((m) => m.ReportVsDashboard)),
 };
 
