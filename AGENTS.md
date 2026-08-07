@@ -127,11 +127,17 @@ Rules that make this work rather than become theatre:
       have one shaped like the page. **7 of 7 covered.** Verified live rather
       than assumed — the streamed first response carries 15, 9 and 8 skeleton
       blocks on /progress, /profile and /certificates.
-      **STILL OPEN — the EMPTY half of this item.** There are already 14
-      `*-empty` classes (`bk-empty`, `prof-empty`, `room-empty`, `search-empty`
-      and so on), so empty states exist in places and were not audited one by
-      one. Nobody has checked that each says what would be there and offers one
-      action, which is what DESIGN-SYSTEM.md asks for
+      The EMPTY half of this item was NOT done — it is its own entry below now,
+      because a live piece of work buried inside a crossed-off one is a piece of
+      work nobody will ever find
+- [ ] **Empty states, audited one by one.** 14 `*-empty` classes already exist
+      (`bk-empty`, `prof-empty`, `room-empty`, `search-empty`, `res-empty`,
+      `fnote-empty`, `gl-empty` …), so these are not missing so much as
+      unchecked. DESIGN-SYSTEM.md asks each for two things — **a sentence saying
+      what would be here, and one action** — and nobody has confirmed a single
+      one has both. Start by rendering each with no data rather than by reading
+      the CSS: an empty state is the one screen that only appears when you have
+      nothing, which is exactly why it never gets seen
 - [x] ~~Dead-code sweep~~ — done 2026-08-07, and it is now **`npm run dead-code`**
       so it can be re-run instead of remembered. Four checks: custom properties
       used-but-undefined, defined-but-unused, orphan components, unreferenced
