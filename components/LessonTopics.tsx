@@ -16,51 +16,48 @@ import type { OutlineEntry } from "@/lib/lesson-outline";
 export function LessonTopics({
   slug, outline, current,
 }: { slug: string; outline: OutlineEntry[]; current: number }) {
-  const list = (
-    <ol className="lt-list">
-      {outline.map((o, i) => {
-        const done = i < current;
-        return (
-          <li key={o.id} className={`lt-item${i === current ? " on" : ""}${done ? " past" : ""}`}>
-            <Link href={i === 0 ? `/learn/${slug}` : `/learn/${slug}?t=${i + 1}`} scroll>
-              <span className="lt-n">{o.n ?? (o.kind === "landmark" ? "•" : i + 1)}</span>
-              <span className="lt-label">{o.label}</span>
-              {o.minutes > 0 && <span className="lt-min">{o.minutes}m</span>}
-            </Link>
-          </li>
-        );
-      })}
-    </ol>
-  );
-
-  /* Two renderings, one displayed — the same shape CourseNav uses, for the same
-   * reason and now with a number behind it. MEASURED on a phone (375x812, real
-   * layout): this block was 202px tall and the lesson's first sentence began at
-   * y=1118, which is 306px BELOW the fold. A reader on a phone scrolled past
-   * more than a screen and a half of furniture to reach the first word, and a
-   * fifth of that furniture was this list — navigation, offered before there is
-   * anything to navigate away from.
+  /* ONE ROW OF PILLS, not a stacked list.
    *
-   * So on a phone it becomes a closed disclosure that says where you are: one
-   * tap to open, and roughly 158px given back to the thing the reader came for.
-   * Desktop is untouched, because there the list sits in space the text was
-   * never going to use. */
+   * MEASURED before changing it (1280x900, /learn/html-links): the boxed list
+   * was 250px tall and the lesson's first paragraph began at y=761 — a quarter
+   * of a screen spent on navigation offered before there is anything to
+   * navigate away from. As a wrapped pill row the same twelve topics take
+   * about 110px and every one of them is still visible.
+   *
+   * One rendering for both widths now (the phone disclosure is gone): the row
+   * wraps on desktop so nothing hides, and becomes a single thumb-scrollable
+   * line on phones, where it costs the same ~44px the closed disclosure did.
+   * Still no client JavaScript — which topic is open is in the URL. */
   return (
     <nav className="lt" aria-label="Topics in this lesson">
-      <div className="lt-open">
-        <div className="lt-head">
-          Topics <span className="lt-count">{current + 1} / {outline.length}</span>
-        </div>
-        {list}
+      <div className="lt-head">
+        Topics <span className="lt-count">{current + 1} / {outline.length}</span>
       </div>
-      <details className="lt-fold">
-        <summary>
-          <span className="lt-fold-n">{current + 1} / {outline.length}</span>
-          <span className="lt-fold-label">{outline[current]?.label ?? "Topics"}</span>
-          <span className="lt-fold-hint">all topics</span>
-        </summary>
-        {list}
-      </details>
+      {/* ⚠️ `tpill-`, not `tp-` — `.tp-row` and `.tp-n` were already taken by
+          the profile's Topics panel, and being later in the stylesheet they won:
+          the row rendered as that panel's 3-column grid. Measured, not guessed —
+          computed display came back `grid` with flex-wrap set to nowrap. */}
+      <ol className="tpill-row">
+        {outline.map((o, i) => {
+          const done = i < current;
+          return (
+            <li key={o.id}>
+              <Link
+                className={`tpill${i === current ? " on" : ""}${done ? " past" : ""}`}
+                href={i === 0 ? `/learn/${slug}` : `/learn/${slug}?t=${i + 1}`}
+                aria-current={i === current ? "step" : undefined}
+                scroll
+              >
+                <span className="tpill-n" aria-hidden="true">
+                  {done ? "✓" : o.n ?? (o.kind === "landmark" ? "•" : i + 1)}
+                </span>
+                <span className="tpill-label">{o.label}</span>
+                {o.minutes > 0 && <span className="tpill-min">{o.minutes}m</span>}
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
     </nav>
   );
 }

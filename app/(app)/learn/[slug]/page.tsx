@@ -719,14 +719,14 @@ export default async function LessonPage({
                 <div className="eyebrow">The step that actually matters</div>
                 <h3>Read it? Now write it 💪</h3>
                 <p>Reading does not build the skill — writing code does. Solve the {lesson.problems.length} short questions for this lesson.</p>
-                <LessonComplete lessonId={lesson.id} href={practiceHref} label="Start practice →" />
+                <LessonComplete lessonId={lesson.id} href={practiceHref} label="Start practice →" title={lesson.title} />
               </>
             ) : (
               <>
                 <div className="eyebrow">Lesson complete</div>
                 <h3>Nice — this topic is done ✅</h3>
                 <p>{next ? "Mark it complete and move to the next lesson." : "That was the last lesson in this track — head back to the roadmap."}</p>
-                <LessonComplete lessonId={lesson.id} href={next ? `/learn/${next.slug}` : "/roadmap"} label={next ? "Complete & next lesson →" : "Complete & roadmap →"} />
+                <LessonComplete lessonId={lesson.id} href={next ? `/learn/${next.slug}` : "/roadmap"} label={next ? "Complete & next lesson →" : "Complete & roadmap →"} title={lesson.title} />
               </>
             )}
           </div>
@@ -740,6 +740,11 @@ export default async function LessonPage({
             every time. The CSS rule was dead: editing it changed nothing, and
             these buttons sat 4px left of every other block for that reason
             alone. The classes already say all of this. */}
+        {/* Labelled, because it used to be the second of two prev/next controls
+            with no way to tell them apart: the topic pager moves inside this
+            lesson, this one leaves it. The pager is pill-shaped now and this
+            says out loud what it is. */}
+        <div className="lnav-lbl">Other lessons in this course</div>
         <nav className="lnav">
           {prev
             ? <Link className="lnav-prev" href={`/learn/${prev.slug}`}><div className="dir">← Previous</div><div className="ttl">{prev.title}</div></Link>

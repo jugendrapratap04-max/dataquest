@@ -848,14 +848,15 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .st-flag.yes { color:var(--good); background:color-mix(in srgb,var(--good) 13%,transparent); }
 .st-flag.no { color:var(--ink-faint); background:var(--panel-2); border:1px solid var(--line); }
 .lesson-head { border-bottom:1px solid var(--line); padding-bottom:20px; margin-bottom:24px; } .lesson-head h1 { font-size:28px; margin:8px 0 10px; }
-.lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-family:var(--mono); } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
-.obj { padding:18px 20px; margin-bottom:24px; } .obj :is(h2,h3) { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:12px; }
+/* Was monospace — lesson metadata is prose about the lesson, not code. */
+.lh-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums; } .lh-meta span { display:inline-flex; align-items:center; gap:6px; } .lh-meta svg { width:14px; height:14px; }
+.obj { padding:18px 20px; margin-bottom:24px; background:var(--accent-soft); border-color:color-mix(in srgb, var(--accent) 22%, transparent); box-shadow:none; } .obj :is(h2,h3) { font-size:11.5px; text-transform:uppercase; letter-spacing:.1em; font-weight:700; color:var(--accent-2); margin-bottom:12px; }
 .obj ul { margin:0; padding:0; list-style:none; display:grid; gap:9px; } .obj li { display:flex; align-items:flex-start; gap:10px; font-size:13.5px; } .obj li svg { width:17px; height:17px; color:var(--teal); flex:none; margin-top:2px; }
 /* Margins deliberately absent here. Spacing is set once, for every block type,
    in the layout system at the bottom of this file; a `.prose h2` rule outranks
    `.prose > *` on specificity, so a margin left here would quietly win and the
    rhythm would drift again. */
-.prose { line-height:1.65; } .prose h2 { font-size:19px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--mono); font-size:13px; color:var(--accent-2); background:var(--accent-soft); width:26px; height:26px; border-radius:var(--r-sm); display:grid; place-items:center; flex:none; }
+.prose { line-height:1.65; } .prose h2 { font-size:19px; display:flex; align-items:center; gap:10px; } .prose h2 .n { font-family:var(--display); font-weight:800; font-size:13px; color:var(--accent-ink); background:var(--accent); width:26px; height:26px; border-radius:var(--r-pill); display:grid; place-items:center; flex:none; }
 .prose p.soft { color:var(--ink-soft); }
 .prose code, .kbd { font-family:var(--mono); font-size:.9em; background:var(--panel-2); border:1px solid var(--line); border-radius:var(--r-xs); padding:1px 6px; color:var(--accent-2); }
 /* Fenced blocks inside a problem description (mdLite). The inner <code> has to
@@ -868,10 +869,13 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .code .out { border-top:1px dashed #2A2E38; padding:11px 16px; font-family:var(--mono); font-size:12.5px; color:#9AA3B4; white-space:pre-wrap; } .code .out b { color:var(--code-str); }
 .c-com{color:var(--code-com);} .c-str{color:var(--code-str);} .c-kw{color:var(--code-kw);} .c-num{color:var(--code-num);} .c-fn{color:var(--code-fn);}
 .note { display:flex; gap:12px; padding:14px 20px; border-radius:var(--r-md); margin:0 0 20px; font-size:13.5px; } .note .i { font-size:18px; flex:none; }
-.note.tip { background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); } .note.warn { background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 30%,transparent); } .note.key { background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 30%,transparent); }
+.note.tip { background:var(--teal-soft); border:1px solid color-mix(in srgb,var(--teal) 30%,transparent); } .note.warn { background:var(--bad-soft); border:1px solid color-mix(in srgb,var(--bad) 30%,transparent); }
+/* 📌 "key" is a thing to remember, not an action — it wears the warm spark so
+   the violet stays with definitions and controls. */
+.note.key { background:var(--spark-soft); border:1px solid color-mix(in srgb,var(--spark) 30%,transparent); }
 .dtypes { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:4px 0 18px; } @media (max-width:560px){ .dtypes{ grid-template-columns:1fr;} }
 .dt { border:1px solid var(--line); border-radius:var(--r-md); padding:14px; background:var(--panel); } .dt .dtag { font-family:var(--mono); font-size:12px; font-weight:700; color:var(--indigo); background:var(--indigo-soft); border-radius:var(--r-xs); padding:2px 8px; } .dt h4 { font-size:14px; margin:10px 0 4px; } .dt p { font-size:12.5px; color:var(--ink-soft); margin:0; } .dt .ex { font-family:var(--mono); font-size:12px; color:var(--teal); margin-top:8px; }
-.recap { padding:20px; margin:30px 0; } .recap :is(h2,h3) { font-size:15px; margin-bottom:12px; } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--accent); }
+.recap { padding:20px; margin:30px 0; background:var(--good-soft); border-color:color-mix(in srgb, var(--good) 28%, transparent); box-shadow:none; } .recap :is(h2,h3) { font-size:15px; margin-bottom:12px; color:var(--ink); } .recap ul { margin:0; padding-left:18px; display:grid; gap:7px; font-size:13.5px; color:var(--ink-soft); } .recap ul li::marker { color:var(--good); }
 .cta { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-teal-border); border-radius:var(--radius); box-shadow:var(--feat-teal-shadow); margin:24px 0; background:var(--feat-teal-bg); }
 .cta .pad { padding:24px; } .cta .eyebrow { color:var(--teal); } .cta h3 { font-size:20px; color:var(--feat-ink); margin:8px 0 6px; } .cta p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; }
 /* The account pitch, under the button rather than instead of it — a guest is
@@ -943,7 +947,8 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .guest-banner p { color:var(--feat-sub); font-size:13.5px; margin:0 0 16px; max-width:62ch; }
 .gb-cta { display:flex; gap:10px; flex-wrap:wrap; }
 
-.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:var(--r-md); padding:13px 20px; background:var(--panel); cursor:pointer; } .lnav a.next { text-align:right; } .lnav .dir { font-family:var(--mono); font-size:11px; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { pointer-events:none; background:var(--panel-2); border-style:dashed; }
+.lnav-lbl { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint); margin:28px 0 10px; }
+.lnav { display:flex; gap:12px; } .lnav a { flex:1; border:1px solid var(--line); border-radius:var(--r-md); padding:13px 20px; background:var(--panel); cursor:pointer; transition:border-color var(--t-fast), box-shadow var(--t-fast); } .lnav a:hover { border-color:color-mix(in srgb, var(--accent) 40%, transparent); box-shadow:var(--shadow); } .lnav a.next { text-align:right; } .lnav .dir { font-size:11px; font-weight:650; color:var(--ink-faint); } .lnav .ttl { font-size:13.5px; font-weight:600; margin-top:3px; } .lnav a.dis { pointer-events:none; background:var(--panel-2); border-style:dashed; box-shadow:none; }
 /* Disabled state without opacity. Fading text is the usual way to show it and
    the wrong one: it multiplies the contrast down — this link measured 2.34:1,
    unreadable — while the reader still needs to know which lesson is not there.
@@ -1047,68 +1052,60 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .lt-head { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);
            display:flex; align-items:center; gap:8px; margin-bottom:9px; }
 .lt-count { margin-left:auto; letter-spacing:0; text-transform:none; font-weight:600; color:var(--accent); }
-/* ⚠️ CAPPED, because this box was pushing the lesson off the first screen.
-   Measured on a live lesson: crumb 19 + header 127 + objectives 181 + THIS 317
-   = 484px of furniture, so the teaching began at y=825 against a 720 fold — a
-   reader's first screen was entirely chrome. The cap is a scroller, so nothing
-   is lost: the current topic is still highlighted and the rest is one flick
-   away. A short lesson with few topics never reaches the cap and is unchanged.
-   (The same cap already existed below 720px; it was the desktop that had none.) */
-.lt-list { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px;
-           max-height:196px; overflow-y:auto; overscroll-behavior:contain; }
-.lt-item a { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:var(--r-xs);
-             text-decoration:none; color:var(--muted); font-size:13.5px; line-height:1.4; }
-.lt-item a:hover { background:color-mix(in srgb, var(--fg) 6%, transparent); color:var(--fg); }
-.lt-n { flex:none; width:20px; height:20px; display:grid; place-items:center; border-radius:var(--r-xs);
-        font-size:11px; font-weight:700; font-family:var(--mono);
-        background:color-mix(in srgb, var(--fg) 8%, transparent); }
-.lt-label { flex:1; }
-.lt-min { flex:none; font-size:11px; opacity:.6; font-variant-numeric:tabular-nums; }
-.lt-item.on a { background:color-mix(in srgb, var(--accent) 12%, transparent); color:var(--fg); font-weight:600; }
-.lt-item.on .lt-n { background:var(--accent); color:#fff; }
-.lt-item.past .lt-n { background:color-mix(in srgb, var(--accent) 22%, transparent); color:var(--accent); }
-
-/* On a phone an 18-entry list is 736px of navigation above 49 words of content —
-   the topic you opened starts below the fold, which defeats the point of showing
-   one topic at a time. Cap it and let the list scroll inside itself. */
-/* The phone copy of the list is the one inside <details>; desktop shows the
-   open copy. Exactly one is ever displayed, which is why the markup renders the
-   list twice — the same arrangement CourseNav uses. */
-.lt-fold { display:none; }
+/* ⚠️ A PILL ROW, because the stacked list was pushing the lesson off the first
+   screen. Measured at 1280x900 on /learn/html-links: the boxed list was 250px
+   and the first paragraph began at y=761. The same twelve topics wrap into
+   about 110px here, and — unlike the capped scroller this replaces — every one
+   of them is visible without a flick.
+   On phones the row does not wrap: it is one thumb-scrollable line, the same
+   ~44px the closed disclosure used to cost, so the phone fold is unchanged. */
+/* ⚠️ `tpill-`, NOT `tp-`: `.tp-row` and `.tp-n` belong to the profile's Topics
+   panel further down this file, and being later they won — the row rendered as
+   that panel's three-column grid. Check for a name collision before adding a
+   short prefix to a 2,900-line stylesheet. */
+.tpill-row { list-style:none; margin:0; padding:0 0 2px; display:flex; flex-wrap:wrap; gap:6px; }
+.tpill { display:inline-flex; align-items:center; gap:7px; padding:6px 12px 6px 7px;
+           border-radius:var(--r-pill); border:1px solid var(--line); background:var(--panel);
+           text-decoration:none; color:var(--ink-soft); font-size:12.5px; line-height:1.35;
+           white-space:nowrap; transition:border-color var(--t-fast), transform var(--t-fast); }
+.tpill:hover { border-color:color-mix(in srgb, var(--accent) 45%, transparent); color:var(--ink); }
+.tpill-n { flex:none; width:19px; height:19px; display:grid; place-items:center; border-radius:var(--r-pill);
+        font-size:10.5px; font-weight:700; font-variant-numeric:tabular-nums;
+        background:color-mix(in srgb, var(--fg) 8%, transparent); color:var(--ink-soft); }
+.tpill-min { flex:none; font-size:11px; opacity:.65; font-variant-numeric:tabular-nums; }
+.tpill.on { background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:650; }
+.tpill.on .tpill-n { background:color-mix(in srgb, var(--accent-ink) 22%, transparent); color:var(--accent-ink); }
+.tpill.on .tpill-min { opacity:.8; }
+.tpill.past { color:var(--ink-faint); }
+.tpill.past .tpill-n { background:var(--good-soft); color:var(--good); }
 
 @media (max-width: 720px) {
-  /* Padding stays 20 so the topic list keeps the same left edge as the title
-     and every card below it. Only the vertical margin tightens on a phone. */
-  .lt { margin-bottom:16px; padding:0; }
-  .lt-open { display:none; }
-  .lt-fold { display:block; }
-
-  /* MEASURED at 375x812 before this existed: `.lt` was 202px and the lesson's
-     first sentence started at y=1118 against an 812 fold. The list was already
-     capped at 152px with its own scrollbar, so the cap was not the problem —
-     offering ten navigation links before the reader has read one word was.
-     Closed, this is a 44px row that says where you are. */
-  .lt-fold > summary { min-height:44px; display:flex; align-items:center; gap:10px;
-                       padding:0 20px; cursor:pointer; list-style:none;
-                       font-size:13px; color:var(--ink-soft); }
-  .lt-fold > summary::-webkit-details-marker { display:none; }
-  .lt-fold-n { flex:none; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; }
-  .lt-fold-label { flex:1; color:var(--fg); font-weight:600; overflow:hidden;
-                   text-overflow:ellipsis; white-space:nowrap; }
-  .lt-fold-hint { flex:none; font-size:11.5px; color:var(--muted); }
-  .lt-fold[open] > summary { border-bottom:1px solid var(--line); }
-  .lt-fold .lt-list { max-height:152px; overflow-y:auto; overscroll-behavior:contain;
-             -webkit-overflow-scrolling:touch; padding:8px 20px 12px; }
-  .lt-item a { padding:7px 8px; }   /* a little taller: this is a touch target */
+  .lt { margin-bottom:16px; padding:8px 0 8px 20px; }
+  /* The "Topics 2 / 12" heading is desktop-only. On a phone every pixel above
+     the first word is contested, and the filled pill already says where you
+     are — measured: dropping it took this block from 89px back to ~50px, the
+     ~44px the closed disclosure used to cost. */
+  .lt-head { display:none; }
+  /* One line, scrolled with the thumb. `nowrap` is the whole point: wrapped,
+     twelve pills would be five rows of navigation above the first word. */
+  .tpill-row { flex-wrap:nowrap; overflow-x:auto; overscroll-behavior-x:contain;
+            -webkit-overflow-scrolling:touch; padding-right:20px; scrollbar-width:none; }
+  .tpill-row::-webkit-scrollbar { display:none; }
+  .tpill { padding-top:8px; padding-bottom:8px; }   /* a touch target, not a link */
 }
 
-/* Previous / next, at the foot of the topic being read. */
-.tnav { display:flex; gap:12px; justify-content:space-between; margin:24px 0; }
-.tnav-btn { display:flex; flex-direction:column; gap:2px; max-width:46%; padding:10px 20px; border-radius:var(--r-sm);
-            border:1px solid var(--line); text-decoration:none; background:var(--card); }
+/* Previous / next TOPIC, at the foot of the topic being read.
+   ⚠️ Deliberately pill-shaped, matching .tpill above: this control and the
+   topic row are the same control, so they look like the same control. The
+   lesson-level nav below is a card and carries a label — before this, two
+   identical bordered prev/next rows sat 85px apart and read as a bug. */
+.tnav { display:flex; gap:12px; justify-content:space-between; align-items:center; margin:24px 0; }
+.tnav-btn { display:inline-flex; align-items:center; gap:8px; max-width:46%; padding:8px 15px; border-radius:var(--r-pill);
+            border:1px solid var(--line); text-decoration:none; background:var(--panel);
+            transition:border-color var(--t-fast); }
 .tnav-btn:hover { border-color:color-mix(in srgb, var(--accent) 45%, transparent); }
-.tnav-btn.next { text-align:right; margin-left:auto; }
-.tnav-dir { font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--accent); }
+.tnav-btn.next { margin-left:auto; flex-direction:row-reverse; }
+.tnav-dir { flex:none; font-size:12px; font-weight:700; color:var(--accent-2); }
 .tnav-label { font-size:13px; color:var(--fg); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 /* Side by side, two buttons on a 375px screen are 92px and 145px stubs whose
    labels are almost entirely ellipsis. Stacked and full width, they read — and
@@ -1234,37 +1231,57 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 /* --- Lesson teaching blocks: hook → think → def → analogy → mistakes → interview --- */
 
 /* Curiosity opener. Deliberately loud — it's the first thing on the page. */
-.hook { border-left:3px solid var(--accent); background:linear-gradient(90deg, var(--accent-soft), transparent 70%); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:16px 18px; margin:20px 0; }
+/* ---- The callout system -------------------------------------------------
+   Every teaching block wears the colour of the JOB it does, so a reader
+   learns the palette once and then recognises a block before reading it:
+
+     curiosity / "why care"   → spark (warm)     hook, think
+     the concept itself       → accent (violet)  def, objectives
+     an aside worth knowing   → teal             note.tip, analogy
+     danger                   → bad (red)        note.warn, mistakes
+     you have got it          → good (green)     recap
+     out in the world         → indigo           interview
+
+   The action colour appears here only on the definition — a tinted wash, never
+   a filled control, so it never competes with a button. */
+.hook { border-left:3px solid var(--spark); background:linear-gradient(90deg, var(--spark-soft), transparent 70%); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:16px 18px; margin:20px 0; }
 .hook-q { font-size:17px; font-weight:700; color:var(--ink); line-height:1.5; }
 .hook-why { font-size:13.5px; color:var(--ink-soft); margin:8px 0 0; }
 
 /* Hidden answer = the student has to guess first. That's the whole point. */
-.think { border:1px dashed var(--line); border-radius:var(--radius-sm); background:var(--panel-2); margin:20px 0; }
+.think { border:1px dashed color-mix(in srgb, var(--spark) 40%, transparent); border-radius:var(--r-md); background:var(--spark-soft); margin:20px 0; }
 .think > summary { cursor:pointer; padding:13px 20px; font-weight:600; font-size:14px; list-style:none; }
 .think > summary::-webkit-details-marker { display:none; }
-.think > summary::before { content:"▸ "; color:var(--accent); font-weight:700; margin-left:-16px; }
+.think > summary::before { content:"▸ "; color:var(--spark-2); font-weight:700; margin-left:-16px; }
 .think[open] > summary::before { content:"▾ "; }
 .think-hint { font-weight:400; font-size:12.5px; color:var(--ink-faint); }
 .think[open] .think-hint { display:none; }
-.think-a { padding:0 20px 15px 20px; font-size:14px; color:var(--ink-soft); line-height:1.65; border-top:1px dashed var(--line); margin-top:2px; padding-top:13px; }
+.think-a { padding:0 20px 15px 20px; font-size:14px; color:var(--ink-soft); line-height:1.65; border-top:1px dashed color-mix(in srgb, var(--spark) 35%, transparent); margin-top:2px; padding-top:13px; }
 
 /* The definition block — professional English first, Hinglish gloss under it. */
-.def { border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:0 var(--radius-sm) var(--radius-sm) 0; background:var(--panel-2); padding:15px 18px; margin:20px 0; }
-.def-term { font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--teal); margin-bottom:7px; }
+.def { border:1px solid color-mix(in srgb, var(--accent) 22%, transparent); border-left:3px solid var(--accent); border-radius:0 var(--r-md) var(--r-md) 0; background:var(--accent-soft); padding:15px 18px; margin:20px 0; }
+.def-term { font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--accent-2); margin-bottom:7px; }
 .def-en { font-size:15.5px; font-weight:600; color:var(--ink); line-height:1.55; }
-.def-hi { font-size:14px; color:var(--ink-soft); margin-top:9px; padding-top:9px; border-top:1px solid var(--line); line-height:1.65; }
+.def-hi { font-size:14px; color:var(--ink-soft); margin-top:9px; padding-top:9px; border-top:1px solid color-mix(in srgb, var(--accent) 20%, transparent); line-height:1.65; }
 
-.analogy { border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--panel-2); padding:14px 20px; margin:18px 0; }
+.analogy { border:1px solid color-mix(in srgb, var(--teal) 22%, transparent); border-radius:var(--r-md); background:var(--teal-soft); padding:14px 20px; margin:18px 0; }
 .an-row { display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:9px; }
-.an-a, .an-b { font-family:var(--mono); font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:var(--r-xs); }
-.an-a { color:var(--indigo); background:var(--indigo-soft); }
-.an-b { color:var(--accent-2); background:var(--accent-soft); }
+/* Both chips sit ON the teal wash now, so they need their own surface rather
+   than a second tint that would fight it. */
+.an-a, .an-b { font-family:var(--mono); font-size:12.5px; font-weight:700; padding:4px 11px; border-radius:var(--r-xs);
+               background:var(--panel); border:1px solid color-mix(in srgb, var(--teal) 25%, transparent); }
+.an-a { color:var(--ink-soft); }
+/* Teal on white is 3.4:1 at this size — the border carries the hue instead. */
+.an-b { color:var(--ink); }
 .an-arrow { color:var(--ink-faint); font-weight:700; }
 .analogy p { font-size:13.5px; color:var(--ink-soft); margin:0; line-height:1.65; }
 
-.mistakes { padding:16px 20px; margin:20px 0; border-color:color-mix(in srgb, var(--bad) 28%, var(--line)); }
-.mistakes :is(h2,h3) { font-size:14px; margin:0 0 12px; }
-.mk { border-top:1px solid var(--line); padding:12px 0; }
+.mistakes { padding:16px 20px; margin:20px 0; background:var(--bad-soft); border-color:color-mix(in srgb, var(--bad) 30%, transparent); box-shadow:none; }
+/* ⚠️ Heading ink, not the semantic hue: measured in light theme, --bad on
+   --bad-soft is 3.46:1 (and --good on --good-soft only 2.64:1). The tint and
+   the border already say which block this is; the words have to be readable. */
+.mistakes :is(h2,h3) { font-size:14px; margin:0 0 12px; color:var(--ink); }
+.mk { border-top:1px solid color-mix(in srgb, var(--bad) 20%, transparent); padding:12px 0; }
 .mk:first-of-type { border-top:0; padding-top:0; }
 /* align-items:start so the label stays at the top of a multi-line snippet */
 .mk-bad, .mk-fix { display:flex; align-items:flex-start; gap:9px; margin:5px 0; }
@@ -1275,15 +1292,15 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .mk pre { font-family:var(--mono); font-size:12.5px; line-height:1.6; background:var(--panel-3); padding:8px 11px; border-radius:var(--r-xs); color:var(--ink); margin:0; overflow-x:auto; white-space:pre; flex:1; min-width:0; }
 .mk-why { font-size:13px; color:var(--ink-soft); margin:7px 0; line-height:1.6; }
 
-.iv { padding:16px 20px; margin:20px 0; }
-.iv :is(h2,h3) { font-size:14px; margin:0 0 11px; }
-.iv-q { border-top:1px solid var(--line); }
+.iv { padding:16px 20px; margin:20px 0; background:var(--indigo-soft); border-color:color-mix(in srgb, var(--indigo) 26%, transparent); box-shadow:none; }
+.iv :is(h2,h3) { font-size:14px; margin:0 0 11px; color:var(--ink); }
+.iv-q { border-top:1px solid color-mix(in srgb, var(--indigo) 20%, transparent); }
 .iv-q:first-of-type { border-top:0; }
 .iv-q > summary { cursor:pointer; padding:11px 0; font-size:13.5px; font-weight:600; display:flex; align-items:center; gap:9px; list-style:none; }
 .iv-q > summary::-webkit-details-marker { display:none; }
-.iv-lvl { font-family:var(--mono); font-size:9.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:var(--r-xs); flex:none; }
+.iv-lvl { font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:2px 7px; border-radius:var(--r-pill); flex:none; background:var(--panel); }
 .iv-lvl.beginner { color:var(--good); background:var(--good-soft); }
-.iv-lvl.intermediate { color:var(--accent-2); background:var(--accent-soft); }
+.iv-lvl.intermediate { color:var(--spark-2); background:var(--spark-soft); }
 .iv-lvl.advanced { color:var(--bad); background:var(--bad-soft); }
 .iv-a { font-size:13.5px; color:var(--ink-soft); padding:0 0 12px; line-height:1.7; }
 
@@ -2960,7 +2977,7 @@ summary:active,
 .pcard:active, .subj-card:active, .note-card:active, .bk-chapter-card:active,
 .bki-card:active, a.pc-row:active, .search-item:active,
 .ch-opt:active, .ch-row:active, .quiz-opt:not(:disabled):active,
-.lt-item a:active, .cnav-course:active, .cnav-scroll li a:active,
+.tpill:active, .cnav-course:active, .cnav-scroll li a:active,
 .toc li a:active, .bk-toc a:active, .crumb a:active,
 .idstrip:active, .userbox:active, .ob-chip:active, .prof-chip.link-chip:active,
 .theme-opt:active, .ss-preset:active, .todo li:active,
