@@ -44,13 +44,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           sidebar — every subject, every link — before reaching the lesson they
           opened, on every single page. */}
       <a href="#main" className="skip-link">Skip to content</a>
-      {/* Both only make sense for a member: activity feeds a focus session, and
-          feedback is tied to an account we can reply to. */}
+      {/* Only makes sense for a member: activity feeds a focus session. */}
       {user && <ActivityPing />}
-      {user && <FeedbackButton />}
-      {/* Not gated on `user`: reading is free, and the reader who most needs the
-          width is the one who has not signed up yet. */}
-      <FocusButton />
       <Sidebar
         user={user ? { name: user.name, role: user.role, xp: user.xp, avatarEmoji: user.avatarEmoji } : null}
         roadmapPct={roadmapPct}
@@ -79,6 +74,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main id="main" tabIndex={-1}>{children}</main>
         </div>
       </div>
+      {/* BOTH ARE position:fixed, SO THEIR PLACE HERE IS PURELY TAB ORDER —
+          nothing about where they appear depends on it. They used to render
+          before the Sidebar, which put "Focus reading" at tab stop 2 of the
+          whole page: the walk went skip-link, then the floating button at
+          y=746, then jumped 718px back UP to the navigation. Tab order is
+          meant to follow the page, and a control that floats over the bottom
+          corner belongs at the end of it, not ahead of every nav item.
+
+          Feedback is gated on `user` — it is tied to an account we can reply
+          to. Focus is not: reading is free, and the reader who most needs the
+          extra width is the one who has not signed up yet. */}
+      <FocusButton />
+      {user && <FeedbackButton />}
     </div>
   );
 }
