@@ -136,7 +136,9 @@ export default async function LandingPage() {
               (HTML, 8085) were invisible from the front door. The subject count
               is queried, like every other number on this page. */}
           <p className="lp-sub">
-            {counts.subjects} subjects — Python, HTML, SQL, statistics, machine learning, even
+            {/* Explicit {" "}: an expression at the start of a JSX line loses the
+                space that follows it — React emitted "11<!-- -->subjects". */}
+            {counts.subjects}{" "}subjects — Python, HTML, SQL, statistics, machine learning, even
             8085 assembly — taught with visuals that make concepts click, practice that&apos;s
             checked the second you submit, and the mistakes and interview questions nobody
             warns you about.
