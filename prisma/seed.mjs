@@ -9276,12 +9276,100 @@ const deployLessons = [
     { t: "note", variant: "tip", html: "<b>Game-changer:</b> ek deployed live ML app (Streamlit Cloud pe free) resume ko 10x strong banata hai — 'yaha click karke try karo'." },
     { t: "recap", items: ["Deploy = model ko live app","Streamlit sabse aasaan","Flask/FastAPI = API","Docker = packaging"] },
   ]},
-  { slug: "deploy-portfolio", order: 3, title: "Portfolio Building", minutes: 11, problems: [], content: [
-    { t: "objectives", items: ["Strong portfolio","Projects kaise chuno","Presentation"] },
-    { t: "h2", n: "1", text: "3-4 strong projects" },
-    { t: "p", html: "Bahut chhote nahi — 3-4 <b>solid, complete, alag</b> projects. Ek EDA, ek ML model, ek deployed app, ek SQL/dashboard. Har ek end-to-end." },
-    { t: "note", variant: "tip", html: "<b>Kaggle:</b> real datasets aur competitions se projects. Achhi Kaggle profile bhi portfolio hai." },
-    { t: "recap", items: ["3-4 complete projects","Variety: EDA/ML/deploy/SQL","Har project end-to-end","Kaggle profile bhi count"] },
+  { slug: "deploy-portfolio", order: 3, title: "Portfolio Building", minutes: 16, problems: [], content: [
+    { t: "objectives", items: [
+      "Say what a portfolio is actually evidence <b>of</b>",
+      "Choose three or four projects for a reason you can defend",
+      "Write a README that survives forty seconds of a stranger's attention",
+      "Recognise the one failure that makes a good project unreviewable",
+    ] },
+
+    { t: "hook",
+      q: "A hiring manager has ninety applications and an afternoon. Your GitHub is open in a tab. Realistically, how long does your best project get?",
+      why: "About forty seconds, and most of that is the README. Not the notebook, not the model, not the accuracy — the first screen of text. Almost everything in this lesson follows from that one number." },
+
+    { t: "think",
+      q: "Two candidates. One has ten repositories; the other has three. Which looks stronger?",
+      a: "Whichever one can be <b>understood</b>. Ten repositories with no READMEs is ten things nobody can evaluate, and it quietly says \"I start things\". Three that each state a question, an approach and a result say \"I finish things\", which is the thing being bought." },
+
+    { t: "def",
+      term: "Portfolio",
+      en: "The small set of work you offer as evidence that you can take a question, get to an answer, and hand that answer to somebody else." },
+
+    { t: "analogy",
+      concept: "a portfolio project",
+      real: "a dish sent out of a kitchen",
+      html: "Nobody grades your knife work. They taste what arrives at the table and decide from that. A project is what arrives — the plot, the number, the working link — and the cleverness that went into it only counts if it survives the trip. That is why a brilliant analysis in an unreadable notebook scores lower than an ordinary one that is clear." },
+
+    { t: "h2", n: "1", text: "Three or four, and why not ten" },
+    { t: "p", html: "Depth reads as competence and count reads as noise. Three or four <b>complete</b> projects beat ten half-finished ones, because a reviewer cannot tell whether the tenth is unfinished or abandoned, and both readings hurt." },
+    { t: "p", html: "Give them different shapes, and be able to say why each is there. An <b>exploratory analysis</b> shows you can ask questions of a dataset. A <b>model</b> shows you can measure a claim honestly. A <b>deployed app</b> shows you can put something in front of a user. A <b>SQL or dashboard</b> project shows you can work with the data where it actually lives. Four projects, four different things being proved." },
+
+    { t: "note", variant: "key", html: "<b>The single most valuable thing in a data-science portfolio is a link somebody can click.</b> A deployed app is the only artefact that proves the whole chain — data in, model, interface, hosting — without the reviewer having to run anything. It is also the part most people skip, which is exactly why it is worth the afternoon." },
+
+    { t: "h2", n: "2", text: "The README is the project" },
+    { t: "p", html: "Almost every weak portfolio has the same defect, and it is not the code: the README is a title and an install command. The reader arrives, learns nothing, and leaves. Whatever is in the notebook never gets read, so effectively it does not exist." },
+    { t: "p", html: "A README that works answers four things, in this order, above the fold: <b>what question this answers</b>, <b>what the answer was</b>, <b>where the data came from</b>, and <b>how to run it</b>. The result goes near the top, not at the bottom — a reviewer should not have to scroll to find out whether the project concluded anything." },
+
+    { t: "note", variant: "tip", html: "<b>The one-line result.</b> Write the finding as a single sentence a non-specialist could repeat: \"Cancellations rise 3x when a booking is made more than 60 days ahead.\" If you cannot write that line, the project is not finished — and writing it usually shows you which analysis is still missing." },
+
+    { t: "h2", n: "3", text: "Kaggle, honestly" },
+    { t: "p", html: "A Kaggle profile is real evidence of <b>practice</b>: real datasets, other people's baselines, a scoreboard that does not flatter you. It is worth having and worth linking." },
+    { t: "p", html: "What it is not is evidence of <b>shipping</b>. A competition hands you a clean target, a fixed metric and a definition of \"done\" — which are the three things nobody hands you at work. So treat Kaggle as one line of the portfolio and not the whole of it, and make sure at least one project began with a question you chose yourself." },
+
+    { t: "debug",
+      intro: "A strong project gets no replies. A friend agrees to review it, clones the repository, and gets this on the first cell. Work out what is wrong before opening the fix.",
+      code: "df = pd.read_csv(\"C:/Users/ravi/Downloads/hotel_bookings.csv\")",
+      symptom: "FileNotFoundError on the reviewer's machine. The notebook runs perfectly on the author's, and the analysis and the charts are genuinely good.",
+      q: "Nothing is wrong with the analysis and the file is definitely on the author's disk. So why can nobody else get past line one?",
+      fix: "df = pd.read_csv(\"data/hotel_bookings.csv\")   # committed, or linked in the README",
+      why: "The path names a folder that exists on exactly one computer on earth. This is the same mistake the HTML course meets as a case-sensitive image path, and it fails the same way: perfectly, locally, right up until somebody else tries. A reviewer who hits an error in the first cell does not debug your project — they close the tab, and everything after that line is unread. <b>Two rules follow, and they are worth more than any modelling technique in this course:</b> reference data with a path relative to the repository, and either commit a small dataset or link the exact source in the README with the one command that downloads it. A project nobody can run is a screenshot with extra steps." },
+
+    { t: "drills", intro: "Do these against a project you have already built. Every one of them takes minutes and is the difference between a repository and a portfolio piece.", items: [
+      { task: "Write your project's finding as one sentence a non-specialist could repeat.", code: "Cancellations rise about 3x when a booking is made\nmore than 60 days ahead — mostly on non-refundable rates." },
+      { task: "The four headings a README needs, in order.", code: "# Project title\n## The question\n## The answer          <- the one-line result, near the top\n## The data            <- source, licence, how to get it\n## Run it              <- exact commands, from a clean clone" },
+      { task: "Turn this notebook name into something a reviewer can read.", code: "final_v3_FINAL.ipynb   ->   01-cleaning.ipynb\n                            02-analysis.ipynb" },
+      { task: "Make this data path survive being cloned.", code: "pd.read_csv(\"C:/Users/ravi/Downloads/data.csv\")\n->\npd.read_csv(\"data/bookings.csv\")" },
+      { task: "Name the four different things your four projects should each prove.", code: "EDA        — you can ask a dataset questions\nA model    — you can measure a claim honestly\nA live app — you can put it in front of a user\nSQL/dashboard — you can work where the data lives" },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "A repository with no README", why: "The reader arrives, learns nothing and leaves. Whatever is in the notebook is never read, so it does not exist.", fix: "Four headings: the question, the answer, the data, how to run it." },
+      { bad: "final_v3_FINAL.ipynb", why: "It says the work was never organised, and it makes the reviewer guess which file to open.", fix: "Numbered, named steps: 01-cleaning.ipynb, 02-analysis.ipynb." },
+      { bad: "A 200-cell notebook with no text between the cells", why: "Cells are what you did; the reader needs to know what you found. Without narrative, they are reading a transcript rather than a result.", fix: "A sentence before each section, and the conclusion at the top." },
+      { bad: "\"Achieved 94% accuracy\" — with no baseline", why: "94% is meaningless alone. If 94% of the rows are one class, predicting that class always scores the same and learns nothing.", fix: "Quote the baseline beside it, and say which metric and why." },
+      { bad: "A private repository linked from a CV", why: "The reviewer gets a 404. It reads as carelessness at exactly the moment attention is scarcest.", fix: "Make it public, and click the link yourself from a logged-out browser." },
+    ] },
+
+    { t: "recap", items: [
+      "A portfolio is <b>evidence you can finish and hand over</b>, not a list of topics",
+      "Three or four complete projects beat ten unfinished ones",
+      "Different shapes: EDA · a model · something deployed · SQL or a dashboard",
+      "<b>The README is the project</b> — question, answer, data, how to run it",
+      "Put the one-line result near the top; if you cannot write it, it is not finished",
+      "A clickable deployed link is the strongest single item you can have",
+      "Kaggle proves practice, not shipping — one line of the portfolio, not all of it",
+      "A project nobody else can run is a screenshot with extra steps",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "Walk me through one of your projects.", a: "Answer in the README's order, because it is the order the listener needs: the question you were answering, where the data came from and what was wrong with it, what you did and why that approach, the result in one sentence, and what you would do next with more time. The last part matters more than people expect — knowing a project's limits is what separates someone who ran a tutorial from someone who understands what they built." },
+      { level: "medium", q: "How do you decide which projects go in a portfolio?", a: "By what each one proves, not by how many there are. One exploratory analysis for asking questions of data, one model for measuring a claim honestly, one deployed application for putting something in front of a user, and one SQL or dashboard piece for working where the data actually lives. If two projects prove the same thing, one of them is not earning its place." },
+      { level: "hard", q: "Your notebook shows 94% accuracy. Why might I not be impressed?", a: "Because accuracy without a baseline says nothing. If 94% of the rows belong to one class, a model that always predicts that class scores exactly the same and has learned nothing at all — which is the commonest way a portfolio project overstates itself. The useful version quotes the baseline beside the score, names the metric that suits the problem, and says what the errors actually cost." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "Roughly how long does a reviewer give your best project?", options: ["About forty seconds, most of it the README","As long as it takes to run the notebook","Ten to fifteen minutes","Until they find a bug"], correct: 0, why: "Almost everything else in this lesson follows from that number." },
+      { level: "easy", q: "How many projects should a portfolio hold?", options: ["As many as possible","Three or four complete ones","Exactly one, done extremely well","Ten, to show range"], correct: 1, why: "Depth reads as competence; count reads as noise. A reviewer cannot tell an unfinished project from an abandoned one." },
+      { level: "easy", q: "What belongs near the TOP of a README?", options: ["The install instructions","The list of libraries used","The result, in one sentence","The licence"], correct: 2, why: "Nobody should have to scroll to find out whether the project concluded anything." },
+      { level: "easy", q: "Which single portfolio item is the strongest?", options: ["A long notebook","A high Kaggle rank","A certificate","A deployed link somebody can click"], correct: 3, why: "It proves the whole chain — data, model, interface, hosting — without the reviewer running anything." },
+      { level: "medium", q: "Why give your projects different shapes rather than four of the same kind?", options: ["It fills more space on a CV","Each shape proves a different thing you can do","Recruiters filter by project type","It is required by most job descriptions"], correct: 1, why: "If two projects prove the same thing, one of them is not earning its place." },
+      { level: "medium", q: "A reviewer clones your repository and the first cell raises FileNotFoundError. What happens next?", options: ["They fix the path and carry on","They email you for the dataset","They close the tab, and nothing after that line is ever read","They review the code without running it"], correct: 2, why: "Attention is scarcest exactly when the first error appears. Everything after it is unread." },
+      { level: "medium", q: "What does a Kaggle profile genuinely prove?", options: ["That you can ship a product","That you practise on real data against real baselines","That you can define a problem","That you can work with stakeholders"], correct: 1, why: "A competition hands you a clean target, a fixed metric and a definition of done — the three things nobody hands you at work." },
+      { level: "hard", q: "\"94% accuracy\" with no other context. What is the problem?", options: ["Accuracy is never a valid metric","The number is too low to be impressive","94% is impossible without overfitting","Without a baseline it says nothing — if 94% of rows are one class, always guessing it scores the same"], correct: 3, why: "The useful version quotes the baseline, names the metric that suits the problem, and says what the errors cost." },
+      { level: "hard", q: "Why is a 200-cell notebook with no text between cells weak, even when the analysis is good?", options: ["Notebooks are unprofessional","It runs too slowly to review","Cells show what you did; the reader needs what you found","Reviewers cannot open large notebooks"], correct: 2, why: "Without narrative it is a transcript rather than a result, and the reader has to do the work of interpreting it — which they will not." },
+      { level: "hard", q: "You link a repository on your CV and it is private. What has the reviewer learned?", options: ["That the work is confidential","Nothing about the project, and something about the care taken","That you have industry experience","That the repository is still in progress"], correct: 1, why: "They get a 404 at the exact moment attention is scarcest. Click your own links from a logged-out browser." },
+    ] },
   ]},
   { slug: "deploy-interview", order: 4, title: "Interview Prep & Job Hunt", minutes: 13, problems: [], content: [
     { t: "objectives", items: ["Interview rounds","Resume & LinkedIn","Job hunt strategy"] },

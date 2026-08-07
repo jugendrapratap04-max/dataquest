@@ -190,8 +190,26 @@ const run = runAsm ?? runSql ?? runPyodide ?? runPy;
 const cases = [];
 /** Blocks deliberately not run, reported at the end so they stay visible. */
 const skipped = [];
-/** Nothing in an HTML lesson is executable — see the note in the loop below. */
-const isHtml = track === "html";
+/* Tracks whose lessons contain nothing this file can run.
+ *
+ * `html` is here because markup produces a document rather than a value, and
+ * it is graded by DOM assertions instead (lib/html-check.ts).
+ *
+ * `bi` and `deploy` are here for a different reason and it is one this file
+ * already documents a few lines below: they teach TOOLS AND PROCESS. Their
+ * snippets are git commands, Dockerfiles, README skeletons, a data path, the
+ * shape of a metric. Handing those to python is what made `deploy-git`
+ * permanently "failing" on six lines of git — the block was fine and the
+ * verifier was reading it in the wrong language. That fix was applied to `code`
+ * blocks by extension; `drills` and `debug` were still handed over regardless,
+ * so the moment either of those tracks gained a drill it failed the same way.
+ *
+ * ⚠️ This buys nothing for free: it means a genuine python snippet in one of
+ * these tracks is not checked either. That is the honest trade, and it is why
+ * the skipped blocks are REPORTED at the end rather than passed over quietly —
+ * a lesson here should be read before it is believed. */
+const NOT_EXECUTABLE = new Set(["html", "bi", "deploy"]);
+const isHtml = NOT_EXECUTABLE.has(track);
 for (const b of lesson.content) {
   /* Shell blocks have no runner, so they are skipped rather than failed.
    *
