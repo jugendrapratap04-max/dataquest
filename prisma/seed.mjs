@@ -8152,30 +8152,287 @@ const sqlLessons = [
 /* ------------------------------------------------------------------ */
 /* ===================== BUSINESS INTELLIGENCE ===================== */
 const biLessons = [
-  { slug: "bi-intro", order: 1, title: "BI & Dashboards Intro", minutes: 10, problems: [], content: [
-    { t: "objectives", items: ["Business Intelligence kya hai","Dashboard ka role","Analyst ka kaam"] },
-    { t: "h2", n: "1", text: "BI — data se business decisions" },
-    { t: "p", html: "BI tools (Power BI, Tableau) data ko interactive dashboards me badalte hain jo managers khud explore kar sakein." },
-    { t: "h2", n: "2", text: "Dashboard kya karta hai" },
-    { t: "p", html: "Ek dashboard KPIs ko charts + filters ke saath dikhata hai — koi bhi bina code ke data dekh sake. Business me isse rozana decisions hote hain." },
-    { t: "note", variant: "tip", html: "<b>Analyst ka daily kaam:</b> data → clean → dashboard → insights present. Communication utni hi zaroori jitni technical skill." },
-    { t: "recap", items: ["BI = data se decisions","Dashboard = charts + KPIs + filters","Power BI / Tableau","Analyst checkpoint yahin"] },
+  { slug: "bi-intro", order: 1, title: "BI & Dashboards Intro", minutes: 15, problems: [], content: [
+    { t: "objectives", items: [
+      "Say what Business Intelligence is for, without using the word \"insights\"",
+      "Tell a <b>report</b> from a <b>dashboard</b>, and say why the difference is the job",
+      "Judge a dashboard by the only measure that counts",
+      "Describe what an analyst's week actually contains",
+    ] },
+
+    { t: "hook",
+      q: "A sales manager wants to know why last month was down. You can answer that in an afternoon. Now they want to know whether it was down in the north too, and whether it was one product or all of them, and whether it happened last year as well. How many afternoons is that?",
+      why: "Every one of those is the <b>next</b> question, and there is always a next question. BI exists because the bottleneck was never producing the answer — it was that the person with the question has to come through you to ask it." },
+
+    { t: "think",
+      q: "If a manager can answer their own follow-up questions, what have you actually given up?",
+      a: "Nothing you wanted. You have given up being a query service, which is the part of the job that never ends and never gets better. What you keep is the part that needs judgement: deciding what is worth measuring, and making the numbers trustworthy enough to act on." },
+
+    { t: "def",
+      term: "Business Intelligence",
+      en: "Turning a company's own data into something the people who run it can interrogate themselves, without asking an analyst first." },
+
+    { t: "analogy",
+      concept: "report vs dashboard",
+      real: "a printed answer vs a light switch",
+      html: "A report is an answer to the question you were asked, handed over once. A dashboard is something the other person can operate: they change the month, the region, the product, and the answer changes in front of them. <b>A report ends a conversation; a dashboard continues one</b> — and that is the whole reason these tools exist." },
+
+    { t: "h2", n: "1", text: "The only measure of a dashboard" },
+    { t: "p", html: "It is opened. Not \"is it accurate\", not \"does it use the right chart types\" — those are prerequisites. A dashboard that is technically excellent and opened twice is a failed dashboard, and a plain one somebody checks every Monday morning is a successful one." },
+    { t: "p", html: "That measure changes what you build. It means you find out what decision the viewer makes each week before you draw anything, and it means fewer numbers rather than more — because a screen with thirty charts has no answer on it, only material." },
+
+    { t: "note", variant: "key", html: "<b>Build for one decision, not for one department.</b> \"A dashboard for sales\" produces thirty charts nobody reads. \"Which regions are behind target this month, and by how much\" produces four, and somebody opens it on Monday. If nobody can tell you what they would <i>do</i> differently based on the screen, you are building furniture." },
+
+    { t: "h2", n: "2", text: "Where BI sits, and where you sit" },
+    { t: "p", html: "The chain is the same everywhere: the data is produced by systems nobody built for analysis, it is extracted and cleaned, it is modelled into something a tool can query, and then it is presented. BI is the last two steps — and the reason the earlier steps of this course exist is that the last two are worthless on top of data you have not understood." },
+    { t: "note", variant: "tip", html: "<b>An analyst's week, honestly:</b> a surprising amount of it is asking people what they meant. \"Active customer\" turns out to mean three different things in three departments; last quarter's number was restated and nobody told you; the export drops cancelled orders. The dashboard is a few hours. Establishing what is <i>true</i> is the week." },
+
+    { t: "h2", n: "3", text: "Self-service, and its price" },
+    { t: "p", html: "Handing people their own filters is the point, and it has a cost worth knowing before you meet it: once anybody can slice the data, anybody can produce a wrong number and quote it in a meeting. Two people filter differently, get different totals for \"revenue\", and now the argument is about the dashboard instead of the business." },
+    { t: "p", html: "The defence is definitions, not restrictions. A metric that is calculated once, centrally, and used everywhere cannot disagree with itself — which is what the next two lessons are really about." },
+
+    { t: "debug",
+      intro: "An analyst spends three weeks on a dashboard for the operations team. It is accurate, fast and good-looking. Six weeks later the usage log looks like this. Work out what went wrong before opening the fix.",
+      code: "Dashboard: Operations Overview\n  32 visuals across 4 tabs\n  Opens, week 1: 41\n  Opens, week 6: 2\n  Most-used filter: (none)",
+      symptom: "Nobody disputes any of the numbers. They just stopped coming, and the ops team went back to asking the analyst directly.",
+      q: "The data is right and the charts are right. So why did it die?",
+      fix: "Dashboard: Which sites are behind SLA this week\n  4 visuals, 1 tab, sorted worst-first\n  Filter: week (defaults to this one)",
+      why: "It was built for a <b>department</b> rather than for a <b>decision</b>. Thirty-two visuals is not an answer, it is material — the viewer still has to do the analysis, which is the work they were trying to hand over. The tell is in the log: the most-used filter is none, meaning nobody explored, meaning nobody found the thing that would have made them return. The fix is not a better chart. It is asking the ops team what they do differently on a Monday, discovering that it is chasing sites that missed their SLA, and building that one screen. <b>Four visuals somebody opens beats thirty-two nobody does</b>, and the second version takes an afternoon." },
+
+    { t: "drills", intro: "These are the questions to ask before opening the tool at all. Say each answer out loud about a dashboard you have seen or want to build.", items: [
+      { task: "State the difference between a report and a dashboard in one sentence.", code: "A report is an answer handed over once.\nA dashboard is something the other person can operate,\nso the next question does not come back to you." },
+      { task: "Name the only measure of whether a dashboard succeeded.", code: "Somebody opens it, repeatedly, without being asked to." },
+      { task: "Turn this brief into something buildable: \"a dashboard for the sales team\".", code: "Which regions are behind target this month, and by how much?\n(one decision, one screen, four visuals)" },
+      { task: "The question to ask before drawing anything.", code: "What will you do differently on Monday\nbecause of what is on this screen?" },
+      { task: "Name the price of self-service, and the defence.", code: "Price   — two people filter differently and quote different\n          revenue numbers in the same meeting.\nDefence — one central definition, calculated once, used everywhere." },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "\"Build me a dashboard for marketing.\"", why: "A department is not a question. It produces a screen full of everything, which is the same as a screen with nothing on it.", fix: "\"Which campaigns are below their cost-per-acquisition target this month?\"" },
+      { bad: "Adding a chart because the data is available", why: "Availability is not relevance. Every extra visual makes the useful ones harder to find and slightly less likely to be trusted.", fix: "Add a visual only when you can name the decision it changes." },
+      { bad: "Presenting a dashboard without agreeing the definitions first", why: "The first meeting then becomes an argument about whether \"active customer\" includes trials, and the numbers get blamed.", fix: "Agree the definitions in writing before you build, not after." },
+      { bad: "\"They just need training on the dashboard.\"", why: "Almost always it needs less on it, not more explanation of what is on it.", fix: "Cut it to the one decision and watch whether they come back." },
+    ] },
+
+    { t: "recap", items: [
+      "BI is letting people ask the <b>next</b> question without coming through you",
+      "A report ends a conversation; a <b>dashboard continues one</b>",
+      "The only measure that counts: <b>is it opened, repeatedly</b>",
+      "Build for one <b>decision</b>, not for one department",
+      "If nobody can say what they would do differently, it is furniture",
+      "Most of the week is establishing what is true, not drawing charts",
+      "Self-service means anyone can produce a wrong number — definitions are the defence",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "What is the difference between a report and a dashboard?", a: "A report answers a question that has already been asked and is handed over once. A dashboard is operable — the viewer changes the period, the region, the product, and the answer moves with them, so their follow-up questions do not come back to the analyst. That difference is the entire reason BI tools exist, because the bottleneck was never producing one answer." },
+      { level: "medium", q: "How do you know whether a dashboard was successful?", a: "Whether it is opened repeatedly without anybody being told to open it. Accuracy and chart choice are prerequisites rather than measures — a technically excellent dashboard that is opened twice has failed, and a plain one somebody checks every Monday has not. It is also a measure you can actually observe, because these tools log usage." },
+      { level: "hard", q: "A stakeholder asks for \"a dashboard for the sales team\". What do you do?", a: "Refuse the brief politely and replace it with a decision. A department is not a question, so it produces a screen with everything on it, which nobody reads. I would ask what they do differently in a given week and what they would need to see to do it — usually that turns into something like \"which regions are behind target and by how much\", which is four visuals rather than thirty and gets opened. It is also worth agreeing the definitions in writing at that point, because the argument about what counts as revenue is much cheaper before the build than after it." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "What is Business Intelligence for?", options: ["Producing more charts","Letting the people who run a business interrogate its data themselves","Storing data efficiently","Replacing analysts"], correct: 1, why: "The bottleneck was never producing one answer — it was that every follow-up question had to come through an analyst." },
+      { level: "easy", q: "What is the difference between a report and a dashboard?", options: ["Dashboards use more colour","Reports are printed and dashboards are digital","A report is handed over once; a dashboard can be operated by the reader","Dashboards contain more data"], correct: 2, why: "A report ends a conversation; a dashboard continues one." },
+      { level: "easy", q: "What is the only real measure of a dashboard's success?", options: ["Whether it is opened repeatedly, unprompted","How many visuals it has","How fast it refreshes","Whether the chart types are correct"], correct: 0, why: "Accuracy and chart choice are prerequisites, not measures. Usage is observable and these tools log it." },
+      { level: "easy", q: "What should a dashboard be built around?", options: ["A department","A data source","One decision","A quarter"], correct: 2, why: "\"A dashboard for sales\" produces thirty charts nobody reads; \"which regions are behind target\" produces four somebody opens." },
+      { level: "medium", q: "A dashboard's usage log shows the most-used filter is \"none\". What does that suggest?", options: ["The filters are broken","The default view is perfect","Nobody explored it, so nobody found a reason to return","Users prefer the mobile version"], correct: 2, why: "Exploration is the behaviour a dashboard exists to enable. Its absence is the clearest early signal that the screen has no answer on it." },
+      { level: "medium", q: "What is the price of self-service BI?", options: ["It is slower than writing queries","Anyone can produce a wrong number and quote it in a meeting","It requires more expensive licences","Data must be duplicated"], correct: 1, why: "Two people filter differently, get different totals for revenue, and the argument becomes about the dashboard rather than the business." },
+      { level: "medium", q: "What is the defence against that?", options: ["Restricting who can use filters","Adding more documentation","Training sessions","Metrics defined once, centrally, and used everywhere"], correct: 3, why: "A number calculated in one place cannot disagree with itself. Restriction just moves the bottleneck back to you." },
+      { level: "hard", q: "Which part of an analyst's week is usually the largest?", options: ["Building visuals","Establishing what the data actually means","Choosing chart types","Publishing and sharing"], correct: 1, why: "\"Active customer\" means three things in three departments, last quarter was restated, the export drops cancellations. The dashboard is a few hours." },
+      { level: "hard", q: "A stakeholder says the team \"just needs training on the dashboard\". What is the likelier problem?", options: ["The training was badly delivered","There is too much on it, not too little explanation","The tool is the wrong one","The refresh schedule is wrong"], correct: 1, why: "Almost always the fix is to cut it to the one decision and see whether they come back on their own." },
+      { level: "hard", q: "When is adding a chart justified?", options: ["When the data for it is available","When a stakeholder asks for it","When it fills empty space on the page","When you can name the decision it changes"], correct: 3, why: "Availability is not relevance, and every extra visual makes the useful ones harder to find and slightly less trusted." },
+    ] },
   ]},
-  { slug: "bi-tools", order: 2, title: "Power BI / Tableau Basics", minutes: 11, problems: [], content: [
-    { t: "objectives", items: ["Power BI vs Tableau","Data connect & model","Visuals banana"] },
-    { t: "h2", n: "1", text: "Ek tool pe master bano" },
-    { t: "p", html: "<b>Power BI</b> (Microsoft, popular, DAX language) ya <b>Tableau</b> (sundar visuals). Ek pe achhe se pakad banao — dono ki zaroorat nahi." },
-    { t: "h2", n: "2", text: "Basic flow" },
-    { t: "p", html: "1) Data connect (CSV/database), 2) relationships banao, 3) drag-drop charts, 4) filters/slicers, 5) publish." },
-    { t: "note", variant: "tip", html: "<b>DAX:</b> Power BI me calculated measures banane ki formula language (Excel formulas jaisa). Basic DAX aana chahiye." },
-    { t: "recap", items: ["Power BI ya Tableau — ek chuno","Connect → model → visualize","Filters interactive","Publish & share"] },
+  { slug: "bi-tools", order: 2, title: "Power BI / Tableau Basics", minutes: 16, problems: [], content: [
+    { t: "objectives", items: [
+      "Choose one tool, for a reason rather than a preference",
+      "Follow the five steps every BI build goes through",
+      "Model data as a <b>star schema</b>, which is the step beginners skip",
+      "Tell a calculated column from a measure — the most expensive confusion in Power BI",
+    ] },
+
+    { t: "hook",
+      q: "Two people build the same dashboard. One spends an hour on the data and three on the charts; the other spends three on the data and one on the charts. Whose dashboard breaks first?",
+      why: "The first, and it breaks in the worst way — not with an error, but with a total that is quietly wrong once a second table is joined in. <b>In BI the charts are the easy part.</b> Almost everything that goes wrong later was decided in the model." },
+
+    { t: "def",
+      term: "Data model",
+      en: "How the tables in a report relate to each other — which one holds the events being counted, which ones describe them, and how they join." },
+
+    { t: "h2", n: "1", text: "Pick one, and it barely matters which" },
+    { t: "note", variant: "tip", html: "<b>Power BI</b> — Microsoft's, so it lands wherever Excel and Teams already are. Cheap per user, formula language called <b>DAX</b>, strongest data modelling of the two. If a job advert names a BI tool in India, this is usually it.<br><br><b>Tableau</b> — better at exploratory, visually careful work, and its defaults look more considered. Pricier, and its calculation language is different.<br><br><b>Choose one and go deep.</b> The transferable part is the modelling and the thinking, and it moves between tools in an afternoon; listing both shallowly on a CV impresses nobody who uses either." },
+
+    { t: "h2", n: "2", text: "The five steps, in order" },
+    { t: "syntax",
+      intro: "Every BI build is these five, and they are done in this sequence for a reason.",
+      form: "1. connect     the source: CSV, a database, an API\n2. clean       types, blanks, duplicates, a real date column\n3. model       relationships between tables  <- the step that is skipped\n4. measure     the calculations, written once\n5. visualise   charts, filters, layout — then publish",
+      parts: [
+        { bit: "connect", says: "Point the tool at the source. Prefer the database over an exported CSV: an export is a copy that starts going stale the moment it is made." },
+        { bit: "clean", says: "Types especially. A date stored as text sorts \"10 Jan\" before \"2 Feb\", and no chart on top of it can be right." },
+        { bit: "model", says: "Which table holds the facts, which describe them, and how they join. Steps 4 and 5 are only as correct as this one." },
+        { bit: "measure", says: "Write each calculation ONCE, here, so every visual that uses it agrees. This is what stops two charts disagreeing about revenue." },
+        { bit: "visualise", says: "The part everybody starts with, and the part that takes the least time when the four above are done." },
+      ],
+      note: "If a number comes out wrong, walk this list from the top rather than adjusting the chart. The chart is almost never the bug.",
+    },
+
+    { t: "h2", n: "3", text: "Star schema: one fact table, several describing it" },
+    { t: "p", html: "The standard shape is one <b>fact</b> table — the things that happened, one row per sale, per ticket, per visit — surrounded by <b>dimension</b> tables that describe them: customers, products, dates, regions. Drawn out it looks like a star, which is where the name comes from." },
+    { t: "p", html: "The beginner's instinct is one wide flat table with everything joined in already, and it works right up until it does not: the customer's city is repeated on every one of their ten thousand orders, so correcting it means correcting ten thousand rows, and counting <i>customers</i> now counts orders instead." },
+
+    { t: "note", variant: "key", html: "<b>Always make a proper date table.</b> Not the date column already in your data — a separate table with one row per day, carrying year, quarter, month, week and day-of-week. Every \"compare to last year\", every \"month to date\", every trend line depends on it, and adding it afterwards means rebuilding the visuals that were already written against the wrong thing." },
+
+    { t: "h2", n: "4", text: "Calculated column or measure" },
+    { t: "p", html: "This is the single most expensive confusion in Power BI, and it is worth getting straight before you write anything. A <b>calculated column</b> is computed row by row when the data refreshes and stored in the table. A <b>measure</b> is computed when the visual asks, against whatever the viewer has filtered to." },
+    { t: "p", html: "So a column is right for something that belongs to the row — a price band, a flag, a full name. A measure is right for anything aggregated: totals, averages, ratios, counts. Use a column where a measure belonged and the number stops responding to filters, which is exactly the bug in the task below." },
+
+    { t: "debug",
+      intro: "A margin percentage on a sales dashboard reads 41.6% no matter which region, product or month is selected. Every underlying number is correct. Read the definition before opening the fix.",
+      code: "-- calculated COLUMN on the Sales table\nMarginPct = DIVIDE(\n    SUM(Sales[Profit]),\n    SUM(Sales[Revenue])\n)\n\n-- the card visual then shows:  AVERAGE(Sales[MarginPct])",
+      symptom: "The card shows 41.6% for every slicer selection. Revenue and profit both filter correctly on the same page; only the percentage refuses to move.",
+      q: "The formula is arithmetically right and the source columns filter properly. So why is the percentage frozen?",
+      fix: "-- a MEASURE, not a column\nMargin % = DIVIDE(\n    SUM(Sales[Profit]),\n    SUM(Sales[Revenue])\n)",
+      why: "Because a calculated column is computed <b>when the data refreshes</b>, before any viewer exists to filter anything — so <code>SUM(Sales[Profit])</code> inside it sums the whole table, writes the same total-company figure into every row, and the card is then averaging a constant. A measure is computed <b>when the visual asks</b>, inside whatever the viewer has selected, which is what makes it move. <b>The rule: anything aggregated is a measure; a column is for something that genuinely belongs to the row.</b> The tell is a number that is right at the top level and refuses to respond to a slicer — always check whether it was written as a column." },
+
+    { t: "drills", intro: "Say the answer before opening it. These four decisions account for most of what goes wrong in a real report.", items: [
+      { task: "The five steps of a BI build, in order.", code: "connect -> clean -> model -> measure -> visualise" },
+      { task: "Sort these into fact and dimension tables: Orders, Customers, Products, Calendar.", code: "Fact       Orders        (the things that happened)\nDimension  Customers, Products, Calendar  (what describes them)" },
+      { task: "Column or measure: a customer's full name from first and last?", code: "Calculated COLUMN — it belongs to the row\nand does not change with a filter." },
+      { task: "Column or measure: revenue per order, shown on a card?", code: "MEASURE — it is aggregated, so it must be computed\ninside whatever the viewer has filtered to." },
+      { task: "Name the table people forget, and one thing that breaks without it.", code: "A proper date table (one row per day).\nWithout it: \"compared to last year\" cannot be written." },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "One wide flat table with everything joined in", why: "The customer's city repeats across ten thousand orders, so a correction means ten thousand rows — and counting customers now counts orders.", fix: "A fact table for events, dimension tables for what describes them." },
+      { bad: "Using the date column already in the data instead of a date table", why: "Year-on-year, month-to-date and week comparisons all depend on a real calendar table. Adding it later means rebuilding the visuals written against the wrong thing.", fix: "One row per day, with year, quarter, month, week and day-of-week." },
+      { bad: "SUM() inside a calculated column", why: "It runs at refresh, before any filter exists, so it writes the same total into every row and the visual stops responding to slicers.", fix: "Write it as a measure." },
+      { bad: "Building the same calculation separately in three visuals", why: "They will disagree the first time one of them is edited, and the argument becomes about the dashboard.", fix: "One measure, referenced by all three." },
+      { bad: "Learning Power BI and Tableau at the same time", why: "Two shallow tools impress nobody who uses either, and the transferable part — the modelling — is the same in both.", fix: "One tool, deeply. The second takes an afternoon afterwards." },
+    ] },
+
+    { t: "recap", items: [
+      "Pick <b>one</b> tool; the modelling is what transfers, and it transfers easily",
+      "<b>connect → clean → model → measure → visualise</b>, in that order",
+      "The charts are the easy part; almost every later bug was decided in the model",
+      "<b>Star schema</b>: one fact table, dimensions describing it",
+      "Always build a real <b>date table</b> — everything time-based needs it",
+      "<b>Column</b> = per row, at refresh. <b>Measure</b> = aggregated, at query time",
+      "A number that ignores your slicers was almost certainly written as a column",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "Power BI or Tableau — which should someone learn?", a: "Either, deeply, rather than both shallowly. Power BI is more common where Microsoft tooling already is and has the stronger data modelling; Tableau is stronger for exploratory work and looks more considered by default. The part that actually transfers is the modelling and the thinking about metrics, and that moves between them in an afternoon — so the choice matters far less than the depth." },
+      { level: "medium", q: "What is a star schema and why use one?", a: "One fact table holding the events — a row per order, per ticket, per visit — surrounded by dimension tables that describe them: customers, products, dates, regions. It is used because the alternative, one wide flat table, repeats every descriptive attribute on every event row, so a single correction touches thousands of rows and counting customers accidentally counts orders. It also makes filtering behave predictably, which is what the whole report rests on." },
+      { level: "hard", q: "A percentage on a dashboard does not change when you use the slicers. Where do you look?", a: "At whether it was written as a calculated column rather than a measure. A calculated column is evaluated at refresh time, before any viewer has filtered anything, so an aggregation inside one writes the same whole-table figure into every row and the visual ends up averaging a constant. A measure evaluates at query time inside the current filter context, which is what makes it respond. The general rule is that anything aggregated has to be a measure." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "What are the five steps of a BI build, in order?", options: ["visualise, model, clean, connect, measure","connect, clean, model, measure, visualise","connect, visualise, clean, measure, model","model, connect, measure, clean, visualise"], correct: 1, why: "If a number is wrong, walk that list from the top. The chart is almost never the bug." },
+      { level: "easy", q: "In a star schema, what does the fact table hold?", options: ["The things that happened — one row per order, ticket or visit","The descriptive attributes","The calculations","The date hierarchy"], correct: 0, why: "The dimensions around it describe those events: customers, products, dates, regions." },
+      { level: "easy", q: "Which advice does this lesson give about choosing a tool?", options: ["Learn Tableau first, then Power BI","Learn whichever the job advert names, both if possible","Pick one and go deep — the modelling is what transfers","Always pick Power BI"], correct: 2, why: "Two shallow tools impress nobody who uses either, and the second takes an afternoon once the thinking is there." },
+      { level: "easy", q: "Why build a separate date table?", options: ["It makes refreshes faster","Everything time-based — year-on-year, month-to-date, trends — depends on it","It is required before publishing","It reduces file size"], correct: 1, why: "And adding it later means rebuilding the visuals that were written against the wrong thing." },
+      { level: "medium", q: "When is a calculated column the right choice?", options: ["For totals and averages","For anything shown on a card","For something that belongs to the row, like a price band or a full name","Whenever the formula is short"], correct: 2, why: "It is computed row by row at refresh and stored, so it suits values that do not depend on what the viewer filtered." },
+      { level: "medium", q: "When is a measure the right choice?", options: ["Anything aggregated — totals, averages, ratios, counts","Only for percentages","Only when the data is large","When the column would be too slow"], correct: 0, why: "A measure is evaluated when the visual asks, inside the current filter context, which is what makes it respond to slicers." },
+      { level: "medium", q: "A percentage reads the same for every slicer selection, while its source columns filter correctly. What is the likeliest cause?", options: ["A broken relationship","It was written as a calculated column containing an aggregation","The visual needs refreshing","The slicer is filtering the wrong table"], correct: 1, why: "The aggregation ran at refresh, before any filter existed, and wrote the same whole-table figure into every row." },
+      { level: "hard", q: "What is wrong with one wide flat table containing everything?", options: ["It is slower to refresh","Descriptive attributes repeat on every event row, so corrections touch thousands of rows and counting customers counts orders","BI tools cannot import it","It cannot be filtered"], correct: 1, why: "It works right up until it does not, and the failure is a wrong count rather than an error." },
+      { level: "hard", q: "The same calculation is built separately inside three visuals. What happens?", options: ["Nothing — they are independent","They refresh at different times","They will disagree the first time one is edited","The report will not publish"], correct: 2, why: "And then the meeting is about which chart is right rather than about the business." },
+      { level: "hard", q: "Where does most of the time go on a BI build that lasts?", options: ["Choosing chart types","Layout and colour","Publishing and permissions","Connecting, cleaning and modelling"], correct: 3, why: "The charts are the easy part. Almost everything that goes wrong later was decided in the model." },
+    ] },
   ]},
-  { slug: "bi-kpis", order: 3, title: "KPIs & Business Metrics", minutes: 10, problems: [], content: [
-    { t: "objectives", items: ["KPI kya hai","Common business metrics","Metric chunna"] },
-    { t: "h2", n: "1", text: "KPIs — kya measure karein" },
-    { t: "p", html: "KPI (Key Performance Indicator) = business ka health-check number. Jaise revenue, conversion rate, churn, customer acquisition cost (CAC)." },
-    { t: "note", variant: "tip", html: "<b>Business samajhna:</b> achha analyst sirf chart nahi banata — samajhta hai kaunsa metric matter karta hai. Ye interview me farak banata hai." },
-    { t: "recap", items: ["KPI = key health metric","Revenue, conversion, churn, CAC","Right metric chunna skill hai","Business context zaroori"] },
+  { slug: "bi-kpis", order: 3, title: "KPIs & Business Metrics", minutes: 16, problems: [], content: [
+    { t: "objectives", items: [
+      "Apply one test that separates a KPI from a number",
+      "Name the common business metrics and what each is really asking",
+      "Explain why a metric's <b>definition</b> matters more than its value",
+      "Spot a metric that moved without anything improving",
+    ] },
+
+    { t: "hook",
+      q: "A dashboard reports 2.4 million page views last month, up 18%. The meeting goes quiet, somebody says \"great\", and the next item begins. What was that number for?",
+      why: "Nothing, and everyone in the room half-knows it. Nobody can name a thing they will do differently at 2.4 million that they would not have done at 2.0 — which is the definition of a number that is not a KPI, however carefully it was calculated." },
+
+    { t: "think",
+      q: "What question would turn that page-view number into something worth reporting?",
+      a: "\"Of the people who arrived, how many did the thing we wanted?\" That is a <b>ratio</b>, it has a decision attached — if it falls, we look at the landing page or the traffic source — and it cannot be improved by simply buying more visitors, which the raw count can." },
+
+    { t: "def",
+      term: "KPI",
+      en: "A Key Performance Indicator — a number chosen because a decision hangs on it. If nothing would be done differently when it moves, it is a statistic rather than a KPI." },
+
+    { t: "analogy",
+      concept: "KPIs",
+      real: "the dials a pilot actually watches",
+      html: "An aircraft produces thousands of measurements. The pilot watches perhaps six, because those six are the ones that change what they do next. Everything else is available if something looks wrong. <b>A dashboard with thirty numbers has no KPIs on it</b> — it has instrumentation, and it has left the choosing to the reader." },
+
+    { t: "h2", n: "1", text: "The test" },
+    { t: "p", html: "Take any number on a dashboard and ask: <b>if this moved by a fifth, what would we do?</b> If there is a clear answer — chase those accounts, pause that campaign, staff that shift differently — it is a KPI. If the answer is \"we would know about it\", it is a statistic. Statistics are not worthless; they belong one level down, where somebody investigating goes looking." },
+    { t: "p", html: "The test also protects against the commonest failure, which is not choosing a wrong metric but choosing <b>too many</b>. Six numbers with decisions attached beat thirty without." },
+
+    { t: "h2", n: "2", text: "The metrics you will actually meet" },
+    { t: "note", variant: "tip", html: "<b>Conversion rate</b> — of those who could have, how many did. The workhorse ratio.<br><b>Churn</b> — the share of customers who left in a period. The mirror of retention, and usually the more urgent framing.<br><b>CAC</b> — customer acquisition cost: what it costs to win one.<br><b>LTV</b> — lifetime value: what one is worth over the relationship. <b>CAC vs LTV is the question</b>, not either alone.<br><b>AOV</b> — average order value.<br><b>Activation</b> — the share of signups who reach the point where the product has actually done something for them. On most products this is where the real problem is, and it is the least often measured.<br><b>DAU / MAU</b> — daily over monthly actives, a rough measure of how habitual something is." },
+
+    { t: "h2", n: "3", text: "Ratios beat totals" },
+    { t: "p", html: "Totals go up on their own. A growing company reports record revenue in a month where every underlying thing got worse, because there were simply more customers. The total is true and it hides the story." },
+    { t: "p", html: "A ratio has a denominator, and the denominator is what makes it honest: revenue <i>per customer</i>, conversions <i>per visitor</i>, cost <i>per acquisition</i>. When somebody presents a total, the useful question is almost always \"out of how many?\"" },
+
+    { t: "note", variant: "key", html: "<b>The definition is the metric.</b> \"Active users: 40,000\" means nothing until somebody says whether that counts trials, whether a login counts or an action is required, and over how many days. Two teams with different answers will produce different numbers from the same database and each will be certain the other is wrong. <b>Write the definition down beside the number</b> — it is the cheapest thing in this lesson and it prevents the most expensive argument." },
+
+    { t: "h2", n: "4", text: "Leading and lagging" },
+    { t: "p", html: "<b>Lagging</b> indicators tell you what happened: revenue, churn, last quarter's total. They are accurate and they are too late to act on. <b>Leading</b> indicators move first and predict them: trial-to-paid rate, support ticket volume, activation. A dashboard made only of lagging indicators is a rear-view mirror — reliable, and no use for steering." },
+
+    { t: "debug",
+      intro: "A team reports that conversion improved sharply after a change to the signup form. Nothing about the product got better that month. Read the two definitions before opening the fix.",
+      code: "-- last quarter\nconversion = paid_customers / all_site_visitors\n           = 1,200 / 60,000  = 2.0%\n\n-- this quarter, after the form change\nconversion = paid_customers / visitors_who_started_signup\n           = 1,260 / 21,000  = 6.0%",
+      symptom: "Reported as \"conversion up from 2.0% to 6.0%\". Paid customers went from 1,200 to 1,260. Nobody is lying and both numbers are correctly calculated.",
+      q: "Both figures are arithmetically right. So why is \"conversion tripled\" a false statement?",
+      fix: "-- one definition, applied to both periods\nconversion = paid_customers / all_site_visitors\n  last quarter  1,200 / 60,000 = 2.0%\n  this quarter  1,260 / 63,000 = 2.0%\n\n-- and report the new ratio SEPARATELY, named for what it is\nsignup completion = paid / visitors_who_started_signup",
+      why: "<b>The denominator changed.</b> The second quarter measures a narrower group — only people who had already started signing up — so of course a larger share of them convert. The metric did not improve; it started measuring something else under the same name. Held to one definition, conversion is flat at 2.0% and the real change is 60,000 visitors becoming 63,000. This is the most common way a dashboard misleads without anybody intending it, and it is why a metric's definition has to be written down and version-controlled like anything else: <b>when a number jumps and nothing you did explains it, check what the denominator was before you celebrate.</b> The narrower ratio is worth reporting — it is genuinely useful — but under its own name, beside the old one, not in place of it." },
+
+    { t: "drills", intro: "Apply the test out loud before opening each answer. This is the judgement the role is actually hired for.", items: [
+      { task: "State the test that separates a KPI from a statistic.", code: "If this number moved by a fifth, what would we DO?\nA clear action -> KPI.  \"We'd know about it\" -> statistic." },
+      { task: "Turn \"2.4 million page views\" into something with a decision attached.", code: "Of the visitors who arrived, what share did the thing we wanted?\n(a ratio, and one you cannot improve by buying traffic)" },
+      { task: "Why is CAC on its own not enough?", code: "Because it only matters against LTV.\nA CAC of 5,000 is excellent at an LTV of 40,000\nand fatal at an LTV of 4,000." },
+      { task: "Sort these into leading and lagging: revenue, activation rate, churn, support tickets.", code: "Leading  activation rate, support tickets   (move first)\nLagging  revenue, churn                    (accurate, too late)" },
+      { task: "Write the missing half of this metric: \"Active users: 40,000\".", code: "Active = performed at least one core action\n         in the last 28 days; excludes trials." },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "Reporting page views, total signups or follower count as KPIs", why: "Nobody can name a decision that changes when they move, and all three rise on their own over time.", fix: "Report the ratio underneath: of those who arrived, how many did the thing." },
+      { bad: "A dashboard with thirty numbers on it", why: "That is instrumentation, not a set of KPIs — it leaves the choosing to the reader, which is the work they wanted done.", fix: "Six numbers with decisions attached, and the rest one level down." },
+      { bad: "\"Conversion is up\" — after the denominator was redefined", why: "The metric started measuring a narrower group under the same name. Nothing improved.", fix: "One definition across periods; report the new ratio under its own name." },
+      { bad: "Quoting CAC without LTV", why: "An acquisition cost is only good or bad relative to what a customer is worth.", fix: "Report them as a pair, or as the ratio." },
+      { bad: "A dashboard made entirely of lagging indicators", why: "Accurate, and always about a month too late to change anything.", fix: "Pair each with a leading indicator that moves first." },
+    ] },
+
+    { t: "recap", items: [
+      "<b>The test:</b> if it moved by a fifth, what would we do? No answer = not a KPI",
+      "Six numbers with decisions beat thirty without",
+      "<b>Ratios beat totals</b> — totals rise on their own and hide the story",
+      "\"Out of how many?\" is the most useful question in the room",
+      "<b>The definition is the metric</b> — write it beside the number",
+      "CAC only means something against LTV",
+      "<b>Lagging</b> tells you what happened; <b>leading</b> lets you steer",
+      "A number that jumps for no reason: check whether the denominator changed",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "What makes a number a KPI rather than just a metric?", a: "A decision hangs on it. The test I use is: if this moved by a fifth, what would we do differently? If there is a concrete answer — chase those accounts, pause that campaign, staff that shift differently — it is a KPI. If the answer is \"we would know about it\", it is a statistic, and statistics belong one level down where somebody investigating can find them." },
+      { level: "medium", q: "Why prefer a ratio to a total?", a: "Because totals rise on their own. A growing company can report record revenue in a month where every underlying thing got worse, simply because there were more customers — the number is true and it hides the story. A ratio carries a denominator, so revenue per customer or conversions per visitor cannot be improved just by getting bigger. Whenever somebody presents a total, the useful question is \"out of how many?\"" },
+      { level: "hard", q: "A team reports that conversion tripled and you can see nothing that changed in the product. What do you check?", a: "The denominator, first. The commonest cause is that the metric was redefined — measured against everyone who visited last quarter and against only the people who started signing up this quarter, which is a much narrower group, so a larger share of them naturally convert. The metric did not improve, it started measuring something else under the same name. The fix is to recompute both periods on one definition and, if the narrower ratio is genuinely useful, report it separately under its own name rather than in place of the old one." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "What is the test that separates a KPI from a statistic?", options: ["Whether it is on the dashboard's first page","Whether it is measured daily","If it moved by a fifth, would anybody do anything differently?","Whether it can be charted"], correct: 2, why: "\"We would know about it\" means it is a statistic — useful, but one level down." },
+      { level: "easy", q: "Why do totals mislead?", options: ["They are hard to calculate","They rise on their own as a company grows, hiding what got worse","They cannot be charted","They are always estimates"], correct: 1, why: "Record revenue in a month where every underlying thing got worse is entirely possible." },
+      { level: "easy", q: "Which metric is CAC only meaningful against?", options: ["AOV","DAU","Churn","LTV"], correct: 3, why: "A CAC of 5,000 is excellent at an LTV of 40,000 and fatal at an LTV of 4,000." },
+      { level: "easy", q: "What does activation measure?", options: ["The share of signups who reach the point where the product has done something for them","Total registered users","How often users log in","Marketing spend efficiency"], correct: 0, why: "On most products this is where the real problem is, and it is the least often measured." },
+      { level: "medium", q: "\"Active users: 40,000.\" What is missing?", options: ["The comparison to last month","The definition — over what window, and what counts as active","The chart type","The data source"], correct: 1, why: "Two teams with different answers produce different numbers from the same database, each certain the other is wrong." },
+      { level: "medium", q: "Which of these is a LEADING indicator?", options: ["Last quarter's revenue","Churn for the period","Trial-to-paid rate","Annual recurring revenue"], correct: 2, why: "Leading indicators move first and predict the lagging ones. A dashboard of only lagging indicators is a rear-view mirror." },
+      { level: "medium", q: "A dashboard carries thirty numbers. What is the problem?", options: ["It refreshes slowly","It is instrumentation, not KPIs — the choosing has been left to the reader","Thirty is too few","Nothing, if they are all accurate"], correct: 1, why: "The pilot watches six dials. Everything else is available if something looks wrong." },
+      { level: "hard", q: "Conversion is reported as rising from 2.0% to 6.0%, paid customers went 1,200 → 1,260, and nothing shipped. What happened?", options: ["Seasonality","The denominator was redefined to a narrower group","A data quality problem","The product genuinely improved"], correct: 1, why: "Measured against everyone who visited, then against only those who started signing up. Both are correct arithmetic and the comparison is false." },
+      { level: "hard", q: "The narrower ratio in that example — should it be thrown away?", options: ["Yes, it is misleading by nature","Yes, unless the product team asks for it","No, replace the old one with it","No — report it separately under its own name, beside the original"], correct: 3, why: "Signup completion is genuinely useful. What is not allowed is quietly swapping it in under the old name." },
+      { level: "hard", q: "What is the cheapest thing you can do to prevent the most expensive metric argument?", options: ["Add more charts","Restrict who can edit the dashboard","Write the definition down beside the number","Refresh the data more often"], correct: 2, why: "Almost every disagreement about a number is really a disagreement about what it was counting." },
+    ] },
   ]},
 ];
 
@@ -9257,24 +9514,190 @@ const dlLessons = [
 
 /* ===================== DEPLOYMENT & JOB PREP ===================== */
 const deployLessons = [
-  { slug: "deploy-git", order: 1, title: "Git & GitHub", minutes: 11, problems: [], content: [
-    { t: "objectives", items: ["Git = version control","GitHub = online + portfolio","Basic commands"] },
-    { t: "h2", n: "1", text: "Git — code ka time machine" },
-    { t: "p", html: "Git code ke versions save karta hai — kuch toota to peeche ja sakte ho. Team ek saath kaam kar paati hai bina ek doosre ka code todhe." },
-    { t: "code", file: "git.sh", code: "git init\ngit add .\ngit commit -m \"first version\"\ngit push", output: "# code GitHub pe" },
-    { t: "h2", n: "2", text: "GitHub = tumhara portfolio" },
-    { t: "p", html: "Apne DS projects GitHub pe daalo. Recruiters ye dekhte hain — 'GitHub link' resume ka <b>sabse strong</b> proof." },
-    { t: "note", variant: "tip", html: "<b>Zaroori:</b> har project ka achha README (kya banaya, kaise chalao, kya seekha) — pehli cheez jo koi dekhta hai." },
-    { t: "recap", items: ["Git = version control","init → add → commit → push","GitHub = online + portfolio","README zaroor likho"] },
+  { slug: "deploy-git", order: 1, title: "Git & GitHub", minutes: 16, problems: [], content: [
+    { t: "objectives", items: [
+      "Say what Git does, and what GitHub adds on top of it",
+      "Run the four commands that cover almost everything you will do alone",
+      "Keep data, secrets and virtual environments out of a repository",
+      "Know what to do when a secret is committed — because deleting it is not enough",
+    ] },
+
+    { t: "hook",
+      q: "It is eleven at night, the model finally works, and you have <code>model_final.py</code>, <code>model_final2.py</code> and <code>model_final_WORKING.py</code> in one folder. Which one produced the numbers in your report?",
+      why: "Nobody knows, including you tomorrow. That folder is a version control system built by hand, badly — and it is exactly what Git replaces: one file, and a complete record of every state it has been in and why." },
+
+    { t: "def",
+      term: "Git",
+      en: "A record of every version of a project, kept alongside it, so any past state can be recovered and any change can be explained." },
+
+    { t: "def",
+      term: "GitHub",
+      en: "A hosted copy of that record — which is what makes it a backup, a way for several people to work on one project, and the link on your CV." },
+
+    { t: "analogy",
+      concept: "a commit",
+      real: "a save point in a game",
+      html: "You do not save after every step; you save when you have got somewhere you would not want to lose. And the thing that makes a save point useful is knowing what it was — \"before the boss fight\" beats \"save 47\". A commit message is that label, which is why <code>update</code> is the least useful message anyone writes." },
+
+    { t: "h2", n: "1", text: "The four commands that cover most days" },
+    { t: "syntax",
+      intro: "Working alone, this is nearly all of it.",
+      form: "git init                      start tracking this folder\ngit status                    what has changed  <- run this constantly\ngit add .                     stage the changes you want to record\ngit commit -m \"why, not what\" record them, with a reason\ngit push                      send them to GitHub",
+      parts: [
+        { bit: "git init", says: "Once per project. It creates the hidden <code>.git</code> folder that holds the history — delete that and the history is gone." },
+        { bit: "git status", says: "The most useful command in Git and the one beginners use least. It tells you what is changed, what is staged, and what is being ignored." },
+        { bit: "git add .", says: "Stage everything changed. Fine on a tidy project, dangerous on an untidy one — this is how a 400MB dataset gets committed." },
+        { bit: "git commit", says: "Write the history entry. <b>Say why</b>: \"fix cancellation rate excluding refunds\" tells your future self something; \"update\" does not." },
+        { bit: "git push", says: "Copy your commits to GitHub. Until you push, everything you have done exists on one laptop." },
+      ],
+      note: "Commit when something works, not when everything is finished. A commit you can return to is worth more than a tidy history you never made.",
+    },
+
+    { t: "h2", n: "2", text: "What must never go in" },
+    { t: "p", html: "A repository is for the things that make the project reproducible: code, small reference data, configuration, the README. Three categories should stay out, and each has a specific reason." },
+    { t: "note", variant: "tip", html: "<b>Large data.</b> Git stores every version of every file forever, so a 400MB CSV committed once makes the repository 400MB permanently — even after you delete the file. Link the source, or commit a small sample.<br><br><b>Virtual environments</b> (<code>venv/</code>, <code>node_modules/</code>). They are machine-specific and rebuildable from a requirements file. Committing them adds thousands of files nobody will read.<br><br><b>Secrets.</b> API keys, database passwords, <code>.env</code> files. This is the one with consequences beyond tidiness, and the next section is about it." },
+
+    { t: "h2", n: "3", text: "A .gitignore, written first" },
+    { t: "code", file: ".gitignore", code: "# environments\nvenv/\n__pycache__/\n\n# secrets — never committed, ever\n.env\n*.key\n\n# data: link it in the README instead\ndata/*.csv\n!data/sample.csv\n\n# notebook noise\n.ipynb_checkpoints/", output: "# git status now shows only files that belong in the project" },
+    { t: "psoft", html: "Write this before the first commit, not after. A file that has already been committed keeps being tracked even once it appears in <code>.gitignore</code> — the ignore list only applies to files Git is not already watching, which is a rule that surprises almost everybody once." },
+
+    { t: "debug",
+      intro: "A student notices an API key in a file they pushed last week. They delete the line, commit, and push again. Read what they did before opening the fix.",
+      code: "# the key was in config.py, pushed on Monday\ngit rm --cached config.py\necho \"config.py\" >> .gitignore\ngit commit -m \"remove api key\"\ngit push",
+      symptom: "The file no longer appears in the repository. The key still works, and the student believes the problem is solved.",
+      q: "The file is gone from GitHub and the key is out of the current code. So what is still wrong?",
+      fix: "# 1. ROTATE THE KEY — revoke the old one at the provider. Do this first.\n# 2. then keep it out of the code for good:\necho \".env\" >> .gitignore\n# read it at runtime instead of writing it in a file that gets committed",
+      why: "Because Git's whole purpose is that <b>nothing is ever really deleted</b>. Removing the file adds a new commit saying \"this file is gone now\"; Monday's commit still contains the key, it is still in the history, it is still in every clone anybody made, and on a public repository it was scraped by an automated scanner within minutes of the push. <b>Deleting a secret from a repository does not un-publish it.</b> The only fix that works is to treat the key as compromised and revoke it at the provider — rewriting history is possible and does not help either, because the copies are already out. The real lesson is upstream: write the <code>.gitignore</code> before the first commit, and read secrets from the environment so there is never a file to forget." },
+
+    { t: "drills", intro: "Type these. The first four are muscle memory; the last one is the habit that prevents the debug task above.", items: [
+      { task: "Start tracking a new project and make the first commit.", code: "git init\ngit add .\ngit commit -m \"initial commit: cleaning + EDA notebook\"" },
+      { task: "The command to run before every commit, and constantly otherwise.", code: "git status" },
+      { task: "Rewrite this commit message so it is worth reading: <code>update</code>", code: "fix cancellation rate to exclude refunded bookings" },
+      { task: "Send your work to GitHub for the first time.", code: "git remote add origin https://github.com/you/project.git\ngit push -u origin main" },
+      { task: "The four things a data project's .gitignore should carry from day one.", code: "venv/\n.env\ndata/*.csv\n.ipynb_checkpoints/" },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "git commit -m \"update\"", why: "It records that something changed and nothing about why, which is the only part your future self needs.", fix: "git commit -m \"exclude refunded bookings from the cancellation rate\"" },
+      { bad: "git add . on a folder containing a 400MB dataset", why: "Git keeps every version forever, so the repository is permanently that size even after the file is deleted.", fix: "A .gitignore written before the first commit, and the data linked in the README." },
+      { bad: "Committing a .env file and deleting it later", why: "The earlier commit still holds it, as does every clone. The key is compromised, not removed.", fix: "Rotate the key at the provider first, then keep secrets out of files entirely." },
+      { bad: "Adding a file to .gitignore after it has been committed", why: "Ignoring only applies to files Git is not already tracking, so it keeps being tracked and nothing appears to happen.", fix: "git rm --cached <file>, then commit — and understand it stays in the history." },
+      { bad: "One commit at the end of the project", why: "There is nothing to return to, which is the entire point of the tool.", fix: "Commit whenever something works." },
+    ] },
+
+    { t: "recap", items: [
+      "Git records versions; <b>GitHub</b> hosts them — backup, collaboration, and the CV link",
+      "<b>init → status → add → commit → push</b> covers most days working alone",
+      "<code>git status</code> is the most useful command and the least used",
+      "A commit message says <b>why</b>, not what",
+      "Keep out: large data, virtual environments, and <b>secrets</b>",
+      "Write <code>.gitignore</code> <b>before</b> the first commit — ignoring is not retroactive",
+      "<b>A committed secret is compromised, not deletable</b> — rotate it at the provider",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "What is the difference between Git and GitHub?", a: "Git is the version control system itself — it runs on your machine and keeps the complete history of the project in a hidden .git folder. GitHub is a hosted copy of that history, which is what turns it into an off-machine backup, a way for several people to work on the same project, and the link somebody clicks from your CV. You can use Git with no GitHub account at all; you just have one copy of everything." },
+      { level: "medium", q: "What should never be committed to a repository, and why?", a: "Large data, because Git keeps every version forever — a 400MB file committed once leaves the repository permanently that size even after deletion. Virtual environments, because they are machine-specific and rebuildable from a requirements file. And secrets, which is the one with real consequences: an API key in a commit is in the history, in every clone, and on a public repository it is scraped by automated scanners within minutes." },
+      { level: "hard", q: "You realise an API key was pushed last week. What do you do?", a: "Rotate it first — revoke the old key at the provider and issue a new one — because the key must be treated as compromised the moment it was pushed. Deleting the file only adds a commit saying it is gone; the original commit still contains it, and so does every clone anybody made. History rewriting is possible but does not recover the copies that already exist, so it is a tidiness step rather than a fix. Then remove the cause: read secrets from the environment rather than from a file, and make sure .gitignore covers them before the next commit." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "What does Git actually give you?", options: ["A complete record of every version, recoverable and explainable","Automatic backups to the cloud","A way to run code faster","Protection against bugs"], correct: 0, why: "GitHub is what adds the hosted copy. Git alone runs entirely on your machine." },
+      { level: "easy", q: "Which command should you run constantly and most beginners barely use?", options: ["git log","git status","git diff","git branch"], correct: 1, why: "It tells you what has changed, what is staged and what is being ignored — before you commit anything." },
+      { level: "easy", q: "What should a commit message say?", options: ["Which files changed","The date and your name","Why the change was made","How long it took"], correct: 2, why: "Git already knows which files changed. Only you know why, and only for about a week." },
+      { level: "easy", q: "Which of these belongs in .gitignore?", options: ["README.md","requirements.txt","The analysis notebook",".env"], correct: 3, why: "Along with venv/, large data files and .ipynb_checkpoints/." },
+      { level: "medium", q: "Why is committing a 400MB dataset a lasting problem?", options: ["GitHub rejects the push","Git keeps every version forever, so the repository stays that size even after deletion","It slows down the notebook","It cannot be pushed over a slow connection"], correct: 1, why: "Link the source in the README, or commit a small sample instead." },
+      { level: "medium", q: "You add an already-committed file to .gitignore. What happens?", options: ["It is removed from the repository","It stops being tracked immediately","Nothing — ignoring only applies to files Git is not already tracking","Its history is deleted"], correct: 2, why: "You need git rm --cached to stop tracking it, and even then it stays in the history." },
+      { level: "medium", q: "When should you commit?", options: ["Once, when the project is finished","Whenever something works","Every time you save a file","Only before pushing"], correct: 1, why: "A commit you can return to is worth more than a tidy history you never made." },
+      { level: "hard", q: "An API key was pushed last week. You delete the file and push again. Is the key safe?", options: ["Yes, it is gone from the repository","Yes, provided the repository is private","No — the earlier commit still holds it, as does every clone","Only if you also delete the branch"], correct: 2, why: "On a public repository it was scraped by automated scanners within minutes of the original push." },
+      { level: "hard", q: "So what is the ONLY step that actually fixes it?", options: ["Rewriting history with a force push","Making the repository private","Deleting and recreating the repository","Rotating the key at the provider"], correct: 3, why: "Everything else is tidiness. The key must be treated as compromised from the moment it was pushed." },
+      { level: "hard", q: "What is the upstream habit that prevents the whole problem?", options: ["Committing less often","Writing .gitignore before the first commit and reading secrets from the environment","Using private repositories only","Reviewing every diff before pushing"], correct: 1, why: "Then there is never a file holding the key to forget about." },
+    ] },
   ]},
-  { slug: "deploy-model", order: 2, title: "Model Deployment", minutes: 12, problems: [], content: [
-    { t: "objectives", items: ["Model deploy kyun","Streamlit / Flask","Live app banana"] },
-    { t: "h2", n: "1", text: "Deploy — model ko live karo" },
-    { t: "p", html: "Notebook me pada model kisi ko dikhta nahi. <b>Deploy</b> karke live web app banao jise koi bhi link se use kare." },
-    { t: "h2", n: "2", text: "Streamlit — sabse aasaan" },
-    { t: "p", html: "<b>Streamlit</b> se Python me hi interactive ML app ban jaata hai (bina web knowledge). <b>Flask/FastAPI</b> = API, <b>Docker</b> = packaging." },
-    { t: "note", variant: "tip", html: "<b>Game-changer:</b> ek deployed live ML app (Streamlit Cloud pe free) resume ko 10x strong banata hai — 'yaha click karke try karo'." },
-    { t: "recap", items: ["Deploy = model ko live app","Streamlit sabse aasaan","Flask/FastAPI = API","Docker = packaging"] },
+  { slug: "deploy-model", order: 2, title: "Model Deployment", minutes: 17, problems: [], content: [
+    { t: "objectives", items: [
+      "Choose between Streamlit, an API and Docker for a reason",
+      "Save a model so that it still works somewhere else",
+      "Ship the <b>preprocessing</b> with the model — the step that silently breaks predictions",
+      "Pin versions, and know what happens when you do not",
+    ] },
+
+    { t: "hook",
+      q: "Your model scores 0.91 on the test set. You send the notebook to a colleague. What is the probability they see 0.91?",
+      why: "Lower than you think, and the reasons have nothing to do with the model: a different pandas version, a missing file, a scaler that was fitted in a cell they did not run. <b>Deployment is the discipline of making the result survive leaving your machine</b>, and most of it is not about the model at all." },
+
+    { t: "def",
+      term: "Deployment",
+      en: "Putting a model somewhere it can be used by somebody who does not have your notebook, your data, or your environment." },
+
+    { t: "h2", n: "1", text: "Three destinations, three different jobs" },
+    { t: "note", variant: "tip", html: "<b>Streamlit</b> — a web app written entirely in Python, no front-end knowledge required. Right when a <b>human</b> is the user: a demo, a portfolio piece, an internal tool. Free hosting on Streamlit Community Cloud, straight from a GitHub repository.<br><br><b>Flask / FastAPI</b> — an API returning JSON. Right when <b>other software</b> is the user: a website, a mobile app, a scheduled job. No interface, and that is the point.<br><br><b>Docker</b> — not a destination but a packaging: the code, the dependencies and the system libraries in one image that runs identically anywhere. Right when the environment itself keeps being the problem, and it is what most real deployments sit inside.<br><br>For a portfolio, <b>Streamlit first</b>. It produces the clickable link, which is the thing that changes a CV." },
+
+    { t: "h2", n: "2", text: "A model has to be saved before it can be served" },
+    { t: "p", html: "A trained model lives in memory and dies with the notebook kernel. Serving it means writing it to a file after training and loading that file when the app starts — training on every request would take minutes and produce a slightly different model each time." },
+
+    { t: "code", file: "train.py", code: "import joblib\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\n\npipe = Pipeline([\n    (\"scaler\", StandardScaler()),\n    (\"model\", LogisticRegression(max_iter=1000)),\n])\npipe.fit(X_train, y_train)\n\njoblib.dump(pipe, \"model.joblib\")   # the WHOLE pipeline, not just the model", output: "model.joblib written — scaler and model together" },
+    { t: "psoft", html: "The important word is <b>Pipeline</b>. Saving the classifier alone saves half the thing that made the predictions: the scaler learned a mean and a standard deviation from the training data, and without them the numbers arriving at the model are on a different scale entirely. Wrapping both means one file, one <code>load</code>, and no way to forget." },
+
+    { t: "code", file: "app.py", code: "import joblib\nimport streamlit as st\n\npipe = joblib.load(\"model.joblib\")\n\nst.title(\"Booking cancellation risk\")\nlead_time = st.number_input(\"Lead time (days)\", 0, 500, 30)\nnights = st.number_input(\"Nights\", 1, 30, 2)\n\nif st.button(\"Predict\"):\n    p = pipe.predict_proba([[lead_time, nights]])[0][1]\n    st.metric(\"Cancellation risk\", f\"{p:.0%}\")", output: "A working web app. streamlit run app.py" },
+    { t: "psoft", html: "That is the whole app. No HTML, no JavaScript, no server configuration — which is exactly why it is the right first deployment, and why \"I did not have time\" is not a defensible reason for a portfolio to have no live link in it." },
+
+    { t: "h2", n: "3", text: "Pin your versions" },
+    { t: "p", html: "The host installs your dependencies fresh. If <code>requirements.txt</code> says <code>scikit-learn</code> with no version, it installs whatever is newest today — which may not be the version that wrote your model file, and loading a model across versions ranges from a warning to a crash to, worst of all, silently different behaviour." },
+    { t: "note", variant: "key", html: "<b>Pin the versions you actually trained with.</b> <code>scikit-learn==1.4.2</code>, not <code>scikit-learn</code>. Generate the file from the environment that produced the model rather than writing it by hand, and treat it as part of the model: the pair only works together." },
+
+    { t: "debug",
+      intro: "A cancellation model scores 0.91 locally. Deployed, it returns almost the same answer for every input — and never errors. Read the two files before opening the fix.",
+      code: "# train.py\nscaler = StandardScaler().fit(X_train)\nmodel  = LogisticRegression().fit(scaler.transform(X_train), y_train)\njoblib.dump(model, \"model.joblib\")\n\n# app.py\nmodel = joblib.load(\"model.joblib\")\np = model.predict_proba([[lead_time, nights]])[0][1]",
+      symptom: "No exception anywhere. Every booking comes back at roughly 0.5 risk, whether the lead time is 3 days or 300. The same model in the notebook still scores 0.91.",
+      q: "The model file loads, the shapes match and nothing raises. So why are the predictions meaningless?",
+      fix: "# train.py — save the whole pipeline\npipe = Pipeline([(\"scaler\", StandardScaler()),\n                 (\"model\", LogisticRegression())]).fit(X_train, y_train)\njoblib.dump(pipe, \"model.joblib\")\n\n# app.py — one load, and the scaling travels with it\npipe = joblib.load(\"model.joblib\")\np = pipe.predict_proba([[lead_time, nights]])[0][1]",
+      why: "<b>The scaler was left behind.</b> Training fitted a StandardScaler, learned a mean and a standard deviation from the training data, and fed the model values centred on zero — then saved only the classifier. The app hands it raw numbers: a lead time of 300 instead of 2.1. The model does not know anything is wrong; it applies coefficients that were learned for one scale to numbers on another, and the results collapse towards the middle. <b>Nothing raises, which is what makes this the most expensive deployment bug there is</b> — it looks like a working app and it is confidently wrong. The rule is that <b>preprocessing is part of the model</b>: put every fitted step in a Pipeline and save that, so there is one object and nothing to forget." },
+
+    { t: "drills", intro: "Write these out. The first three are the deployment; the last two are what stops it breaking a week later.", items: [
+      { task: "Save a scaler and a model as one object.", code: "pipe = Pipeline([(\"scaler\", StandardScaler()),\n                 (\"model\", LogisticRegression())]).fit(X_train, y_train)\njoblib.dump(pipe, \"model.joblib\")" },
+      { task: "Load it in an app and predict once.", code: "pipe = joblib.load(\"model.joblib\")\np = pipe.predict_proba([[lead_time, nights]])[0][1]" },
+      { task: "The command that runs a Streamlit app locally.", code: "streamlit run app.py" },
+      { task: "Fix this requirements line so the host installs what you trained with.", code: "scikit-learn        ->   scikit-learn==1.4.2" },
+      { task: "Choose the tool: a website needs cancellation risk for each booking it displays.", code: "An API — FastAPI or Flask.\nThe user is other software, so there is no interface to build." },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "joblib.dump(model, ...) — with the scaler fitted separately", why: "The preprocessing is left behind, the app feeds raw values to a model trained on scaled ones, and nothing raises. The predictions are confidently wrong.", fix: "Put every fitted step in a Pipeline and save that." },
+      { bad: "requirements.txt listing scikit-learn with no version", why: "The host installs whatever is newest, which may not be the version that wrote your model file.", fix: "scikit-learn==1.4.2, generated from the environment you trained in." },
+      { bad: "Training the model when the app starts", why: "Startup takes minutes, the model differs slightly each deploy, and the training data has to ship with the app.", fix: "Train once, save the file, load it at start-up." },
+      { bad: "Reaching for Docker for a first portfolio project", why: "It solves an environment problem you have not had yet, and it delays the thing that actually matters — a link somebody can click.", fix: "Streamlit Community Cloud first; Docker when the environment becomes the problem." },
+      { bad: "A deployed app with no link on the CV or README", why: "The whole value of deploying is that somebody can try it without installing anything.", fix: "Put the URL at the top of the README and on the CV." },
+    ] },
+
+    { t: "recap", items: [
+      "Deployment is making the result survive <b>leaving your machine</b>",
+      "<b>Streamlit</b> when a human is the user; <b>an API</b> when other software is; <b>Docker</b> when the environment is the problem",
+      "Train once, save the file, load it at start-up",
+      "<b>Preprocessing is part of the model</b> — save the whole Pipeline",
+      "A missing scaler raises nothing and returns confident nonsense",
+      "<b>Pin versions</b> to the ones you trained with; the file and the versions are a pair",
+      "For a portfolio, the deployed link is the point — put it in the README",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "How would you deploy a model for a portfolio project?", a: "Streamlit, hosted free on Streamlit Community Cloud straight from the GitHub repository. The app is written entirely in Python so there is no front-end work, and what it produces is a link somebody can click — which is the only artefact that proves the whole chain from data to interface without the reviewer installing anything. An API would be the choice if the consumer were other software rather than a person." },
+      { level: "medium", q: "What do you save when you save a model?", a: "The entire fitted pipeline, not the estimator alone. Any preprocessing step that learned something from the training data — a scaler's mean and standard deviation, an encoder's categories, an imputer's fill values — is part of what produced the predictions. Saving only the final estimator means the serving code feeds it raw values on a different scale, and because nothing raises an exception it looks like a working app while being confidently wrong." },
+      { level: "hard", q: "A deployed model returns nearly the same probability for every input, with no errors. Where do you look?", a: "At whether the preprocessing was saved with it. That symptom — collapsing towards the middle, no exception — is the signature of a model receiving features on a different scale from the ones it was trained on, which is what happens when the scaler was fitted separately and left behind. I would also check that the pinned library versions match the environment that wrote the model file, because a version mismatch on load can change behaviour without failing outright." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "What is deployment, in one sentence?", options: ["Making a model faster","Retraining a model on new data","Putting a model where somebody without your notebook can use it","Publishing a model's accuracy"], correct: 2, why: "Most of the work has nothing to do with the model itself." },
+      { level: "easy", q: "Which tool suits a portfolio demo a human will click?", options: ["Streamlit","FastAPI","Docker","Kubernetes"], correct: 0, why: "Written entirely in Python, free hosting from a GitHub repo, and it produces the clickable link." },
+      { level: "easy", q: "When is an API the right choice instead?", options: ["When the model is large","When the user is other software — a website, an app, a scheduled job","When you need a nicer interface","When the data is confidential"], correct: 1, why: "It returns JSON and has no interface, which is exactly the point." },
+      { level: "easy", q: "What is Docker for?", options: ["Hosting web apps for free","Training models faster","Packaging code, dependencies and system libraries so it runs identically anywhere","Version-controlling models"], correct: 2, why: "Not a destination but a packaging, and it is what most real deployments sit inside." },
+      { level: "medium", q: "What should be saved to disk after training?", options: ["Only the estimator","The whole fitted pipeline, preprocessing included","The training data","The notebook"], correct: 1, why: "Every step that learned something from the training data is part of what produced the predictions." },
+      { level: "medium", q: "A model is loaded fine but returns roughly the same probability for every input, with no error. What is the likeliest cause?", options: ["The model is overfitted","The scaler was fitted separately and not saved with the model","The input types are wrong","The host ran out of memory"], correct: 1, why: "Raw values reach a model trained on scaled ones; the coefficients no longer mean anything and results collapse to the middle." },
+      { level: "medium", q: "Why is that bug more dangerous than a crash?", options: ["It is harder to reproduce locally","It corrupts the model file","Nothing raises — it looks like a working app and is confidently wrong","It only appears under load"], correct: 2, why: "A crash tells you immediately. This ships and gets believed." },
+      { level: "hard", q: "requirements.txt says `scikit-learn` with no version. What can go wrong?", options: ["The install fails","The host installs whatever is newest, which may not be the version that wrote your model file","The app runs slower","Nothing — versions are backwards compatible"], correct: 1, why: "Loading a model across versions ranges from a warning to a crash to silently different behaviour." },
+      { level: "hard", q: "Why not train the model when the app starts?", options: ["Start-up takes minutes, the model differs each deploy, and the training data must ship with the app","Hosts forbid it","It uses too much disk","The model would be more accurate"], correct: 0, why: "Train once, save the file, load it at start-up." },
+      { level: "hard", q: "Why is Docker usually the wrong first step for a portfolio project?", options: ["It is expensive","It cannot host Python apps","It requires a paid account","It solves an environment problem you have not had yet, and delays the clickable link"], correct: 3, why: "Streamlit Community Cloud gets you the link this afternoon; Docker earns its place when the environment becomes the problem." },
+    ] },
   ]},
   { slug: "deploy-portfolio", order: 3, title: "Portfolio Building", minutes: 16, problems: [], content: [
     { t: "objectives", items: [
@@ -9371,14 +9794,93 @@ const deployLessons = [
       { level: "hard", q: "You link a repository on your CV and it is private. What has the reviewer learned?", options: ["That the work is confidential","Nothing about the project, and something about the care taken","That you have industry experience","That the repository is still in progress"], correct: 1, why: "They get a 404 at the exact moment attention is scarcest. Click your own links from a logged-out browser." },
     ] },
   ]},
-  { slug: "deploy-interview", order: 4, title: "Interview Prep & Job Hunt", minutes: 13, problems: [], content: [
-    { t: "objectives", items: ["Interview rounds","Resume & LinkedIn","Job hunt strategy"] },
-    { t: "h2", n: "1", text: "DS interview ke rounds" },
-    { t: "p", html: "Typical: <b>SQL round</b>, <b>Python/DSA</b>, <b>ML concepts</b>, <b>Statistics</b>, <b>case study / project discussion</b>. Ye poora platform inhi ke liye tayaar karta hai." },
-    { t: "h2", n: "2", text: "Resume aur apply" },
-    { t: "p", html: "Resume me projects + GitHub + skills clearly. LinkedIn active. Referrals se apply (job portals se zyada kaam karte hain). Roz thoda — consistency." },
-    { t: "note", variant: "tip", html: "<b>Yaad rakho:</b> reject hona normal hai — har 'no' ek 'yes' ke kareeb le jaata hai. Base strong hai to job pakki. 💪" },
-    { t: "recap", items: ["Rounds: SQL, Python, ML, stats, case","Resume + GitHub + projects","LinkedIn + referrals","Consistency = job"] },
+  { slug: "deploy-interview", order: 4, title: "Interview Prep & Job Hunt", minutes: 17, problems: [], content: [
+    { t: "objectives", items: [
+      "Name the rounds, and what each one is really testing",
+      "Write a CV line that says a result rather than a tool",
+      "Answer \"tell me about a project\" in a shape that lands",
+      "Run the search as a process instead of as a mood",
+    ] },
+
+    { t: "hook",
+      q: "Two candidates know the same amount. One gets offers and the other does not. Assuming both are honest, what is different?",
+      why: "Almost always the ability to <b>show</b> it: a CV that states results rather than tools, a project they can walk through, and enough applications for the variance to average out. None of that is extra knowledge. It is the part most people skip because it feels like it is not the real work." },
+
+    { t: "def",
+      term: "The project round",
+      en: "The interview stage where you present something you built. It is the only round where you choose the material — which makes it the one worth preparing hardest." },
+
+    { t: "h2", n: "1", text: "The rounds, and what each is actually for" },
+    { t: "note", variant: "tip", html: "<b>SQL</b> — joins, grouping, window functions. Testing whether you can get the data at all, which is most of the job.<br><b>Python</b> — pandas manipulation, sometimes light algorithms. Testing whether you can express a transformation without fighting the language.<br><b>Statistics</b> — sampling, significance, distributions. Testing whether you know when a difference is real.<br><b>ML concepts</b> — overfitting, validation, metric choice, class imbalance. Testing judgement, not recall of algorithms.<br><b>Case study</b> — an open business question. Testing whether you can turn something vague into something measurable.<br><b>Project discussion</b> — your own work. Testing whether you understand what you built or followed a tutorial." },
+    { t: "p", html: "Notice how little of that is modelling. The rounds that decide most outcomes are SQL and the project discussion, which are also the two you can prepare with certainty." },
+
+    { t: "h2", n: "2", text: "A CV states results, not tools" },
+    { t: "p", html: "The commonest weak CV lists technologies. Everyone applying lists the same ones, so the line carries no information — and worse, it makes the reader do the work of imagining what you did with them." },
+    { t: "p", html: "A line that works has three parts: <b>what changed</b>, <b>by how much</b>, and <b>how</b>. If a number is genuinely unavailable, name the outcome instead — \"replaced a four-hour manual report with a scheduled dashboard\" is concrete without a percentage in it." },
+
+    { t: "debug",
+      intro: "A candidate with good projects gets no callbacks. This is the skills section of their CV, and it is the first thing on the page. Work out what is wrong before opening the fix.",
+      code: "SKILLS\nPython, Pandas, NumPy, Scikit-learn, Matplotlib, Seaborn,\nSQL, Power BI, Tableau, Excel, Git, Streamlit, Docker\n\nPROJECTS\n- Hotel booking analysis using Python and Pandas\n- Customer churn prediction using Scikit-learn",
+      symptom: "No callbacks from roughly forty applications. The projects behind those two lines are genuinely good and deployed.",
+      q: "Everything on the page is true, and the work behind it is real. So why does it not land?",
+      fix: "PROJECTS\n- Cancellation forecasting — cut error 34% to 12% on 40k bookings\n  (XGBoost, deployed: booking-risk.streamlit.app)\n- Churn model identifying the 8% of customers driving 40% of losses;\n  informed the retention pilot (logistic regression, SQL, Power BI)",
+      why: "Because every line describes <b>what was used</b> and none describes <b>what happened</b>. \"Hotel booking analysis using Python and Pandas\" is true of several thousand other applicants, so it cannot separate this one from them — and a reader with ninety CVs is separating, not evaluating. The fixed version says what changed, by how much, and how, in that order, and it puts the deployed link where a reader will click it. The tool list is not deleted so much as demoted: it belongs at the bottom as a keyword line for the filters, not at the top as the argument. <b>The rule is that a CV line should be a claim somebody could ask you to defend</b> — and every one of those claims is also a prepared answer for the project round." },
+
+    { t: "h2", n: "3", text: "\"Tell me about a project\"" },
+    { t: "p", html: "This is asked in nearly every interview and it is the one you can rehearse completely. Answer in a fixed order, because the listener needs it in that order: <b>the question</b>, <b>the data and what was wrong with it</b>, <b>what you did and why that approach</b>, <b>the result in one sentence</b>, and <b>what you would do next</b>." },
+    { t: "note", variant: "key", html: "<b>The last part carries more weight than people expect.</b> \"With more time I would have checked whether the improvement held for the smaller regions, because the sample there was thin\" tells an interviewer you understand your own work's limits. Someone who followed a tutorial cannot say that sentence, which is exactly why it is being listened for." },
+
+    { t: "h2", n: "4", text: "The search is a process" },
+    { t: "p", html: "Two things dominate the outcome and neither is skill. The first is <b>volume</b>: offer rates are low enough that ten applications tells you nothing at all, and treating a rejection as evidence about yourself is a statistical error as well as a miserable habit." },
+    { t: "p", html: "The second is <b>route</b>. A referral is read by a person; a portal application is filtered before that. Both are worth doing, and the ratio of effort should not be the one most people use." },
+    { t: "note", variant: "tip", html: "<b>A weekly shape that works:</b> a fixed number of applications, two or three genuine conversations with people who do the job, one improvement to a project or the CV, and one round of practice on whichever technical area went worst last time. Weekly, not daily — daily targets collapse the first time life interferes, and the collapse feels like failure." },
+
+    { t: "drills", intro: "Write these out about your own work. Every one of them is something an interviewer will ask you to produce.", items: [
+      { task: "Rewrite this CV line: \"Hotel booking analysis using Python and Pandas\".", code: "Cancellation forecasting — cut error 34% to 12% on 40k bookings\n(XGBoost, deployed: booking-risk.streamlit.app)" },
+      { task: "The five parts of a project answer, in order.", code: "1. the question\n2. the data, and what was wrong with it\n3. what you did, and why that approach\n4. the result, in one sentence\n5. what you would do next" },
+      { task: "Name what each round is really testing: SQL, and the case study.", code: "SQL        — can you get the data at all (most of the job)\nCase study — can you turn something vague into something measurable" },
+      { task: "Write the sentence that shows you know your project's limits.", code: "With more time I would check whether the improvement held\nfor the smaller regions — the sample there was thin." },
+      { task: "State why counting rejections is a mistake, in one line.", code: "Offer rates are low enough that ten applications is not evidence\nabout you — it is not enough data to be evidence about anything." },
+    ] },
+
+    { t: "mistakes", items: [
+      { bad: "A CV whose top section is a list of libraries", why: "Everyone applying lists the same ones, so it cannot separate you — and a reader with ninety CVs is separating, not evaluating.", fix: "Lead with results; keep the tool list at the bottom for the keyword filters." },
+      { bad: "\"Customer churn prediction using Scikit-learn\"", why: "It says what was used and nothing about what happened.", fix: "\"Identified the 8% of customers driving 40% of losses; informed the retention pilot.\"" },
+      { bad: "Answering \"tell me about a project\" with the tools you used", why: "It is the one round where you control the material, and the tools are the least interesting part of it.", fix: "Question, data, approach, result, what next — in that order." },
+      { bad: "Applying to ten roles and concluding you are not ready", why: "Offer rates make ten a sample too small to conclude anything from.", fix: "A fixed weekly number, and judge the process rather than any single outcome." },
+      { bad: "Only applying through job portals", why: "A portal application is filtered before a person sees it; a referral is read by one.", fix: "Keep applying, and spend real effort on conversations with people who do the job." },
+      { bad: "A deployed project with no link on the CV", why: "The clickable link is the strongest thing you have and it is invisible if it is not there.", fix: "Put the URL on the CV line itself." },
+    ] },
+
+    { t: "recap", items: [
+      "The rounds: <b>SQL · Python · statistics · ML concepts · case · project</b>",
+      "SQL and the project discussion decide the most, and both can be prepared with certainty",
+      "A CV line says <b>what changed, by how much, how</b> — not which libraries",
+      "The tool list belongs at the bottom, for the filters",
+      "Project answer: question → data → approach → result → what next",
+      "<b>Knowing your project's limits is the part being listened for</b>",
+      "Volume and referrals dominate the outcome; ten applications is not evidence",
+      "Judge the process weekly, not any single rejection",
+    ] },
+
+    { t: "interview", items: [
+      { level: "easy", q: "What rounds should you expect in a data interview?", a: "Typically SQL, Python, statistics, ML concepts, a case study and a discussion of your own projects. It is worth noticing how little of that is modelling — SQL and the project round decide the most outcomes, because getting the data is most of the job and the project round is where an interviewer finds out whether you understand what you built or followed a tutorial." },
+      { level: "medium", q: "How should a CV describe a project?", a: "By what changed, by how much, and how — in that order, with the deployed link if there is one. \"Hotel booking analysis using Python and Pandas\" is true of thousands of applicants and separates nobody; \"cut cancellation forecast error from 34% to 12% on 40,000 bookings\" is a claim somebody can ask me to defend, which is exactly what I want them to do. The tool list still belongs on the page, at the bottom, where the keyword filters find it." },
+      { level: "hard", q: "You have applied to forty roles with no offer. What do you change?", a: "I would look at where it is stopping rather than conclude anything about readiness — forty applications with no first-round call is a CV problem, first rounds that do not convert is a specific technical area, and final rounds that do not convert is usually the project or communication round. I would also check the route: portal applications are filtered before a person reads them, so if all forty went that way, the fix is conversations and referrals rather than more of the same. Judging the process weekly is the point; a single rejection is not a sample." },
+    ] },
+
+    { t: "quiz", items: [
+      { level: "easy", q: "Which two rounds decide the most outcomes?", options: ["Statistics and ML concepts","SQL and the project discussion","Python and Docker","The case study and the culture fit"], correct: 1, why: "Getting the data is most of the job, and the project round is where an interviewer learns whether you understand what you built." },
+      { level: "easy", q: "What is the SQL round really testing?", options: ["Memory for syntax","Whether you can get the data at all","Query optimisation","Database administration"], correct: 1, why: "Joins, grouping and window functions — the day-to-day of actually reaching the numbers." },
+      { level: "easy", q: "What should the top of a CV lead with?", options: ["A list of libraries and tools","Education","Results — what changed and by how much","A personal summary"], correct: 2, why: "Everyone lists the same tools, so that section cannot separate you from anybody." },
+      { level: "easy", q: "Where does the tool list belong?", options: ["At the bottom, as a keyword line for the filters","Deleted entirely","At the top, as the headline","In the cover letter only"], correct: 0, why: "It still has a job — being found — but it is not the argument." },
+      { level: "medium", q: "What are the five parts of a good project answer, in order?", options: ["Tools, data, code, result, demo","Question, data, approach, result, what next","Result, tools, data, approach, question","Data, tools, result, question, next"], correct: 1, why: "That is the order the listener needs it in, which is why it can be rehearsed completely." },
+      { level: "medium", q: "Why does \"what I would do next\" carry so much weight?", options: ["It shows ambition","It fills time in the answer","It proves you finished the project","Somebody who followed a tutorial cannot name their work's limits"], correct: 3, why: "Which is exactly why an interviewer is listening for it." },
+      { level: "medium", q: "The ML concepts round is mostly testing what?", options: ["Recall of algorithm internals","Coding speed","Maths derivations","Judgement — validation, metric choice, overfitting, imbalance"], correct: 3, why: "Knowing when a model is fooling you matters more than naming its internals." },
+      { level: "hard", q: "Forty applications, no first-round calls. Where is the problem?", options: ["The CV, or the route the applications took","The technical rounds","The project quality","Bad luck — keep going unchanged"], correct: 0, why: "Where it stops tells you what to fix. No first round at all points at the CV, or at applying only through portals that filter before a person reads." },
+      { level: "hard", q: "Why is concluding \"I am not ready\" after ten applications a mistake?", options: ["Ten is always enough to judge","Offer rates make ten too small a sample to be evidence about anything","Rejections are never about the candidate","Companies do not read early applications"], correct: 1, why: "It is a statistical error as well as a miserable habit." },
+      { level: "hard", q: "Why is a weekly target better than a daily one?", options: ["Weekly applications get more attention","Recruiters respond on a weekly cycle","A daily target collapses the first time life interferes, and the collapse feels like failure","It leaves more time for study"], correct: 2, why: "The process is what you are judging, and a process you can keep is worth more than one you abandon." },
+    ] },
   ]},
 ];
 
