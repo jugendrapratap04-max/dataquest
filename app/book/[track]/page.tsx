@@ -67,7 +67,10 @@ export default async function BookTrack({ params }: { params: Promise<{ track: s
       </div>
 
       {t.chapters.length === 0 ? (
-        <p className="bk-empty">This subject has no written chapters yet.</p>
+        <p className="bk-empty">
+          This subject has no written chapters yet — notes land here as they are written.{" "}
+          <Link href="/learn">Try the interactive lessons →</Link>
+        </p>
       ) : (
         <div className="bk-chapters">
           {t.chapters.map((c, i) => (

@@ -73,7 +73,7 @@ function Grid({ rs, cap }: { rs: ResultSet; cap?: string }) {
           </tbody>
         </table>
       </div>
-      {rs.rows.length > 50 && <div className="sqlt-cap" style={{ marginTop: 6 }}>…aur {rs.rows.length - 50} rows</div>}
+      {rs.rows.length > 50 && <div className="sqlt-cap" style={{ marginTop: 6 }}>…and {rs.rows.length - 50} more rows</div>}
     </>
   );
 }

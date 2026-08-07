@@ -26,8 +26,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       prisma.problem.findMany({ select: { slug: true } }),
       prisma.track.findMany({ select: { slug: true } }),
       // The notes moved from one page per subject to one page per chapter, so
-      // the chapter URLs are where that content now lives.
-      prisma.chapter.findMany({ select: { slug: true, track: { select: { slug: true } } } }),
+      // the chapter URLs are where that content now lives. Same filter as the
+      // subject page: a chapter plan names chapters whose lessons are not
+      // written yet, and advertising those URLs sends searchers to a page that
+      // says "no written topics yet". They join the sitemap when a lesson lands.
+      prisma.chapter.findMany({
+        where: { lessons: { some: {} } },
+        select: { slug: true, track: { select: { slug: true } } },
+      }),
     ]);
 
     return [

@@ -173,7 +173,8 @@ export function YearHeatmap({ year, own }: { year: YearActivity; own: boolean })
       </div>
       {year.activeDays === 0 && own && (
         <p className="prof-empty" style={{ marginBottom: 0 }}>
-          Solve one problem and this grid starts filling in.
+          Solve one problem and this grid starts filling in.{" "}
+          <Link className="link" href="/practice">Open practice →</Link>
         </p>
       )}
     </section>
@@ -204,7 +205,8 @@ export function BadgeWall({ achievements, own }: { achievements: Achievement[]; 
       {earned.length === 0 ? (
         <p className="prof-empty">
           {own
-            ? "None yet — the first two are one lesson and one solved problem away."
+            ? <>None yet — the first two are one lesson and one solved problem away.{" "}
+                <Link className="link" href="/learn">Open a lesson →</Link></>
             : "No badges yet."}
         </p>
       ) : (
@@ -313,7 +315,8 @@ export function TimelinePanel({ timeline, own }: { timeline: TimelineEntry[]; ow
       {timeline.length === 0 ? (
         <p className="prof-empty" style={{ marginBottom: 0 }}>
           {own
-            ? "Nothing recorded yet. Finish a lesson or solve a problem and it appears here."
+            ? <>Nothing recorded yet. Finish a lesson or solve a problem and it appears here.{" "}
+                <Link className="link" href="/learn">Open a lesson →</Link></>
             : "Nothing recorded yet."}
         </p>
       ) : (

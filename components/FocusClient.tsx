@@ -232,7 +232,7 @@ export function FocusClient({ initial, history }: { initial: Session | null; his
                 onChange={(e) => setForm({ ...form, topic: e.target.value })} />
             </label>
             <label className="fset">
-              <span className="k">Aaj ka goal</span>
+              <span className="k">Today&apos;s goal</span>
               <input className="inp" placeholder="Solve 5 loop problems" value={form.goal}
                 onChange={(e) => setForm({ ...form, goal: e.target.value })} />
             </label>

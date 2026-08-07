@@ -131,7 +131,10 @@ export default async function BookChapterPage({
       )}
 
       {topics.length === 0 ? (
-        <p className="bk-empty">This chapter has no written topics yet.</p>
+        <p className="bk-empty">
+          This chapter has no written topics yet — it fills in the moment the first one is written.{" "}
+          <Link href={`/book/${c.track.slug}`}>Read the written chapters →</Link>
+        </p>
       ) : (
         topics.map((t, i) => (
           <BookChapter key={t.slug} n={i + 1} title={t.title} blocks={t.blocks} slug={t.slug} track={c.track.slug} />

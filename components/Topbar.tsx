@@ -305,7 +305,10 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
           {open && q.trim().length >= 2 && (
             <div className="search-drop">
               {results.length === 0 ? (
-                <div className="search-empty">Nothing found</div>
+                <div className="search-empty">
+                  Nothing matches “{q.trim()}” in lessons, topics or problems.{" "}
+                  <Link className="link" href="/learn" onClick={() => setOpen(false)}>Browse all subjects →</Link>
+                </div>
               ) : results.map((it, i) => (
                 <button key={i} className="search-item" onClick={() => goTo(it)}>
                   <span className={`si-tag ${it.kind}`}>{it.kind === "lesson" ? "Lesson" : it.kind === "topic" ? "Topic" : "Practice"}</span>
