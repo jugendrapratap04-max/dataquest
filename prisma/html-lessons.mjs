@@ -139,6 +139,12 @@ export const htmlLessons = [
         "HTML5 is a living standard now; there will be no HTML6",
       ] },
 
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between the Internet and the Web?", a: "The Internet is the network — the wires, the satellites and the agreed rules that let any machine send data to any other. The Web is one service running on it: documents that link to each other, reached through a browser. Email, video calls and online games are other services on the same network, which is why the two words are not interchangeable." },
+        { level: "medium", q: "Why does a browser render a page with invalid markup instead of reporting an error?", a: "It was a deliberate decision at the beginning. The Web was built for scientists sharing papers, not for programmers, and a system that showed an error instead of the document would not have been used. So browsers repair what they can and show something. XHTML tried the strict approach in 2000 and lost, and the forgiving parser is why a missing closing tag gives you a strange page rather than a clear message." },
+        { level: "hard", q: "Why will there never be an HTML6?", a: "Because HTML is now a living standard: it is amended continuously rather than released as numbered versions. New elements arrive when they are ready instead of waiting years for a version number, and \"HTML5\" has simply meant \"HTML\" since 2014. Asking which version to learn is a question the format no longer has an answer to." },
+      ] },
+
       { t: "quiz", items: [
         { level: "easy", q: "What is the difference between the Internet and the Web?", options: ["The Internet is the network of connected machines; the Web is one service running on it","They are two words for the same thing","The Web is older than the Internet","The Internet is for email and the Web is for browsing"], correct: 0, why: "The Internet is the roads. The Web is one thing that travels on them — email, video calls and games are others using the same infrastructure." },
         { level: "easy", q: "What problem was HTML invented to solve?", options: ["Making documents look attractive","Letting one document point directly at another so you could follow it","Storing scientific data efficiently","Running programs inside a browser"], correct: 1, why: "Linking. That is why the link element is <a>, for anchor — it was the whole original idea, and everything else was added on top of it." },
@@ -203,6 +209,14 @@ export const htmlLessons = [
 
       { t: "note", variant: "warn", html: "A <b>search engine</b> is not part of this. It is another program that visits sites, reads their HTML, and builds an index — it is a very well-organised visitor, not part of the browser or the server. That distinction matters in the SEO module, where the whole subject is what that visitor can and cannot understand." },
 
+      { t: "drills", intro: "Nothing to type here — these are five things to go and look at. The whole module is about noticing what is already in front of you.", items: [
+        { task: "Work out whether the page you are reading right now was served, or opened from a disk.", code: "Read the address bar.\nfile:///  = a document on your own machine\nhttp:// or https:// = a server answered a request" },
+        { task: "Find a page on a site you use that could not possibly be one fixed file for everybody.", code: "Anything showing your name, your cart, your orders or your language.\nThat page was built when you asked for it." },
+        { task: "Name the four jobs a browser is doing, and say which one your HTML is the input to.", code: "Ask, parse, render, run.\nHTML is the input to parsing — and rendering follows from what parsing produced." },
+        { task: "Say what has to happen before a server sends you anything at all.", code: "You have to ask.\nServers never send anything unrequested." },
+        { task: "Say what a hosting company is actually renting you.", code: "A machine that is always on, always listening, and reachable at a permanent address.\nYour laptop can do the job; it just is not any of those three." },
+      ] },
+
       { t: "mistakes", items: [
         { bad: "\"I made a website\" — after opening index.html from the desktop", why: "Nothing was served and nobody could reach it. It is a document that a browser can open.", fix: "It becomes a website once a server is handing it out at an address." },
         { bad: "\"Dynamic sites are better than static ones.\"", why: "They solve a different problem and cost more in every direction — speed, hosting, security, complexity. Dynamic is what you use when the page genuinely must differ per visitor.", fix: "\"Dynamic sites are for pages that must differ per visitor.\"" },
@@ -218,6 +232,11 @@ export const htmlLessons = [
         "A browser asks, parses, renders and runs — HTML is the input to parsing",
       ] },
 
+      { t: "interview", items: [
+        { level: "easy", q: "What is the difference between a client and a server?", a: "The client is the machine doing the asking — your browser. It sends a request and displays whatever comes back. The server is the machine that waits for requests and answers them. \"Server\" is a job rather than a category of hardware: an ordinary computer becomes one the moment it starts listening, which is exactly what a Live Server extension does to your laptop." },
+        { level: "medium", q: "When would you choose a static site over a dynamic one?", a: "Whenever the page does not have to differ per visitor. Static means the server finds a file and sends it, so it is faster, cheaper, harder to attack and simpler to host — and a great many serious professional sites are static on purpose. Dynamic exists for pages that genuinely must be built per request: your name, your orders, your language. It solves that one problem and costs more in every other direction." },
+      ] },
+
       { t: "quiz", items: [
         { level: "easy", q: "What makes a computer a server?", options: ["That it waits for requests and answers them","Special server hardware","That it has no screen","That it runs Linux"], correct: 0, why: "It is a job, not a category of machine. Your laptop becomes one the moment it starts listening for requests." },
         { level: "easy", q: "Your address bar shows file:///C:/site/index.html. What does that tell you?", options: ["The page came from a server on your network","The browser opened a file from your own disk — nothing was served","The page is not secure","The site is static"], correct: 1, why: "No request left your machine. That prefix is the difference between having a document and having a website." },
@@ -227,6 +246,8 @@ export const htmlLessons = [
         { level: "medium", q: "Why is \"static\" a reasonable choice for a real professional site?", options: ["It is the only option without a paid host","Faster, cheaper, harder to attack and simpler to host","It ranks better in search by default","It supports more HTML elements"], correct: 1, why: "Dynamic solves a specific problem — pages that must differ per visitor — and costs more in every direction. Plenty of serious sites are static on purpose." },
         { level: "hard", q: "A page shows your name at the top when you are logged in. What does that tell you about how it was produced?", options: ["It must use JavaScript","It cannot be cached","Either the server built it per request, or something ran in the browser after loading — the page could not have been one fixed file for everyone","It is not a real website"], correct: 2, why: "Both routes exist and the question is only whether the personalisation happened before the file was sent or after it arrived. What is ruled out is one fixed file served to all." },
         { level: "hard", q: "Why can a browser talk to a server written in a language it has never heard of?", options: ["Browsers ship with every language runtime","The server translates itself first","Servers must be written in C","Only the request and the response are agreed; how each side produces them is nobody else's business"], correct: 3, why: "The same reason you never enter the restaurant kitchen. That narrow agreement is what has let the web survive thirty-five years of both sides being rewritten." },
+        { level: "medium", q: "A friend says their site is finished and sends you <code>C:\\Users\\ravi\\site\\index.html</code>. Why can you not open it?", options: ["The file is probably corrupted","That is a location on their disk, not an address — nothing is serving it to anybody","You would need the same browser they used","The file is missing its doctype"], correct: 1, why: "It opens perfectly on their machine and exists nowhere else. It becomes a website when some always-on machine is willing to hand it to anyone who asks." },
+        { level: "hard", q: "Why does it matter that <b>only</b> the request and the response are agreed between browser and server?", options: ["It makes both sides faster","It lets browsers be written in any language","It is required by the HTML specification","Because either side can be completely rewritten without the other noticing, which is how the web has survived thirty-five years of both being rebuilt"], correct: 3, why: "A narrow agreement at the boundary is what buys freedom everywhere else. It is the same reason you never need to enter the restaurant kitchen." },
       ] },
     ],
   },
@@ -300,6 +321,22 @@ export const htmlLessons = [
 
       { t: "note", variant: "warn", html: "Because the query string is part of the address, it is stored in browser history, in server logs, and in the referrer header sent to the next site. Never put a password or a token in one — that mistake ends up in three places you do not control." },
 
+      { t: "debug",
+        intro: "A colleague says a site is down. They typed the address themselves and got a page of search results instead. This is exactly what they typed. Read it carefully before opening the fix.",
+        code: "example .com/products",
+        symptom: "Pressing Enter runs a web search for those words. The site itself is fine and loads for everyone else.",
+        q: "The domain is spelt correctly and the path exists. So why did the browser search instead of going there?",
+        fix: "https://example.com/products",
+        why: "There is a space in it. The address bar has been both an address bar and a search box for years, so on every Enter the browser has to guess which one you meant — and its rule is roughly \"does this look like it could be a host?\" A space cannot appear in a host, so the whole line is treated as a search query and handed to the search engine instead. Nothing is broken and nothing is reported, because from the browser's point of view it did exactly what you asked. <b>This is the same class of trap as every other one in this module: the machine applies a rule, and the rule is not the one you had in mind.</b> Typing the scheme removes the guess entirely — <code>https://</code> can only mean an address." },
+
+      { t: "drills", intro: "Take the URL apart and put it back together. Every part of it comes up again in the links, forms and metadata modules.", items: [
+        { task: "Name every part of <code>https://shop.example.com/products/shoes?size=9#reviews</code>", code: "https            scheme\nshop.example.com host\n/products/shoes  path\n?size=9          query string\n#reviews         fragment" },
+        { task: "Say which part DNS turns into a number.", code: "shop.example.com — the host.\nNothing can be requested until that name has become an IP address." },
+        { task: "Say which part never reaches the server at all.", code: "#reviews — the fragment.\nThe browser keeps it, which is why jumping to a heading needs no request." },
+        { task: "Write the URL that asks example.com for /search with a query of q=poha.", code: "https://example.com/search?q=poha" },
+        { task: "Add a second parameter, page=2, to that URL.", code: "https://example.com/search?q=poha&page=2" },
+      ] },
+
       { t: "mistakes", items: [
         { bad: "\"I bought the domain, so it is mine forever.\"", why: "It is rented, normally a year at a time. Registrations lapse and get taken.", fix: "\"I have registered it until next March.\"" },
         { bad: "\"DNS changes are still travelling to other countries.\"", why: "Nothing travels. Machines elsewhere are still using a cached answer until its time to live expires.", fix: "\"Old answers are still cached and have not expired yet.\"" },
@@ -315,6 +352,11 @@ export const htmlLessons = [
         "The fragment never reaches the server; the query string reaches everything",
       ] },
 
+      { t: "interview", items: [
+        { level: "easy", q: "What does DNS do?", a: "It turns a name a person can remember into the IP address a machine actually routes to. It happens before any request is made — there is nothing to connect to until the name has become a number — and it is checked in layers: the machine's own recent answers first, then the operating system's, then a DNS server." },
+        { level: "medium", q: "Why can a DNS change take hours to reach everybody?", a: "Because every answer is handed out with a time to live, and machines all over the world are still using an answer they were told was good for another day. Nothing is travelling anywhere — that is what \"propagation\" misleadingly suggests. There is no way to reach into other people's caches and clear them, so the only thing to do is wait out the time to live you published." },
+      ] },
+
       { t: "quiz", items: [
         { level: "easy", q: "What does DNS do?", options: ["Turns a domain name into the IP address a machine needs","Encrypts the connection","Stores your website's files","Decides which server is fastest"], correct: 0, why: "It happens before any request is made — there is nothing to connect to until the name has become a number." },
         { level: "easy", q: "In https://example.com/shop?id=5#top, which part is the host?", options: ["https","example.com","/shop","#top"], correct: 1, why: "That is the part DNS resolves. Everything after it tells the server which resource, and the fragment never gets there at all." },
@@ -324,6 +366,8 @@ export const htmlLessons = [
         { level: "medium", q: "What is the practical difference between a subdomain and a domain?", options: ["Subdomains cannot have their own pages","A subdomain is free and you create it yourself; a domain must be registered and paid for","Subdomains are less secure","Search engines ignore subdomains"], correct: 1, why: "That one difference decides how most large sites are organised — shop, blog and docs are usually subdomains for exactly this reason." },
         { level: "hard", q: "Why is it dangerous to put a token in a query string?", options: ["Query strings have a length limit","Query strings are not encrypted even over HTTPS","It is stored in browser history, in server logs, and passed to the next site in the referrer header","Search engines index them"], correct: 2, why: "HTTPS does encrypt it in transit, which is what makes this trap easy to miss — the leak is at both ends and in the logs, not on the wire." },
         { level: "hard", q: "Why does a domain resolve from right to left?", options: ["Because it reads faster that way","Because of a limitation in early DNS software","It does not — it resolves left to right","Because the system is a hierarchy, and the rightmost part says which authority to ask next"], correct: 3, why: "Ask who is responsible for .in, then who is responsible for example within it. Each step narrows the search, which is why one machine never has to hold the whole Internet's names." },
+        { level: "medium", q: "What is a time to live, in DNS?", options: ["How long the domain registration lasts","How long a cached answer may be used before the question is asked again","How long a server keeps a connection open","How long a page stays in the browser's cache"], correct: 1, why: "It is the number you are really choosing when you set one — a short one means changes land quickly and questions are asked more often." },
+        { level: "hard", q: "You type an address with a space in it and the browser runs a search instead. Why?", options: ["The site is unreachable","The browser could not find a certificate","A space cannot appear in a host, so the browser treated the whole line as a search query","Search is the default for any address without a path"], correct: 2, why: "The address bar is also a search box, so every Enter is a guess about which you meant. Typing <code>https://</code> removes the guess entirely." },
       ] },
     ],
   },
@@ -384,6 +428,22 @@ export const htmlLessons = [
       { t: "p", html: "A <b>cookie</b> is a small piece of text the server asks the browser to store and send back on every later request. Because HTTP forgets you between requests, this is how anything remembers anything: your session, your language, your cart." },
       { t: "p", html: "The <b>cache</b> is a copy the browser keeps of things it has already downloaded, so the second visit does not fetch them again. It is why a site feels instant the second time — and why your CSS change sometimes does not show up until a hard refresh." },
 
+      { t: "debug",
+        intro: "A page that has always shown a padlock has stopped showing one, and its logo has vanished. Nothing about the logo file changed. Read the one line that did before opening the fix.",
+        code: "<img src=\"http://example.com/logo.png\" alt=\"Logo\">",
+        symptom: "The padlock is gone from the address bar and the logo does not appear. Opening that exact image URL in a new tab shows the picture immediately.",
+        q: "The file is there, the path is right, and it loads perfectly on its own. So why will the browser not show it on this page?",
+        fix: "<img src=\"https://example.com/logo.png\" alt=\"Logo\">",
+        why: "The page arrived over <b>https</b> and this one resource was asked for over <b>http</b>. That is called mixed content, and browsers block it — because the padlock is a claim about the <b>whole page</b>, not about the document alone. An image fetched over an unencrypted connection can be swapped for a different one by anything sitting in between, so a page that pulls in insecure parts cannot honestly claim to be secure, and the browser refuses to let it. One character is the entire fix. Note what this does <i>not</i> mean: HTTPS is protecting the journey, not vouching for anybody — the padlock says the connection is encrypted and the domain is verified, and says nothing at all about whether the owner is honest." },
+
+      { t: "drills", intro: "Say each of these out loud before opening the answer. Status codes especially — you will read them for the rest of your career.", items: [
+        { task: "The family of codes that means the request was wrong.", code: "4xx\n404 not found · 403 forbidden · 400 bad request" },
+        { task: "The family that means the server itself failed.", code: "5xx\n500 internal server error · 503 unavailable\nFirst digit 4 is yours; first digit 5 is theirs." },
+        { task: "The family that means \"it is somewhere else now\".", code: "3xx\n301 moved permanently · 302 found (temporary)" },
+        { task: "The header that lets one machine serve five hundred different sites.", code: "Host: example.com\nIt is in every request. Without it, a machine could serve exactly one site." },
+        { task: "Why a second request knows who you are, when HTTP forgets you the moment it answers.", code: "A cookie.\nThe server sends it once; the browser returns it with every later request to that site." },
+      ] },
+
       { t: "mistakes", items: [
         { bad: "\"The padlock means the site is safe.\"", why: "It means the connection is encrypted and the domain is verified. Phishing sites have padlocks.", fix: "\"The padlock means nobody in between can read this. It says nothing about who I am talking to being honest.\"" },
         { bad: "\"My change is not showing — the code must be broken.\"", why: "Very often the browser is serving a cached copy of the old file.", fix: "Hard refresh (Ctrl+Shift+R) before assuming the code is wrong." },
@@ -399,6 +459,12 @@ export const htmlLessons = [
         "The cache is why the second visit is fast, and why your edit sometimes will not appear",
       ] },
 
+      { t: "interview", items: [
+        { level: "easy", q: "What does a status code tell you?", a: "Which side of the conversation went wrong, and roughly how. 2xx means it worked, 3xx means the thing is somewhere else, 4xx means the request was wrong — a 404 for a resource that is not there, a 403 for one you may not have — and 5xx means the server itself failed. The first digit is the part worth memorising: 4 is yours, 5 is theirs." },
+        { level: "medium", q: "What does HTTPS protect, and what does it not?", a: "It encrypts the connection, so nobody in between can read or alter what passes, and it verifies that the certificate really belongs to the domain in the address bar. What it does not do is say anything about the people running the site. Certificates are free and issued in minutes, so phishing pages have padlocks too — the icon is a statement about the pipe, and the domain name is the thing worth reading." },
+        { level: "hard", q: "HTTP is stateless. What follows from that?", a: "That the server has no memory of you between requests: each one arrives with nothing connecting it to the last. Every mechanism for staying logged in exists to work around that — a cookie the server sets once and the browser returns with every subsequent request, so the second request can be tied to the first. Tracking is a later use of the same mechanism, not the reason it was invented." },
+      ] },
+
       { t: "quiz", items: [
         { level: "easy", q: "What does HTTP actually define?", options: ["The agreed format of a request and a response","A programming language for servers","How files are stored on a server","The encryption used on the connection"], correct: 0, why: "It is an agreement about shape, which is why a browser can talk to a server written in a language it has never heard of." },
         { level: "easy", q: "You get a 404. Whose problem is it?", options: ["The server's — it has crashed","The request's — that resource is not there","Nobody's, it is a redirect","The connection's"], correct: 1, why: "4xx means the request was wrong. 5xx would mean the server itself failed." },
@@ -408,6 +474,8 @@ export const htmlLessons = [
         { level: "medium", q: "Your CSS change is not appearing after a reload. What is the most likely cause?", options: ["The file did not save","The browser is serving a cached copy","The server rejected the file","HTTPS is blocking it"], correct: 1, why: "Hard refresh before assuming the code is wrong. This is the commonest false alarm in front-end work." },
         { level: "hard", q: "One machine serves five hundred different domains. How does it know which site a request is for?", options: ["From the IP address","From the port number","From the Host header in the request","From the TLS certificate"], correct: 2, why: "They all share the IP. The Host header is what makes shared hosting possible at all — without it a machine could serve exactly one site." },
         { level: "hard", q: "HTTPS encrypts the connection. Why is putting a token in the query string still a bad idea?", options: ["Query strings are excluded from encryption","HTTPS only encrypts the body","Query strings have a size limit","It is encrypted in transit but still lands in browser history, server logs and the referrer header"], correct: 3, why: "Encryption protects the middle of the journey. The leak is at both ends, which is exactly what makes this mistake easy to miss." },
+        { level: "medium", q: "A page served over https asks for an image over http. What does the browser do?", options: ["Loads it normally","Blocks it, because a page cannot claim to be secure while pulling in parts that are not","Upgrades the request silently and keeps the padlock","Shows a certificate warning and continues"], correct: 1, why: "It is called mixed content. Anything in between could swap that image for a different one, so the padlock — a claim about the whole page — cannot honestly stand." },
+        { level: "hard", q: "Why is \"the padlock means the site is safe\" the wrong reading?", options: ["Certificates are only issued to verified companies","The padlock also checks the site's content","It applies only to the home page","It says the connection is encrypted and the domain is verified, and nothing at all about whether the owner is honest"], correct: 3, why: "Certificates are free and take minutes, so phishing pages have them too. Read the domain, not the icon." },
       ] },
     ],
   },
@@ -428,6 +496,10 @@ export const htmlLessons = [
       { t: "hook",
         q: "This is asked in almost every web interview, and it is not a trivia question. Someone answering it well has understood how the whole thing fits together — and someone who has not will guess.",
         why: "You already know every piece. This lesson only puts them in order." },
+
+      { t: "def",
+        term: "Round trip",
+        en: "One complete there-and-back between your machine and another: ask, then wait for the answer. Several happen before a page's first byte arrives, which is why distance costs more than file size." },
 
       { t: "h2", n: "1", text: "The journey, in eight steps" },
       { t: "p", html: "You type <code>example.com</code> and press Enter. Here is everything that happens before you see anything." },
@@ -456,6 +528,14 @@ export const htmlLessons = [
       { t: "h2", n: "3", text: "Why the first visit is slow and the second is not" },
       { t: "p", html: "On the second visit the DNS answer is cached, the connection can often be reused, and the images and CSS are already on disk. Steps 2, 3 and half of 7 mostly disappear — which is the entire reason a site feels different the second time, and why testing only on a warm cache hides how the site feels to a new visitor." },
 
+      { t: "drills", intro: "Recite the order until it is automatic, then use it. The value of this lesson is not the list — it is being able to say <b>which step</b> a symptom belongs to.", items: [
+        { task: "The eight steps, in order, from Enter to pixels.", code: "1. parse the URL\n2. DNS lookup\n3. TCP connection\n4. TLS handshake\n5. HTTP request\n6. server responds\n7. parse HTML\n8. render" },
+        { task: "Which of those steps depend on anything you wrote?", code: "Only 7 and 8.\nSteps 1 to 6 are identical for every site on the internet." },
+        { task: "Nothing loads and there is no error page at all. Which steps?", code: "2 or 3.\nThe name did not resolve, or the machine never answered —\nthe conversation never started." },
+        { task: "A 404 appears. What does that prove about the earlier steps?", code: "That all of them worked.\nYou reached the server and it answered; the answer was just 'not here'." },
+        { task: "The page appears and then jumps about for a second. Which step, and why?", code: "8, running again.\nSomething arrived late and changed the size of something already placed,\nso everything below it moved." },
+      ] },
+
       { t: "mistakes", items: [
         { bad: "\"The page is blank, so my HTML is broken.\"", why: "A blank page can be any of eight steps. Check whether the request even reached the server first.", fix: "Open DevTools → Network. If there is no response, the problem is before your file." },
         { bad: "\"It works on my machine, so it works.\"", why: "Your machine has warm DNS, a warm cache and a fast local connection. A first-time visitor has none of that.", fix: "Test once with the cache disabled — that is the real first impression." },
@@ -482,6 +562,10 @@ export const htmlLessons = [
         { level: "medium", q: "A page loads nothing at all and shows no error page. Which steps are the likely suspects?", options: ["Parsing and rendering","The HTTP request and response","The TLS handshake","DNS or the TCP connection — the name did not resolve, or the machine did not answer"], correct: 3, why: "A 404 or 500 would mean you reached the server. Silence means the conversation never started." },
         { level: "medium", q: "Why is the second visit to a site so much faster?", options: ["The DNS answer is cached, the connection can be reused, and the assets are already on disk","Servers prioritise returning visitors","The browser compresses the page after the first visit","HTTPS is skipped the second time"], correct: 0, why: "Which is why testing on a warm cache hides how the site actually feels to somebody arriving for the first time." },
         { level: "hard", q: "Why does a distant server feel slow even for a tiny page?", options: ["Large files take longer over distance","Every round trip costs time, and connecting and negotiating encryption take several before any content moves","DNS is slower for foreign domains","Browsers throttle foreign connections"], correct: 1, why: "The size of the page is almost irrelevant at that point. It is the number of round trips before the first byte, which is exactly what CDNs exist to reduce." },
+        { level: "medium", q: "A 404 comes back. What does that prove about steps 1 to 5?", options: ["Nothing at all","That DNS failed but the rest worked","That every one of them worked — you reached the server and it answered","That the TLS handshake was skipped"], correct: 2, why: "An error page is still an answer. Silence is the symptom that points at the early steps; a status code means the whole conversation happened." },
+        { level: "medium", q: "Which steps of the journey depend on what you wrote?", options: ["All eight","Steps 1 to 6","Only step 8, rendering","Steps 7 and 8 — parsing and rendering"], correct: 3, why: "Everything before that is the same for every site on the internet, which is why this course is entirely about giving step 7 something good to work with." },
+        { level: "hard", q: "Why does testing on your own machine hide how the site feels to a first-time visitor?", options: ["Your screen is a different size","Your browser is newer than theirs","Your DNS answer is cached, your connection is reused, and the assets are already on your disk","Local files skip HTTP entirely"], correct: 2, why: "Steps 2, 3 and half of 7 mostly disappear on a warm visit. Disabling the cache once is the closest you get to seeing the real first impression." },
+        { level: "hard", q: "What is a round trip, and why does it matter more than page size on a distant server?", options: ["The time to download the page — bigger pages cost more","The time to render — more complex pages cost more","The number of files requested — more files cost more","One there-and-back between the machines; several happen before the first byte, and each one costs the full distance"], correct: 3, why: "Connecting and then negotiating encryption both cost trips before any content moves at all. That is precisely what a CDN exists to shorten." },
       ] },
     ],
   },
