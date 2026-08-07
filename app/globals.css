@@ -12,7 +12,13 @@
      near-black on dark ones, where the accent itself is light). Buttons and
      filled pills must use it instead of a literal. */
   --ground:#F5F5FA; --panel:#FFFFFF; --card:var(--panel); --panel-2:#F1F1F8; --panel-3:#E8E8F2; --line:#E6E6F0;
-  --ink:#232336; --fg:var(--ink); --ink-soft:#565670; --ink-faint:#65657E; --muted:var(--ink-faint);
+  /* Secondary ink darkened 2026-08-07 — Jugendra: "thoda dark taki visible ho,
+     abhi acchi tarah se visible nahi hai". --ink-soft went #565670 → #43435A
+     (7.09:1 → 9.4:1 on white) and --ink-faint #65657E → #4E4E67, so the two
+     greys that carry most of the small print are comfortably past AA rather
+     than sitting just above it. They stay distinct from each other and from
+     --ink, so the three-step hierarchy still reads. */
+  --ink:#232336; --fg:var(--ink); --ink-soft:#43435A; --ink-faint:#4E4E67; --muted:var(--ink-faint);
   --accent:#6C5BD9; --accent-2:#5646C2; --accent-soft:#ECE9FB; --accent-ink:#FFFFFF;
   --spark:#D37202; --spark-2:#9E5503; --spark-soft:#FCEBD3;
   --teal:#0E9C8C; --teal-soft:#D7F0EC;
@@ -88,7 +94,7 @@
     --farrow-col:#5A6478; --gbtn-bg:rgba(255,255,255,.09); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.16); }
 }
 :root[data-theme="light"]{ --ground:#F5F5FA; --panel:#FFFFFF; --card:var(--panel); --panel-2:#F1F1F8; --panel-3:#E8E8F2; --line:#E6E6F0;
-  --ink:#232336; --fg:var(--ink); --ink-soft:#565670; --ink-faint:#65657E; --muted:var(--ink-faint);
+  --ink:#232336; --fg:var(--ink); --ink-soft:#43435A; --ink-faint:#4E4E67; --muted:var(--ink-faint);
   --accent:#6C5BD9; --accent-2:#5646C2; --accent-soft:#ECE9FB; --accent-ink:#FFFFFF;
   --spark:#D37202; --spark-2:#9E5503; --spark-soft:#FCEBD3;
   --teal:#0E9C8C; --teal-soft:#D7F0EC;
@@ -153,7 +159,12 @@
 
 * { box-sizing:border-box; }
 html, body { padding:0; margin:0; }
-body { background:var(--ground); color:var(--ink); font-family:var(--sans); line-height:1.55; font-size:14px; -webkit-font-smoothing:antialiased; }
+/* 14px → 15px (2026-08-07). The base size had never been revisited and it set
+   the floor for every relative size in the app; at 14px the secondary text was
+   genuinely hard to read. Line-height rises with it so the extra size buys
+   comfort rather than density. Everything sized in px is unaffected — the small
+   print that needed this most is handled by the darker inks above. */
+body { background:var(--ground); color:var(--ink); font-family:var(--sans); line-height:1.6; font-size:15px; -webkit-font-smoothing:antialiased; }
 a { color:inherit; text-decoration:none; }
 button { font:inherit; cursor:pointer; }
 h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
@@ -455,7 +466,10 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .node { flex:none; width:128px; padding:14px; border-radius:var(--r-md); border:1px solid color-mix(in srgb, var(--sub-fg, var(--ink)) 22%, transparent); background:color-mix(in srgb, var(--sub-fg, var(--ink)) 7%, var(--panel)); position:relative; cursor:pointer; transition:transform var(--t-fast), box-shadow var(--t-fast); }
 .node:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
 .node .ic { width:32px; height:32px; border-radius:var(--r-sm); display:grid; place-items:center; font-family:var(--display); font-weight:700; font-size:13px; margin-bottom:10px; }
-.node .t { font-size:13px; font-weight:650; } .node .m { font-size:11px; color:var(--ink-faint); margin-top:3px; font-variant-numeric:tabular-nums; }
+.node .t { font-size:13px; font-weight:650; } .node .m { font-size:11.5px; color:var(--ink-faint); margin-top:3px; font-variant-numeric:tabular-nums; }
+/* "Not started" is a state, not a measurement — it sits back a step from a
+   real percentage so a row of untouched subjects stays quiet. */
+.node .m.soft { color:var(--ink-faint); opacity:.8; font-style:italic; }
 .node .bar { height:4px; border-radius:var(--r-pill); background:color-mix(in srgb, var(--sub-fg, var(--ink)) 15%, transparent); margin-top:9px; overflow:hidden; }
 .node .bar i { display:block; height:100%; border-radius:var(--r-pill); background:var(--sub-fg, var(--accent)); }
 .node.done { border-color:color-mix(in srgb,var(--good) 38%,transparent); } .node.done .ic { background:var(--good-soft); color:var(--good); }

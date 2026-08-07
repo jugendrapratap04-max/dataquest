@@ -176,13 +176,25 @@ export default async function DashboardPage() {
                     subject's own hue — the icon keeps working unchanged. */}
                 <div className={`ic tinted subject-tint`} style={subjectStyle(t.slug)}>{t.icon}</div>
                 <div className="t">{t.shortTitle}</div>
-                {/* "0%" on a locked subject reads as progress you have not made
-                    yet. These are subjects nobody has written, so they say so —
-                    a percentage would be inviting the student to go and earn
-                    something that does not exist. */}
-                <div className="m">{t.status === "done" ? "✓ done" : t.status === "locked" ? "coming soon" : `${t.pct}%`}</div>
-                {t.status !== "locked" && (
-                  <div className="bar"><i style={{ width: `${t.pct}%` }} /></div>
+                {/* Three states, and none of them prints a zero at the reader.
+                    "0%" on a subject you have never opened is not progress you
+                    failed to make — it is a subject you have not met. Eleven
+                    tiles all reading 0% with eleven empty rails is also the
+                    least useful thing this row could say to a new student.
+                    A "coming soon" subject is one with no lessons written at
+                    all (lib/progress.ts `ready`); there are none today, and the
+                    branch stays so the next new subject is honest on arrival. */}
+                {t.status === "done" ? (
+                  <div className="m">✓ done</div>
+                ) : !t.ready ? (
+                  <div className="m">coming soon</div>
+                ) : t.pct === 0 ? (
+                  <div className="m soft">Not started</div>
+                ) : (
+                  <>
+                    <div className="m">{t.pct}%</div>
+                    <div className="bar"><i style={{ width: `${t.pct}%` }} /></div>
+                  </>
                 )}
                 <span className="badge">{t.status === "done" ? "✓" : t.status === "locked" ? "🔒" : ""}</span>
               </Link>

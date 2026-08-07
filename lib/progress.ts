@@ -13,24 +13,19 @@ import { EXPLORE_MODE } from "./gates";
 export type SkillState = [name: string, done: boolean];
 export type TrackStatus = "done" | "now" | "locked";
 
-/**
- * Has this lesson actually been written, or is it still a stub?
+/* ⚠️ isTaught() REMOVED 2026-08-07, and the reasons are worth keeping.
  *
- * The five blocks below are the ones `prisma/check-syllabus.mjs` grades a lesson
- * on, and only a rebuilt lesson carries all of them — a stub has objectives, a
- * heading, a paragraph and a recap. Checked against the database when this
- * shipped: exactly 50 of 83 lessons pass, which is the same 50 the syllabus
- * report calls "at the FULL standard". One definition of finished, two readers.
+ * This probe was a second copy of check-syllabus.mjs's standard, used to decide
+ * whether a SUBJECT counted as written. Both halves of that failed:
  *
- * It tests the serialised string rather than parsing it. contentJson runs to
- * ~15KB per lesson and this is on the dashboard's path, so JSON.parse across 83
- * of them on every render would be real work to answer a yes/no question.
- */
-function isTaught(contentJson: string | null): boolean {
-  const s = contentJson ?? "";
-  return TEACHING_BLOCKS.every((b) => s.includes(`"t":"${b}"`));
-}
-const TEACHING_BLOCKS = ["hook", "def", "analogy", "mistakes", "interview"];
+ *   1. It drifted. The comment above claimed "exactly 50 of 83 lessons pass";
+ *      measured against the live database that day it was 141 of 160. A second
+ *      copy of a standard goes stale silently.
+ *   2. As a gate it was all-or-nothing, so Python (56 of 58 lessons past the
+ *      bar) and HTML (22 of 35) both read as UNWRITTEN subjects. The only thing
+ *      keeping a padlock off the flagship course was EXPLORE_MODE.
+ *
+ * Per-lesson quality has one owner now: `npm run syllabus`. */
 
 export type TrackProgress = {
   id: string; slug: string; order: number;
@@ -47,6 +42,13 @@ export type TrackProgress = {
   problemsDone: number; totalProblems: number;
   pct: number;
   status: TrackStatus;
+  /** Does this subject have any lessons written at all?
+   *
+   *  Deliberately SEPARATE from `status`, and deliberately independent of
+   *  EXPLORE_MODE: a surface that wants to say "coming soon" should ask about
+   *  the content, not about a review switch. `status` still carries the gate
+   *  and still feeds the skills legend — do not merge the two. */
+  ready: boolean;
   skills: SkillState[];
   skillsDone: number;
 };
@@ -97,7 +99,21 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     );
     const total = totalLessons + totalProblems;
     const pct = total ? Math.round(((lessonsDone + problemsDone) / total) * 100) : 0;
-    const ready = totalLessons > 0 && t.lessons.every((l) => isTaught(l.contentJson));
+    /* "Written yet?" is a question about the SUBJECT, not about every lesson
+     * in it being at the FULL standard.
+     *
+     * This used to be `t.lessons.every(isTaught)`, and measured against the
+     * live database on 2026-08-07 that was a loaded gun: 141 of 160 lessons
+     * pass isTaught, but the two biggest finished courses each carry a few
+     * that do not — **Python 56/58 and HTML 22/35 both counted as NOT ready**.
+     * The only thing standing between that and a padlock on the flagship
+     * course was EXPLORE_MODE being on, and lib/gates.ts says that switch is a
+     * review tool meant to be turned off once there are students. Turning it
+     * off would have hidden Python behind "coming soon".
+     *
+     * Per-lesson quality already has an owner — `npm run syllabus` grades it
+     * and reports which lessons are short. It does not belong in a gate. */
+    const ready = totalLessons > 0;
     return { t, totalLessons, totalProblems, lessonsDone, problemsDone, pct, ready };
   });
 
@@ -146,6 +162,7 @@ async function getProgressImpl(userId: string): Promise<Progress> {
       // Lessons come back ordered, so the first unfinished one IS where they
       // stopped. Falls back to lesson one for a subject not yet started.
       nextLesson: (r.t.lessons.find((l) => !doneLessonIds.has(l.id)) ?? r.t.lessons[0])?.slug,
+      ready: r.ready,
       lessonsDone: r.lessonsDone, totalLessons: r.totalLessons,
       problemsDone: r.problemsDone, totalProblems: r.totalProblems,
       pct: r.pct, status,
