@@ -165,7 +165,11 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    spends the most time. Focus landed on them and vanished.
    Each gets the ring back on :focus-visible, which fires for keyboard focus and
    not for a mouse click, so the editors stay visually quiet while typing. */
-.search input:focus-visible,
+   ⚠️ The topbar search is NOT in this list, and that is deliberate: its
+   wrapper draws the ring (`.search:focus-within`, border + 3px glow), so an
+   outline on the input as well painted TWO rings, one inside the other. One
+   control, one indicator — the wrapper's, which also shows for a mouse click,
+   which is right for a text field you are about to type in. */
 .todo-add input:focus-visible,
 .note-form input:focus-visible,
 .note-form textarea:focus-visible,
@@ -284,8 +288,19 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
    screen: measured, focused and blurred were byte-identical. A keyboard user
    landed in the search box with no way to know it. */
 .search input { border:0; background:none; outline:none; color:var(--ink); font-size:13px; width:100%; font-family:var(--sans); }
+/* The one focus indicator for this control — see the note beside the
+   :focus-visible list at the top of the file. */
 .search:focus-within { border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent); }
 .search input::placeholder { color:var(--ink-faint); }
+/* A caret that blinks at the end of the typed suggestion, so an empty search
+   box looks like it is thinking rather than sitting there. Pure CSS, and the
+   global reduced-motion block stops it along with everything else. */
+.search-caret { display:inline-block; width:1px; height:1.05em; margin-left:1px; vertical-align:-2px;
+                background:var(--accent); animation:caret-blink 1.1s steps(1) infinite; }
+@keyframes caret-blink { 50% { opacity:0; } }
+.search-ghost { position:absolute; left:37px; top:50%; transform:translateY(-50%); pointer-events:none;
+                font-size:13px; color:var(--ink-faint); white-space:nowrap; overflow:hidden;
+                max-width:calc(100% - 50px); }
 .search-drop { position:absolute; top:calc(100% + 6px); right:0; left:0; min-width:280px; background:var(--panel); border:1px solid var(--line); border-radius:var(--r-md); box-shadow:var(--shadow); z-index:40; max-height:340px; overflow-y:auto; }
 .search-empty { padding:14px; font-size:12.5px; color:var(--ink-faint); font-family:var(--mono); text-align:center; }
 .search-item { display:flex; align-items:center; gap:9px; width:100%; padding:9px 12px; border:0; background:none; text-align:left; cursor:pointer; border-bottom:1px solid var(--line); }

@@ -187,6 +187,42 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
+  /* A search box that types to itself while it waits.
+   *
+   * An empty search field is the quietest thing in the topbar, and it is also
+   * the one control that can reach all eleven subjects — so it shows what it
+   * can find, one example at a time, typed and deleted. These are real things
+   * a student can search for, drawn from different subjects on purpose: the box
+   * says "this is not only Python" without a word of marketing.
+   *
+   * It runs ONLY while the field is empty and unfocused, so it never competes
+   * with someone actually typing, and not at all under reduced motion — where
+   * the static placeholder below does the job instead. */
+  const [ghost, setGhost] = useState("");
+  const typing = !q && !open;
+  useEffect(() => {
+    // Clearing happens in the cleanup below, not here: a synchronous setState
+    // in an effect body can cascade renders (and the linter says so).
+    if (!typing) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Short on purpose — the box is 180px at its narrowest, and a suggestion
+    // that clips mid-word looks broken rather than alive. Measured: anything
+    // past about "dictionaries" is cut off at that width.
+    const words = ["loops", "<a> tags", "GROUP BY", "f-strings", "dictionaries", "8085 MOV"];
+    let w = 0, i = 0, erasing = false, timer: ReturnType<typeof setTimeout>;
+    const step = () => {
+      const word = words[w];
+      i += erasing ? -1 : 1;
+      setGhost(word.slice(0, i));
+      let wait = erasing ? 34 : 68;
+      if (!erasing && i === word.length) { erasing = true; wait = 1400; }
+      else if (erasing && i === 0) { erasing = false; w = (w + 1) % words.length; wait = 320; }
+      timer = setTimeout(step, wait);
+    };
+    timer = setTimeout(step, 600);
+    return () => { clearTimeout(timer); setGhost(""); };
+  }, [typing]);
+
   /* Ask the server, rather than downloading the index and filtering here.
    *
    * Filtering locally is what capped search at titles and a few code
@@ -294,7 +330,10 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
               onFocus={() => setOpen(true)}
               onChange={(e) => { setQ(e.target.value); setOpen(true); }}
               onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); if (e.key === "Enter" && results[0]) goTo(results[0]); }}
-              placeholder="Search topics, lessons, problems…"
+              // Blanked while the typing suggestion is on screen, so the two
+              // never overlap. The static text is what a reduced-motion reader,
+              // and the server's first paint, both get.
+              placeholder={ghost ? "" : "Search topics, lessons, problems…"}
               // A placeholder is not a label: it disappears the moment you type,
               // and screen readers are not required to announce it. This input
               // had nothing else, so it was reached as an unnamed text field.
@@ -302,6 +341,14 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
               type="search"
             />
           </div>
+          {/* aria-hidden: this is decoration over a field that already has a
+              label and a placeholder — announcing a word that erases itself
+              would be noise. */}
+          {typing && ghost && (
+            <div className="search-ghost" aria-hidden="true">
+              Search {ghost}<i className="search-caret" />
+            </div>
+          )}
           {open && q.trim().length >= 2 && (
             <div className="search-drop">
               {results.length === 0 ? (
