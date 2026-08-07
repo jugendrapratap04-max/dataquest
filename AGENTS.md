@@ -92,8 +92,25 @@ Rules that make this work rather than become theatre:
       practice, profile and the dashboard have not been swept
 - [ ] Screen-reader pass. Lighthouse scores 100 on accessibility; that is not
       the same as NVDA or VoiceOver being usable
-- [ ] Keyboard walk of one real flow — tab order, focus return after a dialog,
-      Escape on every overlay
+- [x] ~~Keyboard walk of one real flow~~ — done 2026-08-07 on the lesson page,
+      with real Tab presses through Chrome over CDP, reading
+      `document.activeElement` at every stop. **What passed, and it is worth
+      recording as a pass**: over 26 stops, every focused element painted a
+      visible ring, every one had an accessible name, and nothing focusable sat
+      inside an `aria-hidden` subtree.
+      **Two faults, both fixed.** (1) `id="main"` was on a `<main>` whose first
+      child was the Topbar, so "Skip to content" landed the next Tab on the
+      **search input** — the link worked and skipped nothing, and 26 stops in,
+      the walk still had not reached the lesson. The topbar is now outside
+      `<main>`, and both `<main>`s carry `tabIndex={-1}` so activating the link
+      MOVES focus rather than only moving the sequential-focus starting point
+      (before: focus went to the body, so nothing was announced at the moment
+      the user acted). (2) The two `position:fixed` floating buttons rendered
+      before the sidebar, putting "Focus reading" at tab stop 2 and causing a
+      718px jump back up. Moved to the end: **backwards jumps 2 → 0.**
+      **NOT checked:** focus return after a dialog, and Escape on overlays —
+      the lesson page has neither. Whoever takes the modal/drawer flows next
+      still owes those two.
 - [ ] Animation and scroll jank — never once looked at
 - [ ] Empty, loading and error states on every page that fetches
 - [ ] Dead-code sweep. Five starter SVGs and one CSS rule that had never matched
