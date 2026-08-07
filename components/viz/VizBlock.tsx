@@ -136,6 +136,8 @@ const REGISTRY: Record<string, React.ComponentType> = {
   "log-levels": dynamic(() => import("./LogLevels").then((m) => m.LogLevels)),
   "style-lab": dynamic(() => import("./StyleLab").then((m) => m.StyleLab)),
   "git-flow": dynamic(() => import("./GitFlow").then((m) => m.GitFlow)),
+  "kpi-test": dynamic(() => import("./KpiTest").then((m) => m.KpiTest)),
+  "report-vs-dashboard": dynamic(() => import("./ReportVsDashboard").then((m) => m.ReportVsDashboard)),
 };
 
 // Renders an interactive visualization by key (from lesson content blocks).

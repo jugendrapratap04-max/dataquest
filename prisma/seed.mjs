@@ -8181,6 +8181,8 @@ const biLessons = [
     { t: "p", html: "It is opened. Not \"is it accurate\", not \"does it use the right chart types\" — those are prerequisites. A dashboard that is technically excellent and opened twice is a failed dashboard, and a plain one somebody checks every Monday morning is a successful one." },
     { t: "p", html: "That measure changes what you build. It means you find out what decision the viewer makes each week before you draw anything, and it means fewer numbers rather than more — because a screen with thirty charts has no answer on it, only material." },
 
+    { t: "viz", name: "report-vs-dashboard" },
+
     { t: "note", variant: "key", html: "<b>Build for one decision, not for one department.</b> \"A dashboard for sales\" produces thirty charts nobody reads. \"Which regions are behind target this month, and by how much\" produces four, and somebody opens it on Monday. If nobody can tell you what they would <i>do</i> differently based on the screen, you are building furniture." },
 
     { t: "h2", n: "2", text: "Where BI sits, and where you sit" },
@@ -8372,6 +8374,8 @@ const biLessons = [
     { t: "h2", n: "1", text: "The test" },
     { t: "p", html: "Take any number on a dashboard and ask: <b>if this moved by a fifth, what would we do?</b> If there is a clear answer — chase those accounts, pause that campaign, staff that shift differently — it is a KPI. If the answer is \"we would know about it\", it is a statistic. Statistics are not worthless; they belong one level down, where somebody investigating goes looking." },
     { t: "p", html: "The test also protects against the commonest failure, which is not choosing a wrong metric but choosing <b>too many</b>. Six numbers with decisions attached beat thirty without." },
+
+    { t: "viz", name: "kpi-test" },
 
     { t: "h2", n: "2", text: "The metrics you will actually meet" },
     { t: "note", variant: "tip", html: "<b>Conversion rate</b> — of those who could have, how many did. The workhorse ratio.<br><b>Churn</b> — the share of customers who left in a period. The mirror of retention, and usually the more urgent framing.<br><b>CAC</b> — customer acquisition cost: what it costs to win one.<br><b>LTV</b> — lifetime value: what one is worth over the relationship. <b>CAC vs LTV is the question</b>, not either alone.<br><b>AOV</b> — average order value.<br><b>Activation</b> — the share of signups who reach the point where the product has actually done something for them. On most products this is where the real problem is, and it is the least often measured.<br><b>DAU / MAU</b> — daily over monthly actives, a rough measure of how habitual something is." },

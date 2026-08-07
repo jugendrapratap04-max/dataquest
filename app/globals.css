@@ -8,7 +8,7 @@
      values put #fff cards on a near-#fff ground with a barely-there shadow, so
      everything looked like one flat sheet. */
   --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656;
+  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6;
   --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB;
@@ -64,7 +64,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-    --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1;
+    --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
     --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F;
     --teal:#2DD4BF; --teal-soft:#10322E; --indigo:#8C93F2; --indigo-soft:#1E2145;
     --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
@@ -79,7 +79,7 @@
     --farrow-col:#5A6478; --gbtn-bg:rgba(255,255,255,.09); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.16); }
 }
 :root[data-theme="light"]{ --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656;
+  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6; --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB; --good:#1FA85A; --good-soft:#DBF3E4; --bad:#E23D3D; --bad-soft:#FBE3E3; --locked:#B7BAC4;
   --code-bg:#12141C; --shadow:0 1px 2px rgba(70,52,20,.05), 0 4px 10px -2px rgba(70,52,20,.07), 0 14px 30px -12px rgba(70,52,20,.13);
@@ -93,7 +93,7 @@
   --chip-bg:var(--panel-2); --chip-border:var(--line); --chip-ink:var(--ink-soft); --chip-done:var(--good);
   --farrow-col:var(--ink-faint); --gbtn-bg:var(--panel-2); --gbtn-ink:var(--ink); --gbtn-border:var(--line); }
 :root[data-theme="dark"]{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-  --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1;
+  --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F; --teal:#2DD4BF; --teal-soft:#10322E;
   --indigo:#8C93F2; --indigo-soft:#1E2145; --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
   --code-bg:#0A0C12; --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
@@ -109,7 +109,7 @@
    prefers-color-scheme block. Each carries the full token set incl. feature-card
    vars, same as light/dark, so nothing falls back to the wrong palette. */
 :root[data-theme="focus"]{ --ground:#0F1A2E; --panel:#182338; --panel-2:#1F2C46; --panel-3:#273656; --line:#2F4066;
-  --ink:#EAF0FB; --ink-soft:#9FADCB; --ink-faint:#919FBE;
+  --ink:#EAF0FB; --ink-soft:#9FADCB; --ink-faint:#919FBE; --muted:var(--ink-faint);
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#2A2712;
   --teal:#2DD4BF; --teal-soft:#0E332F; --indigo:#93A4F5; --indigo-soft:#20294F;
   --good:#34D07F; --good-soft:#123322; --bad:#F26D6D; --bad-soft:#3A1D22; --locked:#3B4C6E;
@@ -122,7 +122,7 @@
   --chip-bg:rgba(255,255,255,.06); --chip-border:rgba(255,255,255,.11); --chip-ink:#C5CFE6; --chip-done:#7ee0b0;
   --farrow-col:#5C6C90; --gbtn-bg:rgba(255,255,255,.07); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.14); }
 :root[data-theme="sunset"]{ --ground:#1B1012; --panel:#251819; --panel-2:#301F21; --panel-3:#3B2A2C; --line:#473537;
-  --ink:#F7ECE7; --ink-soft:#CBAFA7; --ink-faint:#A7908B;
+  --ink:#F7ECE7; --ink-soft:#CBAFA7; --ink-faint:#A7908B; --muted:var(--ink-faint);
   --accent:#FF9E5A; --accent-2:#F0862F; --accent-soft:#3C2417;
   --teal:#4FD1C5; --teal-soft:#123330; --indigo:#C2A7F5; --indigo-soft:#2B2149;
   --good:#5BD08A; --good-soft:#163220; --bad:#FF8484; --bad-soft:#3E1F1F; --locked:#4E3C3F;
