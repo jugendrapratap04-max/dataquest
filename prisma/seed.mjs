@@ -8276,6 +8276,11 @@ const biLessons = [
       note: "If a number comes out wrong, walk this list from the top rather than adjusting the chart. The chart is almost never the bug.",
     },
 
+    /* Step five, made interactive. Borrowed from the visualisation track's
+       "choosing charts" lesson because picking the right mark for the question
+       is the same skill whether the tool is matplotlib or Power BI. */
+    { t: "viz", name: "chart-choice-lab" },
+
     { t: "h2", n: "3", text: "Star schema: one fact table, several describing it" },
     { t: "p", html: "The standard shape is one <b>fact</b> table — the things that happened, one row per sale, per ticket, per visit — surrounded by <b>dimension</b> tables that describe them: customers, products, dates, regions. Drawn out it looks like a star, which is where the name comes from." },
     { t: "p", html: "The beginner's instinct is one wide flat table with everything joined in already, and it works right up until it does not: the customer's city is repeated on every one of their ten thousand orders, so correcting it means correcting ten thousand rows, and counting <i>customers</i> now counts orders instead." },
@@ -9552,6 +9557,11 @@ const deployLessons = [
       ],
       note: "Commit when something works, not when everything is finished. A commit you can return to is worth more than a tidy history you never made.",
     },
+
+    /* The same component the Python track's git lesson uses. Reused rather than
+       rebuilt: it teaches the identical thing, and `chart-lab` already sets the
+       precedent of one visualisation serving two tracks. */
+    { t: "viz", name: "git-flow" },
 
     { t: "h2", n: "2", text: "What must never go in" },
     { t: "p", html: "A repository is for the things that make the project reproducible: code, small reference data, configuration, the README. Three categories should stay out, and each has a specific reason." },

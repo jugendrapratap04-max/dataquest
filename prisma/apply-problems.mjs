@@ -10,6 +10,7 @@ import { prisma, via } from "./db.mjs";
 console.log(`db: ${via}`);
 import { htmlProblems } from "./html-problems.mjs";
 import { sqlProblems } from "./sql-problems.mjs";
+import { biProblems } from "./bi-problems.mjs";
 import { pandasProblems } from "./pandas-problems.mjs";
 import { vizProblems } from "./viz-problems.mjs";
 import { mpProblems } from "./mp-problems.mjs";
@@ -23,6 +24,7 @@ import { trackLessons, extraProblems } from "./seed.mjs";
 const SETS = [
   ["HTML", htmlProblems],
   ["SQL", sqlProblems],
+  ["BI (SQL)", biProblems],
   ["pandas/numpy", pandasProblems],
   ["viz/EDA", vizProblems],
   ["microprocessor", mpProblems],
