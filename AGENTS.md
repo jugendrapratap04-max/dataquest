@@ -102,14 +102,22 @@ Rules that make this work rather than become theatre:
       and the three `.llist` rules went with the panel they styled, and a
       `@media` rule that had been overridden since it was written came out. Not
       a sweep — three findings from one change
-- [ ] **Quizzes and drills for the HTML course.** `npm run syllabus` reports
-      html at **26/35 passing the bar and 0 at FULL**, and that number is now
-      honest: the interactive-element criterion was fixed on 2026-08-06 (a live
-      code block counts, since LiveHtml makes every one editable), and the rest
-      of the bar was deliberately left alone. What is missing is real: a quiz
-      exists only in Module 0, and drills and debug tasks are patchy. This is
-      the largest single quality debt on the platform and it is content work,
-      not a scoring argument
+- [x] ~~**Quizzes and drills for the HTML course**~~ — done 2026-08-07. It was
+      the largest single quality debt on the platform and it read **26/35 at the
+      bar, 0/35 at FULL**. Now **29/35 and 28/35**, with a ten-question quiz on
+      **all 35** lessons (was 5), plus drills, debug tasks, and the three `code`
+      blocks whose absence was failing the minimum bar outright.
+      **The seven that remain are Modules 0 and 1, and they are a ceiling rather
+      than a gap**: FULL wants two practice problems and a `code` block, and this
+      file's own course notes decline both — "there is nothing to practise yet"
+      and "no HTML is written in this module, and that is the point". Exempting
+      Module 0 in `check-syllabus.mjs` was considered and rejected: only one of
+      the two blockers would move, so the number would not change anyway, and
+      exempting both would launder a deliberate design choice into a passing
+      score. **If 35/35 is ever wanted, it is a content decision — never a
+      criterion edit.**
+      Same pass finished `bi` (3/3 at FULL) and took `deploy` to its own ceiling.
+      Platform went **118/160 → 150/160 at FULL (74% → 94%)**
 - [ ] Split `prisma/seed.mjs`. 1.9 MB in one file is why two sessions collide on
       it, and it is the biggest maintainability problem in the repo
 - [x] ~~Seeded XP on the demo accounts~~ — six accounts held 16,080 XP between

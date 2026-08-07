@@ -115,7 +115,7 @@ export default async function LandingPage() {
           Assistive technology uses it to answer "where does the content start" —
           without one there is nothing to jump to, and the reader tabs through
           the whole nav on every visit. */}
-      <main id="main">
+      <main id="main" tabIndex={-1}>
       <section className="lp-hero">
         <div className="lp-hero-copy">
           <div className="lp-eyebrow">Free · Nothing to install · Runs in your browser</div>
