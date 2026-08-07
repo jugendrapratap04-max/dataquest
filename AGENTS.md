@@ -112,7 +112,26 @@ Rules that make this work rather than become theatre:
       the lesson page has neither. Whoever takes the modal/drawer flows next
       still owes those two.
 - [ ] Animation and scroll jank — never once looked at
-- [ ] Empty, loading and error states on every page that fetches
+- [x] ~~Loading and error states on every page that fetches~~ — done 2026-08-07,
+      prioritised by measurement rather than by taste.
+      **ERROR:** there was exactly one `error.tsx` and it was the ROOT boundary,
+      so a failure on any signed-in page replaced the whole document — sidebar
+      and topbar included — making one broken query look like the site was down
+      and removing the navigation needed to escape it. `app/(app)/error.tsx` now
+      sits inside the layout: the shell survives, only the content area is
+      replaced, nearest boundary wins.
+      **LOADING:** seven pages call `getProgress()` — the query that loads every
+      track with every lesson and problem, and the reason the dashboard felt
+      broken before it had a skeleton. **Five of the seven had none**: profile,
+      progress, certificates, one certificate, a public profile. All five now
+      have one shaped like the page. **7 of 7 covered.** Verified live rather
+      than assumed — the streamed first response carries 15, 9 and 8 skeleton
+      blocks on /progress, /profile and /certificates.
+      **STILL OPEN — the EMPTY half of this item.** There are already 14
+      `*-empty` classes (`bk-empty`, `prof-empty`, `room-empty`, `search-empty`
+      and so on), so empty states exist in places and were not audited one by
+      one. Nobody has checked that each says what would be there and offers one
+      action, which is what DESIGN-SYSTEM.md asks for
 - [x] ~~Dead-code sweep~~ — done 2026-08-07, and it is now **`npm run dead-code`**
       so it can be re-run instead of remembered. Four checks: custom properties
       used-but-undefined, defined-but-unused, orphan components, unreferenced
