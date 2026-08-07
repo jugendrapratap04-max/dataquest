@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /* Pointer-follow 3D tilt. The wrapper supplies perspective; the inner element
  * rotates toward the cursor, and children that carry translateZ (the layered
@@ -28,16 +28,18 @@ export function Tilt({
   const box = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
-  const [active, setActive] = useState(false);
+  // A ref, not state: the flag is only ever read inside event handlers, so a
+  // re-render would buy nothing and setState-in-effect trips the lint rule.
+  const active = useRef(false);
 
   useEffect(() => {
-    const fine = window.matchMedia("(pointer: fine)").matches;
-    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    setActive(fine && !still);
+    active.current =
+      window.matchMedia("(pointer: fine)").matches &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
   const move = (e: React.PointerEvent) => {
-    if (!active) return;
+    if (!active.current) return;
     cancelAnimationFrame(raf.current);
     const { clientX, clientY } = e;
     raf.current = requestAnimationFrame(() => {
