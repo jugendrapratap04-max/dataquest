@@ -85,9 +85,11 @@ input the reader is moving right now. Easing it reads as lag.
   and has to stay there: `:hover` and `:active` have equal specificity, so a
   hover written later would silently win.
 - Celebration is for lesson complete, module complete, level up — nothing
-  smaller. ⚠️ **`Celebrate.tsx` currently fires on every problem's first solve**,
-  which is smaller. Not changed unilaterally — it is the reward loop, and this
-  product's stated problem is activation.
+  smaller. **Lesson complete now fires one** (2026-08-07): marking a lesson done
+  opens the celebration card naming the lesson, with the next step on it.
+  ⚠️ **`Celebrate.tsx` also fires on every problem's first solve**, which is
+  smaller. Not changed unilaterally — it is the reward loop, and this product's
+  stated problem is activation.
 - Never delay an action to finish an animation.
 - `prefers-reduced-motion` is honoured **globally**, not just by the skeletons:
   one block near the top of `globals.css` neutralises animation, transition and
@@ -119,6 +121,28 @@ ink on a filled accent control — that is what `--accent-ink` is for.
 the streak chip becomes "Start your streak" and the streak tile becomes the
 first action. Activation is this product's stated problem; a "🔥 0 STREAK"
 badge is shaming the exact person the design exists for.
+
+### The callout system (lesson blocks)
+
+Every teaching block wears the colour of the **job it does**, so a reader learns
+the palette once and recognises a block before reading it:
+
+| Job | Colour | Blocks |
+|---|---|---|
+| curiosity — "why care" | `--spark` warm | `hook`, `think`, `note.key` |
+| the concept itself | `--accent` violet | `def`, `objectives` |
+| an aside worth knowing | `--teal` | `note.tip`, `analogy` |
+| danger | `--bad` red | `note.warn`, `mistakes` |
+| you have got it | `--good` green | `recap` |
+| out in the world | `--indigo` | `interview` |
+
+**The tint carries identity; ink carries legibility.** Headings inside a tinted
+block are `--ink`, not the semantic hue — measured in light theme, `--bad` on
+`--bad-soft` is 3.46:1 and `--good` on `--good-soft` is 2.64:1. The wash and the
+border already say which block it is.
+
+The action colour appears here only on the definition, and only as a wash —
+never as a filled control, so it never competes with a button.
 
 ## Focus
 
