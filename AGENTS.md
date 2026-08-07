@@ -113,12 +113,34 @@ Rules that make this work rather than become theatre:
       still owes those two.
 - [ ] Animation and scroll jank — never once looked at
 - [ ] Empty, loading and error states on every page that fetches
-- [ ] Dead-code sweep. Five starter SVGs and one CSS rule that had never matched
-      anything turned up on the first look; nobody has done a full one.
-      **Partly paid down 2026-08-06** with the course-nav rebuild: `.learn-side`
-      and the three `.llist` rules went with the panel they styled, and a
-      `@media` rule that had been overridden since it was written came out. Not
-      a sweep — three findings from one change
+- [x] ~~Dead-code sweep~~ — done 2026-08-07, and it is now **`npm run dead-code`**
+      so it can be re-run instead of remembered. Four checks: custom properties
+      used-but-undefined, defined-but-unused, orphan components, unreferenced
+      classes.
+      **The real finds were the variables, not the classes.** `--fg` (17 uses),
+      `--card` (6) and `--muted` (18) were used across the stylesheet and
+      **defined nowhere**, so every one of those declarations was invalid and
+      the element silently inherited. Measured in a browser: `.lt` asked for
+      `background:var(--card)` and computed to `rgba(0,0,0,0)` — the topic-list
+      card had no background at all. All three are now defined beside the token
+      they alias, in **all six theme blocks**. `--code-fg` was a rename leftover
+      for `--code-ink`; it had a fallback so it was phantom rather than broken.
+      **Removed:** 18 lines — the old `.cal` week-grid calendar (the profile
+      uses `.yearcal` now), `.mrow`/`.mcard`, `.ppane`, `.respane`, `.spark`,
+      and `.side-card` **together with the careful comment above it about a bug
+      in a class that is on no element at all** — the sidebar labels are
+      `.nav-lbl`, and they are styled correctly.
+      ⚠️ **THE LESSON, and it is written into the script: ten of the first
+      nineteen "unused" classes were LIVE.** `.t-bool`, `.t-float`, five
+      `.ef-*` and three `.fa-*` are built as `` `t-${v.type}` `` and friends, so
+      no literal search can see them. The script now scans the source for
+      `foo-${` and excludes those prefixes. A checker that cries wolf gets
+      ignored, so it is worth keeping honest.
+      **Left alone deliberately:** `--ease` is defined and used zero times.
+      Adopting it changes the curve of every transition in the product and that
+      curve has never been looked at — a design decision with eyes on it, not a
+      find-and-replace. Recorded in DESIGN-SYSTEM.md, which used to claim it was
+      used "for everything"
 - [x] ~~**Quizzes and drills for the HTML course**~~ — done 2026-08-07. It was
       the largest single quality debt on the platform and it read **26/35 at the
       bar, 0/35 at FULL**. Now **29/35 and 28/35**, with a ten-question quiz on

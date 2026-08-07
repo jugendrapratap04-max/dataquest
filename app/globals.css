@@ -7,8 +7,8 @@
      raised, a real (soft) 3-layer shadow for depth, and warm neutrals. The old
      values put #fff cards on a near-#fff ground with a barely-there shadow, so
      everything looked like one flat sheet. */
-  --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
+  --ground:#F1EDE4; --panel:#FFFFFF; --card:var(--panel); --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
+  --ink:#24221C; --fg:var(--ink); --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6;
   --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB;
@@ -63,8 +63,8 @@
   --gbtn-bg:var(--panel-2); --gbtn-ink:var(--ink); --gbtn-border:var(--line);
 }
 @media (prefers-color-scheme: dark){
-  :root{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-    --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
+  :root{ --ground:#0E1119; --panel:#161B26; --card:var(--panel); --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
+    --ink:#EEF1F6; --fg:var(--ink); --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
     --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F;
     --teal:#2DD4BF; --teal-soft:#10322E; --indigo:#8C93F2; --indigo-soft:#1E2145;
     --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
@@ -78,8 +78,8 @@
     --chip-bg:rgba(255,255,255,.08); --chip-border:rgba(255,255,255,.12); --chip-ink:#DCE1EC; --chip-done:#7ee0b0;
     --farrow-col:#5A6478; --gbtn-bg:rgba(255,255,255,.09); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.16); }
 }
-:root[data-theme="light"]{ --ground:#F1EDE4; --panel:#FFFFFF; --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
-  --ink:#24221C; --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
+:root[data-theme="light"]{ --ground:#F1EDE4; --panel:#FFFFFF; --card:var(--panel); --panel-2:#F6F2EA; --panel-3:#EBE5D9; --line:#E2DCCE;
+  --ink:#24221C; --fg:var(--ink); --ink-soft:#5C574C; --ink-faint:#6D6656; --muted:var(--ink-faint);
   --accent:#E8920C; --accent-2:#B96E08; --accent-soft:#FBE7C6; --teal:#0E9C8C; --teal-soft:#D7F0EC;
   --indigo:#4F5BD5; --indigo-soft:#E4E5FB; --good:#1FA85A; --good-soft:#DBF3E4; --bad:#E23D3D; --bad-soft:#FBE3E3; --locked:#B7BAC4;
   --code-bg:#12141C; --shadow:0 1px 2px rgba(70,52,20,.05), 0 4px 10px -2px rgba(70,52,20,.07), 0 14px 30px -12px rgba(70,52,20,.13);
@@ -92,8 +92,8 @@
   --feat-teal-shadow:0 1px 2px rgba(70,52,20,.05), 0 12px 30px -12px color-mix(in srgb,var(--teal) 28%,transparent);
   --chip-bg:var(--panel-2); --chip-border:var(--line); --chip-ink:var(--ink-soft); --chip-done:var(--good);
   --farrow-col:var(--ink-faint); --gbtn-bg:var(--panel-2); --gbtn-ink:var(--ink); --gbtn-border:var(--line); }
-:root[data-theme="dark"]{ --ground:#0E1119; --panel:#161B26; --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
-  --ink:#EEF1F6; --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
+:root[data-theme="dark"]{ --ground:#0E1119; --panel:#161B26; --card:var(--panel); --panel-2:#1D232F; --panel-3:#232A37; --line:#29303D;
+  --ink:#EEF1F6; --fg:var(--ink); --ink-soft:#A6ADBC; --ink-faint:#8991A1; --muted:var(--ink-faint);
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#33280F; --teal:#2DD4BF; --teal-soft:#10322E;
   --indigo:#8C93F2; --indigo-soft:#1E2145; --good:#34D07F; --good-soft:#12321F; --bad:#F26D6D; --bad-soft:#3A1A1A; --locked:#3A4150;
   --code-bg:#0A0C12; --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -14px rgba(0,0,0,.6);
@@ -108,8 +108,8 @@
 /* Unlockable themes (earned with XP/coins) — explicit-choice only, so no
    prefers-color-scheme block. Each carries the full token set incl. feature-card
    vars, same as light/dark, so nothing falls back to the wrong palette. */
-:root[data-theme="focus"]{ --ground:#0F1A2E; --panel:#182338; --panel-2:#1F2C46; --panel-3:#273656; --line:#2F4066;
-  --ink:#EAF0FB; --ink-soft:#9FADCB; --ink-faint:#919FBE; --muted:var(--ink-faint);
+:root[data-theme="focus"]{ --ground:#0F1A2E; --panel:#182338; --card:var(--panel); --panel-2:#1F2C46; --panel-3:#273656; --line:#2F4066;
+  --ink:#EAF0FB; --fg:var(--ink); --ink-soft:#9FADCB; --ink-faint:#919FBE; --muted:var(--ink-faint);
   --accent:#F5A524; --accent-2:#E0900F; --accent-soft:#2A2712;
   --teal:#2DD4BF; --teal-soft:#0E332F; --indigo:#93A4F5; --indigo-soft:#20294F;
   --good:#34D07F; --good-soft:#123322; --bad:#F26D6D; --bad-soft:#3A1D22; --locked:#3B4C6E;
@@ -121,8 +121,8 @@
   --feat-teal-border:#31446B; --feat-shadow:var(--shadow); --feat-teal-shadow:var(--shadow);
   --chip-bg:rgba(255,255,255,.06); --chip-border:rgba(255,255,255,.11); --chip-ink:#C5CFE6; --chip-done:#7ee0b0;
   --farrow-col:#5C6C90; --gbtn-bg:rgba(255,255,255,.07); --gbtn-ink:#fff; --gbtn-border:rgba(255,255,255,.14); }
-:root[data-theme="sunset"]{ --ground:#1B1012; --panel:#251819; --panel-2:#301F21; --panel-3:#3B2A2C; --line:#473537;
-  --ink:#F7ECE7; --ink-soft:#CBAFA7; --ink-faint:#A7908B; --muted:var(--ink-faint);
+:root[data-theme="sunset"]{ --ground:#1B1012; --panel:#251819; --card:var(--panel); --panel-2:#301F21; --panel-3:#3B2A2C; --line:#473537;
+  --ink:#F7ECE7; --fg:var(--ink); --ink-soft:#CBAFA7; --ink-faint:#A7908B; --muted:var(--ink-faint);
   --accent:#FF9E5A; --accent-2:#F0862F; --accent-soft:#3C2417;
   --teal:#4FD1C5; --teal-soft:#123330; --indigo:#C2A7F5; --indigo-soft:#2B2149;
   --good:#5BD08A; --good-soft:#163220; --bad:#FF8484; --bad-soft:#3E1F1F; --locked:#4E3C3F;
@@ -349,7 +349,6 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .stat { padding:15px 16px; background:var(--panel-2); border-color:transparent; box-shadow:none; }
 .stat .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; }
 .stat .v { font-family:var(--mono); font-weight:700; font-size:25px; margin-top:5px; display:flex; align-items:baseline; gap:6px; } .stat .v small { font-size:11.5px; color:var(--good); font-weight:600; font-family:var(--sans); }
-.spark { margin-top:9px; width:100%; height:28px; display:block; }
 .trackrow { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
 .node { flex:none; width:124px; padding:14px; border-radius:var(--radius-sm); border:1px solid var(--line); background:var(--panel-2); position:relative; cursor:pointer; }
 .node .ic { width:32px; height:32px; border-radius:var(--r-sm); display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:13px; margin-bottom:10px; }
@@ -384,9 +383,6 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .ring { width:104px; height:104px; border-radius:50%; flex:none; display:grid; place-items:center; }
 .ring .inner { width:78px; height:78px; border-radius:50%; background:var(--panel); display:grid; place-items:center; text-align:center; } .ring .inner b { font-family:var(--mono); font-size:22px; display:block; } .ring .inner span { font-size:10px; color:var(--ink-faint); text-transform:uppercase; }
 .ring-legend { display:flex; flex-direction:column; gap:9px; font-size:12.5px; } .ring-legend .row { display:flex; align-items:center; gap:8px; } .ring-legend .dot { width:9px; height:9px; border-radius:3px; } .ring-legend b { font-family:var(--mono); margin-left:auto; }
-.cal { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; } .cal .d { aspect-ratio:1; border-radius:var(--r-xs); background:var(--panel-2); display:grid; place-items:center; font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
-.cal .d.l1 { background:color-mix(in srgb,var(--accent) 28%,var(--panel-2)); color:var(--ink); } .cal .d.l2 { background:color-mix(in srgb,var(--accent) 55%,var(--panel-2)); color:var(--ink); } .cal .d.l3 { background:var(--accent); color:#21160A; font-weight:700; }
-.cal-head { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; } .cal-head span { text-align:center; font-family:var(--mono); font-size:10px; color:var(--ink-faint); }
 
 /* roadmap */
 .hero { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-amber-border); border-radius:var(--radius); box-shadow:var(--feat-shadow); margin-bottom:20px; background:var(--feat-amber-bg); }
@@ -395,11 +391,6 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .mstep { display:inline-flex; align-items:center; gap:7px; font-family:var(--mono); font-size:12px; padding:7px 12px; border-radius:var(--r-sm); background:var(--chip-bg); border:1px solid var(--chip-border); color:var(--chip-ink); } .mstep b { color:var(--feat-amber-eyebrow); }
 .ov { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; } @media (max-width:640px){ .ov{ grid-template-columns:repeat(2,1fr);} }
 .ovc { padding:15px 16px; } .ovc .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); font-weight:600; } .ovc .v { font-family:var(--mono); font-weight:700; font-size:21px; margin-top:5px; }
-.mrow { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; } @media (max-width:640px){ .mrow{ grid-template-columns:1fr;} }
-.mcard { border:1px solid var(--line); border-radius:var(--radius-sm); padding:16px; position:relative; background:var(--panel-2); }
-.mcard.a { border-color:color-mix(in srgb,var(--teal) 45%,transparent); } .mcard.b { border-color:color-mix(in srgb,var(--accent) 45%,transparent); }
-.mcard .role { font-size:14px; font-weight:700; } .mcard .pkg { font-family:var(--mono); font-weight:700; font-size:19px; margin-top:6px; } .mcard.a .pkg { color:var(--teal); } .mcard.b .pkg { color:var(--accent-2); }
-.mcard .after { font-size:11.5px; color:var(--ink-faint); margin-top:6px; } .mcard .flag { position:absolute; top:14px; right:14px; font-size:18px; }
 .phase { margin-bottom:14px; overflow:hidden; } .phead { display:flex; align-items:center; gap:14px; padding:18px 20px; cursor:pointer; }
 .pnum { width:42px; height:42px; border-radius:var(--r-md); flex:none; display:grid; place-items:center; font-family:var(--mono); font-weight:800; font-size:16px; background:var(--panel-2); color:var(--ink-soft); border:1px solid var(--line); }
 .phase.done .pnum { background:var(--good-soft); color:var(--good); } .phase.now .pnum { background:var(--accent); color:#21160A; }
@@ -944,18 +935,10 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
    this file, not here — one place per behaviour. What DOES belong here is the
    restore tab moving to the left edge, because the panel it restores did. */
 .rail-tab { right:auto; left:0; border-radius:0 9px 9px 0; border-right:1px solid var(--line); border-left:0; }
-/* `.side-card`, not `.side-card h4`.
-   The class sits ON the heading, so the descendant form matched nothing and
-   both sidebar labels have been rendering at default browser heading size this
-   whole time instead of as the small-caps label they were written to be.
-   Tag-agnostic now, so the element can change for heading order without this
-   silently detaching again. */
-.side-card { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-faint); margin:0 0 14px; font-weight:600; }
 
 /* practice */
 .psplit { display:grid; grid-template-columns:minmax(0,42%) minmax(0,58%); gap:18px; align-items:start; } @media (max-width:900px){ .psplit{ grid-template-columns:1fr;} }
 .ptabs { display:flex; gap:4px; margin-bottom:18px; border-bottom:1px solid var(--line); } .ptab { padding:9px 13px; font-size:13px; color:var(--ink-faint); border:0; background:none; border-bottom:2px solid transparent; margin-bottom:-1px; font-weight:550; } .ptab.active { color:var(--accent-2); border-bottom-color:var(--accent); }
-.ppane { display:none; } .ppane.active { display:block; }
 .diff { font-family:var(--mono); font-size:11px; font-weight:700; padding:3px 10px; border-radius:var(--r-xl); background:var(--good-soft); color:var(--good); }
 .diff.medium { background:var(--accent-soft); color:var(--accent-2); }
 .diff.hard { background:var(--bad-soft); color:var(--bad); }
@@ -1074,7 +1057,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .lc-reset:not(:disabled):hover { color:var(--fg); }
 .lc-area { display:block; width:100%; box-sizing:border-box; resize:vertical; border:0; outline:0;
            padding:13px 15px; font-family:var(--mono); font-size:13px; line-height:1.65;
-           color:var(--code-fg, #E6E9EF); background:transparent; tab-size:4; }
+           color:var(--code-ink); background:transparent; tab-size:4; }
 .code.live.editing { outline:1px solid color-mix(in srgb, var(--accent) 45%, transparent); }
 /* Shown only while the very first Run downloads the runtime. Sits where the
    output box will land, so nothing jumps when the result replaces it. */
@@ -1133,7 +1116,7 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .hw-acts { margin-left:auto; display:flex; align-items:center; gap:6px; }
 .hw-area { display:block; width:100%; box-sizing:border-box; resize:vertical; border:0; outline:0;
            min-height:250px; padding:13px 15px; font-family:var(--mono); font-size:13px; line-height:1.65;
-           color:var(--code-fg, #E6E9EF); background:transparent; tab-size:2; }
+           color:var(--code-ink); background:transparent; tab-size:2; }
 .hw-preview { border:1px solid #23262F; border-radius:var(--radius); overflow:hidden; }
 .hw-preview iframe { display:block; width:100%; height:300px; border:0; background:#fff; }
 .hw-verdict { margin-top:14px; padding:11px 14px; border-radius:var(--r-sm); font-weight:600; font-size:14px; border:1px solid transparent; }
@@ -1163,7 +1146,6 @@ h1,h2,h3,h4 { margin:0; letter-spacing:-.02em; text-wrap:balance; }
 .eh-link { display:inline-block; font-size:12.5px; font-weight:600; color:var(--accent); text-decoration:none; }
 .eh-link:hover { text-decoration:underline; }
 
-.respane { display:none; } .respane.active { display:block; }
 /* The PNG matplotlib handed back. It keeps its own white background — a chart's
    own colours are chosen against white, and re-tinting it to match a dark UI is
    how you end up with a yellow line nobody can see. So it gets a deliberate white

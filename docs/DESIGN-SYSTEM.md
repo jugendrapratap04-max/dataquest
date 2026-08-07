@@ -37,7 +37,7 @@ that a single token cannot express.
 | `--t-fast` | .15s | hover, colour, opacity |
 | `--t-base` | .2s | the default |
 | `--t-slow` | .25s | panels, disclosure, layout |
-| `--ease` | `cubic-bezier(.2,0,0,1)` | everything |
+| `--ease` | `cubic-bezier(.2,0,0,1)` | ⚠️ **defined, and used zero times** |
 
 Was eight durations (.12 .15 .18 .2 .22 .24 .6 .9). Anything above `--t-slow`
 belongs to a celebration, not an interaction.
@@ -58,6 +58,17 @@ token, and the file reads **64 tokens to 13 literals**.
 | `sk-shimmer` | 1.4s, infinite | A loading indicator. Already switched off under reduced motion. |
 | `.toast` | .35s | A notification arriving from off-screen has further to travel. |
 | `pop` / `ob-pop` / `cc-grow` | .28–.5s | Entrances and the celebration card — the one case the rule above names. |
+
+**`--ease` is not adopted, and this table used to claim it was.** A dead-code
+sweep on 2026-08-07 found it defined and referenced **nowhere** — the row above
+said "everything" and the truth was zero. What the transitions actually use is
+the browser's own `ease` (16 of them) and a deliberate `linear` (3, all of them
+progress or timer fills). So the app IS consistent; the token is simply unused.
+
+Adopting it would change the curve of every transition in the product, and that
+curve has never been looked at by anybody. **That is a deliberate design
+decision with eyes on it, not a find-and-replace** — which is why the sweep
+corrected the documentation and left the CSS alone.
 
 **Progress fill is one speed: `--t-slow`.** Four bars share it. The fifth,
 `.readbar > i`, is on `--t-fast` linear on purpose — every other fill animates a
