@@ -4,6 +4,7 @@ import { unstable_cache } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { highlightPython } from "@/lib/highlight";
+import { Tilt } from "@/components/Tilt";
 
 // The public front door. Anyone who arrives without an account sees what's
 // inside before being asked for anything — until now the link went straight to
@@ -133,17 +134,30 @@ export default async function LandingPage() {
         </div>
 
         <div className="lp-hero-demo">
-          <div className="code">
-            <div className="bar">
-              <span className="dot" style={{ background: "#FF5F57" }} />
-              <span className="dot" style={{ background: "#FEBC2E" }} />
-              <span className="dot" style={{ background: "#28C840" }} />
-              <span className="fn">first_lesson.py</span>
+          {/* The first thing a visitor's cursor touches answers back — the
+              editor window tilts toward the pointer. Touch and reduced-motion
+              get the same window, still. */}
+          <Tilt max={6}>
+            <div className="code">
+              <div className="bar">
+                <span className="dot" style={{ background: "#FF5F57" }} />
+                <span className="dot" style={{ background: "#FEBC2E" }} />
+                <span className="dot" style={{ background: "#28C840" }} />
+                <span className="fn">first_lesson.py</span>
+              </div>
+              <pre dangerouslySetInnerHTML={{ __html: highlightPython(SAMPLE) }} />
+              <div className="out">Output:<br /><b>Class average: 78.0</b></div>
             </div>
-            <pre dangerouslySetInnerHTML={{ __html: highlightPython(SAMPLE) }} />
-            <div className="out">Output:<br /><b>Class average: 78.0</b></div>
-          </div>
+          </Tilt>
           <div className="lp-demo-note">↑ This is the actual editor you&apos;ll use — no setup, no downloads.</div>
+        </div>
+
+        {/* Ambient glyphs of the subjects themselves, drifting behind the hero. */}
+        <div className="float-field" aria-hidden="true">
+          <span className="ff-a" style={{ top: "8%", left: "44%", width: 34, height: 34, fontSize: 13 }}>{"{ }"}</span>
+          <span className="ff-t" style={{ top: "70%", left: "47%", width: 30, height: 30, fontSize: 12, animationDelay: "1.2s", animationDuration: "6s" }}>π</span>
+          <span className="ff-s" style={{ top: "26%", right: "-14px", width: 28, height: 28, fontSize: 10.5, animationDelay: ".6s" }}>SQL</span>
+          <span className="ff-a" style={{ bottom: "4%", right: "40%", width: 28, height: 28, fontSize: 11, animationDelay: "2s", animationDuration: "5.4s" }}>{"</>"}</span>
         </div>
       </section>
 

@@ -6,6 +6,7 @@ import { TodoList } from "@/components/TodoList";
 import { GuestBanner } from "@/components/GuestBanner";
 import { Avatar } from "@/components/Avatar";
 import { Illo } from "@/components/Illo";
+import { Tilt } from "@/components/Tilt";
 import { subjectStyle } from "@/lib/subjects";
 import { levelFor, focusOf } from "@/lib/profile";
 import { getRank } from "@/lib/profile-server";
@@ -114,7 +115,16 @@ export default async function DashboardPage() {
               )}
               <Link className="btn btn-ghost" href="/practice">Practice now</Link>
             </div>
-            <div className="r-illo" aria-hidden="true"><Illo name="code" size={152} /></div>
+            <div className="r-illo" aria-hidden="true">
+              <Tilt max={9}><Illo name="code" size={152} /></Tilt>
+            </div>
+          </div>
+          {/* Ambient glyphs drifting behind the hero's right half — pointer-
+              transparent, hidden on phones with the illustration. */}
+          <div className="float-field" aria-hidden="true">
+            <span className="ff-a" style={{ top: "14%", right: "218px", width: 30, height: 30, fontSize: 12, animationDelay: ".8s" }}>{"</>"}</span>
+            <span className="ff-t" style={{ bottom: "16%", right: "196px", width: 26, height: 26, fontSize: 11, animationDuration: "6s" }}>py</span>
+            <span className="ff-s" style={{ top: "58%", right: "34px", width: 24, height: 24, fontSize: 12, animationDelay: "1.6s", animationDuration: "4.2s" }}>⚡</span>
           </div>
         </section>
 
