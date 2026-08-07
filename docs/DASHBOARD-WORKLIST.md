@@ -51,13 +51,20 @@ before code · **F** = just fix, no decision.
       *Decision:* in-progress = subjects actually started; third row becomes
       "Not started" (nothing is locked while EXPLORE_MODE is on).
 
-- [ ] **D4 · All 11 subjects show "0%" and a progress bar, including the 7 that
-      have no lessons written.** `D`
-      `EXPLORE_MODE = true` makes the "locked" state unreachable, so the page's
-      own "coming soon" branch is dead code and every stub subject invites you
-      into an empty course. Live-confirmed: 11 tiles, all `now`, all 0%.
-      *Decision:* read content-readiness directly instead of through the explore
-      switch, or turn the switch off.
+- [x] **D4 · done — and the item as written was half wrong.** `F`
+      **Measuring first killed the premise.** There are no unwritten subjects:
+      all 11 have lessons and 141 of 160 pass the teaching-block test (the code
+      comment claimed 50 of 83). The real bug was quieter and worse — `ready`
+      meant *every* lesson at the full standard, so **Python (56/58) and HTML
+      (22/35) both counted as unwritten**, and the only thing keeping a padlock
+      off the flagship course was EXPLORE_MODE, a review switch `gates.ts` says
+      to turn off once there are students.
+      Fixed: `ready` asks whether the subject has any lessons; `isTaught()`
+      deleted (a drifted second copy of `check-syllabus.mjs`'s standard — that
+      standard has one owner, `npm run syllabus`). `ready` is exposed on
+      `TrackProgress`; `status` and its consumers (skills legend, roadmap) are
+      untouched, verified after. The tile stops printing zeros: an unopened
+      subject reads **"Not started"** with no empty rail. Commit `e08a555`.
 
 - [ ] **D5 · "Daily Challenge" has no daily challenge.** `D`
       The card says "Solve today's problem"; the button opens the whole
@@ -178,6 +185,18 @@ before code · **F** = just fix, no decision.
       height.
 
 ---
+
+## Found on the way (added, not fixed on the spot)
+
+- [ ] **D25 · /roadmap says "Ready now: 11".** `F`
+      It counts `status !== "locked"`, which nothing can be, so the box repeats
+      the "Subjects" box beside it. Same family as D4; separate page.
+- [ ] **D26 · Three definitions of "not written yet".** `D`
+      `lib/progress.ts` (has lessons), `/certificates` (`lessons + problems === 0`)
+      and `/book` (`lessons.length === 0`) each answer it differently, so one
+      subject can read three ways across three pages.
+- [ ] **D27 · `unlockedIdsFor` in lib/unlock.ts has zero callers** and encodes
+      the progression rule a second time — it will drift from `lockStateFor`. `F`
 
 ## Deliberately not on this list
 
