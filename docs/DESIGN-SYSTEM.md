@@ -42,13 +42,47 @@ that a single token cannot express.
 Was eight durations (.12 .15 .18 .2 .22 .24 .6 .9). Anything above `--t-slow`
 belongs to a celebration, not an interaction.
 
+**That first pass tokenised the transitions and left the animations alone.**
+Measured later: 47 of 74 motion declarations still carried a literal, and
+`viz-land` — one animation — ran at **.2s, .22s, .24s and .28s across 33
+places**. Four values 20ms apart is four decisions nobody made. It is now one
+token, and the file reads **64 tokens to 13 literals**.
+
+**Deliberately off the scale, and should stay off.** Each is slower than
+`--t-slow` for a reason that is not an interaction:
+
+| Where | Value | Why |
+|---|---|---|
+| `viz-glow` | .9s, after a .22s delay | An attention fade — "this value just changed". At a quarter-second it is a flicker nobody catches. |
+| `.focus-stage`, `.fring-fg` stroke | .6s | The calm shift into break mode. An ambient state change, not a step. |
+| `sk-shimmer` | 1.4s, infinite | A loading indicator. Already switched off under reduced motion. |
+| `.toast` | .35s | A notification arriving from off-screen has further to travel. |
+| `pop` / `ob-pop` / `cc-grow` | .28–.5s | Entrances and the celebration card — the one case the rule above names. |
+
+**Progress fill is one speed: `--t-slow`.** Four bars share it. The fifth,
+`.readbar > i`, is on `--t-fast` linear on purpose — every other fill animates a
+value that *changed*, while that one tracks the scroll position, a continuous
+input the reader is moving right now. Easing it reads as lag.
+
 **Rules.**
 - Motion communicates state. It is never decoration.
 - Most interactions are opacity, colour, or ≤2px of movement.
+- **Every control that reacts to a hover must react to a press.** The stylesheet
+  once had 57 `:hover` rules and **zero** `:active` ones, which meant that on a
+  phone — where there is no hover at all — tapping anything did nothing visible
+  until the action finished. The press layer is the last block in `globals.css`
+  and has to stay there: `:hover` and `:active` have equal specificity, so a
+  hover written later would silently win.
 - Celebration is for lesson complete, module complete, level up — nothing
-  smaller.
+  smaller. ⚠️ **`Celebrate.tsx` currently fires on every problem's first solve**,
+  which is smaller. Not changed unilaterally — it is the reward loop, and this
+  product's stated problem is activation.
 - Never delay an action to finish an animation.
-- `prefers-reduced-motion` must be honoured. The skeletons already do.
+- `prefers-reduced-motion` is honoured **globally**, not just by the skeletons:
+  one block near the top of `globals.css` neutralises animation, transition and
+  scroll-behaviour on `*`. `Celebrate.tsx` checks it separately because a canvas
+  cannot be reached by CSS. The three other `requestAnimationFrame` uses in the
+  app are cursor placement after a Tab-indent, not motion, and need no guard.
 
 ## Colour
 
