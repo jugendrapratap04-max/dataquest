@@ -31,8 +31,11 @@ export async function POST(req: Request) {
   if (existing) {
     return NextResponse.json({ error: "That email is already registered. Sign in instead." }, { status: 409 });
   }
+  // Every new account used to be stamped "Aspiring Data Analyst" — a job title
+  // for one of eleven subjects, chosen before the student picked anything. The
+  // neutral default is honest, and the profile editor lets them write their own.
   const user = await prisma.user.create({
-    data: { name, email: mail, passwordHash: hashPassword(password), role: "Aspiring Data Analyst" },
+    data: { name, email: mail, passwordHash: hashPassword(password), role: "Learner" },
   });
   const store = await cookies();
   store.set(SESSION_COOKIE, signSession(user.id, user.sessionVersion), SESSION_COOKIE_OPTIONS);

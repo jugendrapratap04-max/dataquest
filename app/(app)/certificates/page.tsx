@@ -25,6 +25,12 @@ export default async function CertificatesPage() {
   });
 
   const earnedCount = cards.filter((c) => c.state === "earned").length;
+  // The nearest finish line, rather than "finish the Python track!" said to
+  // someone who is 91% through HTML. Only started-and-unfinished subjects
+  // qualify — a subject at 0% is not close to anything.
+  const closest = cards
+    .filter((c) => c.state === "prog")
+    .sort((a, b) => b.t.pct - a.t.pct)[0]?.t;
 
   return (
     <>
@@ -35,7 +41,9 @@ export default async function CertificatesPage() {
           ? <>These are the certificates the platform issues. Finish a subject and yours is generated automatically.</>
           : earnedCount > 0
           ? <><b>{earnedCount} earned</b> so far 🎉 — put them on your resume and LinkedIn.</>
-          : <>None earned yet. The first one is close — finish the Python track!</>}
+          : closest
+          ? <>None earned yet — <b>{closest.shortTitle}</b> is your closest at {closest.pct}%. Finish it and the certificate is issued automatically.</>
+          : <>None earned yet. Finish any subject and its certificate is issued automatically, with your name on it.</>}
       </p>
       <div className="certs">
         {cards.map(({ t, state }) => (
@@ -43,7 +51,9 @@ export default async function CertificatesPage() {
             <div className="cert-seal"><SealIcon /></div>
             <div className="eyebrow">Certificate</div>
             <h3>{t.shortTitle}</h3>
-            <div className="sub2">Data Science Track · Etudo</div>
+            {/* This said "Data Science Track" on every card — including HTML
+                and the 8085 microprocessor course. The subject names itself. */}
+            <div className="sub2">{t.shortTitle} · Etudo</div>
             {state === "earned" && (
               <div className="cert-earned">
                 <span className="cert-status on">✓ Earned</span>

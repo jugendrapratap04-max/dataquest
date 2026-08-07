@@ -46,7 +46,9 @@ for(var i=0;i<q.length;i++){if(localStorage.getItem(q[i][0])===q[i][2]){d.setAtt
 // nobody here controls, and it was the first thing Google showed for every page.
 export const metadata: Metadata = {
   title: "Etudo — Learn it. Practise it. Build with it.",
-  description: "Learn data science and practise it in the browser — real Python and SQL that run as you type, with visuals that make the concepts click.",
+  // Etudo is multi-subject. This description said "data science" while HTML and
+  // the 8085 course were finished and live — and this is the line Google shows.
+  description: "Learn programming, data and computer science by writing it — Python, HTML, SQL and 8085 assembly all run in your browser, with visuals that make the concepts click.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -69,7 +69,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <div><span className="wm">Etudo</span></div>
         </div>
         <h1>{isSignup ? "Create your account" : "Welcome back 👋"}</h1>
-        <p className="sub">{isSignup ? "One account, and the whole data science path is yours." : "Sign in and pick up exactly where you left off."}</p>
+        <p className="sub">{isSignup ? "One account, and every subject on the path is yours." : "Sign in and pick up exactly where you left off."}</p>
 
         {err && <div className="auth-err">{err}</div>}
 

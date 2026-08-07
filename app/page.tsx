@@ -45,6 +45,16 @@ average = sum(marks) / len(marks)
 
 print(f"Class average: {average}")`;
 
+// Python leads because it is the deepest subject (58 lessons), but the front
+// door has to show that it is one of many — these are the other four runtimes
+// that execute in the browser with no install.
+const RUNTIMES = [
+  { k: "Python", d: "runs in Pyodide" },
+  { k: "SQL", d: "a real database" },
+  { k: "HTML", d: "renders live" },
+  { k: "8085", d: "assembly simulator" },
+];
+
 const REASONS = [
   {
     k: "01",
@@ -63,8 +73,8 @@ const REASONS = [
   },
   {
     k: "04",
-    title: "Pointed at a job",
-    body: "Every topic says where it's used in real data work. The roadmap runs from your first variable to a deployed project, one subject at a time.",
+    title: "Pointed at something real",
+    body: "Every topic says where it is actually used. Each subject ends in something that works — a page on the web, a query that answers a question, a program running on a simulator, a model you deployed.",
   },
 ];
 
@@ -120,11 +130,16 @@ export default async function LandingPage() {
       <section className="lp-hero">
         <div className="lp-hero-copy">
           <div className="lp-eyebrow">Free · Nothing to install · Runs in your browser</div>
-          <h1>Learn data science by <em>writing</em> the code.</h1>
+          <h1>Learn by <em>writing</em> it, not watching it.</h1>
+          {/* Etudo is a multi-subject platform, not a data science course — the
+              headline said otherwise for months while two finished subjects
+              (HTML, 8085) were invisible from the front door. The subject count
+              is queried, like every other number on this page. */}
           <p className="lp-sub">
-            Python, statistics, SQL and pandas — taught with visuals that make concepts click,
-            practice that&apos;s checked the second you submit, and the mistakes and interview
-            questions nobody warns you about.
+            {counts.subjects} subjects — Python, HTML, SQL, statistics, machine learning, even
+            8085 assembly — taught with visuals that make concepts click, practice that&apos;s
+            checked the second you submit, and the mistakes and interview questions nobody
+            warns you about.
           </p>
           <div className="lp-cta">
             <Link href="/signup" className="btn btn-primary lp-big">Start learning free →</Link>
@@ -149,7 +164,12 @@ export default async function LandingPage() {
               <div className="out">Output:<br /><b>Class average: 78.0</b></div>
             </div>
           </Tilt>
-          <div className="lp-demo-note">↑ This is the actual editor you&apos;ll use — no setup, no downloads.</div>
+          <div className="lp-runtimes">
+            {RUNTIMES.map((r) => (
+              <span key={r.k} className="lp-rt"><b>{r.k}</b>{r.d}</span>
+            ))}
+          </div>
+          <div className="lp-demo-note">↑ The actual editor you&apos;ll use — four languages, all running in the browser. No setup, no downloads.</div>
         </div>
 
         {/* Ambient glyphs of the subjects themselves, drifting behind the hero. */}
@@ -197,8 +217,10 @@ export default async function LandingPage() {
       </section>
 
       <section className="lp-sec">
-        <h2 className="lp-h2">The full road, start to finish</h2>
-        <p className="lp-secsub">Nine tracks in order. Start at the very beginning — no prior coding needed.</p>
+        <h2 className="lp-h2">Every subject, in the order that works</h2>
+        {/* "Nine tracks" was typed here while eleven were live — the same
+            stale-number failure the counts above were fixed for. Queried now. */}
+        <p className="lp-secsub">{counts.subjects} subjects, in order. Start at the very beginning — no prior coding needed.</p>
         <div className="lp-tracks">
           {TRACKS.map((t, i) => (
             <div className="lp-track" key={t}>

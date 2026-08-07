@@ -115,7 +115,7 @@ export function ProfileEditor({
         <input
           id="pf-role" className="pf-in" value={role} maxLength={MAX_ROLE}
           onChange={(e) => setRole(e.target.value)}
-          placeholder="Aspiring Data Scientist"
+          placeholder="Student · Self-taught developer · Aspiring anything"
         />
       </div>
 

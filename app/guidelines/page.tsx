@@ -10,7 +10,7 @@ export default function GuidelinesPage() {
   return (
     <LegalShell title="Community Guidelines" current="/guidelines">
       <p className="legal-lead">
-        Etudo exists so people can learn data science together. These guidelines keep it a place
+        Etudo exists so people can learn together. These guidelines keep it a place
         where a beginner is comfortable saying &quot;I don&apos;t understand this&quot; out loud.
       </p>
 
