@@ -101,7 +101,7 @@ export default async function LandingPage() {
       <a href="#main" className="skip-link">Skip to content</a>
       <header className="lp-nav">
         <div className="lp-brand">
-          <div className="mark">D</div>
+          <div className="mark">E</div>
           <span className="wm">Etudo</span>
           <span className="beta">BETA</span>
         </div>

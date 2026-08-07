@@ -97,12 +97,28 @@ input the reader is moving right now. Easing it reads as lag.
 
 ## Colour
 
-**Already tokenised — 40 custom properties, and colour was not the problem.**
-A redesign spec proposed replacing the palette; it was rejected, because Etudo
-has an amber/teal identity and **four working themes** driven by `--sub-h`, and
-swapping the palette means rebuilding all four.
+**Repalettized 2026-08-07 (Jugendra's call, from his reference mockups):**
+violet is the single action colour, orange is demoted to the streak/energy
+accent. The roles:
 
-Add a colour only as a token, and check it in every theme.
+| Token | Light | Job |
+|---|---|---|
+| `--accent` / `-2` / `-soft` | `#6C5BD9` / `#5646C2` / `#ECE9FB` | THE action colour: primary buttons, active nav pill, focus ring, progress |
+| `--accent-ink` | `#FFFFFF` (near-black on dark themes) | text ON the accent — never a literal hex on a filled control |
+| `--spark` / `-2` / `-soft` | `#D37202` / `#9E5503` / `#FCEBD3` | energy only: streak chip, activity ticks, celebration warmth |
+| `--display` | Bricolage Grotesque → `--sans` | headings, greetings, hero numbers (set once, never per theme) |
+
+Sunset keeps its warm identity — there the accent IS the spark. All four themes
+carry the full set; every new pairing was contrast-checked per theme
+(`scratchpad contrast-check` pattern: 40 pairs, all ≥4.5 text / ≥3.0 UI).
+
+Add a colour only as a token, check it in every theme, and never put a literal
+ink on a filled accent control — that is what `--accent-ink` is for.
+
+**The zero-state rule:** gamification never prints a zero at the user. At zero
+the streak chip becomes "Start your streak" and the streak tile becomes the
+first action. Activation is this product's stated problem; a "🔥 0 STREAK"
+badge is shaming the exact person the design exists for.
 
 ## Focus
 

@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { SCHEDULE, THEME_IDS, THEME_KEY, MODE_KEY } from "@/lib/theme-schedule";
+
+// The display face — headings, greetings, hero numbers. Body text stays on the
+// system stack (fast, familiar); this is personality, not plumbing. Self-hosted
+// by next/font at build time: no CDN request, no layout shift, works offline.
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+});
 
 /* The pre-paint script, built rather than typed.
  *
@@ -41,7 +51,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={display.variable}>
       <body>
         {/* Set the theme AND the reading width before first paint, so neither a
             saved preference nor the clock flashes the wrong one. This runs

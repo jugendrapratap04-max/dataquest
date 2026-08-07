@@ -65,7 +65,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           so the browser's native English bubbles don't fire first. */}
       <form className="auth-card" onSubmit={submit} noValidate>
         <div className="auth-logo">
-          <div className="mark">D</div>
+          <div className="mark">E</div>
           <div><span className="wm">Etudo</span></div>
         </div>
         <h1>{isSignup ? "Create your account" : "Welcome back 👋"}</h1>

@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
-import { getProgress, getStreak, shortTitle } from "@/lib/progress";
+import { getProgress, getStreak, getActivity, shortTitle } from "@/lib/progress";
 import { TodoList } from "@/components/TodoList";
 import { GuestBanner } from "@/components/GuestBanner";
 import { Avatar } from "@/components/Avatar";
+import { Illo } from "@/components/Illo";
 import { subjectStyle } from "@/lib/subjects";
 import { levelFor, focusOf } from "@/lib/profile";
 import { getRank } from "@/lib/profile-server";
@@ -28,6 +29,15 @@ export default async function DashboardPage() {
 
   const p = await getProgress(uid);
   const { streak, bestStreak } = await getStreak(uid);
+  // Last seven days of real activity for the streak tile's tick row — same
+  // query the /progress heatmap uses, so a lit tick means the same thing
+  // everywhere: you solved something that day. Index 6 is today.
+  const week = await getActivity(uid, 7);
+  const dayLetter = (offsetFromToday: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() - offsetFromToday);
+    return "SMTWTFS"[d.getDay()];
+  };
   const lessons = await prisma.lesson.findMany({
     include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
@@ -104,6 +114,7 @@ export default async function DashboardPage() {
               )}
               <Link className="btn btn-ghost" href="/practice">Practice now</Link>
             </div>
+            <div className="r-illo" aria-hidden="true"><Illo name="code" size={152} /></div>
           </div>
         </section>
 
@@ -112,7 +123,17 @@ export default async function DashboardPage() {
             The streak next to them was the same lie until it was derived. */}
         <section className="stats">
           <div className="card stat"><div className="k">Day Streak</div>
-            <div className="v num">{streak} <small>best {bestStreak}</small></div></div>
+            {/* At zero the tile offers the first action instead of printing a
+                zero — the invitation IS the stat until there is one. The tick
+                row shows the real last seven days either way (getActivity). */}
+            {streak > 0
+              ? <div className="v">{streak} <small>best {bestStreak}</small></div>
+              : <Link className="invite" href="/practice">Solve one problem today and your streak begins →</Link>}
+            <div className="week" aria-label="Last 7 days of activity">
+              {week.map((n, i) => (
+                <i key={i} className={n > 0 ? "on" : ""} title={`${dayLetter(6 - i)} · ${n} solved`}>{n > 0 ? "✓" : ""}</i>
+              ))}
+            </div></div>
           <div className="card stat"><div className="k">Problems Solved</div>
             <div className="v num">{p.problemsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalProblems}</small></div></div>
           <div className="card stat"><div className="k">Lessons Done</div>
@@ -137,8 +158,12 @@ export default async function DashboardPage() {
               <Link
                 key={t.id}
                 href={t.status !== "locked" && t.nextLesson ? `/learn/${t.nextLesson}` : "/roadmap"}
-                className={`node ${t.status}`}
+                className={`node subject-tint ${t.status}`}
+                style={subjectStyle(t.slug)}
               >
+                {/* The tint sits on the whole tile now (--sub-h on the Link),
+                    so the wash, border and progress bar all derive from the
+                    subject's own hue — the icon keeps working unchanged. */}
                 <div className={`ic tinted subject-tint`} style={subjectStyle(t.slug)}>{t.icon}</div>
                 <div className="t">{t.shortTitle}</div>
                 {/* "0%" on a locked subject reads as progress you have not made
@@ -146,6 +171,9 @@ export default async function DashboardPage() {
                     a percentage would be inviting the student to go and earn
                     something that does not exist. */}
                 <div className="m">{t.status === "done" ? "✓ done" : t.status === "locked" ? "coming soon" : `${t.pct}%`}</div>
+                {t.status !== "locked" && (
+                  <div className="bar"><i style={{ width: `${t.pct}%` }} /></div>
+                )}
                 <span className="badge">{t.status === "done" ? "✓" : t.status === "locked" ? "🔒" : ""}</span>
               </Link>
             ))}
@@ -189,8 +217,10 @@ export default async function DashboardPage() {
           <div className="eyebrow" style={{color:"var(--accent-2)"}}>Daily Challenge</div>
           <h3 style={{fontSize:"15px",margin:"8px 0 6px"}}>Solve today&apos;s problem</h3>
           {/* "Keep your 0-day streak alive" is not a thing you can say to someone. */}
+          {/* No typed XP promise here — the real award is per problem and the
+              server decides it. The streak is the honest stake. */}
           <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
-            {streak > 0 ? <>+20 XP · keep your 🔥 {streak}-day streak alive</> : <>+20 XP · solve one today and your streak starts here</>}
+            {streak > 0 ? <>Keep your 🔥 {streak}-day streak alive — one problem does it.</> : <>Solve one today and your streak starts here.</>}
           </p>
           {/* Secondary, not primary. There were two orange buttons on this
               screen — "Resume learning" in the hero and this one — and two

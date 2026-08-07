@@ -99,7 +99,7 @@ export function Sidebar({ user, roadmapPct }: { user: SideUser | null; roadmapPc
       <div className={`side-backdrop${open ? " show" : ""}`} onClick={() => setOpen(false)} aria-hidden="true" />
       <aside className={`side${open ? " open" : ""}`}>
       <div className="logo">
-        <div className="mark">D</div>
+        <div className="mark">E</div>
         <div><span className="wm">Etudo</span><span className="beta">BETA</span></div>
         <NavCollapse />
       </div>

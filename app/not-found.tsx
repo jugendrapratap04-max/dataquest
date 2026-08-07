@@ -19,7 +19,7 @@ export default function NotFound() {
     <div className="auth-wrap">
       <div className="auth-card">
         <div className="auth-logo">
-          <div className="mark">D</div>
+          <div className="mark">E</div>
           <div><span className="wm">Etudo</span></div>
         </div>
         <h1>This page does not exist</h1>

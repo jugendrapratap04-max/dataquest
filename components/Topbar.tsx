@@ -320,7 +320,13 @@ export function Topbar({ user }: { user: { name: string; streak: number; xp: num
           )}
         </div>
         {user ? (
-          <div className="streak-chip"><span>🔥</span><b>{user.streak}</b><span className="lbl">streak</span></div>
+          user.streak > 0 ? (
+            <div className="streak-chip"><span>🔥</span><b>{user.streak}</b><span className="lbl">streak</span></div>
+          ) : (
+            /* A zero is not worn as a badge. At zero the chip becomes the
+               invitation — solving one problem today is what starts it. */
+            <Link href="/practice" className="streak-chip zero"><span>🔥</span><span className="lbl">Start your streak</span></Link>
+          )
         ) : (
           <div className="guest-cta">
             <Link href="/login" className="gc-link">Sign in</Link>
