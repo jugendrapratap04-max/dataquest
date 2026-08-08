@@ -77,11 +77,21 @@ before code · **F** = just fix, no decision.
       untouched, verified after. The tile stops printing zeros: an unopened
       subject reads **"Not started"** with no empty rail. Commit `e08a555`.
 
-- [ ] **D5 · "Daily Challenge" has no daily challenge.** `D`
-      The card says "Solve today's problem"; the button opens the whole
-      catalogue. No problem-of-the-day exists anywhere in the code.
-      *Decision:* derive a real one (seeded by date), or rename the card to what
-      it does.
+- [x] **D5 · done — there is a problem of the day now.** `F`
+      `lib/daily.ts` picks one from the date itself: same problem for everybody
+      on the same day, tomorrow's decided by arithmetic. No schema, no table, no
+      cost. The pool is the **401 Easy and Medium** problems (measured; all four
+      engines, every one with a lesson) — a Super Hard as the day's one task is
+      a reason to close the tab. The card names it, quotes its **real**
+      difficulty and XP (it used to type "+20 XP" while the award is per problem
+      and set by the server), and links to that problem's workbench; if you have
+      solved it already it says so and offers another.
+      Verified live: guest and signed-in reader get the same problem, the link
+      opens a real workbench, the pick holds from 01:00 to 23:00 and changes
+      tomorrow. **NOT render-verified:** the already-solved branch — nobody has
+      solved today's pick — so both its inputs were checked instead.
+      ⚠️ The rollover is the server's day, deliberately the same basis as the
+      streak. **D8 must move both together.** Commit `bd5ee54`.
 
 - [ ] **D6 · Two Practice Arena cards, one destination.** `D`
       "Python Compiler — real, in-browser" and "Problem Sets" both link to
