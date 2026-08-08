@@ -91,7 +91,7 @@ before code · **F** = just fix, no decision.
       tomorrow. **NOT render-verified:** the already-solved branch — nobody has
       solved today's pick — so both its inputs were checked instead.
       ⚠️ The rollover is the server's day, deliberately the same basis as the
-      streak. **D8 must move both together.** Commit `bd5ee54`.
+      streak. **D8 must move both together.** Commit `9a766da`.
 
 - [ ] **D6 · Two Practice Arena cards, one destination.** `D`
       "Python Compiler — real, in-browser" and "Problem Sets" both link to
