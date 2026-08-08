@@ -42,21 +42,25 @@ before code · **F** = just fix, no decision.
       (its AUTH_SECRET is a sensitive var), so the per-user check runs against a
       local production build pointed at the production database.
 
-- [ ] **D2 · The skills ring is a second, disagreeing version of one fact.** `D`
-      "Skills mastered" is `floor(lessonsDone / totalLessons × skillCount)` —
-      lessons re-scaled by a typed list of skill names. 10 of 39 Python lessons
-      shows **2%** in the ring while the tile beside it says **12%**, and 3 of 39
-      floors to **0%**. Nothing in the schema maps a skill to a lesson.
-      *Decision:* drop the ring (lessons/problems already say this), or give
-      skills a real mapping.
+- [x] **D2 · done — and it took D3 with it.** `F`
+      A "skill" was a name in a list; nothing said which lesson teaches it. The
+      gap was filled by ticking skills in **list order** against a ratio of
+      lessons done, and that ratio drove a "Skills mastered" percentage on two
+      pages plus a green tick per skill on a third.
+      Fixed at the source. The dashboard ring shows what the card is already
+      titled — overall progress, `(lessons + problems) done / exists` — so it is
+      the **sum** of the tiles two cards up and cannot disagree with them; the
+      legend names the two components plus subjects opened, and at zero it
+      offers the lesson that would move it. `/progress` traded "Skills Mastered"
+      for the same number and its bars are honestly titled "Progress by
+      subject". The roadmap keeps the skill NAMES (a real fact about the
+      syllabus) and drops the tick and the empty checkbox.
+      Verified on a real account: ring 2%, legend 8/160 and 2/450, tiles 8/160
+      and 2/450, `/progress` 2%, 104 skill rows with 0 ticked. Commit `be5015b`.
 
-- [ ] **D3 · "In progress: 104" before you have opened anything.** `D`
-      Every skill on the platform counts as in-progress for a guest and for a
-      brand-new account, because membership is decided by track *status*, not by
-      whether the student touched it. "Locked" is then arithmetically pinned to
-      0 — a legend row that can never have a value.
-      *Decision:* in-progress = subjects actually started; third row becomes
-      "Not started" (nothing is locked while EXPLORE_MODE is on).
+- [x] **D3 · gone with D2.** The "In progress 104 / Locked 0" legend does not
+      exist any more — the ring's three rows are lessons, problems and subjects
+      opened, all counted from what the student did.
 
 - [x] **D4 · done — and the item as written was half wrong.** `F`
       **Measuring first killed the premise.** There are no unwritten subjects:
