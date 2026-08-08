@@ -262,22 +262,36 @@ export default async function DashboardPage() {
           <TodoList nextLesson={nextLesson ? { title: nextLesson.title, track: shortTitle(nextLesson.track.title) } : null} />
         </section>
 
+        {/* THE CARD NOW SHOWS WHAT ITS OWN TITLE SAYS.
+            It used to read "Skills mastered" off a ratio nothing measured, and
+            contradicted the tiles two cards up: 10 of 39 Python lessons drew 2%
+            here and 12% there. This number is the sum of the two things the
+            platform records, so it cannot disagree with them. */}
         <section className="card pad"><div className="sec-head"><h2>Overall Progress</h2></div>
           <div className="ring-wrap">
-            <div className="ring" style={{ background: `conic-gradient(var(--accent) 0turn ${p.jobReady/100}turn, var(--panel-2) ${p.jobReady/100}turn 1turn)` }}>
-              {/* This number is mastered skills over total skills. Calling it
-                  "Job-ready" was reading an employment outcome off a completion
-                  percentage, which it has never measured. */}
-              <div className="inner"><div><b className="num">{p.jobReady}%</b><span>Skills mastered</span></div></div>
+            <div
+              className="ring"
+              style={{ background: `conic-gradient(var(--accent) 0turn ${p.overallPct / 100}turn, var(--panel-2) ${p.overallPct / 100}turn 1turn)` }}
+              role="img"
+              aria-label={`${p.overallPct}% of Etudo complete: ${p.lessonsDone} of ${p.totalLessons} lessons and ${p.problemsDone} of ${p.totalProblems} problems`}
+            >
+              <div className="inner"><div><b className="num">{p.overallPct}%</b><span>of Etudo</span></div></div>
             </div>
-            {/* All three count skills, so they add up to totalSkills. The old legend
-                mixed skill counts with track counts and the numbers meant nothing. */}
             <div className="ring-legend">
-              <div className="row"><span className="dot" style={{background:"var(--good)"}}></span>Mastered <b>{p.masteredSkills}</b></div>
-              <div className="row"><span className="dot" style={{background:"var(--accent)"}}></span>In progress <b>{p.inProgressSkills}</b></div>
-              <div className="row"><span className="dot" style={{background:"var(--panel-2)",border:"1px solid var(--line)"}}></span>Locked <b>{p.lockedSkills}</b></div>
+              <div className="row"><span className="dot" style={{background:"var(--accent)"}}></span>Lessons <b>{p.lessonsDone}<span className="of">/{p.totalLessons}</span></b></div>
+              <div className="row"><span className="dot" style={{background:"var(--teal)"}}></span>Problems <b>{p.problemsDone}<span className="of">/{p.totalProblems}</span></b></div>
+              <div className="row"><span className="dot" style={{background:"var(--good)"}}></span>Subjects opened <b>{p.subjectsStarted}<span className="of">/{p.tracks.length}</span></b></div>
             </div>
           </div>
+          {/* Three zeros is not a status report. At the very start the card says
+              what would move it instead of printing them. */}
+          {p.overallPct === 0 && nextLesson && (
+            <p className="ring-invite">
+              Nothing here yet — finishing{" "}
+              <Link className="link" href={`/learn/${nextLesson.slug}`}>one lesson</Link>{" "}
+              moves every number on this card.
+            </p>
+          )}
         </section>
 
         <section className="card pad" style={{borderColor:"color-mix(in srgb,var(--accent) 40%,transparent)"}}>

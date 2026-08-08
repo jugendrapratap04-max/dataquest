@@ -501,7 +501,9 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .ring-wrap { display:flex; align-items:center; gap:18px; }
 .ring { width:104px; height:104px; border-radius:50%; flex:none; display:grid; place-items:center; }
 .ring .inner { width:78px; height:78px; border-radius:50%; background:var(--panel); display:grid; place-items:center; text-align:center; } .ring .inner b { font-family:var(--mono); font-size:22px; display:block; } .ring .inner span { font-size:10px; color:var(--ink-faint); text-transform:uppercase; }
-.ring-legend { display:flex; flex-direction:column; gap:9px; font-size:12.5px; } .ring-legend .row { display:flex; align-items:center; gap:8px; } .ring-legend .dot { width:9px; height:9px; border-radius:3px; } .ring-legend b { font-family:var(--mono); margin-left:auto; }
+.ring-legend { display:flex; flex-direction:column; gap:9px; font-size:12.5px; } .ring-legend .row { display:flex; align-items:center; gap:8px; } .ring-legend .dot { width:9px; height:9px; border-radius:3px; } .ring-legend b { font-family:var(--mono); margin-left:auto; font-variant-numeric:tabular-nums; }
+.ring-legend .of { color:var(--ink-faint); font-weight:400; }
+.ring-invite { font-size:12.5px; color:var(--ink-soft); line-height:1.6; margin:14px 0 0; }
 
 /* roadmap */
 .hero { position:relative; overflow:hidden; color:var(--feat-ink); border:1px solid var(--feat-amber-border); border-radius:var(--radius); box-shadow:var(--feat-shadow); margin-bottom:20px; background:var(--feat-amber-bg); }
@@ -519,8 +521,11 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .pbody { display:none; padding:0 20px 20px; } .phase.open .pbody { display:block; }
 .why { font-size:13px; color:var(--ink-soft); background:var(--panel-2); border-left:3px solid var(--accent); padding:11px 14px; border-radius:0 8px 8px 0; margin-bottom:16px; }
 .skills { display:grid; grid-template-columns:1fr 1fr; gap:5px 18px; margin-bottom:16px; } @media (max-width:560px){ .skills{ grid-template-columns:1fr;} }
-.skill { display:flex; align-items:flex-start; gap:9px; padding:4px 0; font-size:12.5px; } .cb { width:16px; height:16px; border-radius:var(--r-xs); border:2px solid var(--line); flex:none; margin-top:2px; display:grid; place-items:center; font-size:9px; color:transparent; }
-.skill.on .cb { background:var(--good); border-color:var(--good); color:#fff; } .skill.on .lbl { color:var(--ink-faint); }
+/* A bullet, not a checkbox: this list is what the subject covers, and an empty
+   tickbox beside every line read as a to-do nobody could ever tick. The `.on`
+   state is gone with the fabricated per-skill claim behind it. */
+.skill { display:flex; align-items:flex-start; gap:9px; padding:4px 0; font-size:12.5px; }
+.cb { width:16px; flex:none; margin-top:1px; text-align:center; font-size:11px; color:var(--accent); line-height:1.5; }
 .milestone { margin-top:12px; display:flex; align-items:center; gap:10px; font-size:12.5px; background:var(--teal-soft); color:var(--teal); border-radius:var(--r-sm); padding:10px 13px; } .milestone svg { width:16px; height:16px; flex:none; }
 
 /* learn */

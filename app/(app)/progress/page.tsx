@@ -24,11 +24,16 @@ export default async function ProgressPage() {
         <div className="card ovc"><div className="k">Total XP</div><div className="v">{(user?.xp ?? 0).toLocaleString()}</div></div>
         <div className="card ovc"><div className="k">Day Streak</div><div className="v">{streak} 🔥</div></div>
         <div className="card ovc"><div className="k">Best Streak</div><div className="v">{bestStreak}</div></div>
-        <div className="card ovc"><div className="k">Skills Mastered</div><div className="v">{p.jobReady}%</div></div>
+        {/* Was "Skills Mastered {jobReady}%" — a share of skill ticks assigned
+            by list order, not by anything the student did. Same honest number
+            as the dashboard ring now. */}
+        <div className="card ovc"><div className="k">Course Complete</div><div className="v">{p.overallPct}%</div></div>
       </div>
 
       <div className="card pad" style={{ marginBottom: 20 }}>
-        <div className="sec-head"><h2>Skill Mastery</h2></div>
+        {/* These bars are per-subject completion (lessons + problems), which is
+            real — only the heading claimed they were about skills. */}
+        <div className="sec-head"><h2>Progress by subject</h2></div>
         <div className="prog-bars">
           {p.tracks.map((t, i) => (
             <div className="pb-row" key={t.id}>
@@ -42,7 +47,7 @@ export default async function ProgressPage() {
 
       <div className="card pad">
         <div className="sec-head">
-          <h2>Activity — Last 4 Weeks<span className="sub">{totalSubs} submissions · {activeDays} active din</span></h2>
+          <h2>Activity — Last 4 Weeks<span className="sub">{totalSubs} submissions · {activeDays} active days</span></h2>
         </div>
         <div className="bigcal">
           {activity.map((n, i) => (

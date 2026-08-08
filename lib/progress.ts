@@ -10,7 +10,8 @@ import { cache } from "react";
 import { prisma } from "./prisma";
 import { EXPLORE_MODE } from "./gates";
 
-export type SkillState = [name: string, done: boolean];
+/* Was `[name, done]`. The `done` half was fabricated — see the note beside the
+ * skills list below — so a subject's skills are now just what it covers. */
 export type TrackStatus = "done" | "now" | "locked";
 
 /* ⚠️ isTaught() REMOVED 2026-08-07, and the reasons are worth keeping.
@@ -49,15 +50,17 @@ export type TrackProgress = {
    *  the content, not about a review switch. `status` still carries the gate
    *  and still feeds the skills legend — do not merge the two. */
   ready: boolean;
-  skills: SkillState[];
-  skillsDone: number;
+  /** What this subject covers — syllabus names, not per-student state. */
+  skills: string[];
 };
 
 export type Progress = {
   tracks: TrackProgress[];
-  totalSkills: number; masteredSkills: number;
-  inProgressSkills: number; lockedSkills: number;
-  jobReady: number;
+  /** How far through everything the platform records: (lessons + problems)
+   *  done over (lessons + problems) that exist. Replaced `jobReady`, which was
+   *  a percentage of skill ticks nothing measured. */
+  overallPct: number;
+  subjectsStarted: number;
   lessonsDone: number; totalLessons: number;
   problemsDone: number; totalProblems: number;
   doneLessonIds: Set<string>;
@@ -143,15 +146,22 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     const status: TrackStatus =
       !r.ready && !EXPLORE_MODE ? "locked" : r.pct === 100 ? "done" : "now";
 
-    // Nothing in the data maps a skill to the lessons that teach it, so a skill counts
-    // as mastered once the matching share of the track's lessons is done. Lessons are
-    // taken in order, so this tracks reality closely -- and unlike the old hardcoded
-    // flags it can never claim progress the student hasn't made.
+    /* ⚠️ A SKILL IS NOT MEASURED BY ANYTHING, so nothing here claims one is.
+     *
+     * skillsJson is a list of names — "Loops", "Comprehensions" — and no row in
+     * the schema says which lesson teaches which. This used to fill that gap by
+     * ticking skills in LIST ORDER against a ratio of lessons done: at 10 of 39
+     * Python lessons the first 2 names went green, whichever two they happened
+     * to be, and the same arithmetic drove a "Skills mastered" percentage on
+     * two pages. It disagreed with the lesson count beside it (2% against 12%),
+     * and Math.floor erased real work — 3 of 39 lessons rounded to zero skills.
+     *
+     * The names are still worth showing: they are what a subject COVERS, which
+     * is a fact about the syllabus. What is gone is the claim that you have
+     * personally mastered a given one. If per-skill progress is ever wanted it
+     * needs a real lesson↔skill mapping in the schema, not a ratio. */
     const names: string[] = (JSON.parse(r.t.skillsJson || "[]") as ([string, number] | string)[])
       .map((s) => (Array.isArray(s) ? s[0] : s));
-    const skillsDone = r.totalLessons
-      ? Math.floor((r.lessonsDone / r.totalLessons) * names.length)
-      : 0;
 
     return {
       id: r.t.id, slug: r.t.slug, order: r.t.order,
@@ -166,28 +176,31 @@ async function getProgressImpl(userId: string): Promise<Progress> {
       lessonsDone: r.lessonsDone, totalLessons: r.totalLessons,
       problemsDone: r.problemsDone, totalProblems: r.totalProblems,
       pct: r.pct, status,
-      skills: names.map((n, k): SkillState => [n, k < skillsDone]),
-      skillsDone,
+      skills: names,
     };
   });
 
-  const totalSkills = out.reduce((n, t) => n + t.skills.length, 0);
-  const masteredSkills = out.reduce((n, t) => n + t.skillsDone, 0);
-  const inProgressSkills = out
-    .filter((t) => t.status === "now")
-    .reduce((n, t) => n + (t.skills.length - t.skillsDone), 0);
+  const lessonsDone = out.reduce((n, t) => n + t.lessonsDone, 0);
+  const totalLessons = out.reduce((n, t) => n + t.totalLessons, 0);
+  const problemsDone = out.reduce((n, t) => n + t.problemsDone, 0);
+  const totalProblems = out.reduce((n, t) => n + t.totalProblems, 0);
+  const totalWork = totalLessons + totalProblems;
 
   return {
     tracks: out,
-    totalSkills,
-    masteredSkills,
-    inProgressSkills,
-    lockedSkills: Math.max(0, totalSkills - masteredSkills - inProgressSkills),
-    jobReady: totalSkills ? Math.round((masteredSkills / totalSkills) * 100) : 0,
-    lessonsDone: out.reduce((n, t) => n + t.lessonsDone, 0),
-    totalLessons: out.reduce((n, t) => n + t.totalLessons, 0),
-    problemsDone: out.reduce((n, t) => n + t.problemsDone, 0),
-    totalProblems: out.reduce((n, t) => n + t.totalProblems, 0),
+    /* One number for "how far through Etudo am I" — the two things the platform
+     * actually records, over everything there is. It replaces `jobReady`, which
+     * was a share of invented skill ticks and disagreed with the lesson count
+     * on the same screen. This one cannot disagree with the tiles: it is their
+     * sum. */
+    overallPct: totalWork ? Math.round(((lessonsDone + problemsDone) / totalWork) * 100) : 0,
+    /** Subjects the student has actually opened — at least one lesson finished
+     *  or one problem solved in them. */
+    subjectsStarted: out.filter((t) => t.lessonsDone + t.problemsDone > 0).length,
+    lessonsDone,
+    totalLessons,
+    problemsDone,
+    totalProblems,
     doneLessonIds,
     solvedProblemIds,
   };

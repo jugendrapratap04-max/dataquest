@@ -7,7 +7,7 @@ import { subjectStyle } from "@/lib/subjects";
 export type Phase = {
   id: string; slug: string; order: number; title: string; subtitle: string; status: string;
   weeks: string; level: string; whyText: string; milestone: string;
-  toolsCsv: string; skills: [name: string, done: boolean][]; firstLesson?: string;
+  toolsCsv: string; skills: string[]; firstLesson?: string;
   pct: number;
 };
 
@@ -51,10 +51,17 @@ function PhaseCard({ p }: { p: Phase }) {
       </div>
       <div className="pbody">
         {p.whyText && <div className="why">💡 {p.whyText}</div>}
+        {/* WHAT THIS SUBJECT COVERS — not a checklist of what you have mastered.
+            Each row used to carry a green tick, and the ticks were handed out in
+            LIST ORDER against a ratio of lessons done: ten of Python's
+            thirty-nine lessons lit up the first two names, whichever two they
+            happened to be. Nothing in the schema says which lesson teaches which
+            skill, so the claim was invented. The names stay — they are a real
+            fact about the syllabus — and the tick is gone. */}
         <div className="skills">
-          {p.skills.map(([name, d], i) => (
-            <div key={i} className={`skill${d ? " on" : ""}`}>
-              <span className="cb">✓</span><span className="lbl">{name}</span>
+          {p.skills.map((name, i) => (
+            <div key={i} className="skill">
+              <span className="cb" aria-hidden="true">•</span><span className="lbl">{name}</span>
             </div>
           ))}
         </div>
