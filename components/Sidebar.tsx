@@ -130,6 +130,10 @@ export function Sidebar({ user, roadmapPct }: { user: SideUser | null; roadmapPc
         {/* Reachable from inside the app too — a signed-in student should not
             have to log out to find the rules they agreed to. */}
         <div className="side-legal">
+          {/* /about is the old front page. Since `/` became the dashboard it has
+              no other entrance, and it is the only page that explains the
+              method — so it is reachable from every screen, not orphaned. */}
+          <Link href="/about" onClick={() => setOpen(false)}>About</Link>
           <Link href="/guidelines" onClick={() => setOpen(false)}>Guidelines</Link>
           <Link href="/terms" onClick={() => setOpen(false)}>Terms</Link>
           <Link href="/privacy" onClick={() => setOpen(false)}>Privacy</Link>

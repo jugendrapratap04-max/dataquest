@@ -1,0 +1,260 @@
+import Link from "next/link";
+import { unstable_cache } from "next/cache";
+import { prisma } from "@/lib/prisma";
+import { highlightPython } from "@/lib/highlight";
+import { Tilt } from "@/components/Tilt";
+
+/* THE TOUR — what Etudo is, for somebody deciding whether to bother.
+ *
+ * This was `/` until 2026-08-07, when Jugendra moved the front door to the
+ * dashboard: "ye landing page ho, naki other". A visitor now arrives inside the
+ * product with everything real on screen, rather than reading a pitch about it.
+ *
+ * The page is kept, not deleted, and kept public: it is the only place that
+ * explains the method, and it is what a search engine and a shared link have to
+ * chew on. It no longer redirects signed-in readers away — somebody who already
+ * has an account is allowed to read what the product claims to be.
+ */
+//
+// No database work for a visitor: with no session cookie getCurrentUser()
+// returns null on the signature check alone, and the numbers below are static.
+// A cold database must never be the first thing a new student waits on.
+
+// The headline numbers were typed in by hand and had already drifted — the page
+// advertised 82 lessons while the database held 83, and every lesson written
+// widens the gap. Counted for real now, but cached for an hour and wrapped in a
+// fallback, because the rule above still holds: a visitor must never wait on a
+// cold database, and a database hiccup must not take the front door down.
+const FALLBACK_COUNTS = { lessons: 83, problems: 156, subjects: 9 };
+
+const getLandingCounts = unstable_cache(
+  async () => {
+    // The subject count was typed into the page as "9" and stayed there while
+    // two more subjects were finished and shipped, so the front door advertised
+    // nine and the roadmap listed eleven. Counted like the other two now — only
+    // subjects that actually have lessons, since an empty track is not a
+    // subject anyone can start.
+    const [lessons, problems, subjects] = await Promise.all([
+      prisma.lesson.count(),
+      prisma.problem.count(),
+      prisma.track.count({ where: { lessons: { some: {} } } }),
+    ]);
+    return { lessons, problems, subjects };
+  },
+  ["landing-counts"],
+  { revalidate: 3600 }
+);
+
+const SAMPLE = `# Real Python. Runs right here, in your browser.
+marks = [72, 85, 91, 64]
+average = sum(marks) / len(marks)
+
+print(f"Class average: {average}")`;
+
+// Python leads because it is the deepest subject (58 lessons), but the front
+// door has to show that it is one of many — these are the other four runtimes
+// that execute in the browser with no install.
+const RUNTIMES = [
+  { k: "Python", d: "runs in Pyodide" },
+  { k: "SQL", d: "a real database" },
+  { k: "HTML", d: "renders live" },
+  { k: "8085", d: "assembly simulator" },
+];
+
+const REASONS = [
+  {
+    k: "01",
+    title: "You write the code",
+    body: "No videos to sit through. You type real Python, run it, and tests check your answer the moment you submit — the way you actually learn to code.",
+  },
+  {
+    k: "02",
+    title: "Concepts you can see",
+    body: "Slicing, loops, objects, exceptions — each one has a small interactive visual you can play with, so the idea clicks instead of being memorised.",
+  },
+  {
+    k: "03",
+    title: "The traps, before you fall in",
+    body: "Every lesson shows the mistakes beginners actually make, why they happen, and the fix — plus the interview questions asked on that topic.",
+  },
+  {
+    k: "04",
+    title: "Pointed at something real",
+    body: "Every topic says where it is actually used. Each subject ends in something that works — a page on the web, a query that answers a question, a program running on a simulator, a model you deployed.",
+  },
+];
+
+const FLOW = [
+  { n: "Understand", d: "A question worth answering, a clear definition, and where it's used at work." },
+  { n: "See it", d: "An interactive visual — change the input, watch what happens." },
+  { n: "Practice", d: "Write real code. Tests check it instantly and pay you XP." },
+  { n: "Prove it", d: "A three-level quiz that only clears if the concept truly landed." },
+];
+
+/* The list under "The full road, start to finish" — which was nine of eleven.
+   HTML (35 lessons) and the microprocessor course (19) were both finished and
+   both missing, so the page promised the full road and left two subjects off
+   it. Hardcoded still, because the order is editorial rather than the `order`
+   column — but it has to be COMPLETE. Add a subject here when you ship one. */
+const TRACKS = [
+  "Python", "Statistics", "Data Manipulation", "Data Visualization", "SQL",
+  "BI Tools", "Machine Learning", "Deep Learning", "Deployment",
+  "Microprocessor", "HTML",
+];
+
+export const metadata = {
+  title: "What Etudo is — Learn it. Practise it. Build with it.",
+  description:
+    "Eleven subjects, taught with visuals that make concepts click and practice that is checked the second you submit. Free, in the browser, nothing to install.",
+  alternates: { canonical: "https://dataquest-navy.vercel.app/about" },
+};
+
+export default async function AboutPage() {
+
+  let counts = FALLBACK_COUNTS;
+  try {
+    counts = await getLandingCounts();
+  } catch {
+    // Keep the last known-good numbers rather than rendering a broken hero.
+  }
+
+  return (
+    <div className="lp">
+      <a href="#main" className="skip-link">Skip to content</a>
+      <header className="lp-nav">
+        <div className="lp-brand">
+          <div className="mark">E</div>
+          <span className="wm">Etudo</span>
+          <span className="beta">BETA</span>
+        </div>
+        <nav className="lp-navlinks">
+          <Link href="/login" className="lp-link">Sign in</Link>
+          <Link href="/signup" className="btn btn-primary lp-navcta">Start free</Link>
+        </nav>
+      </header>
+
+      {/* The landing page had a header, sections and a footer, and no <main>.
+          Assistive technology uses it to answer "where does the content start" —
+          without one there is nothing to jump to, and the reader tabs through
+          the whole nav on every visit. */}
+      <main id="main" tabIndex={-1}>
+      <section className="lp-hero">
+        <div className="lp-hero-copy">
+          <div className="lp-eyebrow">Free · Nothing to install · Runs in your browser</div>
+          <h1>Learn by <em>writing</em> it, not watching it.</h1>
+          {/* Etudo is a multi-subject platform, not a data science course — the
+              headline said otherwise for months while two finished subjects
+              (HTML, 8085) were invisible from the front door. The subject count
+              is queried, like every other number on this page. */}
+          <p className="lp-sub">
+            {/* Explicit {" "}: an expression at the start of a JSX line loses the
+                space that follows it — React emitted "11<!-- -->subjects". */}
+            {counts.subjects}{" "}subjects — Python, HTML, SQL, statistics, machine learning, even
+            8085 assembly — taught with visuals that make concepts click, practice that&apos;s
+            checked the second you submit, and the mistakes and interview questions nobody
+            warns you about.
+          </p>
+          <div className="lp-cta">
+            <Link href="/signup" className="btn btn-primary lp-big">Start learning free →</Link>
+            <Link href="/login" className="btn btn-ghost lp-big">I have an account</Link>
+          </div>
+          <div className="lp-trust">No credit card. No installation. Your progress saves as you go.</div>
+        </div>
+
+        <div className="lp-hero-demo">
+          {/* The first thing a visitor's cursor touches answers back — the
+              editor window tilts toward the pointer. Touch and reduced-motion
+              get the same window, still. */}
+          <Tilt max={6}>
+            <div className="code">
+              <div className="bar">
+                <span className="dot" style={{ background: "#FF5F57" }} />
+                <span className="dot" style={{ background: "#FEBC2E" }} />
+                <span className="dot" style={{ background: "#28C840" }} />
+                <span className="fn">first_lesson.py</span>
+              </div>
+              <pre dangerouslySetInnerHTML={{ __html: highlightPython(SAMPLE) }} />
+              <div className="out">Output:<br /><b>Class average: 78.0</b></div>
+            </div>
+          </Tilt>
+          <div className="lp-runtimes">
+            {RUNTIMES.map((r) => (
+              <span key={r.k} className="lp-rt"><b>{r.k}</b>{r.d}</span>
+            ))}
+          </div>
+          <div className="lp-demo-note">↑ The actual editor you&apos;ll use — four languages, all running in the browser. No setup, no downloads.</div>
+        </div>
+
+        {/* Ambient glyphs of the subjects themselves, drifting behind the hero. */}
+        <div className="float-field" aria-hidden="true">
+          <span className="ff-a" style={{ top: "8%", left: "44%", width: 34, height: 34, fontSize: 13 }}>{"{ }"}</span>
+          <span className="ff-t" style={{ top: "70%", left: "47%", width: 30, height: 30, fontSize: 12, animationDelay: "1.2s", animationDuration: "6s" }}>π</span>
+          <span className="ff-s" style={{ top: "26%", right: "-14px", width: 28, height: 28, fontSize: 10.5, animationDelay: ".6s" }}>SQL</span>
+          <span className="ff-a" style={{ bottom: "4%", right: "40%", width: 28, height: 28, fontSize: 11, animationDelay: "2s", animationDuration: "5.4s" }}>{"</>"}</span>
+        </div>
+      </section>
+
+      <section className="lp-stats">
+        <div><b className="num">{counts.lessons}</b><span>lessons</span></div>
+        <div><b className="num">{counts.problems}</b><span>practice problems</span></div>
+        <div><b className="num">{counts.subjects}</b><span>subjects on the path</span></div>
+        <div><b className="num">₹0</b><span>to learn everything</span></div>
+      </section>
+
+      <section className="lp-sec">
+        <h2 className="lp-h2">Why this works better than watching tutorials</h2>
+        <div className="lp-reasons">
+          {REASONS.map((r) => (
+            <div className="lp-reason" key={r.k}>
+              <div className="lp-rk">{r.k}</div>
+              <h3>{r.title}</h3>
+              <p>{r.body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-sec">
+        <h2 className="lp-h2">How every lesson goes</h2>
+        <div className="lp-flow">
+          {FLOW.map((f, i) => (
+            <div className="lp-step" key={f.n}>
+              <div className="lp-stepn">{i + 1}</div>
+              <div>
+                <h3>{f.n}</h3>
+                <p>{f.d}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-sec">
+        <h2 className="lp-h2">Every subject, in the order that works</h2>
+        {/* "Nine tracks" was typed here while eleven were live — the same
+            stale-number failure the counts above were fixed for. Queried now. */}
+        <p className="lp-secsub">{counts.subjects} subjects, in order. Start at the very beginning — no prior coding needed.</p>
+        <div className="lp-tracks">
+          {TRACKS.map((t, i) => (
+            <div className="lp-track" key={t}>
+              <span className="lp-tn">{String(i + 1).padStart(2, "0")}</span>{t}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="lp-final">
+        <h2>Your first program is five minutes away.</h2>
+        <p>Make an account, open the first lesson, and write something that runs today.</p>
+        <Link href="/signup" className="btn btn-primary lp-big">Start learning free →</Link>
+      </section>
+      </main>
+
+      <footer className="lp-foot">
+        <span className="mono">Etudo</span> — learn it, practise it, build with it.
+        <br />
+        <Link href="/book">Free written notes</Link> · <Link href="/guidelines">Community Guidelines</Link> · <Link href="/terms">Terms</Link> · <Link href="/privacy">Privacy</Link>
+      </footer>
+    </div>
+  );
+}

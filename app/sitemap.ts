@@ -11,6 +11,10 @@ import { SITE_URL } from "@/lib/seo";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
+    // The page that explains what this is. It was `/` until the front door
+    // moved to the dashboard; a redirect is not something to index, so the
+    // prose it used to carry is listed here on its own.
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE_URL}/book`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/learn`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/practice`, changeFrequency: "weekly", priority: 0.8 },

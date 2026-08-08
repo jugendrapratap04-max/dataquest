@@ -50,7 +50,49 @@ export default async function DashboardPage() {
   const focus = user ? focusOf(p) : null;
   const rank = user ? await getRank(user.id) : null;
 
-  const nextLesson = lessons.find((l) => !p.doneLessonIds.has(l.id)) ?? lessons[0];
+  /* CONTINUE MEANS THE SUBJECT YOU WERE IN — not the first one in the catalogue.
+   *
+   * This used to be `lessons.find(l => !done.has(l.id))` over a list ordered by
+   * track.order then lesson.order, so the answer was "the earliest unfinished
+   * lesson anywhere". Since Python is track 1 and nobody finishes 58 lessons
+   * quickly, EVERY student was told to continue with Python lesson 1 — while
+   * the identity strip 40px above said their focus was HTML. Jugendra put it
+   * plainly: "har user ko us jagah Python hi milti hai".
+   *
+   * Nothing records "last opened", so the most recent thing the student
+   * FINISHED is the honest signal: a completed lesson or a solved problem,
+   * whichever happened later. Two indexed lookups of one row each.
+   */
+  const [lastLesson, lastSolve] = user
+    ? await Promise.all([
+        prisma.lessonProgress.findFirst({
+          where: { userId: user.id, status: "done", completedAt: { not: null } },
+          orderBy: { completedAt: "desc" },
+          select: { completedAt: true, lesson: { select: { trackId: true } } },
+        }),
+        prisma.submission.findFirst({
+          where: { userId: user.id, passed: true },
+          orderBy: { createdAt: "desc" },
+          select: { createdAt: true, problem: { select: { lesson: { select: { trackId: true } } } } },
+        }),
+      ])
+    : [null, null];
+
+  const lessonAt = lastLesson?.completedAt?.getTime() ?? 0;
+  const solveAt = lastSolve?.createdAt?.getTime() ?? 0;
+  const activeTrackId =
+    (solveAt > lessonAt ? lastSolve?.problem?.lesson?.trackId : lastLesson?.lesson.trackId) ??
+    lastLesson?.lesson.trackId ?? lastSolve?.problem?.lesson?.trackId ?? null;
+  /** Has this student done anything at all? Drives the hero's wording, so a
+   *  signed-in account that has never opened a lesson is not told to "continue
+   *  where you left off" — it has no left off. */
+  const started = lessonAt > 0 || solveAt > 0;
+
+  const unfinished = (trackId?: string | null) =>
+    lessons.find((l) => (!trackId || l.trackId === trackId) && !p.doneLessonIds.has(l.id));
+  // Their subject first; if they have finished it, the next unfinished anywhere;
+  // if they have finished everything, lesson one.
+  const nextLesson = unfinished(activeTrackId) ?? unfinished(null) ?? lessons[0];
   const theoryDone = nextLesson ? p.doneLessonIds.has(nextLesson.id) : false;
   const practiceDone =
     !!nextLesson &&
@@ -93,7 +135,10 @@ export default async function DashboardPage() {
           <div className="pad">
             {/* "Continue where you left off" is a lie to somebody who has never
                 been here. Same card, honest label. */}
-            <div className="eyebrow">{user ? "Continue where you left off" : "Start here"}</div>
+            {/* "Continue where you left off" to somebody who has never opened a
+                lesson is the activation cohort being told a story about a past
+                they do not have. It now follows real activity, not sign-in. */}
+            <div className="eyebrow">{started ? "Continue where you left off" : "Start here"}</div>
             <h2>{nextLesson ? nextLesson.title : "Start your journey"}</h2>
             <div className="sub">
               {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Start with Python"}
@@ -110,7 +155,7 @@ export default async function DashboardPage() {
             <div className="rfoot">
               {nextLesson && (
                 <Link className="btn btn-primary" href={`/learn/${nextLesson.slug}`}>
-                  {user ? "Resume learning →" : "Start the first lesson →"}
+                  {started ? "Resume learning →" : "Start the first lesson →"}
                 </Link>
               )}
               <Link className="btn btn-ghost" href="/practice">Practice now</Link>
