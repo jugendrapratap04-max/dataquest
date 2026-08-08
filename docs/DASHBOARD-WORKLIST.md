@@ -90,12 +90,23 @@ before code · **F** = just fix, no decision.
       *Decision:* build the scratchpad the card promises, or collapse to one
       honest card.
 
-- [ ] **D7 · Reading lessons earns nothing, but the page implies it does.** `D`
-      XP, streak and the activity ticks all come from *passing submissions* only.
-      A student who reads ten lessons sees "Lessons Done 10/83" beside "Total XP
-      0", a zero streak and seven blank ticks.
-      *Decision:* does finishing a lesson award XP / count for the streak? If
-      not, the streak copy must stop implying that showing up is measured.
+- [x] **D7 · done — reading counts as a day studied; XP stays code-only.** `F`
+      **The decision, and why it split.** Finishing a lesson now counts for the
+      streak, the dashboard's week of ticks and both heatmaps — showing up is
+      measured, which matters most for the seven HTML Module 0/1 lessons and the
+      deploy track, where there are no problems to solve by design. One source
+      (`studyMoments`) feeds all three counters, because they were separately
+      correct before and that is the only reason they stayed in step.
+      **XP deliberately does not follow.** `db:check` fails any account holding
+      more XP than its passing submissions justify — the invariant born from
+      16,080 seeded XP — and `/api/progress` takes the client's word for it, so
+      paying XP there would let a loop mint the number the leaderboard ranks on.
+      Reading is rewarded by the streak, the squares and four Reading badges;
+      solving is rewarded by XP, and the tiles now say which is which.
+      Measured before shipping: one real student goes streak 0 → 1 and active
+      days 4 → 6 (he had finished two lessons and been told he had none).
+      Nobody else moves; seven rows predate `completedAt` and are skipped rather
+      than dated by guesswork. Commit `37055e7`.
 
 - [ ] **D8 · Day boundaries run on server time (UTC), not IST.** `D`
       A problem solved at 01:00 IST is filed to the previous day — it can break
