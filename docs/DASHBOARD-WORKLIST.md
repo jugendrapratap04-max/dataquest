@@ -27,13 +27,20 @@ before code · **F** = just fix, no decision.
 
 ## Tier 1 — the page tells lies (do these first)
 
-- [ ] **D1 · The hero always sends you to Python.** `D`
-      `nextLesson` is the first unfinished lesson in **global track order**, so a
-      student 91% through HTML is told "Continue where you left off →" over
-      Python lesson 1. The identity strip 40px above it says their focus is HTML.
-      *Decision:* continue = the subject you last touched (needs a "last opened"
-      signal), or the subject with the most progress, or keep global order and
-      change the wording.
+- [x] **D1 · done — Continue now means your subject.** `F`
+      Nothing records "last opened", so the hero follows the most recent thing
+      the student **finished** (a completed lesson or a solved problem,
+      whichever is later) and opens the first unfinished lesson in that subject;
+      then the next unfinished anywhere; then lesson one. The eyebrow and CTA
+      follow real activity instead of sign-in, so a signed-in account that has
+      never opened a lesson reads "Start here", not "Continue where you left
+      off". Verified against three real accounts on a production build:
+      SQL → SQL & SELECT, HTML → HTML lesson 3 (its first unfinished, not its
+      first), zero-activity → Python lesson 1 under "Start here". Commit
+      `13ffad6`.
+      **NOT verifiable on the live site:** production sessions cannot be minted
+      (its AUTH_SECRET is a sensitive var), so the per-user check runs against a
+      local production build pointed at the production database.
 
 - [ ] **D2 · The skills ring is a second, disagreeing version of one fact.** `D`
       "Skills mastered" is `floor(lessonsDone / totalLessons × skillCount)` —
@@ -185,6 +192,14 @@ before code · **F** = just fix, no decision.
       height.
 
 ---
+
+## The front door moved (2026-08-07)
+
+`/` is the dashboard now — Jugendra: *"ye landing page ho naki other"*. It only
+works because the dashboard was built guest-first: honest zeros, the whole
+roadmap, every lesson open without an account. The marketing page kept its
+content and moved to **`/about`**, linked from the sidebar on every screen and
+listed in the sitemap in place of a redirect nothing should index.
 
 ## Found on the way (added, not fixed on the spot)
 
