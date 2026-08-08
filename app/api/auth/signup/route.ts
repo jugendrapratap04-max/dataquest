@@ -29,7 +29,8 @@ export async function POST(req: Request) {
   recordSignup(ip);
   const existing = await prisma.user.findUnique({ where: { email: mail } });
   if (existing) {
-    return NextResponse.json({ error: "That email is already registered. Sign in instead." }, { status: 409 });
+    // Do not leak whether the email exists. Same generic message as login.
+    return NextResponse.json({ error: "That email or password is not right." }, { status: 400 });
   }
   // Every new account used to be stamped "Aspiring Data Analyst" — a job title
   // for one of eleven subjects, chosen before the student picked anything. The
