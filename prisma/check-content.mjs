@@ -332,7 +332,10 @@ console.log(`problems: ${problems.length} (${pyProblems.length} python, ${sqlPro
  * No account may hold XP it did not earn.
  *
  * XP is paid in /api/submit — problem.xp, once, on the first passing
- * submission. Anything above that sum was put there by hand, and six seeded
+ * submission. Nowhere else: finishing a lesson deliberately pays none, so that
+ * this invariant stays enforceable and so that a self-declared "I read it"
+ * cannot mint the number the leaderboard ranks on (app/api/progress/route.ts
+ * carries the reasoning). Anything above that sum was put there by hand, and six seeded
  * demo accounts held 16,080 XP between them against zero submissions for
  * months. It was visible the whole time and nothing was looking: the profile
  * page showed "Level 9" beside "0 problems solved, 0 of 25 badges", and the

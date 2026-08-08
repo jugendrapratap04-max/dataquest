@@ -7,6 +7,25 @@ import { readJson, idOf } from "@/lib/http";
  *  verbatim, so a client could invent a status the rest of the app can't read. */
 const STATUSES = new Set(["in_progress", "done"]);
 
+/* ⚠️ FINISHING A LESSON DOES NOT PAY XP, AND THAT IS A DECISION.
+ *
+ * Reading now counts for the streak and the activity squares (lib/progress.ts
+ * studyMoments) — showing up is measured. XP stays the currency of code, for
+ * two reasons that would both be lost by paying it here:
+ *
+ *   1. XP feeds the leaderboard and the levels, and it is the one number with
+ *      an enforced invariant: `db:check` fails any account holding more XP than
+ *      its passing submissions justify. That check exists because six seeded
+ *      accounts once held 16,080 unearned XP for months.
+ *   2. This endpoint takes the client's word for it. "I read this" is
+ *      self-declared, so a loop over 160 lessonIds would mint XP. A passing
+ *      submission is re-verified on the server before a single point is paid.
+ *
+ * So: the streak, the squares and four Reading badges reward reading; XP and
+ * the leaderboard reward solving. The dashboard says which is which rather
+ * than implying that everything feeds one number.
+ */
+
 // Mark a lesson as in_progress / done for the current user.
 export async function POST(req: Request) {
   const user = await getCurrentUser();

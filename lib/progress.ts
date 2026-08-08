@@ -206,6 +206,42 @@ async function getProgressImpl(userId: string): Promise<Progress> {
   };
 }
 
+/* WHAT COUNTS AS STUDYING — one answer, used by all three day-counters.
+ *
+ * Until 2026-08-07 the streak, the dashboard's week of ticks and the profile's
+ * year heatmap each ran their own query and each counted passing submissions
+ * ONLY. So a student who read ten lessons — the exact behaviour this platform
+ * is trying to cause, and the only behaviour available in the seven HTML
+ * Module 0/1 lessons and the deploy track, which carry no problems by design —
+ * saw a zero streak, seven blank squares, and "your streak begins here".
+ * The page counted the work in one tile and denied it in the next.
+ *
+ * Finishing a lesson now counts as a day studied, exactly like solving.
+ *
+ * ⚠️ ALL THREE CALLERS MUST USE THIS. They were separately correct before and
+ * that is how they stayed in step; a green square and a live streak have to
+ * keep meaning the same thing, which is the bug this file was written to kill
+ * once already (see getActivity's note).
+ *
+ * XP is deliberately NOT paid for reading — see app/api/progress/route.ts.
+ */
+export const studyMoments = cache(studyMomentsImpl);
+async function studyMomentsImpl(userId: string, since?: Date): Promise<Date[]> {
+  const [subs, read] = await Promise.all([
+    prisma.submission.findMany({
+      where: { userId, passed: true, ...(since ? { createdAt: { gte: since } } : {}) },
+      select: { createdAt: true },
+    }),
+    prisma.lessonProgress.findMany({
+      // A row from before completedAt existed carries NULL and is skipped rather
+      // than dated by guesswork — the same rule the column's own comment sets.
+      where: { userId, status: "done", completedAt: since ? { gte: since } : { not: null } },
+      select: { completedAt: true },
+    }),
+  ]);
+  return [...subs.map((s) => s.createdAt), ...read.map((l) => l.completedAt!)];
+}
+
 export type Streak = { streak: number; bestStreak: number };
 
 /**
@@ -222,12 +258,8 @@ export type Streak = { streak: number; bestStreak: number };
  */
 export const getStreak = cache(getStreakImpl);
 async function getStreakImpl(userId: string): Promise<Streak> {
-  const subs = await prisma.submission.findMany({
-    where: { userId, passed: true },
-    select: { createdAt: true },
-    orderBy: { createdAt: "asc" },
-  });
-  if (subs.length === 0) return { streak: 0, bestStreak: 0 };
+  const moments = await studyMoments(userId);
+  if (moments.length === 0) return { streak: 0, bestStreak: 0 };
 
   const DAY = 86_400_000;
   const dayOf = (d: Date) => {
@@ -236,7 +268,7 @@ async function getStreakImpl(userId: string): Promise<Streak> {
     return x.getTime();
   };
 
-  const days = [...new Set(subs.map((s) => dayOf(s.createdAt)))].sort((a, b) => a - b);
+  const days = [...new Set(moments.map(dayOf))].sort((a, b) => a - b);
 
   let best = 1;
   let run = 1;
@@ -253,27 +285,24 @@ async function getStreakImpl(userId: string): Promise<Streak> {
   return { streak: current, bestStreak: best };
 }
 
-/** Solved problems per day for the last `days` days, oldest first.
+/** Things finished per day for the last `days` days, oldest first — lessons and
+ *  solved problems together.
  *
- *  Counts passing submissions only, and that matters: this used to count every
- *  submission while getStreak counted only passing ones, so the heatmap could
- *  light a day green while the streak stayed at zero — two numbers on the same
- *  page disagreeing about whether you studied. A green square now means the same
- *  thing everywhere: you solved something that day. */
+ *  It reads the same source as the streak, and that matters: this once counted
+ *  every submission while getStreak counted only passing ones, so the heatmap
+ *  could light a day green while the streak stayed at zero — two numbers on the
+ *  same page disagreeing about whether you studied. A green square means the
+ *  same thing everywhere: you finished something that day. */
 export const getActivity = cache(getActivityImpl);
 async function getActivityImpl(userId: string, days = 28): Promise<number[]> {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - (days - 1));
 
-  const subs = await prisma.submission.findMany({
-    where: { userId, passed: true, createdAt: { gte: start } },
-    select: { createdAt: true },
-  });
-
+  const moments = await studyMoments(userId, start);
   const counts = new Array<number>(days).fill(0);
-  for (const s of subs) {
-    const d = new Date(s.createdAt);
+  for (const at of moments) {
+    const d = new Date(at);
     d.setHours(0, 0, 0, 0);
     const i = Math.round((d.getTime() - start.getTime()) / 86_400_000);
     if (i >= 0 && i < days) counts[i]++;

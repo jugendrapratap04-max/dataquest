@@ -12,6 +12,7 @@
  */
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
+import { studyMoments } from "@/lib/progress";
 
 /* ------------------------------------------------------------------ solved -- */
 
@@ -139,14 +140,13 @@ async function getYearActivityImpl(userId: string, weeks = 53): Promise<YearActi
 
   const total_days = Math.round((end.getTime() - start.getTime()) / DAY) + 1;
 
-  const subs = await prisma.submission.findMany({
-    where: { userId, passed: true, createdAt: { gte: start } },
-    select: { createdAt: true },
-  });
+  // Same source as the streak and the dashboard's week — see studyMoments.
+  // A square on this grid and a day on the streak have to mean one thing.
+  const moments = await studyMoments(userId, start);
 
   const counts = new Array<number>(total_days).fill(0);
-  for (const s of subs) {
-    const d = new Date(s.createdAt);
+  for (const at of moments) {
+    const d = new Date(at);
     d.setHours(0, 0, 0, 0);
     const i = Math.round((d.getTime() - start.getTime()) / DAY);
     if (i >= 0 && i < total_days) counts[i]++;

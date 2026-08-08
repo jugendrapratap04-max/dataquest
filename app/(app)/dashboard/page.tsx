@@ -31,8 +31,9 @@ export default async function DashboardPage() {
   const p = await getProgress(uid);
   const { streak, bestStreak } = await getStreak(uid);
   // Last seven days of real activity for the streak tile's tick row — same
-  // query the /progress heatmap uses, so a lit tick means the same thing
-  // everywhere: you solved something that day. Index 6 is today.
+  // source the streak and both heatmaps use, so a lit tick means the same thing
+  // everywhere: you finished a lesson or solved a problem that day. Index 6 is
+  // today.
   const week = await getActivity(uid, 7);
   const dayLetter = (offsetFromToday: number) => {
     const d = new Date();
@@ -181,20 +182,29 @@ export default async function DashboardPage() {
             {/* At zero the tile offers the first action instead of printing a
                 zero — the invitation IS the stat until there is one. The tick
                 row shows the real last seven days either way (getActivity). */}
+            {/* Reading counts now, so the invitation offers the cheaper of the
+                two doors first. Somebody who has never solved anything is far
+                more likely to finish a lesson today, and that is a real day on
+                the streak. */}
             {streak > 0
               ? <div className="v">{streak} <small>best {bestStreak}</small></div>
-              : <Link className="invite" href="/practice">Solve one problem today and your streak begins →</Link>}
+              : nextLesson
+                ? <Link className="invite" href={`/learn/${nextLesson.slug}`}>Finish a lesson or solve a problem today — either starts it →</Link>
+                : <Link className="invite" href="/practice">Solve one problem today and your streak begins →</Link>}
             <div className="week" aria-label="Last 7 days of activity">
               {week.map((n, i) => (
-                <i key={i} className={n > 0 ? "on" : ""} title={`${dayLetter(6 - i)} · ${n} solved`}>{n > 0 ? "✓" : ""}</i>
+                <i key={i} className={n > 0 ? "on" : ""} title={`${dayLetter(6 - i)} · ${n} finished`}>{n > 0 ? "✓" : ""}</i>
               ))}
             </div></div>
           <div className="card stat"><div className="k">Problems Solved</div>
             <div className="v num">{p.problemsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalProblems}</small></div></div>
           <div className="card stat"><div className="k">Lessons Done</div>
             <div className="v num">{p.lessonsDone}<small style={{color:"var(--ink-faint)"}}>/{p.totalLessons}</small></div></div>
+          {/* Says where XP comes from, because the tile beside it counts lessons
+              and reading pays none — see app/api/progress/route.ts for why. */}
           <div className="card stat"><div className="k">Total XP</div>
-            <div className="v num">{(user?.xp ?? 0).toLocaleString()}</div></div>
+            <div className="v num">{(user?.xp ?? 0).toLocaleString()}</div>
+            <div className="k-sub">earned by solving</div></div>
         </section>
 
         <section className="card pad">
@@ -301,7 +311,7 @@ export default async function DashboardPage() {
           {/* No typed XP promise here — the real award is per problem and the
               server decides it. The streak is the honest stake. */}
           <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
-            {streak > 0 ? <>Keep your 🔥 {streak}-day streak alive — one problem does it.</> : <>Solve one today and your streak starts here.</>}
+            {streak > 0 ? <>Keep your 🔥 {streak}-day streak alive — one problem does it.</> : <>A solved problem is the fastest way in, and it pays XP.</>}
           </p>
           {/* Secondary, not primary. There were two orange buttons on this
               screen — "Resume learning" in the hero and this one — and two

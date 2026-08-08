@@ -453,6 +453,9 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
    panel-2 demotion moved to .card.quiet, which still exists for true chrome. */
 .stat { padding:16px 18px; background:var(--panel); border-color:var(--line); box-shadow:var(--shadow); border-radius:var(--r-lg); }
 .stat .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); font-weight:700; }
+/* Says where a number comes from when the tile beside it counts something
+   else — sentence case on purpose, so it reads as a note and not a label. */
+.stat .k-sub { font-size:11px; color:var(--ink-faint); margin-top:3px; }
 .stat .v { font-family:var(--display); font-variant-numeric:tabular-nums; font-weight:800; font-size:26px; margin-top:5px; display:flex; align-items:baseline; gap:6px; } .stat .v small { font-size:11.5px; color:var(--good); font-weight:600; font-family:var(--sans); }
 /* Real last-7-days activity under the streak value — a tick per day solved. */
 .stat .week { display:flex; gap:5px; margin-top:9px; }
