@@ -11,6 +11,12 @@ Anything found on the way gets added to the bottom, not fixed on the spot.
 **Status key:** `[ ]` open · `[x]` done · **D** = needs Jugendra's decision
 before code · **F** = just fix, no decision.
 
+> **The `F` items are GitHub issues #1–#12** (2026-08-07), written so Copilot's
+> coding agent — or anyone — can act without this conversation. Each carries
+> file references, a re-measured reproduction, and what not to break.
+> The `D` items stay here: they need a decision, or live measurement against the
+> production database and the deployed site, which no CI sandbox has.
+
 ---
 
 ## Done already
