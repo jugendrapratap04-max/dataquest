@@ -124,11 +124,32 @@ before code · **F** = just fix, no decision.
       Nobody else moves; seven rows predate `completedAt` and are skipped rather
       than dated by guesswork. Commit `37055e7`.
 
-- [ ] **D8 · Day boundaries run on server time (UTC), not IST.** `D`
-      A problem solved at 01:00 IST is filed to the previous day — it can break
-      a streak the student kept, and mislabel the weekday on the tick row.
-      *Decision:* declare IST for the three bucketing sites (cheap), or store a
-      per-user timezone (correct).
+- [x] **D8 · done — the platform has one calendar, and it is the students'.** `F`
+      Five places decided what day it is and every one truncated on the
+      **server's** clock; Vercel runs UTC. Anything finished after 18:30 UTC —
+      after midnight IST — was filed to the previous day.
+      `lib/day.ts` answers it once, in a declared platform timezone, and none of
+      its functions read the local zone at all. That matters: the bug was
+      invisible in development on a laptop already in IST.
+      **Proof:** same cases under `TZ=UTC` and `TZ=Asia/Kolkata` — new logic
+      agrees **4/4**, old logic **2/4**, and both failures are the
+      after-midnight ones (a solve at 00:01 IST on 8 Aug was filed as Friday
+      7 Aug on Vercel). A fixed +05:30 is exact because India has no DST; the
+      file says not to copy that shape for a zone that has it.
+      **Measured on live data:** 2 of 17 study moments move day, both from
+      `2026-07-28T19:00Z` = half past midnight on the 29th. One account's
+      numbers therefore go **down** — best streak 2→1, active days 7→6 —
+      because UTC had split one late-night session across two days and
+      manufactured a streak from it. The smaller number is the true one.
+      The daily challenge rides the same boundary by construction, so it rolls
+      at midnight IST instead of 05:30.
+      **NOT proved live:** the deployed check only confirms nothing regressed —
+      during IST daytime UTC and IST share a weekday, so it cannot tell the two
+      apart. The dual-timezone run is the discriminating test.
+      Commit `d6f29bc`.
+      *Per-user timezones were considered and rejected for now: a stored field,
+      onboarding to capture it and a backfill, for a benefit nobody has while
+      the audience is single-region. `lib/day.ts` is where that gets replaced.*
 
 ---
 
