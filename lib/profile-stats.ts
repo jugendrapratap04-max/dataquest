@@ -13,6 +13,7 @@
 import { cache } from "react";
 import { prisma } from "@/lib/prisma";
 import { studyMoments } from "@/lib/progress";
+import { startOfDay, weekdayIndex, DAY_MS } from "@/lib/day";
 
 /* ------------------------------------------------------------------ solved -- */
 
@@ -129,14 +130,14 @@ export type YearActivity = {
  *  whether or not that is true. A year has room for the shape of a habit. */
 export const getYearActivity = cache(getYearActivityImpl);
 async function getYearActivityImpl(userId: string, weeks = 53): Promise<YearActivity> {
-  const DAY = 86_400_000;
+  const DAY = DAY_MS;
 
   // Start on the Sunday on or before (today - weeks*7 + 1), so the last column
   // is the current, partial week and every column above it is a full one.
-  const end = new Date();
-  end.setHours(0, 0, 0, 0);
-  const start = new Date(end.getTime() - (weeks * 7 - 1) * DAY);
-  start.setDate(start.getDate() - start.getDay());
+  // Days are the platform's, not the server's — see lib/day.ts.
+  const end = startOfDay();
+  const back = new Date(end.getTime() - (weeks * 7 - 1) * DAY);
+  const start = new Date(back.getTime() - weekdayIndex(back) * DAY);
 
   const total_days = Math.round((end.getTime() - start.getTime()) / DAY) + 1;
 
@@ -146,9 +147,7 @@ async function getYearActivityImpl(userId: string, weeks = 53): Promise<YearActi
 
   const counts = new Array<number>(total_days).fill(0);
   for (const at of moments) {
-    const d = new Date(at);
-    d.setHours(0, 0, 0, 0);
-    const i = Math.round((d.getTime() - start.getTime()) / DAY);
+    const i = Math.round((startOfDay(at).getTime() - start.getTime()) / DAY);
     if (i >= 0 && i < total_days) counts[i]++;
   }
 

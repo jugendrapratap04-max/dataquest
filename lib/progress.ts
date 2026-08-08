@@ -9,6 +9,7 @@
 import { cache } from "react";
 import { prisma } from "./prisma";
 import { EXPLORE_MODE } from "./gates";
+import { startOfDay, DAY_MS } from "./day";
 
 /* Was `[name, done]`. The `done` half was fabricated — see the note beside the
  * skills list below — so a subject's skills are now just what it covers. */
@@ -261,26 +262,24 @@ async function getStreakImpl(userId: string): Promise<Streak> {
   const moments = await studyMoments(userId);
   if (moments.length === 0) return { streak: 0, bestStreak: 0 };
 
-  const DAY = 86_400_000;
-  const dayOf = (d: Date) => {
-    const x = new Date(d);
-    x.setHours(0, 0, 0, 0);
-    return x.getTime();
-  };
+  // Days are the PLATFORM's, not the server's — see lib/day.ts. On Vercel the
+  // server is UTC, so a solve at 01:00 IST used to land on the previous day and
+  // could break a streak the student had actually kept.
+  const dayOf = (d: Date) => startOfDay(d).getTime();
 
   const days = [...new Set(moments.map(dayOf))].sort((a, b) => a - b);
 
   let best = 1;
   let run = 1;
   for (let i = 1; i < days.length; i++) {
-    run = days[i] - days[i - 1] === DAY ? run + 1 : 1;
+    run = days[i] - days[i - 1] === DAY_MS ? run + 1 : 1;
     if (run > best) best = run;
   }
 
   // The current run only counts if it reaches today or yesterday.
   const today = dayOf(new Date());
   const last = days[days.length - 1];
-  const current = last === today || last === today - DAY ? run : 0;
+  const current = last === today || last === today - DAY_MS ? run : 0;
 
   return { streak: current, bestStreak: best };
 }
@@ -295,16 +294,14 @@ async function getStreakImpl(userId: string): Promise<Streak> {
  *  same thing everywhere: you finished something that day. */
 export const getActivity = cache(getActivityImpl);
 async function getActivityImpl(userId: string, days = 28): Promise<number[]> {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  start.setDate(start.getDate() - (days - 1));
+  // Both bounds in platform days, so the last bucket is genuinely "today" for
+  // the student rather than for the datacentre.
+  const start = new Date(startOfDay().getTime() - (days - 1) * DAY_MS);
 
   const moments = await studyMoments(userId, start);
   const counts = new Array<number>(days).fill(0);
   for (const at of moments) {
-    const d = new Date(at);
-    d.setHours(0, 0, 0, 0);
-    const i = Math.round((d.getTime() - start.getTime()) / 86_400_000);
+    const i = Math.round((startOfDay(at).getTime() - start.getTime()) / DAY_MS);
     if (i >= 0 && i < days) counts[i]++;
   }
   return counts;

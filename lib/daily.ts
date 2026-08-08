@@ -12,21 +12,15 @@ import { prisma } from "@/lib/prisma";
  * about, compared and shared, and tomorrow's is decided by arithmetic rather
  * than by anybody remembering to pick one.
  *
- * ⚠️ THE DAY BOUNDARY IS THE SERVER'S, which on Vercel is UTC — the same basis
- * getStreak and getActivity use (lib/progress.ts). That is deliberate: a daily
- * problem that rolls over at a different hour than the streak would be two
- * calendars in one product. Worklist item D8 moves them to a real timezone
- * together; until then nothing here promises a rollover time, because for an
- * Indian student "midnight" would be a lie by five and a half hours.
+ * THE DAY BOUNDARY IS THE PLATFORM'S — lib/day.ts, IST — and it is the same
+ * boundary the streak and both heatmaps use. That is the whole point: a daily
+ * problem rolling over at a different hour than the streak would be two
+ * calendars in one product. It rolls at midnight IST, which is a time a student
+ * here can actually recognise; it used to roll at 05:30 IST because the server
+ * runs UTC.
  */
-
-/** `YYYY-MM-DD` for the server's today. Must roll over with the streak's day —
- *  see the note above before changing it here alone. */
-export function dayKey(d: Date = new Date()): string {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`;
-}
+export { dayKey } from "@/lib/day";
+import { dayKey } from "@/lib/day";
 
 /** FNV-1a. Any stable hash would do; this one is four lines and has no deps. */
 function hash(s: string): number {

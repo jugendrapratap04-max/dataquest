@@ -11,6 +11,7 @@ import { subjectStyle } from "@/lib/subjects";
 import { levelFor, focusOf } from "@/lib/profile";
 import { getRank } from "@/lib/profile-server";
 import { getDailyProblem } from "@/lib/daily";
+import { weekdayLettersBack } from "@/lib/day";
 
 // Subject tiles are coloured from lib/subjects.ts, the same hue as the lesson
 // header and the roadmap card, so a subject looks like itself everywhere. The
@@ -36,11 +37,10 @@ export default async function DashboardPage() {
   // everywhere: you finished a lesson or solved a problem that day. Index 6 is
   // today.
   const week = await getActivity(uid, 7);
-  const dayLetter = (offsetFromToday: number) => {
-    const d = new Date();
-    d.setDate(d.getDate() - offsetFromToday);
-    return "SMTWTFS"[d.getDay()];
-  };
+  // Weekday letters in the platform's timezone — the tick row used to name the
+  // wrong day for anybody studying after 18:30 IST, because the server is UTC.
+  // Oldest first, matching getActivity's order.
+  const weekLetters = weekdayLettersBack(7);
   const lessons = await prisma.lesson.findMany({
     include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
@@ -199,7 +199,7 @@ export default async function DashboardPage() {
                 : <Link className="invite" href="/practice">Solve one problem today and your streak begins →</Link>}
             <div className="week" aria-label="Last 7 days of activity">
               {week.map((n, i) => (
-                <i key={i} className={n > 0 ? "on" : ""} title={`${dayLetter(6 - i)} · ${n} finished`}>{n > 0 ? "✓" : ""}</i>
+                <i key={i} className={n > 0 ? "on" : ""} title={`${weekLetters[i]} · ${n} finished`}>{n > 0 ? "✓" : ""}</i>
               ))}
             </div></div>
           <div className="card stat"><div className="k">Problems Solved</div>
