@@ -10,6 +10,7 @@ import { Tilt } from "@/components/Tilt";
 import { subjectStyle } from "@/lib/subjects";
 import { levelFor, focusOf } from "@/lib/profile";
 import { getRank } from "@/lib/profile-server";
+import { getDailyProblem } from "@/lib/daily";
 
 // Subject tiles are coloured from lib/subjects.ts, the same hue as the lesson
 // header and the roadmap card, so a subject looks like itself everywhere. The
@@ -44,6 +45,11 @@ export default async function DashboardPage() {
     include: { track: true, problems: { select: { id: true } } },
     orderBy: [{ track: { order: "asc" } }, { order: "asc" }],
   });
+
+  // Today's problem, and whether this reader has already done it. The solved
+  // check reuses the set getProgress already built — no second query.
+  const daily = await getDailyProblem();
+  const dailySolved = !!daily && p.solvedProblemIds.has(daily.id);
 
   // Identity strip inputs. A guest has none of this and does not get the strip,
   // so the rank query is skipped rather than run against "__guest__".
@@ -304,23 +310,47 @@ export default async function DashboardPage() {
           )}
         </section>
 
-        <section className="card pad" style={{borderColor:"color-mix(in srgb,var(--accent) 40%,transparent)"}}>
-          <div className="eyebrow" style={{color:"var(--accent-2)"}}>Daily Challenge</div>
-          <h3 style={{fontSize:"15px",margin:"8px 0 6px"}}>Solve today&apos;s problem</h3>
-          {/* "Keep your 0-day streak alive" is not a thing you can say to someone. */}
-          {/* No typed XP promise here — the real award is per problem and the
-              server decides it. The streak is the honest stake. */}
-          <p style={{fontSize:"12.5px",color:"var(--ink-soft)",margin:"0 0 14px"}}>
-            {streak > 0 ? <>Keep your 🔥 {streak}-day streak alive — one problem does it.</> : <>A solved problem is the fastest way in, and it pays XP.</>}
-          </p>
-          {/* Secondary, not primary. There were two orange buttons on this
-              screen — "Resume learning" in the hero and this one — and two
-              primary actions is the same as none: the eye has to choose, which
-              is the decision fatigue the dashboard exists to remove. The card
-              keeps its accent border, so the daily challenge still stands out
-              as the second thing without competing to be the first. */}
-          <Link className="btn btn-ghost" style={{width:"100%",justifyContent:"center"}} href="/practice">Solve now</Link>
-        </section>
+        {/* A DAILY CHALLENGE THAT HAS A CHALLENGE IN IT.
+            The card used to say "Solve today's problem" over a button that
+            opened all 450 — there was no problem of the day anywhere in the
+            code. lib/daily.ts picks one from the day itself, so everybody gets
+            the same one and tomorrow's needs nobody to choose it. */}
+        {daily && (
+          <section className="card pad daily" style={{borderColor:"color-mix(in srgb,var(--accent) 40%,transparent)"}}>
+            <div className="eyebrow" style={{color:"var(--accent-2)"}}>Daily Challenge</div>
+            {dailySolved ? (
+              <>
+                <h3 className="daily-title">✓ Done for today</h3>
+                <p className="daily-sub">
+                  You solved <b>{daily.title}</b>. A new one is picked tomorrow.
+                </p>
+                <Link className="btn btn-ghost daily-go" href="/practice">Find another problem</Link>
+              </>
+            ) : (
+              <>
+                <h3 className="daily-title">{daily.title}</h3>
+                {/* Real numbers: the difficulty and XP of the actual problem
+                    behind the link. The card used to type "+20 XP" while the
+                    award is per problem and decided by the server. */}
+                <p className="daily-sub">
+                  <span className={`diff ${daily.difficulty.toLowerCase().replace(" ", "")}`}>{daily.difficulty}</span>
+                  <span className="daily-xp">+{daily.xp} XP</span>
+                  {daily.track && <span className="daily-track">{shortTitle(daily.track)}</span>}
+                </p>
+                <p className="daily-note">
+                  {streak > 0
+                    ? <>One problem keeps your 🔥 {streak}-day streak alive.</>
+                    : <>Solving it starts your streak — and pays the XP above.</>}
+                </p>
+                {/* Secondary, not primary. There were two accent buttons on this
+                    screen — "Resume learning" in the hero and this one — and two
+                    primary actions is the same as none. The card keeps its accent
+                    border, so it still reads as the second thing to do. */}
+                <Link className="btn btn-ghost daily-go" href={`/practice/${daily.slug}`}>Solve it →</Link>
+              </>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );

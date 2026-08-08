@@ -1076,6 +1076,15 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .diff.hard { background:var(--bad-soft); color:var(--bad); }
 .diff.superhard { background:#EBE1FA; color:#6D4BD1; }
 :root[data-theme="dark"] .diff.superhard { background:#241d3d; color:#B7A2F2; }
+/* The daily-challenge card. Reuses .diff so a difficulty means the same thing
+   here as it does on every problem card in the arena. */
+.daily-title { font-size:15.5px; font-weight:750; margin:8px 0 8px; line-height:1.3; }
+.daily-sub { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 10px; font-size:12px; }
+.daily-xp { font-weight:700; color:var(--accent-2); font-variant-numeric:tabular-nums; }
+.daily-track { color:var(--ink-faint); }
+.daily-note { font-size:12.5px; color:var(--ink-soft); margin:0 0 14px; line-height:1.55; }
+.daily .btn.daily-go { width:100%; justify-content:center; }
+
 .diff-group { margin-bottom:24px; }
 .diff-group-head { display:flex; align-items:center; gap:10px; margin:0 0 13px; }
 .diff-group-head h2 { font-size:15px; font-weight:700; }
