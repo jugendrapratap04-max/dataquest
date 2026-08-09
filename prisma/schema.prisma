@@ -546,3 +546,51 @@ model RoomSignal {
 
   @@index([roomId, toId, createdAt])
 }
+
+// ---------------------------------------------------------------------------
+// AI Mentor and learning signals: additive, low-risk models for personalized
+// guidance. These tables are small and can be extended later if needed.
+// ---------------------------------------------------------------------------
+
+model StudentLearningProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  // JSON snapshots stored as plain text for portability across DBs
+  preferredStylesJson    String   @default("[]") // e.g. ["examples","visual"]
+  strengthsJson          String   @default("[]") // [{concept,score}]
+  weaknessesJson         String   @default("[]") // [{concept,score}]
+  notes                  String   @default("")   // short instructor/system notes
+  updatedAt              DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model ConceptMastery {
+  id          String   @id @default(cuid())
+  userId      String
+  concept     String   // short stable id for a concept, e.g. "loops.for"
+  masteryLevel Int     @default(0) // 0..100
+  correctCount Int     @default(0)
+  attemptCount Int     @default(0)
+  lastSeen    DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, concept])
+}
+
+model LearningSignal {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // e.g. "thumbs_up" | "thumbs_down" | "confused" | "clarify"
+  payload   String   @default("") // optional structured info as JSON string
+  lessonId  String?
+  problemId String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+}
