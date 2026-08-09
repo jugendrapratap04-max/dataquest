@@ -1,6 +1,14 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
+import { getCurrentUser } from "@/lib/session";
+import {
+  getStudentContext,
+  getStoredTurns,
+  rememberExchange,
+  forgetConversation,
+} from "@/lib/byte-context";
+
 type HistoryItem = {
   role?: "user" | "model";
   text?: string;
@@ -71,6 +79,27 @@ export async function POST(request: Request) {
         : [];
 
     // --------------------------------------------------
+    // 2b. WHO IS ASKING
+    //
+    // From the session cookie, never from the body. If the
+    // request could name the student, anyone could ask Byte
+    // to read out somebody else's progress, or write into
+    // their conversation.
+    //
+    // A signed-out visitor still gets Byte — just a Byte with
+    // no idea who they are and nothing kept afterwards.
+    // --------------------------------------------------
+
+    const user = await getCurrentUser();
+
+    const [student, storedTurns] = user
+      ? await Promise.all([
+          getStudentContext(user.id),
+          getStoredTurns(user.id),
+        ])
+      : [null, null];
+
+    // --------------------------------------------------
     // 3. PAGE CONTEXT
     // --------------------------------------------------
 
@@ -107,23 +136,32 @@ export async function POST(request: Request) {
     // a user turn, so a leading model turn is dropped.
     // --------------------------------------------------
 
-    const turns = history
-      .filter(
-        (item) =>
-          (item.role === "user" ||
-            item.role === "model") &&
-          typeof item.text === "string" &&
-          item.text.trim().length > 0
-      )
-      .map((item) => ({
-        role:
-          item.role === "model"
-            ? "model"
-            : "user",
-        parts: [
-          { text: item.text as string },
-        ],
-      }));
+    /*
+     * A signed-in student's history comes from the database, not from their
+     * browser: it survives a new device, a cleared cache and the chat panel's
+     * own 16-message cap, and it cannot be edited on the way in. The body's
+     * `history` is only the fallback for a signed-out visitor, who has nowhere
+     * to keep one.
+     */
+    const turns =
+      storedTurns ??
+      history
+        .filter(
+          (item) =>
+            (item.role === "user" ||
+              item.role === "model") &&
+            typeof item.text === "string" &&
+            item.text.trim().length > 0
+        )
+        .map((item) => ({
+          role:
+            item.role === "model"
+              ? "model"
+              : "user",
+          parts: [
+            { text: item.text as string },
+          ],
+        }));
 
     while (
       turns.length > 0 &&
@@ -467,6 +505,46 @@ Understand the context without asking the student
 to repeat everything.
 
 ==================================================
+WHO YOU ARE TALKING TO
+==================================================
+
+${
+  student
+    ? `This is not a stranger. Here is what Etudo knows
+about them, taken from their own account and their
+own work on the platform:
+
+${student}
+
+Use it the way a friend who has been studying with
+them would.
+
+- Use their name naturally. Do not open every single
+  message with it.
+- Their progress is real. If they ask what to do
+  next, you already know what is next for them.
+- If they are stuck on something they have been
+  practising, connect it to what they have already
+  done rather than starting from zero.
+- Encourage the streak honestly. Never invent a
+  number, and never congratulate them for work this
+  briefing does not show.
+
+Do not read this list out to them. It is what you
+know, not what you say. Mention a detail only when
+it actually helps the answer.
+
+If they ask what you know about them, answer openly
+and plainly — it is their own information.`
+    : `Nobody is signed in, so you do not know who this is.
+
+Be just as helpful, but do not guess at their name,
+their progress or their goals, and do not imply you
+remember them. If knowing would genuinely help,
+mention that signing in lets you keep track.`
+}
+
+==================================================
 CURRENT PAGE AWARENESS
 ==================================================
 
@@ -655,6 +733,30 @@ DO NOT JUST ANSWER.
       );
     }
 
+    /*
+     * Written only now, and only for a signed-in student: both halves of the
+     * exchange land together, so a failure on the way to Gemini cannot leave a
+     * question stored with no answer beside it — which would read later as Byte
+     * having ignored something.
+     *
+     * A storage failure must not swallow a reply the student is waiting for, so
+     * it is logged and the answer still goes out.
+     */
+    if (user) {
+      try {
+        await rememberExchange(
+          user.id,
+          message,
+          text
+        );
+      } catch (storeError) {
+        console.error(
+          "[Byte] could not store the exchange:",
+          storeError
+        );
+      }
+    }
+
     return NextResponse.json({
       text,
     });
@@ -681,6 +783,101 @@ DO NOT JUST ANSWER.
     return NextResponse.json(
       {
         error: errorMessage,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/*
+ * The conversation Byte is holding on to.
+ *
+ * The chat panel paints from localStorage so it appears instantly, then asks
+ * for this. Without it, signing in on a second device would show an empty chat
+ * while Byte carried on remembering — a panel and a companion disagreeing about
+ * what was said.
+ *
+ * Signed-out visitors have nothing stored, and get an empty list rather than an
+ * error: there is no failure here, only nothing to remember.
+ */
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+
+    /*
+     * `signedIn` matters as much as the messages. Without it an empty list is
+     * ambiguous — a signed-out visitor and a student who just cleared their
+     * chat look identical — and the panel cannot tell whether the server is
+     * the truth or whether it should keep what is in localStorage.
+     */
+    if (!user) {
+      return NextResponse.json({
+        signedIn: false,
+        messages: [],
+      });
+    }
+
+    const turns = await getStoredTurns(
+      user.id
+    );
+
+    return NextResponse.json({
+      signedIn: true,
+      messages: turns.map((turn) => ({
+        from:
+          turn.role === "model"
+            ? "buddy"
+            : "student",
+        text: turn.parts[0].text,
+      })),
+    });
+  } catch (error) {
+    console.error(
+      "[Byte] could not load the conversation:",
+      error
+    );
+
+    /*
+     * A history that will not load must not stop the student from talking to
+     * Byte. `signedIn: false` is the safe answer here even for a student who
+     * is: it makes the panel keep whatever it already had on screen instead of
+     * replacing a real conversation with an empty one because of a hiccup.
+     */
+    return NextResponse.json({
+      signedIn: false,
+      messages: [],
+    });
+  }
+}
+
+/*
+ * Clear chat, on the server as well as in the panel.
+ *
+ * Without this the button would wipe what the student can SEE while Byte went
+ * on remembering it — the worst of both, and not what anyone means when they
+ * clear a conversation.
+ */
+export async function DELETE() {
+  try {
+    const user = await getCurrentUser();
+
+    if (user) {
+      await forgetConversation(user.id);
+    }
+
+    return NextResponse.json({
+      ok: true,
+    });
+  } catch (error) {
+    console.error(
+      "[Byte] could not clear the conversation:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          "Could not clear the conversation. Please try again.",
       },
       { status: 500 }
     );

@@ -67,6 +67,7 @@ model User {
   notes          Note[]
   sessions       StudySession[]
   notebook       NotebookEntry[]
+  byteMessages   ByteMessage[]
   roomMembers    RoomMember[]
   roomMessages   RoomMessage[]
   hostedRooms    Room[]             @relation("RoomHost")
@@ -545,4 +546,31 @@ model RoomSignal {
   room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@index([roomId, toId, createdAt])
+}
+
+// What Byte remembers.
+//
+// The chat used to live only in localStorage, capped at 16 messages. That made
+// Byte a companion who forgot you the moment you opened a different browser,
+// and forgot the start of a long session while you were still in it. A student
+// who told Byte "I'm preparing for placements" on Monday had to say it again on
+// Tuesday, which is the opposite of the thing being built.
+//
+// One row per turn rather than a blob per user: turns get trimmed from the old
+// end continuously, and appending a row is cheaper than rewriting a document
+// on every message.
+//
+// The account owns it, so deleting the account deletes the conversation. There
+// is nothing here a student cannot already see in their own chat window.
+model ByteMessage {
+  id     String @id @default(cuid())
+  userId String
+  role   String // "user" | "model" — the roles Gemini's contents array takes
+  text   String
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

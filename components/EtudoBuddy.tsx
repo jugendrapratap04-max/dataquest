@@ -22,7 +22,15 @@ type HistoryMessage = {
 };
 
 const CHAT_KEY = "etudo-byte-chat-v1";
-const MAX_MESSAGES = 16;
+
+/*
+ * How much of the conversation the panel keeps on screen.
+ *
+ * Raised from 16 once Byte started remembering server-side: a panel that
+ * forgets sooner than Byte does makes it look like Byte is answering things
+ * nobody asked. Matches CONTEXT_TURNS in lib/byte-context.ts.
+ */
+const MAX_MESSAGES = 20;
 
 function readStoredMessages(): Message[] {
   if (typeof window === "undefined") {
@@ -142,6 +150,54 @@ export function EtudoBuddy() {
       // Ignore localStorage errors.
     }
   }, [messages]);
+
+  /*
+   * localStorage paints the chat instantly; the server is what Byte actually
+   * remembers. Ask it once on mount and take its word — that is what makes the
+   * conversation follow the student to another browser, and what stops a
+   * cleared cache from looking like Byte lost its memory.
+   *
+   * Only for a signed-in student. A visitor has nothing stored, so their
+   * localStorage stays exactly as it was.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const response = await fetch(
+          "/api/buddy"
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data: {
+          signedIn?: boolean;
+          messages?: Message[];
+        } = await response.json();
+
+        if (
+          cancelled ||
+          !data.signedIn ||
+          !Array.isArray(data.messages)
+        ) {
+          return;
+        }
+
+        setMessages(
+          data.messages.slice(-MAX_MESSAGES)
+        );
+      } catch {
+        // Offline, or the route is unhappy. The panel keeps what it had.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /*
    * Clicking Byte opens Byte.
@@ -337,7 +393,12 @@ export function EtudoBuddy() {
   }
 
   /*
-   * Clear Byte conversation.
+   * Clear Byte conversation — on the server too.
+   *
+   * Wiping only the panel would leave Byte still remembering everything it had
+   * just been asked to forget, which is the opposite of what the button says.
+   * The screen clears immediately and the delete follows: a student pressing
+   * Clear should not have to wait on the network to see it happen.
    */
   function clearChat(): void {
     setMessages([]);
@@ -347,6 +408,15 @@ export function EtudoBuddy() {
     } catch {
       // Ignore localStorage errors.
     }
+
+    void fetch("/api/buddy", {
+      method: "DELETE",
+    }).catch((error) => {
+      console.error(
+        "Byte could not clear its memory:",
+        error
+      );
+    });
 
     input.current?.focus();
   }
