@@ -3883,6 +3883,129 @@ summary:active,
 }
 
 /* =========================================================
+   THE PANEL ITSELF
+
+   This had no base rule at all. Every part INSIDE it was styled — header,
+   messages, input, footer — while the container holding them was a plain
+   <section> in normal document flow, so the "floating chat panel" was a block
+   sitting in the page pushing everything down, and the backdrop behind it was
+   an invisible div that happened to close on click. Same shape of gap as the
+   pet's missing body: the details were drawn and the thing itself was not.
+========================================================= */
+
+.buddy-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 94;
+
+  background: color-mix(
+    in srgb,
+    var(--ground) 55%,
+    transparent
+  );
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  animation: buddy-fade var(--t-base) var(--ease);
+}
+
+.buddy-panel {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 95;
+
+  display: flex;
+  flex-direction: column;
+
+  width: min(420px, calc(100vw - 40px));
+  height: min(620px, calc(100vh - 40px));
+
+  border-radius: 20px;
+  border: 1px solid
+    color-mix(in srgb, var(--teal) 20%, var(--line));
+
+  overflow: hidden;
+
+  /* Three layers, front to back: a light catching the top-left corner the way
+     it would on a real surface, a whisper of the subject teal so the panel
+     belongs to Byte rather than to the page, and the panel colour underneath.
+     Tokens throughout, so all four themes get it without a second rule. */
+  background:
+    radial-gradient(
+      120% 90% at 0% 0%,
+      color-mix(in srgb, var(--panel) 75%, transparent),
+      transparent 60%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--teal) 7%, transparent),
+      transparent 45%
+    ),
+    var(--panel);
+
+  /* Stacked rather than one big blur: a tight contact shadow to seat it, a
+     wide soft one for depth, and an inset hairline so the edge reads as lit
+     glass instead of a drawn border. */
+  box-shadow:
+    0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent),
+    0 18px 50px -12px color-mix(in srgb, var(--ink) 30%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--panel) 60%, transparent) inset;
+
+  animation: buddy-rise var(--t-slow) var(--ease);
+}
+
+/* The grain. Two offset dot grids at very low opacity — enough to stop the
+   large flat background reading as a plain rectangle, not enough to notice
+   as a pattern. Sits above the background and below every child. */
+.buddy-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+
+  opacity: 0.5;
+
+  background-image:
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--ink) 5%, transparent) 1px,
+      transparent 0
+    ),
+    radial-gradient(
+      circle at 1px 1px,
+      color-mix(in srgb, var(--teal) 6%, transparent) 1px,
+      transparent 0
+    );
+
+  background-size: 22px 22px, 14px 14px;
+  background-position: 0 0, 7px 5px;
+}
+
+.buddy-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes buddy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes buddy-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* =========================================================
    HEADER
 ========================================================= */
 
@@ -3897,12 +4020,14 @@ summary:active,
 
   border-bottom: 1px solid var(--line);
 
-  background:
-    linear-gradient(
-      135deg,
-      var(--teal-soft),
-      transparent
-    );
+  /* --teal-soft at full strength turned the whole header mint on the light
+     theme. Mixed back toward the panel so it reads as a tint on a surface
+     rather than a coloured band, and stays a tint in all four themes. */
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--teal-soft) 55%, var(--panel)),
+    transparent 85%
+  );
 }
 
 .buddy-header > div {
@@ -4059,49 +4184,314 @@ summary:active,
    CHAT MESSAGES
    ========================================================= */
 
-.buddy-msg {
-  max-width: 88%;
+/* A reply and the face that said it. */
+.buddy-turn {
+  display: flex;
+  align-self: stretch;
+  align-items: flex-start;
+  gap: 8px;
 
+  max-width: 92%;
+}
+
+/* Byte's face, small. Deliberately the same two glowing eyes on the same dark
+   screen as the pet — one character in two places, not a chat icon. */
+.buddy-avatar {
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  width: 26px;
+  height: 26px;
+  margin-top: 2px;
+
+  border-radius: 9px;
+  border: 1px solid
+    color-mix(in srgb, var(--teal) 30%, var(--line));
+
+  background: linear-gradient(
+    165deg,
+    var(--panel-2),
+    color-mix(in srgb, var(--teal) 12%, var(--panel-2))
+  );
+}
+
+.buddy-avatar i {
+  width: 4px;
+  height: 6px;
+
+  border-radius: 2px;
+  background: var(--teal);
+
+  box-shadow: 0 0 5px
+    color-mix(in srgb, var(--teal) 70%, transparent);
+}
+
+.buddy-msg {
   margin: 0;
 
-  padding: 10px 12px;
+  padding: 11px 14px;
 
-  border-radius: 13px;
+  border-radius: 14px;
 
-  font-size: 12.5px;
-  line-height: 1.6;
+  /* 13.5px, up from 12.5. Byte writes explanations, not notifications, and
+     this is the surface they are read on. */
+  font-size: 13.5px;
+  line-height: 1.65;
 
-  /*
-   * Important for long Gemini responses,
-   * URLs and code-like text.
-   */
+  /* Long URLs, stack traces and unbroken identifiers all arrive here. */
   overflow-wrap: anywhere;
   word-break: break-word;
 
-  /*
-   * Preserve new lines returned by Gemini.
-   */
-  white-space: pre-wrap;
+  animation: buddy-msg-in var(--t-base) var(--ease);
 }
 
 .buddy-msg.buddy {
-  align-self: flex-start;
+  flex: 1 1 auto;
+  min-width: 0;
 
-  background: var(--panel-2);
+  /* A hint of teal, not a wash of it. At 12% the light theme turned mint and
+     started arguing with the violet that is actually Etudo's primary; teal is
+     Byte's accent, and an accent is an edge and a glow, not a fill. */
+  background: color-mix(
+    in srgb,
+    var(--panel-2) 96%,
+    var(--teal)
+  );
 
-  color: var(--ink-soft);
+  /* Was --ink-soft. Byte's answer is the main text on this surface, and
+     secondary ink is for things beside the point, not the point. */
+  color: var(--ink);
 
-  border-bottom-left-radius: 4px;
+  border: 1px solid
+    color-mix(in srgb, var(--teal) 16%, var(--line));
+
+  border-top-left-radius: 5px;
 }
 
 .buddy-msg.student {
   align-self: flex-end;
+  max-width: 88%;
 
   background: var(--accent);
-
   color: var(--accent-ink);
 
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 5px;
+
+  /* The student's own line, kept as typed — their newlines are not Markdown. */
+  white-space: pre-wrap;
+}
+
+@keyframes buddy-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Thinking. Three dots that breathe, instead of the words "Byte is
+   thinking..." arriving as a message that then vanishes — which read, every
+   time, as Byte having answered and the answer being lost. */
+.buddy-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 14px;
+}
+
+.buddy-typing span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+  background: var(--teal);
+
+  animation: buddy-dot 1.3s ease-in-out infinite;
+}
+
+.buddy-typing span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.buddy-typing span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes buddy-dot {
+  0%, 60%, 100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+
+/* =========================================================
+   WHAT BYTE WROTE
+
+   Byte replies in Markdown and the panel used to print it verbatim — asterisks
+   and all, "your name is **Jeetu**" on screen. lib/byte-markdown.ts turns it
+   into these elements. Every rule is scoped under .buddy-msg so nothing here
+   can reach the rest of the app.
+========================================================= */
+
+.buddy-msg > :first-child { margin-top: 0; }
+.buddy-msg > :last-child  { margin-bottom: 0; }
+
+.buddy-msg p {
+  margin: 0 0 9px;
+}
+
+.buddy-msg .bmd-h {
+  margin: 14px 0 6px;
+
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+
+  color: var(--ink);
+}
+
+/* Tailwind's preflight strips list-style from every ul and ol, so a bullet
+   list rendered here came out as a stack of indented sentences with nothing
+   marking them as a list at all. Put back explicitly, per element — both use
+   the same class and they must not get the same marker. */
+ul.bmd-list,
+ol.bmd-list {
+  margin: 0 0 9px;
+  padding-left: 20px;
+}
+
+ul.bmd-list { list-style: disc outside; }
+ol.bmd-list { list-style: decimal outside; }
+
+.buddy-msg .bmd-list li {
+  margin-bottom: 3px;
+  padding-left: 2px;
+}
+
+.buddy-msg .bmd-list li::marker {
+  color: color-mix(in srgb, var(--teal) 80%, var(--ink-faint));
+}
+
+.buddy-msg .bmd-code {
+  padding: 1.5px 5px;
+
+  border-radius: var(--r-xs);
+  border: 1px solid
+    color-mix(in srgb, var(--teal) 18%, var(--line));
+
+  background: var(--panel-3);
+  color: var(--ink);
+
+  font-family: var(--mono);
+  font-size: 0.88em;
+}
+
+.buddy-msg .bmd-pre {
+  margin: 0 0 10px;
+  padding: 11px 12px;
+
+  border-radius: var(--r-sm);
+  border: 1px solid
+    color-mix(in srgb, var(--teal) 16%, var(--line));
+
+  background: var(--panel-3);
+
+  /* Code is the one thing in a reply that must not be re-wrapped: a broken
+     line is a different program. It scrolls in its own box instead. */
+  overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+
+  /* The standard properties, not only the -webkit- pseudo-elements below.
+     Windows Chrome draws a full-height scrollbar with stepper arrows here by
+     default, and it ended up the loudest thing in the whole reply. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink) 22%, transparent) transparent;
+}
+
+.buddy-msg .bmd-pre code {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+/* The default scrollbar under a code block is a thick pale bar that ends up
+   the loudest thing in the reply. Same quiet treatment the message list gets. */
+.buddy-msg .bmd-pre::-webkit-scrollbar {
+  height: 7px;
+}
+
+.buddy-msg .bmd-pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.buddy-msg .bmd-pre::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.buddy-msg .bmd-pre::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink) 30%, transparent);
+}
+
+.buddy-msg .bmd-quote {
+  margin: 0 0 9px;
+  padding: 2px 0 2px 11px;
+
+  border-left: 2px solid
+    color-mix(in srgb, var(--teal) 45%, transparent);
+
+  color: var(--ink-soft);
+}
+
+.buddy-msg .bmd-link {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+
+.buddy-msg .bmd-rule {
+  margin: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+/* On the student's own bubble everything sits on the accent, so the code and
+   link colours have to come from the text colour rather than the palette. */
+.buddy-msg.student .bmd-code,
+.buddy-msg.student .bmd-link {
+  color: var(--accent-ink);
+  border-color: color-mix(in srgb, var(--accent-ink) 30%, transparent);
+  background: color-mix(in srgb, var(--accent-ink) 12%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buddy-panel,
+  .buddy-backdrop,
+  .buddy-msg,
+  .buddy-typing span {
+    animation: none;
+  }
+
+  /* The dots still have to say "working", so they stay lit rather than
+     stopping mid-fade at whatever opacity the keyframe left them on. */
+  .buddy-typing span {
+    opacity: 0.75;
+  }
 }
 
 

@@ -3,6 +3,8 @@ import { Topbar } from "@/components/Topbar";
 import { ActivityPing } from "@/components/ActivityPing";
 import { FeedbackButton } from "@/components/FeedbackButton";
 import { FocusButton } from "@/components/LayoutControls";
+import { EtudoBuddy } from "@/components/EtudoBuddy";
+import { BytePet } from "@/components/BytePet";
 import { getCurrentUser } from "@/lib/session";
 import { getProgress, getStreak } from "@/lib/progress";
 import { prisma } from "@/lib/prisma";
@@ -25,16 +27,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   let isNew = false;
 
   if (user) {
-    // "Welcome back" is a lie on someone's first visit.
-    isNew =
-      user.xp === 0 &&
-      (await prisma.lessonProgress.count({ where: { userId: user.id } })) === 0 &&
-      (await prisma.submission.count({ where: { userId: user.id } })) === 0;
+    // Four independent reads, so they go together rather than one after another.
+    const [lessonProgressCount, submissionCount, progress, streakData] = await Promise.all([
+      prisma.lessonProgress.count({ where: { userId: user.id } }),
+      prisma.submission.count({ where: { userId: user.id } }),
+      getProgress(user.id),
+      getStreak(user.id),
+    ]);
 
-    const { lessonsDone, totalLessons, problemsDone, totalProblems } = await getProgress(user.id);
-    const totalUnits = totalLessons + totalProblems;
-    roadmapPct = totalUnits ? Math.round(((lessonsDone + problemsDone) / totalUnits) * 100) : 0;
-    ({ streak } = await getStreak(user.id));
+    // "Welcome back" is a lie on someone's first visit.
+    isNew = user.xp === 0 && lessonProgressCount === 0 && submissionCount === 0;
+
+    const totalUnits = progress.totalLessons + progress.totalProblems;
+    const doneUnits = progress.lessonsDone + progress.problemsDone;
+    roadmapPct = totalUnits ? Math.round((doneUnits / totalUnits) * 100) : 0;
+    streak = streakData.streak;
   }
 
   return (
@@ -74,18 +81,27 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <main id="main" tabIndex={-1}>{children}</main>
         </div>
       </div>
-      {/* BOTH ARE position:fixed, SO THEIR PLACE HERE IS PURELY TAB ORDER —
-          nothing about where they appear depends on it. They used to render
-          before the Sidebar, which put "Focus reading" at tab stop 2 of the
-          whole page: the walk went skip-link, then the floating button at
+      {/* ALL OF THESE ARE position:fixed, SO THEIR PLACE HERE IS PURELY TAB
+          ORDER — nothing about where they appear depends on it. They used to
+          render before the Sidebar, which put "Focus reading" at tab stop 2 of
+          the whole page: the walk went skip-link, then the floating button at
           y=746, then jumped 718px back UP to the navigation. Tab order is
           meant to follow the page, and a control that floats over the bottom
           corner belongs at the end of it, not ahead of every nav item.
 
           Feedback is gated on `user` — it is tied to an account we can reply
           to. Focus is not: reading is free, and the reader who most needs the
-          extra width is the one who has not signed up yet. */}
+          extra width is the one who has not signed up yet.
+
+          Byte is two components on purpose. BytePet is the body you drag and
+          click; EtudoBuddy is the conversation, and the only one of the two
+          that can cost an API call. They never import each other — the pet
+          announces on window and the chat listens (lib/pet-events.ts) — which
+          is what lets the chat keep working below 819px, where the pet is
+          display:none and the "Ask Byte" button takes over. */}
       <FocusButton />
+      <EtudoBuddy />
+      <BytePet />
       {user && <FeedbackButton />}
     </div>
   );

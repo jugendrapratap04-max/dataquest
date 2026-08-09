@@ -24,6 +24,7 @@
     "dead-code": "node scripts/dead-code.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.16.0",
     "@monaco-editor/react": "^4.7.0",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.9.1",

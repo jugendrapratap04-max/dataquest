@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 import { onPetEvent } from "@/lib/pet-events";
+import { renderByteMarkdown } from "@/lib/byte-markdown";
 
 type Message = {
   from: "buddy" | "student";
@@ -132,6 +133,9 @@ export function EtudoBuddy() {
 
   const input = useRef<HTMLInputElement>(null);
 
+  const scroller =
+    useRef<HTMLDivElement>(null);
+
   const page = getPageContext(pathname);
 
   /*
@@ -213,6 +217,24 @@ export function EtudoBuddy() {
       }),
     []
   );
+
+  /*
+   * Follow the conversation down.
+   *
+   * A reply that lands below the fold reads as no reply at all — the student
+   * watches the thinking dots disappear and nothing appears to happen. Runs on
+   * `loading` too, so the dots themselves are what scrolls into view and the
+   * answer is already in place when it replaces them.
+   */
+  useEffect(() => {
+    const node = scroller.current;
+
+    if (!node) {
+      return;
+    }
+
+    node.scrollTop = node.scrollHeight;
+  }, [messages, loading, open]);
 
   /*
    * Focus input when Byte opens.
@@ -475,7 +497,10 @@ export function EtudoBuddy() {
             </div>
 
             {/* Chat content */}
-            <div className="buddy-content">
+            <div
+              className="buddy-content"
+              ref={scroller}
+            >
               {/* Intro */}
               <div className="buddy-intro">
                 <strong>
@@ -491,23 +516,69 @@ export function EtudoBuddy() {
                 </p>
               </div>
 
-              {/* Messages */}
+              {/*
+                The student's own words go in as TEXT. Byte's come back as
+                Markdown and are rendered — see lib/byte-markdown.ts, which
+                escapes before it marks up. Nothing a student types is ever
+                treated as markup, so the asymmetry is deliberate.
+              */}
               {messages.map(
-                (message, index) => (
-                  <p
-                    className={`buddy-msg ${message.from}`}
-                    key={`${message.from}-${index}`}
-                  >
-                    {message.text}
-                  </p>
-                )
+                (message, index) =>
+                  message.from ===
+                  "student" ? (
+                    <p
+                      className="buddy-msg student"
+                      key={`student-${index}`}
+                    >
+                      {message.text}
+                    </p>
+                  ) : (
+                    <div
+                      className="buddy-turn"
+                      key={`buddy-${index}`}
+                    >
+                      <span
+                        className="buddy-avatar"
+                        aria-hidden="true"
+                      >
+                        <i />
+                        <i />
+                      </span>
+
+                      <div
+                        className="buddy-msg buddy"
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            renderByteMarkdown(
+                              message.text
+                            ),
+                        }}
+                      />
+                    </div>
+                  )
               )}
 
-              {/* Loading */}
+              {/* Thinking */}
               {loading && (
-                <p className="buddy-msg buddy">
-                  Byte is thinking...
-                </p>
+                <div className="buddy-turn">
+                  <span
+                    className="buddy-avatar"
+                    aria-hidden="true"
+                  >
+                    <i />
+                    <i />
+                  </span>
+
+                  <div
+                    className="buddy-msg buddy buddy-typing"
+                    role="status"
+                    aria-label="Byte is thinking"
+                  >
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                </div>
               )}
 
               {/* Quick actions */}
