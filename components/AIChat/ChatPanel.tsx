@@ -1,7 +1,10 @@
 "use client";
 import React, { useState } from "react";
 
-export function ChatPanel(): JSX.Element {
+// React 19's types dropped the GLOBAL `JSX` namespace, so a bare `JSX.Element`
+// no longer resolves and the build stops at type-check. It lives under React
+// now — and every other component in this repo simply lets TypeScript infer it.
+export function ChatPanel(): React.JSX.Element {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<{ from: "user" | "ai"; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
