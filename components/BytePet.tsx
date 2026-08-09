@@ -28,11 +28,21 @@ const PET_HEIGHT = 72;
  * How far the pointer may travel and still count as a tap
  * rather than a drag.
  *
- * A pointer never holds perfectly still, so zero would make
- * Byte impossible to click; anything much larger starts
- * opening the chat at the end of a short drag.
+ * This was 5px of MANHATTAN distance and it made Byte
+ * effectively unclickable for other people. Measured on the
+ * live site with real mouse events: a click that moved 3px
+ * across and 3px down — an ordinary trackpad click — summed
+ * to 6 and was read as a drag, so nothing happened. Adding
+ * the axes together double-counts every diagonal wobble,
+ * which is the shape a hand actually makes.
+ *
+ * Straight-line distance now, and roomier: a hand holding a
+ * mouse drifts several pixels, and a finger on glass drifts
+ * further still. A real drag crosses these in the first
+ * few frames anyway.
  */
-const TAP_SLOP = 5;
+const TAP_SLOP_MOUSE = 10;
+const TAP_SLOP_TOUCH = 16;
 
 const START_POSITION: Position = {
   x: 140,
@@ -71,6 +81,9 @@ export function BytePet() {
     startX: 0,
     startY: 0,
     moved: false,
+
+    /* A finger is allowed more drift than a mouse. */
+    slop: TAP_SLOP_MOUSE,
   });
 
   const [direction, setDirection] =
@@ -177,6 +190,12 @@ export function BytePet() {
         event.clientY,
 
       moved: false,
+
+      slop:
+        event.pointerType === "touch" ||
+        event.pointerType === "pen"
+          ? TAP_SLOP_TOUCH
+          : TAP_SLOP_MOUSE,
     };
 
     setState("walking");
@@ -236,17 +255,17 @@ export function BytePet() {
      * one sub-pixel at a time and would never register.
      */
     if (!dragRef.current.moved) {
-      const travelled =
-        Math.abs(
-          event.clientX -
-            dragRef.current.startX
-        ) +
-        Math.abs(
-          event.clientY -
-            dragRef.current.startY
-        );
+      const travelled = Math.hypot(
+        event.clientX -
+          dragRef.current.startX,
 
-      if (travelled > TAP_SLOP) {
+        event.clientY -
+          dragRef.current.startY
+      );
+
+      if (
+        travelled > dragRef.current.slop
+      ) {
         dragRef.current.moved = true;
       }
     }

@@ -775,14 +775,63 @@ DO NOT JUST ANSWER.
       "======================================="
     );
 
-    const errorMessage =
+    /*
+     * Say what actually happened.
+     *
+     * Every failure used to reach the student as one sentence — "Sorry, I
+     * couldn't connect to Byte right now" — so a quota that clears in a minute
+     * and a genuinely broken deployment looked identical. A friend opened the
+     * site, hit the free tier's daily cap, and had no way to know Byte was fine
+     * and simply out of questions for the day.
+     *
+     * The raw Google error is logged, never returned: it carries quota metric
+     * names and internal URLs that mean nothing to a student.
+     */
+    const raw =
       error instanceof Error
         ? error.message
-        : "Unknown Gemini error.";
+        : String(error);
+
+    const status =
+      typeof (error as { status?: number })
+        ?.status === "number"
+        ? (error as { status: number }).status
+        : 500;
+
+    if (status === 429) {
+      /* Google distinguishes the per-day cap from the per-minute one, and the
+         student's next move is different for each: come back tomorrow, or
+         wait a moment. */
+      const daily = /PerDay|per day/i.test(raw);
+
+      return NextResponse.json(
+        {
+          error: daily
+            ? "Byte has used up its free questions for today. It will be back tomorrow."
+            : "Byte is getting a lot of questions right now. Try again in a minute.",
+        },
+        { status: 429 }
+      );
+    }
+
+    if (
+      /API[_ ]?KEY|API key not valid|PERMISSION_DENIED/i.test(
+        raw
+      )
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Byte is not set up correctly on this site. Nothing you did — this one is on us.",
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(
       {
-        error: errorMessage,
+        error:
+          "Byte could not answer that one. Please try again.",
       },
       { status: 500 }
     );

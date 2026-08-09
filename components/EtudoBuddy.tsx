@@ -395,15 +395,29 @@ export function EtudoBuddy() {
       );
 
       /*
-       * Show error in chat.
+       * Show WHAT went wrong, not just that something did.
+       *
+       * The route already works out whether Byte is out of free questions for
+       * the day, merely busy, or genuinely misconfigured — and this used to
+       * throw all three away and print "couldn't connect" instead. A student
+       * who is told to wait a minute will wait a minute; a student told the
+       * connection failed just decides the site is broken.
+       *
+       * The fallback is only for the case the route never answered at all,
+       * which really is a connection problem.
        */
+      const reason =
+        error instanceof Error &&
+        error.message
+          ? error.message
+          : "Byte could not be reached. Check your connection and try again.";
+
       setMessages((current) => {
         const updated: Message[] = [
           ...current,
           {
             from: "buddy",
-            text:
-              "Sorry, I couldn't connect to Byte right now. Please try again.",
+            text: reason,
           },
         ];
 
