@@ -29,8 +29,19 @@ export async function POST(req: Request) {
   recordSignup(ip);
   const existing = await prisma.user.findUnique({ where: { email: mail } });
   if (existing) {
-    // Do not leak whether the email exists. Same generic message as login.
-    return NextResponse.json({ error: "That email or password is not right." }, { status: 400 });
+    // Do not confirm whether the address already has an account — that is how
+    // an attacker enumerates who is on the platform, and login is already
+    // careful about exactly this (see the DUMMY_HASH pattern there).
+    //
+    // But the wording matters as much as the status. Borrowing login's "email
+    // or password is not right" tells a person signing UP that a password they
+    // have just invented is wrong, which is both untrue and a dead end. This
+    // says nothing about whether the account exists and still leaves somewhere
+    // to go.
+    return NextResponse.json(
+      { error: "We couldn't create an account with those details. If you already have one, sign in instead." },
+      { status: 400 }
+    );
   }
   // Every new account used to be stamped "Aspiring Data Analyst" — a job title
   // for one of eleven subjects, chosen before the student picked anything. The
