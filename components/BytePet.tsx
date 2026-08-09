@@ -1,0 +1,508 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { emitPetEvent } from "@/lib/pet-events";
+
+type Direction = "left" | "right";
+
+type PetState =
+  | "idle"
+  | "walking"
+  | "happy";
+
+type Position = {
+  x: number;
+  y: number;
+};
+
+const PET_WIDTH = 72;
+const PET_HEIGHT = 72;
+
+/*
+ * How far the pointer may travel and still count as a tap
+ * rather than a drag.
+ *
+ * A pointer never holds perfectly still, so zero would make
+ * Byte impossible to click; anything much larger starts
+ * opening the chat at the end of a short drag.
+ */
+const TAP_SLOP = 5;
+
+const START_POSITION: Position = {
+  x: 140,
+  y: 220,
+};
+
+function clamp(
+  value: number,
+  min: number,
+  max: number
+) {
+  return Math.min(Math.max(value, min), max);
+}
+
+export function BytePet() {
+  const petRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const positionRef =
+    useRef<Position>(START_POSITION);
+
+  const dragRef = useRef({
+    active: false,
+    pointerId: -1,
+    offsetX: 0,
+    offsetY: 0,
+    lastX: START_POSITION.x,
+
+    /*
+     * Where the pointer went down, and whether it has
+     * since travelled far enough to be a drag.
+     *
+     * Byte is both a toy you move and a button you press,
+     * so releasing has to know which one just happened.
+     */
+    startX: 0,
+    startY: 0,
+    moved: false,
+  });
+
+  const [direction, setDirection] =
+    useState<Direction>("right");
+
+  const [state, setState] =
+    useState<PetState>("idle");
+
+  /*
+   * Keep Byte inside the browser viewport.
+   */
+  const getBounds = useCallback(() => {
+    return {
+      minX: 8,
+
+      maxX: Math.max(
+        8,
+        window.innerWidth -
+          PET_WIDTH -
+          8
+      ),
+
+      minY: 70,
+
+      maxY: Math.max(
+        70,
+        window.innerHeight -
+          PET_HEIGHT -
+          12
+      ),
+    };
+  }, []);
+
+  /*
+   * Apply position directly to the DOM.
+   *
+   * This keeps dragging smooth without
+   * causing a React render for every move.
+   */
+  const applyPosition = useCallback(
+    (position: Position) => {
+      if (!petRef.current) {
+        return;
+      }
+
+      petRef.current.style.left =
+        `${position.x}px`;
+
+      petRef.current.style.top =
+        `${position.y}px`;
+    },
+    []
+  );
+
+  /*
+   * Start dragging Byte.
+   */
+  const handlePointerDown = (
+    event: React.PointerEvent
+  ) => {
+    const target =
+      event.target as HTMLElement;
+
+    if (
+      target.closest(
+        "button, a, input, textarea, select"
+      )
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const bounds = getBounds();
+
+    const rect =
+      petRef.current?.getBoundingClientRect();
+
+    if (!rect) {
+      return;
+    }
+
+    dragRef.current = {
+      active: true,
+
+      pointerId:
+        event.pointerId,
+
+      offsetX:
+        event.clientX -
+        rect.left,
+
+      offsetY:
+        event.clientY -
+        rect.top,
+
+      lastX:
+        positionRef.current.x,
+
+      startX:
+        event.clientX,
+
+      startY:
+        event.clientY,
+
+      moved: false,
+    };
+
+    setState("walking");
+
+    /*
+     * Capture the pointer so dragging continues
+     * even when the cursor leaves Byte.
+     */
+    event.currentTarget.setPointerCapture(
+      event.pointerId
+    );
+
+    /*
+     * Make sure initial position is valid.
+     */
+    const safePosition = {
+      x: clamp(
+        positionRef.current.x,
+        bounds.minX,
+        bounds.maxX
+      ),
+
+      y: clamp(
+        positionRef.current.y,
+        bounds.minY,
+        bounds.maxY
+      ),
+    };
+
+    positionRef.current =
+      safePosition;
+
+    applyPosition(
+      safePosition
+    );
+  };
+
+  /*
+   * Move Byte while dragging.
+   */
+  const handlePointerMove = (
+    event: React.PointerEvent
+  ) => {
+    if (
+      !dragRef.current.active ||
+      dragRef.current.pointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    /*
+     * Measured from where the pointer went down, not from
+     * the last move: a slow drag creeps past the threshold
+     * one sub-pixel at a time and would never register.
+     */
+    if (!dragRef.current.moved) {
+      const travelled =
+        Math.abs(
+          event.clientX -
+            dragRef.current.startX
+        ) +
+        Math.abs(
+          event.clientY -
+            dragRef.current.startY
+        );
+
+      if (travelled > TAP_SLOP) {
+        dragRef.current.moved = true;
+      }
+    }
+
+    const bounds = getBounds();
+
+    const nextX = clamp(
+      event.clientX -
+        dragRef.current.offsetX,
+
+      bounds.minX,
+      bounds.maxX
+    );
+
+    const nextY = clamp(
+      event.clientY -
+        dragRef.current.offsetY,
+
+      bounds.minY,
+      bounds.maxY
+    );
+
+    /*
+     * Detect horizontal walking direction.
+     */
+    const difference =
+      nextX -
+      dragRef.current.lastX;
+
+    if (difference < -1) {
+      setDirection("left");
+    } else if (difference > 1) {
+      setDirection("right");
+    }
+
+    dragRef.current.lastX =
+      nextX;
+
+    const nextPosition = {
+      x: nextX,
+      y: nextY,
+    };
+
+    positionRef.current =
+      nextPosition;
+
+    applyPosition(
+      nextPosition
+    );
+  };
+
+  /*
+   * Stop dragging.
+   */
+  const finishDrag = (
+    event: React.PointerEvent
+  ) => {
+    if (
+      !dragRef.current.active ||
+      dragRef.current.pointerId !==
+        event.pointerId
+    ) {
+      return;
+    }
+
+    dragRef.current.active =
+      false;
+
+    try {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    } catch {
+      /*
+       * Pointer capture may already
+       * have been released.
+       */
+    }
+
+    setState("happy");
+
+    /*
+     * A press that never travelled is a click, and clicking
+     * Byte is how you talk to Byte. The pet only announces
+     * it — opening the chat, and every cost that comes with
+     * it, belongs to whoever is listening.
+     */
+    if (!dragRef.current.moved) {
+      emitPetEvent("pet:open-chat");
+    }
+
+    /*
+     * Return to idle after a short reaction.
+     */
+    window.setTimeout(() => {
+      if (!dragRef.current.active) {
+        setState("idle");
+      }
+    }, 400);
+  };
+
+  /*
+   * Byte has claimed role="button" and tabIndex={0} since the
+   * day it was written, which promises a keyboard can press
+   * it. Until now nothing listened, so a screen reader
+   * announced a button that could not be operated.
+   */
+  const handleKeyDown = (
+    event: React.KeyboardEvent
+  ) => {
+    if (
+      event.key !== "Enter" &&
+      event.key !== " "
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    setState("happy");
+
+    emitPetEvent("pet:open-chat");
+
+    window.setTimeout(() => {
+      if (!dragRef.current.active) {
+        setState("idle");
+      }
+    }, 400);
+  };
+
+  /*
+   * Keep Byte inside the viewport
+   * when the browser is resized.
+   */
+  useEffect(() => {
+    const handleResize = () => {
+      const bounds = getBounds();
+
+      const current =
+        positionRef.current;
+
+      const nextPosition = {
+        x: clamp(
+          current.x,
+          bounds.minX,
+          bounds.maxX
+        ),
+
+        y: clamp(
+          current.y,
+          bounds.minY,
+          bounds.maxY
+        ),
+      };
+
+      positionRef.current =
+        nextPosition;
+
+      applyPosition(
+        nextPosition
+      );
+    };
+
+    window.addEventListener(
+      "resize",
+      handleResize
+    );
+
+    return () => {
+      window.removeEventListener(
+        "resize",
+        handleResize
+      );
+    };
+  }, [
+    applyPosition,
+    getBounds,
+  ]);
+
+  /*
+   * Set initial position after mount.
+   */
+  useEffect(() => {
+    applyPosition(
+      positionRef.current
+    );
+  }, [applyPosition]);
+
+  return (
+    <div
+      ref={petRef}
+      className={`byte-pet byte-pet-${state} byte-pet-${direction}`}
+      role="button"
+      tabIndex={0}
+      aria-label="Byte — click to chat, drag to move"
+      title="Click Byte to chat · drag to move"
+      onKeyDown={
+        handleKeyDown
+      }
+      onPointerDown={
+        handlePointerDown
+      }
+      onPointerMove={
+        handlePointerMove
+      }
+      onPointerUp={
+        finishDrag
+      }
+      onPointerCancel={
+        finishDrag
+      }
+      onLostPointerCapture={() => {
+        if (dragRef.current.active) {
+          dragRef.current.active =
+            false;
+
+          setState("idle");
+        }
+      }}
+    >
+      {/* Ground shadow */}
+      <div className="byte-pet-shadow" />
+
+      {/* Main Byte body */}
+      <div className="byte-pet-body">
+
+        {/* Antenna */}
+        <div className="byte-pet-antenna">
+          <span />
+        </div>
+
+        {/* Ears */}
+        <div className="byte-pet-ear byte-pet-ear-left" />
+
+        <div className="byte-pet-ear byte-pet-ear-right" />
+
+        {/* Face */}
+        <div className="byte-pet-face">
+          <span className="byte-pet-eye" />
+
+          <span className="byte-pet-eye" />
+
+          <span className="byte-pet-mouth" />
+        </div>
+
+        {/* Belly */}
+        <div className="byte-pet-belly">
+          <span>&lt;/&gt;</span>
+        </div>
+
+        {/* Feet */}
+        <div className="byte-pet-foot byte-pet-foot-left" />
+
+        <div className="byte-pet-foot byte-pet-foot-right" />
+
+      </div>
+    </div>
+  );
+}

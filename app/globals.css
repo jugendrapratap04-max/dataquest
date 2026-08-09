@@ -3097,13 +3097,19 @@ summary:active,
    BYTE — Etudo AI Study Companion
    ========================================================= */
 
+/* The button is the PHONE's way in. On a desktop you click Byte itself, so the
+   button would be a second door to the same room — hidden there, and the pet
+   below is hidden here, so exactly one of the two is on screen at any width.
+   The breakpoint is 819px in both places on purpose: they are one decision.
+   Never hide this without checking .byte-pet's media query, or a phone gets no
+   way to reach the chat at all. */
 .buddy-fab {
   position: fixed;
   right: 20px;
   bottom: 76px;
   z-index: 70;
 
-  display: inline-flex;
+  display: none;
   align-items: center;
   justify-content: center;
 
@@ -3138,6 +3144,14 @@ summary:active,
 .buddy-fab:active {
   transform: translateY(0);
 }
+
+/* Below this width .byte-pet is display:none, so the button takes over. */
+@media (max-width: 819px) {
+  .buddy-fab {
+    display: inline-flex;
+  }
+}
+
 /* =========================================================
    BYTE PET
 ========================================================= */
