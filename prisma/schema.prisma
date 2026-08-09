@@ -71,6 +71,17 @@ model User {
   roomMessages   RoomMessage[]
   hostedRooms    Room[]             @relation("RoomHost")
   feedback       Feedback[]
+
+  // The other end of the three AI Mentor relations. Prisma needs both sides of
+  // every relation, and without these `prisma generate` fails outright with
+  // P1012 — which is why every build on this branch died in its first second,
+  // before `next build` was even reached.
+  //
+  // Optional-single for the profile because its userId is @unique (one row per
+  // student); lists for the other two, which are logs.
+  learningProfile StudentLearningProfile?
+  conceptMastery  ConceptMastery[]
+  learningSignals LearningSignal[]
 }
 
 model Track {
