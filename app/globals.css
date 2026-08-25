@@ -2330,17 +2330,6 @@ select.inp { cursor:pointer; }
 .cr-line { transition:background var(--t-base) ease, border-color var(--t-base) ease, opacity var(--t-base) ease; }
 .cr-arrow { animation:viz-land var(--t-slow) ease-out; }
 
-/* Shared motion vocabulary for visualisations. Deliberately small: only the
-   element that just changed animates, always in response to a click, never on a
-   loop. The prefers-reduced-motion block earlier in this file switches all of
-   it off for anyone who asks. */
-@keyframes viz-land { 0% { transform:translateY(-5px) scale(.97); opacity:0; } 60% { opacity:1; } 100% { transform:none; opacity:1; } }
-@keyframes viz-glow { 0% { background:var(--accent-soft); } 100% { background:transparent; } }
-.cr-var.just { animation:viz-land var(--t-slow) ease-out, viz-glow .9s ease-out .22s; border-radius:var(--r-xs); }
-.cr-out.just { animation:viz-land var(--t-slow) ease-out; }
-.cr-line { transition:background var(--t-base) ease, border-color var(--t-base) ease, opacity var(--t-base) ease; }
-.cr-arrow { animation:viz-land var(--t-slow) ease-out; }
-
 /* ---- The Etudo Book: lessons rendered as readable, printable notes ---- */
 .book-index { max-width:860px; margin:0 auto; padding:0 24px 60px; }
 .bki-head { padding:26px 0 24px; }
