@@ -20,6 +20,45 @@ type PageData = {
   statement?: string;
 };
 
+/*
+ * Which model answers as Byte.
+ *
+ * Default measured rather than assumed. gemini-2.5-flash was here, and on a real
+ * question with a 1200-token budget it spent 1151 of them THINKING and 45 on the
+ * answer — the student got 201 characters, cut mid-sentence. It also carries a
+ * free-tier cap of 20 requests per DAY for the whole project, which is what took
+ * Byte down for everyone the first time a second person opened the site.
+ *
+ * gemini-flash-lite-latest (currently gemini-3.5-flash-lite) does no thinking,
+ * answers the same question in full, and counts against its own quota. Measured
+ * side by side: 201 chars versus 4199.
+ *
+ * Overridable, so switching models is an environment variable rather than a
+ * deploy — including back to 2.5-flash if its answers are ever wanted.
+ */
+const MODEL =
+  process.env.GEMINI_MODEL ||
+  "gemini-flash-lite-latest";
+
+/*
+ * 1200 cut real answers off mid-sentence (finishReason MAX_TOKENS on every
+ * question worth asking). The free tier counts REQUESTS per day, not tokens, so
+ * a longer ceiling costs nothing and lets Byte finish a thought.
+ */
+const MAX_OUTPUT_TOKENS = 2048;
+
+/*
+ * Thinking models spend the output budget on reasoning before they write a word,
+ * so they need it switched off to answer within any sane ceiling. Models that do
+ * not think REJECT the option outright — gemini-flash-lite-latest returns 400
+ * INVALID_ARGUMENT for it — so this cannot simply be sent to everyone.
+ */
+function thinkingConfigFor(model: string) {
+  return /^gemini-2\.5|thinking/i.test(model)
+    ? { thinkingConfig: { thinkingBudget: 0 } }
+    : {};
+}
+
 export async function POST(request: Request) {
   try {
     // --------------------------------------------------
@@ -699,14 +738,15 @@ DO NOT JUST ANSWER.
 
     const response =
       await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: MODEL,
 
         contents,
 
         config: {
           systemInstruction: prompt,
           temperature: 0.75,
-          maxOutputTokens: 1200,
+          maxOutputTokens: MAX_OUTPUT_TOKENS,
+          ...thinkingConfigFor(MODEL),
         },
       });
 
