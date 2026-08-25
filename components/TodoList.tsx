@@ -35,8 +35,20 @@ export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(KEY);
+      const parsed = saved ? JSON.parse(saved) : null;
+
+      // An emptied list is a real saved state, and it is the string "[]" —
+      // which is TRUTHY. `if (saved)` therefore restored the empty array over
+      // the starters on every load, so once a student deleted all three the
+      // suggestions could never come back and this panel was a heading above
+      // a blank gap for ever after.
+      //
+      // Left empty on purpose rather than re-seeded: clearing the list is a
+      // deliberate act and quietly undoing it is the app overruling the
+      // student. The empty state offers the plan back instead — one click,
+      // never a surprise.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (saved) setItems(JSON.parse(saved));
+      if (Array.isArray(parsed)) setItems(parsed);
     } catch {}
     setReady(true);
   }, []);
@@ -56,6 +68,17 @@ export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: 
 
   return (
     <>
+      {items.length === 0 && (
+        <p className="todo-empty">
+          Nothing planned today.{" "}
+          <button
+            type="button"
+            onClick={() => setItems(starterItems(nextLesson))}
+          >
+            Suggest a plan
+          </button>
+        </p>
+      )}
       <ul className="todo">
         {items.map((it) => (
           <li key={it.id} className={it.done ? "done" : ""}>
@@ -66,7 +89,7 @@ export function TodoList({ nextLesson }: { nextLesson?: { title: string; track: 
               <span className="txt">{it.text}</span>
             </button>
             <span className={`kind ${it.kind === "learn" ? "learn" : "prac"}`}>{it.kind === "learn" ? "learn" : "practice"}</span>
-            <button className="todo-del" onClick={() => remove(it.id)} aria-label={`"${it.text}" hatao`}>×</button>
+            <button className="todo-del" onClick={() => remove(it.id)} aria-label={`Remove "${it.text}"`}>×</button>
           </li>
         ))}
       </ul>

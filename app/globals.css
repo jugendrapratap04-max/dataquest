@@ -436,6 +436,17 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 @keyframes pet-blink { 0%, 91%, 100% { transform:scaleY(1); } 94%, 97% { transform:scaleY(.12); } }
 
 /* Floating glyph chips — ambient, pointer-transparent, each on its own beat. */
+/* The chips are meant to drift BEHIND the hero text, and the comment below
+   used to say so while the opposite happened: .float-field is absolute and
+   renders after .pad in the markup, so it painted on top. Measured on the live
+   site, the "</>" chip's box intersected the .resume h2's box at both 1100px
+   and 1280px.
+   Fixed here rather than by nudging each chip's right offset, because the
+   failing case is a LONG lesson title and no fixed offset survives that. The
+   in-flow text is lifted above the decoration instead, which holds at every
+   width and every title length. Scoped to .resume — .pad is shared with the
+   lesson and roadmap pages. */
+.resume .pad { position:relative; z-index:1; }
 .float-field { position:absolute; inset:0; pointer-events:none; }
 .float-field span { position:absolute; display:grid; place-items:center; font-family:var(--mono); font-weight:700;
   border-radius:var(--r-sm); box-shadow:var(--shadow); animation:drift 5s ease-in-out infinite alternate; }
@@ -453,7 +464,14 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .grid > .col > *:nth-child(5) { animation-delay:.2s; }
 .grid > .col > *:nth-child(n+6) { animation-delay:.25s; }
 .resume .btn-ghost { background:var(--gbtn-bg); color:var(--gbtn-ink); border-color:var(--gbtn-border); }
-.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; } @media (max-width:640px){ .stats{ grid-template-columns:repeat(2,1fr);} }
+/* minmax(0,1fr), not 1fr. A bare 1fr is minmax(auto,1fr), and auto cannot
+   shrink below a track's min-content — the 7-tick activity row inside the Day
+   Streak tile is 7x14px plus six 5px gaps plus 36px of padding, so that column
+   simply refused to match its neighbours. Measured on the live site:
+   375px gave 166px 120px, 390px gave 166px 135px, and even the four-column
+   layout at 768px came out 166 162 162 162. Both rules needed it, not just the
+   phone one. */
+.stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; } @media (max-width:640px){ .stats{ grid-template-columns:repeat(2,minmax(0,1fr));} }
 /* ---- Card hierarchy ---------------------------------------------------
    Measured on the dashboard: ELEVEN cards, and nine of them carried the
    identical border, background and shadow. Everything asked for the same
@@ -505,6 +523,16 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .ic.py{ background:#FBF0D3; color:#A9770A;} .ic.sql{ background:#DBE8FA; color:#2C5FC0;} .ic.pd{ background:#E6E1F7; color:#6248C4;} .ic.st{ background:var(--teal-soft); color:var(--teal);}
 :root[data-theme="dark"] .ic.py, :root[data-theme="focus"] .ic.py, :root[data-theme="sunset"] .ic.py{ background:#3a2f10; color:#F0C453;} :root[data-theme="dark"] .ic.sql, :root[data-theme="focus"] .ic.sql, :root[data-theme="sunset"] .ic.sql{ background:#152a45; color:#78ADF2;} :root[data-theme="dark"] .ic.pd, :root[data-theme="focus"] .ic.pd, :root[data-theme="sunset"] .ic.pd{ background:#241d3d; color:#B7A2F2;}
 @media (prefers-color-scheme:dark){ .ic.py{ background:#3a2f10; color:#F0C453;} .ic.sql{ background:#152a45; color:#78ADF2;} .ic.pd{ background:#241d3d; color:#B7A2F2;} }
+/* Deleting every task used to leave a heading, a blank gap and an input —
+   a zero state with neither a sentence nor an action, which
+   docs/DESIGN-SYSTEM.md forbids. The button is the action; it re-seeds the same
+   three suggestions a fresh visitor gets, so an accidental clear-out is one
+   click to undo without the app quietly putting them back by itself. */
+.todo-empty { font-size:12.5px; color:var(--ink-faint); line-height:1.6; margin:4px 0 10px; }
+.todo-empty button { background:none; border:0; padding:0; font:inherit; color:var(--accent);
+  cursor:pointer; text-decoration:underline; text-underline-offset:2px; }
+.todo-empty button:hover { color:var(--accent-2); }
+
 .todo { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; }
 .todo li { display:flex; align-items:center; gap:11px; padding:9px 6px; border-radius:var(--r-sm); } .todo li:hover { background:var(--panel-2); }
 /* The tick + label are one real button now, so the row itself isn't the control. */
