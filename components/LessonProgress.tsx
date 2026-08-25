@@ -4,9 +4,39 @@ import { useEffect, useState } from "react";
 import type { OutlineEntry } from "@/lib/lesson-outline";
 
 /** Thin bar across the top showing how far through the lesson the reader is.
- *  A long lesson with no sense of progress is a lesson people abandon. */
-export function ReadingProgress() {
+ *  A long lesson with no sense of progress is a lesson people abandon.
+ *
+ *  It also records that the lesson was OPENED. That was the missing half of
+ *  the dashboard's "Read theory" step: nothing in the app ever wrote an
+ *  in_progress row, so the step asked a question whose answer was always no.
+ *  Measured against the production database before this: 14 rows done, 0 with
+ *  any other status.
+ *
+ *  It lives here rather than in a component of its own because this is already
+ *  the "a reader is in this lesson" component, and it is already mounted once
+ *  per lesson page. */
+export function ReadingProgress({ lessonId }: { lessonId?: string }) {
   const [pct, setPct] = useState(0);
+
+  /*
+   * Once per lesson per tab. A re-render, a back-navigation or a scroll must
+   * not each cost a write, and sessionStorage is the cheapest thing that
+   * survives the first two and dies with the tab.
+   *
+   * Guests get a 401 and that is fine — there is nobody to record it for.
+   * Failures are swallowed: nothing about reading a lesson should break
+   * because a progress ping did not land.
+   */
+  useEffect(() => {
+    if (!lessonId) return;
+    const key = "dq-opened-" + lessonId;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, "1"); } catch {}
+    void fetch("/api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lessonId, status: "in_progress" }),
+    }).catch(() => {});
+  }, [lessonId]);
 
   useEffect(() => {
     const onScroll = () => {

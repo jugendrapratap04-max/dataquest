@@ -541,7 +541,7 @@ export default async function LessonPage({
 
   return (
     <div className="learn-layout">
-      <ReadingProgress />
+      <ReadingProgress lessonId={lesson.id} />
       {/* The contents come FIRST in the source as well as on screen: on a phone
           this renders as a closed disclosure above the lesson, which is the
           whole fix — the old rail landed after the entire lesson. */}

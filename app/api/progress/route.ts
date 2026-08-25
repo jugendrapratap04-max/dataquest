@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveStatus, type LessonStatus } from "@/lib/lesson-status";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/session";
 import { readJson, idOf } from "@/lib/http";
@@ -50,14 +51,26 @@ export async function POST(req: Request) {
   // finished it, which is what the activity timeline reads.
   const existing = await prisma.lessonProgress.findUnique({
     where: { userId_lessonId: { userId: user.id, lessonId } },
-    select: { completedAt: true },
+    select: { completedAt: true, status: true },
   });
-  const firstTimeDone = status === "done" && !existing?.completedAt;
+
+  // DONE IS A FLOOR. Opening a lesson marks it in_progress (that is what makes
+  // the dashboard's "Read theory" step able to tick), and writing `status`
+  // straight through would then walk a FINISHED lesson backwards every time a
+  // student re-read it. doneLessonIds feeds the progress percentages, the
+  // roadmap, the certificates and the gating — they would have watched their
+  // own progress fall. The rule lives in lib/lesson-status.ts, tested by
+  // scripts/test-lesson-status.mjs.
+  const nextStatus = resolveStatus(
+    (existing?.status as LessonStatus | undefined) ?? null,
+    status as LessonStatus
+  );
+  const firstTimeDone = nextStatus === "done" && !existing?.completedAt;
 
   const record = await prisma.lessonProgress.upsert({
     where: { userId_lessonId: { userId: user.id, lessonId } },
-    update: { status, ...(firstTimeDone ? { completedAt: new Date() } : {}) },
-    create: { userId: user.id, lessonId, status, ...(status === "done" ? { completedAt: new Date() } : {}) },
+    update: { status: nextStatus, ...(firstTimeDone ? { completedAt: new Date() } : {}) },
+    create: { userId: user.id, lessonId, status: nextStatus, ...(nextStatus === "done" ? { completedAt: new Date() } : {}) },
   });
 
   return NextResponse.json({ ok: true, status: record.status });
