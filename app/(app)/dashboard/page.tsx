@@ -97,10 +97,26 @@ export default async function DashboardPage() {
 
   const unfinished = (trackId?: string | null) =>
     lessons.find((l) => (!trackId || l.trackId === trackId) && !p.doneLessonIds.has(l.id));
-  // Their subject first; if they have finished it, the next unfinished anywhere;
-  // if they have finished everything, lesson one.
-  const nextLesson = unfinished(activeTrackId) ?? unfinished(null) ?? lessons[0];
-  const theoryDone = nextLesson ? p.doneLessonIds.has(nextLesson.id) : false;
+  // Their subject first, then the next unfinished anywhere.
+  //
+  // The `?? lessons[0]` that used to close this line sent a student who had
+  // finished EVERY lesson back to lesson one, under the heading "Continue
+  // where you left off". Nothing on the page branched on being done, so there
+  // was no acknowledgement and nowhere to go. Null now, and the hero carries a
+  // completed state.
+  const nextLesson = unfinished(activeTrackId) ?? unfinished(null) ?? null;
+  const finishedEverything = !nextLesson && lessons.length > 0;
+
+  // "Read theory" asked whether the NEXT lesson was done — and the next lesson
+  // is by definition the first one that is NOT. So the tick was unreachable for
+  // every student on the normal path and `.fstep.done` styled nothing. It now
+  // asks the question it meant to: has this lesson been opened?
+  const theoryDone = !!nextLesson && p.startedLessonIds.has(nextLesson.id);
+
+  // The first lesson every new student meets has no problems at all, and nor do
+  // six others, so step two could never tick there either. The step is simply
+  // not shown when there is nothing to practise.
+  const hasPractice = !!nextLesson && nextLesson.problems.length > 0;
   const practiceDone =
     !!nextLesson &&
     nextLesson.problems.length > 0 &&
@@ -145,26 +161,44 @@ export default async function DashboardPage() {
             {/* "Continue where you left off" to somebody who has never opened a
                 lesson is the activation cohort being told a story about a past
                 they do not have. It now follows real activity, not sign-in. */}
-            <div className="eyebrow">{started ? "Continue where you left off" : "Start here"}</div>
-            <h2>{nextLesson ? nextLesson.title : "Start your journey"}</h2>
+            <div className="eyebrow">
+              {finishedEverything ? "Every lesson done" : started ? "Continue where you left off" : "Start here"}
+            </div>
+            <h2>
+              {nextLesson ? nextLesson.title : finishedEverything ? "You have finished every lesson" : "Start your journey"}
+            </h2>
             <div className="sub">
-              {nextLesson ? `${nextLesson.track.title} · Lesson ${nextLesson.order}` : "Start with Python"}
+              {nextLesson
+                ? `${nextLesson.track.title} · Lesson ${nextLesson.order}`
+                : finishedEverything
+                  ? `All ${p.totalLessons} topics, across ${p.tracks.length} subjects.`
+                  : "Start with Python"}
             </div>
-            <div className="flow">
-              <span className={`fstep ${theoryDone ? "done" : "now"}`}>
-                {theoryDone ? "✓ " : ""}Read theory
-              </span>
-              <span className="farrow">→</span>
-              <span className={`fstep ${practiceDone ? "done" : theoryDone ? "now" : ""}`}>
-                {practiceDone ? "✓ " : ""}Practice
-              </span>
-            </div>
+            {nextLesson && (
+              <div className="flow">
+                <span className={`fstep ${theoryDone ? "done" : "now"}`}>
+                  {theoryDone ? "✓ " : ""}Read theory
+                </span>
+                {hasPractice && (
+                  <>
+                    <span className="farrow">→</span>
+                    <span className={`fstep ${practiceDone ? "done" : theoryDone ? "now" : ""}`}>
+                      {practiceDone ? "✓ " : ""}Practice
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
             <div className="rfoot">
-              {nextLesson && (
+              {nextLesson ? (
                 <Link className="btn btn-primary" href={`/learn/${nextLesson.slug}`}>
                   {started ? "Resume learning →" : "Start the first lesson →"}
                 </Link>
-              )}
+              ) : finishedEverything ? (
+                <Link className="btn btn-primary" href="/certificates">
+                  See your certificates →
+                </Link>
+              ) : null}
               <Link className="btn btn-ghost" href="/practice">Practice now</Link>
             </div>
             <div className="r-illo" aria-hidden="true">
@@ -192,11 +226,33 @@ export default async function DashboardPage() {
                 two doors first. Somebody who has never solved anything is far
                 more likely to finish a lesson today, and that is a real day on
                 the streak. */}
-            {streak > 0
-              ? <div className="v">{streak} <small>best {bestStreak}</small></div>
-              : nextLesson
-                ? <Link className="invite" href={`/learn/${nextLesson.slug}`}>Finish a lesson or solve a problem today — either starts it →</Link>
-                : <Link className="invite" href="/practice">Solve one problem today and your streak begins →</Link>}
+            {/* `best` used to live only inside the streak > 0 branch, though
+                getStreak returns it either way — so a student whose 30-day run
+                broke two days ago saw no trace of the 30, only an invitation
+                implying they had never had one. It is shown whenever there is
+                one to show, and the invitation says restart rather than begin. */}
+            {streak > 0 ? (
+              <div className="v">{streak} <small>best {bestStreak}</small></div>
+            ) : (
+              <>
+                {bestStreak > 0 && (
+                  <div className="v v-quiet">0 <small>best {bestStreak}</small></div>
+                )}
+                {nextLesson ? (
+                  <Link className="invite" href={`/learn/${nextLesson.slug}`}>
+                    {bestStreak > 0
+                      ? "Finish a lesson or solve a problem today — either restarts it →"
+                      : "Finish a lesson or solve a problem today — either starts it →"}
+                  </Link>
+                ) : (
+                  <Link className="invite" href="/practice">
+                    {bestStreak > 0
+                      ? "Solve one problem today and your streak restarts →"
+                      : "Solve one problem today and your streak begins →"}
+                  </Link>
+                )}
+              </>
+            )}
             <div className="week" aria-label="Last 7 days of activity">
               {week.map((n, i) => (
                 <i key={i} className={n > 0 ? "on" : ""} title={`${weekLetters[i]} · ${n} finished`}>{n > 0 ? "✓" : ""}</i>
@@ -214,7 +270,7 @@ export default async function DashboardPage() {
         </section>
 
         <section className="card pad">
-          <div className="sec-head"><h2>Your Roadmap<span className="sub">{p.tracks.length} subjects, in order</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
+          <div className="sec-head"><h2>Your Roadmap{" "}<span className="sub">{p.tracks.length} subjects, in order</span></h2><Link className="link" href="/roadmap">View full path →</Link></div>
           <div className="trackrow">
             {/* A SUBJECT TILE OPENS THE SUBJECT.
                 Every one of these linked to /roadmap, so picking a subject
@@ -264,10 +320,10 @@ export default async function DashboardPage() {
         </section>
 
         <section className="card pad">
-          <div className="sec-head"><h2>Practice Arena<span className="sub">learn, then master by doing</span></h2><Link className="link" href="/practice">All playgrounds →</Link></div>
+          <div className="sec-head"><h2>Practice Arena{" "}<span className="sub">learn, then master by doing</span></h2><Link className="link" href="/practice">All playgrounds →</Link></div>
           <div className="arena">
-            <Link href="/practice" className="pcard"><div className="top"><div className="ic py"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div><h3>Python Compiler<small>real, in-browser</small></h3></div><div className="d">Write code, run it, see the output instantly — real Python.</div></Link>
-            <Link href="/practice" className="pcard"><div className="top"><div className="ic pd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></div><h3>Problem Sets<small>test-case checked</small></h3></div><div className="d">Short problems for every topic, with an auto-checker.</div></Link>
+            <Link href="/practice" className="pcard"><div className="top"><div className="ic py"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m8 6-5 6 5 6M16 6l5 6-5 6"/></svg></div><h3>Python Compiler{" "}<small>real, in-browser</small></h3></div><div className="d">Write code, run it, see the output instantly — real Python.</div></Link>
+            <Link href="/practice" className="pcard"><div className="top"><div className="ic pd"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 4v16"/></svg></div><h3>Problem Sets{" "}<small>test-case checked</small></h3></div><div className="d">Short problems for every topic, with an auto-checker.</div></Link>
           </div>
         </section>
       </div>

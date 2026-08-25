@@ -66,6 +66,11 @@ export type Progress = {
   lessonsDone: number; totalLessons: number;
   problemsDone: number; totalProblems: number;
   doneLessonIds: Set<string>;
+  /** Lessons with a LessonProgress row that is NOT yet done — opened, not finished.
+   *  The dashboard's "Read theory" step had no way to be true without this: it
+   *  asked whether the NEXT lesson was done, and the next lesson is by definition
+   *  the first one that is not. */
+  startedLessonIds: Set<string>;
   solvedProblemIds: Set<string>;
 };
 
@@ -91,10 +96,16 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     },
   });
 
+  // One query for both sets rather than two: dropping the status filter costs a
+  // few more rows and no extra round trip.
+  const lessonRows = await prisma.lessonProgress.findMany({
+    where: { userId }, select: { lessonId: true, status: true },
+  });
   const doneLessonIds = new Set(
-    (await prisma.lessonProgress.findMany({
-      where: { userId, status: "done" }, select: { lessonId: true },
-    })).map((d) => d.lessonId)
+    lessonRows.filter((r) => r.status === "done").map((r) => r.lessonId)
+  );
+  const startedLessonIds = new Set(
+    lessonRows.filter((r) => r.status !== "done").map((r) => r.lessonId)
   );
   const solvedProblemIds = new Set(
     (await prisma.submission.findMany({
@@ -211,6 +222,7 @@ async function getProgressImpl(userId: string): Promise<Progress> {
     problemsDone,
     totalProblems,
     doneLessonIds,
+    startedLessonIds,
     solvedProblemIds,
   };
 }
