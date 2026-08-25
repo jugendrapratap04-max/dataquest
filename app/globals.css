@@ -53,6 +53,11 @@
   --t-fast:.15s;   /* hover, colour, opacity — was .12 and .15 */
   --t-base:.2s;    /* the default — was .18, .2 and .22 */
   --t-slow:.25s;   /* panels and disclosure — was .24 */
+  /* Entrance tier, deliberately OFF the scale above. Those three answer a
+     pointer and must feel instant; this one is content arriving and wants to
+     be seen. .5s is not a new number — it is what `rise` already uses at the
+     dashboard (see @keyframes rise). */
+  --t-reveal:.5s;
   --ease:cubic-bezier(.2,0,0,1);
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Roboto Mono", monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -4804,5 +4809,50 @@ ol.bmd-list { list-style: decimal outside; }
 
   .buddy-input button {
     min-width: 48px;
+  }
+}
+/* =========================================================
+   MOTION — scroll reveal on the reading column
+
+   The lesson page was the one surface with 4,671 content blocks and no
+   entrance motion of any kind: the text simply existed. This gives it the
+   same arrival the dashboard has had all along.
+
+   Scoped to `.prose > *`, which is already a styled family in this file and
+   whose class appears in exactly ONE place in the codebase
+   (app/(app)/learn/[slug]/page.tsx). So the hook already existed; nothing
+   had to be added to a .tsx file to get this.
+
+   Three deliberate choices, each of which is load-bearing:
+
+   1. CSS-only, via scroll-driven animation. No IntersectionObserver, no
+      client component. LessonProgress.tsx already documents why this repo
+      avoids IO — frame-driven callbacks that "silently never arrive in a
+      throttled/hidden tab". A JS reveal also has the classic fatal bug:
+      if the script is slow or fails, content parked at opacity:0 never
+      un-hides and the lesson renders blank. There is no script here to fail.
+
+   2. @supports means a browser without scroll-driven animation gets NO rule
+      at all and renders exactly as it does today. Not degraded, not flashing
+      — identical. (First @supports in this file; there were none before.)
+
+   3. Only opacity and transform move, so this is compositor-only and names
+      no colour — it therefore cannot break any of the theme blocks.
+
+   ⚠️ `animation-timeline` MUST stay AFTER the `animation` shorthand. The
+   shorthand resets timeline to `auto`. Reversed, it parses, it builds, it
+   lints clean, and the reveal silently never gates on scroll.
+   ========================================================= */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes rv-in {
+      from { opacity:0; transform:translateY(14px); }
+      to   { opacity:1; transform:none; }
+    }
+    .prose > * {
+      animation: rv-in var(--t-reveal) var(--ease) both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
   }
 }
