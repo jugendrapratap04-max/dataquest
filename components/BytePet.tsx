@@ -132,11 +132,11 @@ export function BytePet() {
         return;
       }
 
-      petRef.current.style.left =
-        `${position.x}px`;
-
-      petRef.current.style.top =
-        `${position.y}px`;
+      /* One compositor-only property instead of two layout ones. The element
+         stays at left:0/top:0 and is moved from there, so getBoundingClientRect
+         still reports where Byte actually is and the drag maths is unchanged. */
+      petRef.current.style.transform =
+        `translate3d(${position.x}px, ${position.y}px, 0)`;
     },
     []
   );

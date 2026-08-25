@@ -3167,11 +3167,21 @@ summary:active,
   /* Keep antenna and other parts visible outside the box */
   overflow: visible;
 
-  pointer-events: auto;
+  /* The box is 72x72; the pet drawn inside it is smaller, so its corners were
+     transparent AND clickable. A pet parked over a button ate the click and
+     nothing happened. Nothing here is interactive now — the body below opts
+     back in, and events on it still bubble to the drag handlers on this root. */
+  pointer-events: none;
+
   user-select: none;
   touch-action: none;
   cursor: grab;
-  will-change: left, top;
+
+  /* transform, not left/top. Writing left/top on every pointermove asks the
+     browser to lay the page out again for each frame of a drag; a transform is
+     handled on the compositor and touches no layout at all. Promising the
+     browser the wrong property is worse than promising nothing. */
+  will-change: transform;
 }
 
 .byte-pet:active {
@@ -3213,6 +3223,10 @@ summary:active,
 ========================= */
 
 .byte-pet-body {
+  /* The only part of Byte that takes a pointer. Ears, antenna, face and feet
+     are all inside it, so they come along; the empty corners of the box do not. */
+  pointer-events: auto;
+
   position: absolute;
   left: 7px;
   bottom: 10px;
