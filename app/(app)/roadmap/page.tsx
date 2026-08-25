@@ -20,7 +20,18 @@ export default async function RoadmapPage() {
   // Counted from the database, so these can only ever say what is really there.
   // The row they replaced advertised "~10 mo" and a target job title, neither of
   // which anybody could check and neither of which was ours to promise.
-  const ready = tracks.filter((t) => t.status !== "locked").length;
+  /*
+   * "Ready now" counted subjects that are not locked — and nothing can be
+   * locked while EXPLORE_MODE is on, so it printed the same number as the
+   * "Subjects" box beside it. Two boxes showing one number is not information.
+   *
+   * `ready` means the subject has lessons written, is deliberately separate
+   * from `status`, and does not move with EXPLORE_MODE (see lib/progress.ts).
+   * Today every subject has lessons, so this still reads 11 — but now it is
+   * true rather than accidentally true, and it will move when a new empty
+   * subject is added.
+   */
+  const ready = tracks.filter((t) => t.ready).length;
   const totalLessons = tracks.reduce((n, t) => n + t.totalLessons, 0);
   const totalProblems = tracks.reduce((n, t) => n + t.totalProblems, 0);
 

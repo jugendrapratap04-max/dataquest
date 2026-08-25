@@ -98,29 +98,3 @@ export async function lockStateFor(
     },
   };
 }
-
-/**
- * The unlocked set for a whole subject in one pass — for lists, where calling
- * lockStateFor per lesson would be one query per row.
- */
-export function unlockedIdsFor(
-  lessons: { id: string; order: number; problems: { id: string }[] }[],
-  touchedLessonIds: Set<string>,
-  doneLessonIds: Set<string>,
-  solvedProblemIds: Set<string>
-): Set<string> {
-  const open = new Set<string>();
-  const inOrder = [...lessons].sort((a, b) => a.order - b.order);
-
-  for (const [i, lesson] of inOrder.entries()) {
-    // First topic of the subject, or one the student has already reached —
-    // gating paces what is next, it never confiscates what is done.
-    if (i === 0 || touchedLessonIds.has(lesson.id)) { open.add(lesson.id); continue; }
-    const prev = inOrder[i - 1];
-    const solved = prev.problems.filter((p) => solvedProblemIds.has(p.id)).length;
-    if (doneLessonIds.has(prev.id) && solved >= requiredFor(prev.problems.length)) {
-      open.add(lesson.id);
-    }
-  }
-  return open;
-}

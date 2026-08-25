@@ -9,6 +9,7 @@
 import { cache } from "react";
 import { prisma } from "./prisma";
 import { EXPLORE_MODE } from "./gates";
+import { subjectName } from "./subjects";
 import { startOfDay, DAY_MS } from "./day";
 
 /* Was `[name, done]`. The `done` half was fabricated — see the note beside the
@@ -68,6 +69,13 @@ export type Progress = {
   solvedProblemIds: Set<string>;
 };
 
+/* ⚠️ NOT the source of TrackProgress.shortTitle any more — that reads
+   subjectName() in lib/subjects.ts, which has a pinned name per subject.
+   This only strips text after an em-dash or a bracket, so real titles came
+   through whole and eight of eleven subject tiles on the dashboard wrapped to
+   four lines. Kept because the dashboard still calls it on a bare track title
+   that has no slug to look up. If you find yourself reaching for it with a
+   slug in hand, use subjectName instead. */
 export const shortTitle = (t: string) =>
   t.split(" — ")[0].split(" (")[0].replace("Programming Foundations", "Python");
 
@@ -166,7 +174,7 @@ async function getProgressImpl(userId: string): Promise<Progress> {
 
     return {
       id: r.t.id, slug: r.t.slug, order: r.t.order,
-      title: r.t.title, shortTitle: shortTitle(r.t.title), subtitle: r.t.subtitle,
+      title: r.t.title, shortTitle: subjectName(r.t.title, r.t.slug), subtitle: r.t.subtitle,
       icon: r.t.icon, whyText: r.t.whyText, weeks: r.t.weeks, level: r.t.level,
       milestone: r.t.milestone, toolsCsv: r.t.toolsCsv, checkpoint: r.t.checkpoint,
       firstLesson: r.t.lessons[0]?.slug,

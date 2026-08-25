@@ -21,7 +21,11 @@ export function GuestBanner({ what }: { what: string }) {
   return (
     <section className="card pad guest-banner">
       <div className="eyebrow">You&apos;re exploring as a guest</div>
-      <h3>{what}</h3>
+      {/* h2, not h3. Every page that renders this has an h1 above it, so an
+          h3 here put a guest's outline at h1 -> h3 -> h2 — a skipped level for
+          exactly the audience this platform is built to convert. Signed-in
+          readers never saw it, which is why it survived. */}
+      <h2>{what}</h2>
       <p>
         Look around as much as you like — none of this is behind a wall. An account is what
         makes it <b>yours</b>: it remembers the lessons you finish, checks your code and pays
