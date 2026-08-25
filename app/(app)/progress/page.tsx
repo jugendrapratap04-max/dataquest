@@ -47,7 +47,7 @@ export default async function ProgressPage() {
 
       <div className="card pad">
         <div className="sec-head">
-          <h2>Activity — Last 4 Weeks<span className="sub">{totalSubs} submissions · {activeDays} active days</span></h2>
+          <h2>Activity — Last 4 Weeks{" "}<span className="sub">{totalSubs} submissions · {activeDays} active days</span></h2>
         </div>
         <div className="bigcal">
           {activity.map((n, i) => (

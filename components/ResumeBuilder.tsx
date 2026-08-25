@@ -135,7 +135,7 @@ export function ResumeBuilder({ name, role, keywords, canSave = true }: { name: 
       {/* ATS + preview */}
       <div className="rb-right">
         <div className="card pad">
-          <div className="sec-head"><h2>ATS Score<span className="sub">how a machine reads it</span></h2></div>
+          <div className="sec-head"><h2>ATS Score{" "}<span className="sub">how a machine reads it</span></h2></div>
           <div className="ats-top">
             <div className="ats-ring" style={{ background: `conic-gradient(${bandColor} ${score * 3.6}deg, var(--panel-2) 0)` }}>
               <div className="ats-inner"><b style={{ color: bandColor }}>{score}</b><span>/ 100</span></div>
@@ -154,10 +154,10 @@ export function ResumeBuilder({ name, role, keywords, canSave = true }: { name: 
         </div>
 
         <div className="card pad">
-          <div className="sec-head"><h2>Live Preview<span className="sub">print / PDF ready</span></h2></div>
+          <div className="sec-head"><h2>Live Preview{" "}<span className="sub">print / PDF ready</span></h2></div>
           <div className="rsm">
             <div className="rsm-head">
-              <h1>{d.fullName || "Your Name"}</h1>
+              <div className="rsm-name">{d.fullName || "Your Name"}</div>
               <div className="rsm-role">{d.role}</div>
               <div className="rsm-contact">{[d.email, d.phone, d.linkedin].filter(Boolean).join("  ·  ")}</div>
             </div>

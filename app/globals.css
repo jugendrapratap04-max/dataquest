@@ -1938,7 +1938,11 @@ h1, h2, .top-title { font-family:var(--display); letter-spacing:-.01em; }
 .ats-list li .aw { font-family:var(--mono); font-size:11px; color:var(--ink-faint); }
 .rsm { background:#fff; color:#1a1a1a; border:1px solid var(--line); border-radius:var(--r-sm); padding:26px 28px; font-size:12.5px; line-height:1.5; }
 .rsm-head { border-bottom:2px solid #1a1a1a; padding-bottom:12px; margin-bottom:14px; }
-.rsm-head h1 { font-size:22px; color:#111; }
+/* Was an h1, which gave /resume two of them — see issue #14. Every visual
+   property it had is here: Tailwind preflight resets heading size and weight,
+   so the name never inherited anything from being a heading except the
+   display face, which is named explicitly now. */
+.rsm-head .rsm-name { font-family:var(--display); letter-spacing:-.01em; font-weight:700; font-size:22px; color:#111; }
 .rsm-role { font-size:13px; color:#444; margin-top:2px; font-weight:600; }
 .rsm-contact { font-size:11px; color:#666; margin-top:6px; font-family:var(--mono); }
 .rsm-h { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:#111; margin:14px 0 6px; border-bottom:1px solid #ddd; padding-bottom:3px; }

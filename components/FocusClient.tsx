@@ -353,7 +353,7 @@ function History({ rows }: { rows: HistoryRow[] }) {
   if (rows.length === 0) return null;
   return (
     <div style={{ marginTop: 26 }}>
-      <div className="sec-head"><h2>Study History<span className="sub">pichhle sessions</span></h2></div>
+      <div className="sec-head"><h2>Study History{" "}<span className="sub">your earlier sessions</span></h2></div>
       <div className="card fhist">
         {rows.map((r) => (
           <div key={r.id} className="fhist-row">

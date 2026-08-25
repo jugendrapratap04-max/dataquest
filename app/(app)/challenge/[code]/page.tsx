@@ -64,7 +64,7 @@ export default async function ChallengeRunPage({ params }: { params: Promise<{ c
 
       {/* Scoreboard, always. It is what the link is for. */}
       <section className="card pad">
-        <div className="sec-head"><h2>Scoreboard<span className="sub">{questions.length} questions · code {challenge.code}</span></h2></div>
+        <div className="sec-head"><h2>Scoreboard{" "}<span className="sub">{questions.length} questions · code {challenge.code}</span></h2></div>
         {challenge.attempts.length === 0 ? (
           <p className="ch-hint">Nobody has taken this yet. Be the first.</p>
         ) : (

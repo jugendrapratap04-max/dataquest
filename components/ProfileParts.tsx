@@ -71,7 +71,7 @@ export function SolvedPanel({ stats }: { stats: SolvedStats }) {
   return (
     <section className="card pad">
       <div className="sec-head">
-        <h2>Problems solved<span className="sub">{stats.totalSolved} of {stats.totalProblems}</span></h2>
+        <h2>Problems solved{" "}<span className="sub">{stats.totalSolved} of {stats.totalProblems}</span></h2>
         <Link className="link" href="/practice">Practice →</Link>
       </div>
       <div className="solved-grid">
@@ -113,7 +113,7 @@ export function TopicPanel({ stats }: { stats: SolvedStats }) {
   return (
     <section className="card pad">
       <div className="sec-head">
-        <h2>Topics<span className="sub">{stats.topicsTouched} touched · {stats.clearedTopics} cleared</span></h2>
+        <h2>Topics{" "}<span className="sub">{stats.topicsTouched} touched · {stats.clearedTopics} cleared</span></h2>
       </div>
       <div className="topic-list">
         {stats.byTopic.map((t) => (
@@ -200,7 +200,7 @@ export function BadgeWall({ achievements, own }: { achievements: Achievement[]; 
   return (
     <section className="card pad">
       <div className="sec-head">
-        <h2>Badges<span className="sub">{earned.length} of {achievements.length}</span></h2>
+        <h2>Badges{" "}<span className="sub">{earned.length} of {achievements.length}</span></h2>
       </div>
       {earned.length === 0 ? (
         <p className="prof-empty">
@@ -266,7 +266,7 @@ export function CoursePanel({
   return (
     <section className="card pad">
       <div className="sec-head">
-        <h2>Courses<span className="sub">{tracks.length} started · {certificates} finished</span></h2>
+        <h2>Courses{" "}<span className="sub">{tracks.length} started · {certificates} finished</span></h2>
         {own && <Link className="link" href="/roadmap">Full path →</Link>}
       </div>
       {tracks.length === 0 ? (
@@ -347,7 +347,7 @@ export function LevelPanel({
   return (
     <section className="card pad prof-level">
       <div className="sec-head">
-        <h2>Level {level.level}<span className="sub">{xp.toLocaleString()} XP earned</span></h2>
+        <h2>Level {level.level}{" "}<span className="sub">{xp.toLocaleString()} XP earned</span></h2>
         <span className="prof-next">{level.toNext.toLocaleString()} XP to level {level.level + 1}</span>
       </div>
       <div className="pbar"><i style={{ width: `${level.pct}%` }} /></div>

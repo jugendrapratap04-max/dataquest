@@ -75,7 +75,7 @@ export default async function ProfilePage() {
           <CoursePanel tracks={started} certificates={certificates} own />
           <section className="card pad">
             <div className="sec-head">
-              <h2>Certificates<span className="sub">issued on a finished subject</span></h2>
+              <h2>Certificates{" "}<span className="sub">issued on a finished subject</span></h2>
               <Link className="link" href="/certificates">View all →</Link>
             </div>
             <p className="prof-empty" style={{ margin: 0 }}>

@@ -57,7 +57,7 @@ export default async function LeaderboardPage() {
         </p>
       )}
       <div className="card pad">
-        <div className="sec-head"><h2>Top Learners<span className="sub">by XP · all-time</span></h2></div>
+        <div className="sec-head"><h2>Top Learners{" "}<span className="sub">by XP · all-time</span></h2></div>
         <ul className="lb">
           {users.map((u, i) => {
             const isMe = me && u.id === me.id;
