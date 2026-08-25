@@ -16,12 +16,20 @@
  */
 
 /*
- * Every event the pet can announce.
+ * Every event the pet can announce or be told about.
  *
- * Phase 5 adds the study cues here — `pet:cue` for solve/pass/fail and friends —
- * which is why this is a union rather than a single string constant.
+ * `pet:cue` carries one of lib/sound.ts's study cues. Hooking the pet to the
+ * SOUND bus rather than to the workbenches is what keeps this cheap: fifteen
+ * call sites across six components already fire those cues, and not one of them
+ * has to learn that a pet exists.
+ *
+ * `pet:thinking` is a boolean — the chat raising and lowering its hand while it
+ * waits on an answer.
  */
-export type PetEventName = "pet:open-chat";
+export type PetEventName =
+  | "pet:open-chat"
+  | "pet:cue"
+  | "pet:thinking";
 
 /*
  * Tell everyone the pet did something.

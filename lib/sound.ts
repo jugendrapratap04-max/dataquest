@@ -1,3 +1,5 @@
+import { emitPetEvent } from "./pet-events";
+
 /* Short synthesised cues for the moments that matter: a solve, a failed run, a
  * quiz answer, a finished lesson.
  *
@@ -158,6 +160,14 @@ function makeReverb(ac: AudioContext): ConvolverNode {
  * the middle of a student solving a problem.
  */
 export function play(cue: Cue): void {
+  // Byte hears this too — and ABOVE the mute check on purpose. Muting turns
+  // the sound off, not the pet: a student who silences the tab should still
+  // see Byte react when they get something right. One line below the guard
+  // and the pet dies for everyone who studies quietly.
+  //
+  // emitPetEvent is a no-op without a window, so it is safe this early.
+  emitPetEvent("pet:cue", cue);
+
   if (typeof window === "undefined" || isMuted()) return;
 
   try {

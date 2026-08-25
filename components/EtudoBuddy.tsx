@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
-import { onPetEvent } from "@/lib/pet-events";
+import { onPetEvent, emitPetEvent } from "@/lib/pet-events";
 import { renderByteMarkdown } from "@/lib/byte-markdown";
 
 type Message = {
@@ -296,6 +296,14 @@ export function EtudoBuddy() {
     setLoading(true);
 
     /*
+     * Byte's face waits with the student. The pet is a different component
+     * in a different corner of the layout and the two never import each
+     * other, so this goes out on the window and whoever is listening picks
+     * it up.
+     */
+    emitPetEvent("pet:thinking", true);
+
+    /*
      * Keep previous conversation for Gemini.
      */
     const history: HistoryMessage[] =
@@ -425,6 +433,9 @@ export function EtudoBuddy() {
       });
     } finally {
       setLoading(false);
+
+      /* In the finally block, so a failed request puts the face back too. */
+      emitPetEvent("pet:thinking", false);
     }
   }
 

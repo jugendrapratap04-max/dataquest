@@ -8,13 +8,13 @@ import {
 } from "react";
 
 import { emitPetEvent } from "@/lib/pet-events";
+import { usePetBehavior } from "@/lib/pet-behavior";
 
 type Direction = "left" | "right";
 
-type PetState =
-  | "idle"
-  | "walking"
-  | "happy";
+/* PetState now lives in lib/pet-state.ts, with all eight faces. This file
+   used to declare its own three, which is exactly why the other five were
+   drawn in globals.css and never once appeared on screen. */
 
 type Position = {
   x: number;
@@ -89,8 +89,11 @@ export function BytePet() {
   const [direction, setDirection] =
     useState<Direction>("right");
 
-  const [state, setState] =
-    useState<PetState>("idle");
+  /* Mood, reactions and the study cues all come from here. This component
+     still owns exactly what it always owned: where Byte is and whether it is
+     being held. */
+  const { state, setDragging, react } =
+    usePetBehavior();
 
   /*
    * Keep Byte inside the browser viewport.
@@ -198,7 +201,7 @@ export function BytePet() {
           : TAP_SLOP_MOUSE,
     };
 
-    setState("walking");
+    setDragging(true);
 
     /*
      * Capture the pointer so dragging continues
@@ -345,7 +348,7 @@ export function BytePet() {
        */
     }
 
-    setState("happy");
+    setDragging(false);
 
     /*
      * A press that never travelled is a click, and clicking
@@ -357,14 +360,6 @@ export function BytePet() {
       emitPetEvent("pet:open-chat");
     }
 
-    /*
-     * Return to idle after a short reaction.
-     */
-    window.setTimeout(() => {
-      if (!dragRef.current.active) {
-        setState("idle");
-      }
-    }, 400);
   };
 
   /*
@@ -385,15 +380,9 @@ export function BytePet() {
 
     event.preventDefault();
 
-    setState("happy");
+    react("happy", 900);
 
     emitPetEvent("pet:open-chat");
-
-    window.setTimeout(() => {
-      if (!dragRef.current.active) {
-        setState("idle");
-      }
-    }, 400);
   };
 
   /*
@@ -482,7 +471,7 @@ export function BytePet() {
           dragRef.current.active =
             false;
 
-          setState("idle");
+          setDragging(false);
         }
       }}
     >
